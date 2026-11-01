@@ -1,0 +1,17 @@
+{
+  "name": "global-full-page-custom-ui",
+  "title": "Global full page custom UI",
+  "description": "Template for Global full page for custom UI",
+  "link": "https://developer.atlassian.com/platform/forge/manifest-reference/modules/global-full-page/",
+  "version": "1.2.6-next.1",
+  "main": "index.js",
+  "license": "MIT",
+  "private": true,
+  "devDependencies": {
+    "eslint": "^8.56.0",
+    "eslint-plugin-react-hooks": "^4.6.0"
+  },
+  "dependencies": {
+    "@forge/resolver": "2.0.2-next.0"
+  }
+}

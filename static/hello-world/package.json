@@ -1,0 +1,35 @@
+{
+  "name": "global-full-page-custom-ui-static",
+  "title": "Global full page custom UI static",
+  "description": "Template for Global full page for custom UI static",
+  "link": "https://developer.atlassian.com/platform/forge/manifest-reference/modules/confluence-full-page/",
+  "version": "0.2.24-next.13",
+  "private": true,
+  "homepage": ".",
+  "dependencies": {
+    "@atlaskit/css-reset": "^6.6.2",
+    "@forge/bridge": "7.2.1-next.13",
+    "react": "^16",
+    "react-dom": "^16"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.0",
+    "vite": "^5.4.19"
+  },
+  "scripts": {
+    "start": "vite",
+    "build": "vite build"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
