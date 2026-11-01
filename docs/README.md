@@ -21,3 +21,7 @@ EXPERIENCE owns static/hello-world and frontend documentation; CORE owns backend
 ## Limitations and source preservation
 
 The template's original App.jsx is preserved but unused; index.jsx explicitly imports App.tsx. Do not restore the template's automatic bridge call into demo startup. No AI inference or backend simulation runs. Scenarios are authored fixtures, and custom parameters are unavailable. Dependency audits include the retained bridge; review actual reports before integration. The current work has no remote push or PR. See STATUS.md for remaining verification and known limitations.
+
+## V2 production boundary
+
+npm start serves the development-only fixture prototype on port 3000. npm run build produces the Forge production access/capability interface, which has no fixture fallback. npm run preview -- --host 127.0.0.1 --port 3001 previews that build locally; it intentionally reports PENDING_BACKEND until reviewed CORE resolver bindings are configured. npm run test:browser builds first and tests both development and production servers. Host theming is implemented but requires Forge-hosted verification. See coordination/frontend-integration-requests.md for the exact backend dependency list.

@@ -604,3 +604,56 @@ dialog::backdrop {
 .skip:not(:focus) {
   transform: translateY(-300%);
 }
+@page {
+  size: A4;
+  margin: 16mm;
+}
+@media print {
+  .app[data-theme] {
+    --bg: white;
+    --surface: white;
+    --raised: white;
+    --text: black;
+    --muted: #333;
+    --line: #aaa;
+    --accent: #16574f;
+    min-height: 0;
+    font-size: 11pt;
+  }
+  .app main {
+    min-height: 0;
+    max-width: none;
+    margin: 0;
+  }
+  .passport {
+    break-inside: auto;
+    padding: 0;
+    margin: 0;
+  }
+  .passport h3 {
+    break-after: avoid;
+    margin-top: 18pt;
+  }
+  .passport p {
+    break-inside: avoid;
+    orphans: 3;
+    widows: 3;
+  }
+  .disclosure {
+    background: white;
+  }
+}
+@media print {
+  .app .passport {
+    line-height: 1.4;
+  }
+  .app .passport p {
+    margin: 6pt 0;
+  }
+  .app .passport h3 {
+    margin: 12pt 0 6pt;
+  }
+  main > [role="status"] {
+    display: none;
+  }
+}

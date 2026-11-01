@@ -1,0 +1,47 @@
+{
+  "workstream": "EXPERIENCE",
+  "branch": "feat/product-experience",
+  "revisionBase": "18b5b54",
+  "revisionScope": "working tree: production/fixture split and v2 client boundary",
+  "contractVersion": "frontend-proposal-v2 — TEMPORARY, not CORE approved",
+  "status": "IMPLEMENTED",
+  "screens": {
+    "development": "seven fixture screens plus component showcase",
+    "production": "Forge capability and access onboarding; no fixture fallback"
+  },
+  "tests": {
+    "unit": 23,
+    "browser": 17,
+    "lint": "PASS",
+    "typecheck": "PASS",
+    "format": "PASS",
+    "build": "PASS",
+    "mode": "LOCAL/MOCK and LOCAL production preview — not Forge hosted"
+  },
+  "forgeVerification": "BLOCKED: no reviewed resolver bindings/shared contracts or verified installation access",
+  "requestedOperations": [
+    "getCapabilities",
+    "getProjects",
+    "getProjectSnapshot",
+    "getEvidenceGraph",
+    "simulateChange",
+    "compareScenarios",
+    "generatePreventionPlan",
+    "approvePreventionPlan",
+    "executeApprovedPlan",
+    "getExecutionStatus",
+    "getPreventionPassport"
+  ],
+  "evidenceMode": "LOCAL/MOCK only; no VERIFIED_FORGE evidence",
+  "limitations": [
+    "Legacy development harness still uses ExperienceAdapter and authored scenario results; not the completed v2 FixtureClient mapping",
+    "Live action approval/execution UI awaits shared schemas",
+    "Transport cancellation stops observation, not server-side writes",
+    "Production full-page routing, CSP, host theming and authentication are not verified in Forge"
+  ],
+  "next": [
+    "Map full fixture harness to shared AnticipateClient payloads",
+    "Implement per-action plan and execution states after schema agreement",
+    "Complete official requirements log, research, curated evidence and final reproducibility audit"
+  ]
+}

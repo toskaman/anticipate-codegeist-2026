@@ -37,10 +37,11 @@
     "build": "vite build",
     "test": "vitest run src",
     "typecheck": "tsc --noEmit",
-    "test:browser": "playwright test",
+    "test:browser": "npm run build && playwright test",
     "format": "prettier --write src tests *.ts *.js index.html package.json",
     "format:check": "prettier --check src tests *.ts *.js index.html package.json",
-    "lint": "eslint src/**/*.ts src/**/*.tsx tests/**/*.ts"
+    "lint": "eslint src/**/*.ts src/**/*.tsx tests/**/*.ts",
+    "preview": "vite preview"
   },
   "browserslist": {
     "production": [

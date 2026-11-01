@@ -24,6 +24,7 @@ import ConfirmDialog from "./ConfirmDialog";
 import { usePage } from "./usePage";
 import { localAdapter, loadExperience } from "./adapters";
 import { useResource } from "./useResource";
+const loadLocalExperience = () => loadExperience();
 const Graph = lazy(() => import("./Graph"));
 const Showcase = lazy(() => import("./Showcase"));
 const pages = [
@@ -57,7 +58,7 @@ export default function App() {
   const [confirm, setConfirm] = useState<"reset" | "approve" | null>(null);
   const [mode, setMode] = useState("demo");
   const [notice, setNotice] = useState("");
-  const resource = useResource(loadExperience);
+  const resource = useResource(loadLocalExperience);
   if (resource.status !== "ready")
     return (
       <div className="app" data-theme={theme}>
