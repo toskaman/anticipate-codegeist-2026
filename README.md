@@ -78,3 +78,15 @@ forge install
 ## Support
 
 See [Get help](https://developer.atlassian.com/platform/forge/get-help/) for how to get help and provide feedback.
+
+## Local EXPERIENCE frontend
+
+The existing frontend now contains the local ANTICIPATE demo. From the repository root:
+
+```powershell
+cd static/hello-world
+npm ci
+npm start -- --host 127.0.0.1
+```
+
+Open http://127.0.0.1:3000. Demo fixtures require no credentials and perform no Atlassian writes. Scripts: typecheck, test, build, test:browser (first run: npx playwright install chromium). Build output remains static/hello-world/build. See docs/STATUS.md for verified progress and remaining work; docs/integration for backend and Git handoff. No live integration or deployment is claimed.
