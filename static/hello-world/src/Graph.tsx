@@ -4,20 +4,27 @@ import "@xyflow/react/dist/style.css";
 import { services as fixtureServices } from "./domain";
 import { localAdapter, type ExperienceAdapter } from "./adapters";
 import { useResource } from "./useResource";
+const emptyServices: typeof fixtureServices = [];
 export default function Graph({
   adapter = localAdapter,
 }: {
   adapter?: ExperienceAdapter;
 }) {
   const resource = useResource(adapter.getEvidenceGraph);
-  const services = resource.status === "ready" ? resource.data : [];
+  const services = resource.status === "ready" ? resource.data : emptyServices;
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("ALL");
-  const [selected, setSelected] = useState(fixtureServices[0]);
-  const visible = services.filter(
-    (s) =>
-      s.label.toLowerCase().includes(query.toLowerCase()) &&
-      (filter === "ALL" || s.evidence === filter),
+  const [selectedId, setSelectedId] = useState("checkout");
+  const selected =
+    services.find((service) => service.id === selectedId) ?? services[0];
+  const visible = useMemo(
+    () =>
+      services.filter(
+        (s) =>
+          s.label.toLowerCase().includes(query.toLowerCase()) &&
+          (filter === "ALL" || s.evidence === filter),
+      ),
+    [services, query, filter],
   );
   const nodes = useMemo(
     () => [
@@ -34,12 +41,7 @@ export default function Graph({
         className: s.id === selected?.id ? "selected-node" : "",
       })),
     ],
-    [
-      resource.status === "ready" ? resource.data : null,
-      query,
-      filter,
-      selected,
-    ],
+    [visible, selected],
   );
   const edges = visible.map((s) => ({
     id: s.id,
@@ -101,11 +103,9 @@ export default function Graph({
               fitView
               onNodeClick={(_, n) => {
                 const s = services.find((s) => s.id === n.id);
-                if (s) setSelected(s);
+                if (s) setSelectedId(s.id);
               }}
-              onEdgeClick={(_, e) =>
-                setSelected(services.find((s) => s.id === e.id)!)
-              }
+              onEdgeClick={(_, e) => setSelectedId(e.id)}
             >
               <Background gap={24} />
               <Controls />
@@ -129,7 +129,7 @@ export default function Graph({
               className="list-row"
               key={s.id}
               aria-pressed={s.id === selected?.id}
-              onClick={() => setSelected(s)}
+              onClick={() => setSelectedId(s.id)}
             >
               <span>{s.label}</span>
               <span className="badge">{s.evidence}</span>

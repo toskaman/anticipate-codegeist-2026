@@ -1,3 +1,4 @@
+import { readFile } from "node:fs/promises";
 import { test, expect } from "@playwright/test";
 test("complete local demo journey without external mutations", async ({
   page,
@@ -46,7 +47,20 @@ test("complete local demo journey without external mutations", async ({
   ).toBeVisible();
   const download = page.waitForEvent("download");
   await page.getByRole("button", { name: "Export demo JSON" }).click();
-  expect((await download).suggestedFilename()).toContain("DEMO");
+  const reportDownload = await download;
+  expect(reportDownload.suggestedFilename()).toContain("DEMO");
+  const report = JSON.parse(
+    await readFile((await reportDownload.path())!, "utf8"),
+  );
+  expect(report.disclosure).toContain("fictional");
+  expect(report.change).toBe("AUTH-142");
+  expect(report.selectedScenario).toBe("C");
+  expect(report.affectedDependencies).toHaveLength(5);
+  expect(report.uncertainty).toContain("Support usage unknown");
+  expect(report.execution).toBe("Simulated complete");
+  expect(
+    report.approvalTimeline.map((item: { event: string }) => item.event),
+  ).toEqual(["Local demo approval", "Simulated execution complete"]);
   expect(mutations).toEqual([]);
 });
 for (const width of [1440, 1024, 390])

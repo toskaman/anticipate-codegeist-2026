@@ -145,10 +145,10 @@ export const demoAdapter: DataAdapter = {
     return { mode: "demo", execution: false };
   },
   async getEvidenceGraph() {
-    return services;
+    return structuredClone(services);
   },
   async simulateChange(id) {
-    return scenarios[scenarioSchema.parse(id)];
+    return structuredClone(scenarios[scenarioSchema.parse(id)]);
   },
 };
 export const forgeAdapter: DataAdapter = {

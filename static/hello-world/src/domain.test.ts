@@ -6,6 +6,7 @@ import {
   forgeAdapter,
   passport,
   scenarios,
+  type ScenarioId,
 } from "./domain";
 describe("demo decision workflow", () => {
   it("blocks execution before approval", () =>
@@ -25,7 +26,9 @@ describe("demo decision workflow", () => {
     expect(scenarios.C.blockers).toContain("Support usage unknown");
   });
   it("rejects unsupported scenario parameters", async () => {
-    await expect(demoAdapter.simulateChange("D" as any)).rejects.toThrow();
+    await expect(
+      demoAdapter.simulateChange("D" as ScenarioId),
+    ).rejects.toThrow();
   });
   it("does not silently substitute fixtures for Forge", async () => {
     await expect(forgeAdapter.getEvidenceGraph()).rejects.toThrow(

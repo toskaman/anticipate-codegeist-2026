@@ -11,11 +11,13 @@ export default function ConfirmDialog({
   const ref = useRef<HTMLDialogElement>(null);
   const previous = useRef(document.activeElement as HTMLElement | null);
   useEffect(() => {
-    ref.current?.showModal();
-    ref.current?.querySelector("button")?.focus();
+    const dialog = ref.current;
+    const trigger = previous.current;
+    dialog?.showModal();
+    dialog?.querySelector("button")?.focus();
     return () => {
-      ref.current?.close();
-      previous.current?.focus();
+      dialog?.close();
+      trigger?.focus();
     };
   }, []);
   return (

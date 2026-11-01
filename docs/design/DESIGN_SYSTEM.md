@@ -1,3 +1,5 @@
 # Design system
 
 Deep navy surfaces, teal selected paths and actions, amber uncertainty, text labels on all status badges. Tokens are CSS custom properties in style.css with dark and light variants. Segoe UI uses local system fonts with no external requests. Panels, status badges, rows, buttons, scenario cards, action steps, modal and responsive navigation are implemented. Graph is lazy loaded. 700px switches navigation to a horizontal rail and cards to one column. Reduced motion follows OS settings. Full component showcase, comprehensive accessibility verification and modal focus trapping remain outstanding.
+
+A development-only Component Showcase is now available in local navigation. It uses the actual Graph component with ready, empty, slow-loading and fail-once/retry adapters. Production navigation omits it. Automated axe checks pass all seven product screens in both themes at 1440, 1024 and 390px; this does not prove complete WCAG conformance. Light-theme warning contrast and graph theme overrides were corrected from actual browser evidence.

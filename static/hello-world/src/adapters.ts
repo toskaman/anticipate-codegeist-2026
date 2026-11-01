@@ -1,4 +1,10 @@
 import {
+  evidenceSchema,
+  comparisonSchema,
+  projectsSchema,
+  capabilitiesSchema,
+} from "./schemas";
+import {
   actions,
   demoAdapter,
   forgeAdapter,
@@ -88,3 +94,33 @@ export const unavailableForgeAdapter: ExperienceAdapter = {
   executeApprovedPlan: unavailable,
   getPreventionPassport: unavailable,
 };
+
+export async function loadExperience(
+  adapter: ExperienceAdapter = localAdapter,
+) {
+  const [projects, capabilities, evidence, comparisons, plan] =
+    await Promise.all([
+      adapter.getProjects(),
+      adapter.getCapabilities(),
+      adapter.getEvidenceGraph(),
+      adapter.compareScenarios(["A", "B", "C"]),
+      adapter.generatePreventionPlan("C"),
+    ]);
+  evidenceSchema.parse(evidence);
+  comparisonSchema.parse(comparisons);
+  projectsSchema.parse(projects);
+  capabilitiesSchema.parse(capabilities);
+  if (!projects.length)
+    throw new Error("EMPTY_PROJECTS: no project snapshot is available");
+  const projectSnapshot = await adapter.getProjectSnapshot(projects[0].id);
+  return {
+    projects,
+    capabilities,
+    services: evidence,
+    scenarios: Object.fromEntries(
+      comparisons.map((item) => [item.id, item.result]),
+    ) as Record<ScenarioId, (typeof scenarios)[ScenarioId]>,
+    actions: plan.actions,
+    snapshot: projectSnapshot,
+  };
+}

@@ -14,20 +14,18 @@ import {
   RotateCcw,
 } from "lucide-react";
 import {
-  services,
-  scenarios,
-  actions,
   actionDetails,
   initialWorkflow,
-  transition,
   passport,
   type ScenarioId,
 } from "./domain";
 import "./style.css";
 import ConfirmDialog from "./ConfirmDialog";
 import { usePage } from "./usePage";
-import { localAdapter } from "./adapters";
+import { localAdapter, loadExperience } from "./adapters";
+import { useResource } from "./useResource";
 const Graph = lazy(() => import("./Graph"));
+const Showcase = lazy(() => import("./Showcase"));
 const pages = [
   "Mission Control",
   "Evidence Graph",
@@ -36,6 +34,7 @@ const pages = [
   "Prevention Plan",
   "Prevention Passport",
   "Settings",
+  ...(import.meta.env.DEV ? ["Component Showcase"] : []),
 ];
 const icons = [
   LayoutDashboard,
@@ -44,6 +43,7 @@ const icons = [
   ShieldCheck,
   ListChecks,
   FileCheck,
+  Settings,
   Settings,
 ];
 export default function App() {
@@ -57,6 +57,30 @@ export default function App() {
   const [confirm, setConfirm] = useState<"reset" | "approve" | null>(null);
   const [mode, setMode] = useState("demo");
   const [notice, setNotice] = useState("");
+  const resource = useResource(loadExperience);
+  if (resource.status !== "ready")
+    return (
+      <div className="app" data-theme={theme}>
+        <main
+          className="panel"
+          role={resource.status === "error" ? "alert" : "status"}
+        >
+          <h1>
+            {resource.status === "loading"
+              ? "Loading local demo snapshot…"
+              : "Project snapshot unavailable"}
+          </h1>
+          <p>DEMO DATA · No Jira changes will be made.</p>
+          {resource.status === "error" && (
+            <>
+              <p>{resource.error}</p>
+              <button onClick={resource.retry}>Retry snapshot</button>
+            </>
+          )}
+        </main>
+      </div>
+    );
+  const { services, scenarios, actions } = resource.data;
   const result = scenarios[scenario];
   function go(next: string) {
     setPage(next);
@@ -299,6 +323,11 @@ export default function App() {
                     </section>
                   </div>
                 </>
+              )}
+              {page === "Component Showcase" && (
+                <Suspense fallback={<p role="status">Loading components…</p>}>
+                  <Showcase />
+                </Suspense>
               )}
               {page === "Evidence Graph" && (
                 <Suspense fallback={<p role="status">Loading graph…</p>}>
