@@ -9,3 +9,9 @@ Latest verification: all four Playwright tests pass, including full local approv
 ## Verified continuation
 
 Added complete provisional ExperienceAdapter signatures and demo implementations in adapters.ts. The UI approval/execution now calls this boundary. Other screens still read authored fixture data directly; migration of all reads to asynchronous adapter operations remains open. Browser-history navigation, malformed hash recovery, explicit reset/approval purposes, modal focus wrap, Escape dismissal and trigger-focus restoration are implemented. Nine unit tests and six browser tests pass; production build passes. A native-dialog focus issue discovered by the new browser test was corrected rather than skipped.
+
+## Async loading and visual verification
+
+Graph reads now use the adapter with loading, retry and obsolete-response protection. A root error boundary provides reload/navigation recovery. Async lifecycle tests verify empty success, failure/retry and stale-response rejection. Prettier scripts format the frontend. Automated axe checks passed all seven screens in both themes after correcting light warning contrast. Actual screenshots in evidence/ were inspected for Evidence Graph dark and Scenario Lab light; graph library background overrides were corrected and the graph recaptured and inspected. Other screenshot inspection and smaller-view screen matrix remain outstanding. Prevention actions now reference evidence by service ID rather than array position.
+
+Local milestone commit: 1ca5179. Author identity is configured only for this repository using the user's supplied details. No push or deployment.

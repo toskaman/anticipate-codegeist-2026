@@ -1,11 +1,155 @@
-import React, { useMemo, useState } from 'react';
-import { ReactFlow, Background, Controls, MarkerType } from '@xyflow/react';
-import '@xyflow/react/dist/style.css';
-import { services } from './domain';
-export default function Graph() {
- const [query,setQuery] = useState(''); const [filter,setFilter] = useState('ALL'); const [selected,setSelected] = useState(services[0]);
- const visible = services.filter(s => s.label.toLowerCase().includes(query.toLowerCase()) && (filter === 'ALL' || s.evidence === filter));
- const nodes = useMemo(() => [{id:'auth',position:{x:320,y:160},data:{label:'Legacy authentication API v1'},className:'root-node'},...visible.map((s,i)=>({id:s.id,position:{x:i < 3 ? 30 : 650,y:(i < 3 ? i : i-3)*140},data:{label:s.label},className:s.id === selected?.id ? 'selected-node' : ''}))],[query,filter,selected]);
- const edges = visible.map(s=>({id:s.id,source:s.id,target:'auth',label:s.evidence,style:{stroke:s.evidence === 'UNKNOWN' ? '#efa958' : '#54b9b2',strokeWidth:s.id === selected?.id ? 3 : 1,strokeDasharray:s.evidence === 'CONFIRMED' ? undefined : '5 5'},markerEnd:{type:MarkerType.ArrowClosed}}));
- return <><section className="panel"><div className="section-heading"><h2>The evidence behind the change</h2><span className="badge">5 fixture relationships</span></div><div className="filters"><label>Search dependencies<input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search services…"/></label><label>Evidence classification<select value={filter} onChange={e=>setFilter(e.target.value)}>{['ALL','CONFIRMED','INFERRED','UNKNOWN'].map(f=><option key={f}>{f}</option>)}</select></label></div>{visible.length ? <div className="graph"><ReactFlow nodes={nodes} edges={edges} fitView onNodeClick={(_,n)=>{const s=services.find(s=>s.id===n.id);if(s)setSelected(s)}} onEdgeClick={(_,e)=>setSelected(services.find(s=>s.id===e.id)!)}><Background gap={24}/><Controls/></ReactFlow></div> : <p role="status">No dependencies match. Clear the search or change the filter.</p>}<p className="muted">Solid: CONFIRMED · Dashed: INFERRED or UNKNOWN · Select a node or edge to highlight its path.</p></section><div className="two-col"><section className="panel"><h2>Accessible dependency list</h2>{visible.map(s=><button className="list-row" key={s.id} aria-pressed={s.id===selected?.id} onClick={()=>setSelected(s)}><span>{s.label}</span><span className="badge">{s.evidence}</span></button>)}</section>{selected && <section className="panel"><span className="eyebrow">SOURCE EVIDENCE</span><h2>{selected.label}</h2><span className="badge">{selected.evidence}</span><p>{selected.detail}</p><p className="muted">{selected.source}</p><small>Fictional fixture reference; this is not a live repository citation.</small></section>}</div></>;
+import React, { useMemo, useState } from "react";
+import { ReactFlow, Background, Controls, MarkerType } from "@xyflow/react";
+import "@xyflow/react/dist/style.css";
+import { services as fixtureServices } from "./domain";
+import { localAdapter, type ExperienceAdapter } from "./adapters";
+import { useResource } from "./useResource";
+export default function Graph({
+  adapter = localAdapter,
+}: {
+  adapter?: ExperienceAdapter;
+}) {
+  const resource = useResource(adapter.getEvidenceGraph);
+  const services = resource.status === "ready" ? resource.data : [];
+  const [query, setQuery] = useState("");
+  const [filter, setFilter] = useState("ALL");
+  const [selected, setSelected] = useState(fixtureServices[0]);
+  const visible = services.filter(
+    (s) =>
+      s.label.toLowerCase().includes(query.toLowerCase()) &&
+      (filter === "ALL" || s.evidence === filter),
+  );
+  const nodes = useMemo(
+    () => [
+      {
+        id: "auth",
+        position: { x: 320, y: 160 },
+        data: { label: "Legacy authentication API v1" },
+        className: "root-node",
+      },
+      ...visible.map((s, i) => ({
+        id: s.id,
+        position: { x: i < 3 ? 30 : 650, y: (i < 3 ? i : i - 3) * 140 },
+        data: { label: s.label },
+        className: s.id === selected?.id ? "selected-node" : "",
+      })),
+    ],
+    [
+      resource.status === "ready" ? resource.data : null,
+      query,
+      filter,
+      selected,
+    ],
+  );
+  const edges = visible.map((s) => ({
+    id: s.id,
+    source: s.id,
+    target: "auth",
+    label: s.evidence,
+    style: {
+      stroke: s.evidence === "UNKNOWN" ? "#efa958" : "#54b9b2",
+      strokeWidth: s.id === selected?.id ? 3 : 1,
+      strokeDasharray: s.evidence === "CONFIRMED" ? undefined : "5 5",
+    },
+    markerEnd: { type: MarkerType.ArrowClosed },
+  }));
+  if (resource.status === "loading")
+    return (
+      <section className="panel" role="status" aria-busy="true">
+        <h2>Loading evidence snapshot…</h2>
+        <p>Retrieving documented dependency relationships.</p>
+      </section>
+    );
+  if (resource.status === "error")
+    return (
+      <section className="panel" role="alert">
+        <h2>Evidence unavailable</h2>
+        <p>{resource.error}</p>
+        <button onClick={resource.retry}>Retry evidence</button>
+      </section>
+    );
+  return (
+    <>
+      <section className="panel">
+        <div className="section-heading">
+          <h2>The evidence behind the change</h2>
+          <span className="badge">{services.length} fixture relationships</span>
+        </div>
+        <div className="filters">
+          <label>
+            Search dependencies
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search services…"
+            />
+          </label>
+          <label>
+            Evidence classification
+            <select value={filter} onChange={(e) => setFilter(e.target.value)}>
+              {["ALL", "CONFIRMED", "INFERRED", "UNKNOWN"].map((f) => (
+                <option key={f}>{f}</option>
+              ))}
+            </select>
+          </label>
+        </div>
+        {visible.length ? (
+          <div className="graph">
+            <ReactFlow
+              nodes={nodes}
+              edges={edges}
+              fitView
+              onNodeClick={(_, n) => {
+                const s = services.find((s) => s.id === n.id);
+                if (s) setSelected(s);
+              }}
+              onEdgeClick={(_, e) =>
+                setSelected(services.find((s) => s.id === e.id)!)
+              }
+            >
+              <Background gap={24} />
+              <Controls />
+            </ReactFlow>
+          </div>
+        ) : (
+          <p role="status">
+            No dependencies match. Clear the search or change the filter.
+          </p>
+        )}
+        <p className="muted">
+          Solid: CONFIRMED · Dashed: INFERRED or UNKNOWN · Select a node or edge
+          to highlight its path.
+        </p>
+      </section>
+      <div className="two-col">
+        <section className="panel">
+          <h2>Accessible dependency list</h2>
+          {visible.map((s) => (
+            <button
+              className="list-row"
+              key={s.id}
+              aria-pressed={s.id === selected?.id}
+              onClick={() => setSelected(s)}
+            >
+              <span>{s.label}</span>
+              <span className="badge">{s.evidence}</span>
+            </button>
+          ))}
+        </section>
+        {selected && visible.some((service) => service.id === selected.id) && (
+          <section className="panel">
+            <span className="eyebrow">SOURCE EVIDENCE</span>
+            <h2>{selected.label}</h2>
+            <span className="badge">{selected.evidence}</span>
+            <p>{selected.detail}</p>
+            <p className="muted">{selected.source}</p>
+            <small>
+              Fictional fixture reference; this is not a live repository
+              citation.
+            </small>
+          </section>
+        )}
+      </div>
+    </>
+  );
 }
