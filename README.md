@@ -1,87 +1,90 @@
-# ANTICIPATE
+# ANTICIPATE — The Decision Firewall for Software Teams
 
-**Understand the dependencies before changing them. Approve preventive actions. Verify what actually happened.**
+**Test the consequences. Prove the safeguards. Then ship.**
 
-ANTICIPATE is a Forge application for Jira built for Codegeist 2026. It turns readable Jira evidence into a dependency graph, compares deterministic change scenarios, explains policy decisions and records approvals and verified execution outcomes in a Prevention Passport. Unknown evidence stays unknown; a recommendation is never an approval.
+ANTICIPATE is a Forge app for Jira, built for Atlassian Codegeist 2026 (Apps for Software Teams). Before a team retires an API, decommissions a service or ships a breaking upgrade, it shows what depends on the change, compares safer alternatives, explains why a risky option is blocked, and records the human decision with verified results.
 
-[Install in Jira — judge instructions](docs/submission/INSTALL_LINK.md) · [Current delivery status](docs/STATUS.md) · [CORE integration contract](docs/integration/CORE_CLIENT_INTEGRATION.md) · [Jury walkthrough](docs/jury/JURY_UI_SHOWCASE.md)
+[Install in Jira (judges)](docs/submission/INSTALL_LINK.md) · [Jury walkthrough](docs/jury/JURY_UI_SHOWCASE.md) · [Hosted evidence](docs/evidence/EVIDENCE_PACK.md) · [Status](docs/STATUS.md)
 
-## A complete decision journey
+## The problem
 
-1. **Mission Control:** choose an accessible project and the Jira issue describing the change; capture a snapshot.
-2. **Evidence Graph:** inspect confirmed, inferred and unknown relationships, their sources and a keyboard-accessible list. Rendering uses bounded windows rather than an unreadable wall of nodes.
-3. **Scenario Lab:** compare removal, temporary retention and migration first against the same snapshot.
-4. **Decision Firewall:** understand blocking policies and unresolved questions. Administrator-configured Jira workflow enforcement is a separate optional capability.
-5. **Prevention Plan:** select actions, explicitly approve them and separately confirm execution. The backend authorizes actions and verifies their results.
-6. **Prevention Passport:** inspect evidence, alternatives, approvals, per-action outcomes and the decision timeline; export JSON or print.
-7. **Settings:** distinguish manifest declarations, backend-reported availability and what has actually been verified.
+A change ticket says "retire Auth API v1". It looks safe. The services that break are two links away, behind an issue nobody opened, or mentioned only in a comment. Teams usually find out in production, and afterwards nobody can show what was known when the decision was made.
 
-If dependencies change after a plan was reviewed, approval/execution is refused. The UI displays the backend reason and reported added/removed relations or newly unknown evidence. It blocks the old plan and offers rebuilding the snapshot and reviewing a new comparison.
+## What ANTICIPATE does
 
-## Real browser captures
+1. **Reads the real dependencies.** It builds an evidence graph from the Jira issues and links you can access. Every relation is *Confirmed*, *Inferred* or *Unknown*, with the Jira record it came from. Unreadable evidence stays Unknown, never "safe".
+2. **Compares alternatives, not just tickets.** The same evidence is simulated under several options: remove now, retain temporarily, migrate consumers first, or, for upgrades, breaking upgrade, backward-compatible shim, move consumers first. Results are deterministic and reproducible; there are no invented risk percentages.
+3. **Explains the decision.** Policies say why an option is blocked or needs review, following the path from the change to the affected dependency.
+4. **Keeps people accountable.** A prevention plan lists concrete Jira actions. A person approves them, then confirms execution as a separate step. The backend re-reads Jira to verify each result.
+5. **Refuses stale decisions.** If the dependencies change after approval, execution is refused and the screen shows exactly what changed.
+6. **Records the proof.** The Prevention Passport keeps the evidence, alternatives, approvals, verified outcomes and timeline, as JSON or a printable A4 report. It is an audit-style record, not a legal or cryptographic certificate.
 
-These are genuine Playwright screenshots of the connected UI running locally with **MOCK_TRANSPORT**, not design mockups or proof of hosted Jira execution. Their visible test banner identifies the provenance. CORE's separate hosted reports are in [the evidence pack](docs/evidence/EVIDENCE_PACK.md).
+## Screens
 
-### Evidence Graph
+These are real Playwright captures of the connected UI with a **mock backend transport (MOCK_TRANSPORT)**, labelled on screen. They are not hosted Jira results; hosted results are listed in the [evidence pack](docs/evidence/EVIDENCE_PACK.md).
 
-![Evidence Graph: dependency map, provenance inspector and accessible evidence list](evidence/experience/v3-redesign/visual/02-evidence-graph-desktop-light.png)
+| Evidence Graph | Scenario Lab | Prevention Passport |
+| --- | --- | --- |
+| ![Dependency map with evidence sources, provenance inspector and accessible list](evidence/experience/v3-redesign/visual/02-evidence-graph-desktop-dark.png) | ![Three alternatives compared on the same evidence, with verdicts and named open questions](evidence/experience/v3-redesign/visual/03-scenario-lab-desktop-dark.png) | ![Decision record with alternatives, approvals and verified execution](evidence/experience/v3-redesign/visual/11-prevention-passport-desktop-light.png) |
 
-### Scenario comparison
+More: [all screens, mobile and error states](docs/design/UI_VISUAL_QA.md) · [dependency upgrade comparison](evidence/experience/v4-ux/scenario-lab-upgrade-light-1440-MOCK_TRANSPORT.png) · [printed Passport (PDF)](evidence/experience/v4-ux/passport-long-print-MOCK_TRANSPORT.pdf).
 
-![Scenario Lab: removal, temporary retention and migration-first alternatives](evidence/experience/v3-redesign/visual/03-scenario-lab-desktop-dark.png)
+## Try it in Jira (about one minute once sample data exists)
 
-### Prevention Passport
+1. Install with the [judge link](docs/submission/INSTALL_LINK.md) and open ANTICIPATE from Jira.
+2. Click **Start the guided demo**, choose a company-managed project where you can browse, create and link issues.
+3. **Preview sample data** (read-only), then confirm **Create sample data**: six labelled issues and four links. First-time creation takes about 15–20 seconds; if the screen waits longer, ANTICIPATE re-reads Jira instead of retrying the write.
+4. **Analyze** the sample root → **Compare options** → **Check safeguards** → **Generate prevention plan** → approve, then execute → **Prevention Passport**.
 
-![Prevention Passport: decision evidence, approvals and per-action execution outcomes](evidence/experience/v3-redesign/visual/11-prevention-passport-desktop-light.png)
+Opening or previewing never writes to Jira. No Jira project is created and nothing is deleted automatically. With no accessible project, the app says which permissions are needed.
 
-[All seven screens, mobile views and error states](docs/design/UI_VISUAL_QA.md) · [Evidence-changed refusal capture](evidence/experience/v3-redesign/visual/30-executeApprovedPlan-MOCK.png) · [Sample preparation result capture](evidence/experience/v3-redesign/visual/31-sample-result-MOCK-390.png)
+## Architecture
 
-## Judges: prepare sample Jira data
+- **Forge Custom UI** (React, TypeScript) in a Jira global full page, with the Atlassian host theme, a dark default and a Display & accessibility menu.
+- **Forge resolvers** (Node) call Jira REST as the user, so Jira permissions apply. Forge storage keeps plans, approvals and execution leases.
+- **Pure TypeScript simulation and policy engine**, shared **zod contracts** validated on both sides.
+- **Jira workflow validator** (optional, admin-configured): issues labelled `anticipate-change` cannot move forward until their decision is completed.
 
-After installing, open ANTICIPATE and choose an existing Jira project where you may create and link issues. In Mission Control, click **Prepare a demo project** (the English UI label for « Préparer un projet de démo »), then **Preview sample data**. Review the proposed labelled tickets and links before explicitly confirming **Create sample data**. Use **Analyze <issue key>** to begin the journey.
+### Rovo and MCP
 
-Opening or previewing does not write Jira. Confirmation creates real labelled sample issues in the selected project; it does not create a Jira project. Existing sample entries are reused, and no automatic cleanup is performed. If no project is accessible, create one in Jira or ask an administrator for access.
+A Rovo agent, *ANTICIPATE Decision Reviewer*, and five read-only MCP tools (evidence graph, simulate retirement, simulate upgrade, Passport, plan freshness) answer "what happens if we change X?" using the same engine. They never approve or execute. Availability depends on the site's Rovo access and an administrator toggle for MCP.
 
-Sample creation may take 15–20 seconds according to CORE's hosted report. The client allows **60 seconds** for this operation. If the response still times out, creation may continue: click **Preview sample data** again to inspect existing results before any further creation. The UI never automatically resubmits the write or assumes success from a timeout.
+**Teamwork Graph:** not integrated yet (allowlisting pending). The app shows it as *Not configured* and uses Jira evidence only.
 
-## Develop locally on Windows
+## Safety by design
 
-Use the existing checkout; do not register another Forge app. The GitHub workflow uses Node 22; the frontend requires the Node version supported by the pinned Vite release (see package metadata).
+- Approval and execution are separate, explicit steps, and the backend authorizes every action.
+- Execution is idempotent and leased; lost responses are recovered by plan ID, never blindly retried.
+- A suggested option is never an approval. Timeouts are not treated as success or failure: the app re-reads Jira.
+- Display only what the backend reports: declared capabilities are not shown as verified.
 
-```powershell
-Set-Location -LiteralPath 'C:\Users\Orpheane\Desktop\PROJECT-ANTIGRAVITY\ANTICIPATE'
-npm ci
-Set-Location -LiteralPath 'static\hello-world'
-npm ci
-npm start -- --host 127.0.0.1
-```
-
-Open `http://127.0.0.1:3000` for the isolated development fixture prototype. It performs no Atlassian writes and does not demonstrate the connected hosted journey. In a Forge iframe, the app loads `ForgeApp` → `CoreWorkspace` with the real Forge client and shared contracts; there is no production fixture fallback. A standalone production preview cannot supply an authenticated Forge bridge.
-
-[Frontend guide and architecture](docs/README.md) · [Build/test evidence and limitations](docs/design/UI_RELEASE_READINESS.md)
-
-## Checks
+## Tests and evidence
 
 From `static/hello-world`:
 
-```powershell
-npm run typecheck
-npm run lint
-npm run format:check
+```bash
+npm ci
+npm run typecheck && npm run lint && npm run format:check
 npm test
 npm run build
-npx playwright install chromium
-npx playwright test --workers=1
+npx playwright test
 ```
 
-From the repository root: `npm run typecheck`, `npm test`, `npx vitest run --root packages/contracts` and `npx vitest run --root packages/simulation-core`.
+From the repository root: `npm ci`, `npm run typecheck`, `npm test`.
 
-The sample-timeout follow-up passed 49 frontend unit tests; the full UI v3 baseline passed 72 Chromium tests. Exact final results, engine scope and retry history are recorded in the release report and PR. CI runs CORE checks and the frontend install/build; local browser/axe checks are separate evidence.
+Latest local results (Chromium, mock transport): 59 frontend unit tests and 83 browser tests, including axe WCAG 2.2 AA checks on light and dark themes, 320 px reflow, keyboard paths, Passport A4 print and security refusals. Automated accessibility checks are not a WCAG certification. Firefox and WebKit runs are recorded per release in [UI release readiness](docs/design/UI_RELEASE_READINESS.md).
 
-## Ownership and limits
+Hosted results (deployed Forge app on Jira Cloud) are recorded by CORE with date, site and procedure in the [evidence pack](docs/evidence/EVIDENCE_PACK.md), including verified writes, the evidence-changed refusal, the workflow validator, sample data and Rovo.
 
-EXPERIENCE owns the frontend and its documentation. CORE owns the backend, shared contracts, manifest, Forge identity, deployment and authenticated hosted acceptance. This branch does not register/deploy apps or merge pull requests.
+## Honest limitations
 
-CORE's newer upgrade operation and read-only MCP tool are available through the backend/Rovo integration; the frontend scenario picker currently presents the retirement journey. Teamwork Graph availability depends on backend capabilities and external enablement. Local tests do not prove live permissions, Jira mutations, host sizing/themes or production readiness. Native screen-reader/zoom testing and long stability soaks remain outstanding; dependency and license findings are documented in the release report.
+- Evidence comes from Jira issues, links and components only; unreadable items stay Unknown.
+- Policies are deterministic rules, not predictions; ANTICIPATE does not claim to prevent every incident.
+- Local browser tests use a mock transport; hosted behaviour is verified separately and is listed with its scope.
+- Native screen-reader and browser-zoom testing are partial.
 
-For public support, publisher and privacy details, use the [installation information](docs/submission/INSTALL_LINK.md) and CORE-maintained [privacy policy](docs/legal/PRIVACY.md) and [terms](docs/legal/TERMS.md).
+## Codegeist 2026
+
+Category: Apps for Software Teams. Bonus candidates: Rovo agent and MCP tools. Built by two people: CORE (backend, engine, Forge, security) and EXPERIENCE (interface, accessibility, presentation).
+
+Licence: proprietary, source available. Copyright © 2026 toskaman and Orphee; see [LICENSE](LICENSE). Support, privacy and terms: [installation information](docs/submission/INSTALL_LINK.md), [privacy](docs/legal/PRIVACY.md), [terms](docs/legal/TERMS.md).

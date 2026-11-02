@@ -4013,3 +4013,66 @@ body:has(.ax-app) {
   margin-top: 3px;
   color: var(--ax-info);
 }
+.ax-steps-list {
+  margin: var(--ax-2) 0 0;
+  padding-left: 1.2em;
+  display: grid;
+  gap: 4px;
+}
+
+/* 16 · SAMPLE DATA RESULT -------------------------------------------------- */
+.ax-app .ax-sample-fields .ax-sample-list,
+.ax-sample-list {
+  list-style: none;
+  margin: var(--ax-2) 0 var(--ax-4);
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.ax-sample-list li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px var(--ax-3);
+  padding: var(--ax-2) var(--ax-3);
+  border-radius: var(--ax-r);
+  border: 1px solid var(--ax-border);
+  background: var(--ax-surface-2);
+  font-size: var(--ax-fs-sm);
+}
+.ax-sample-list__name {
+  flex: 1 1 12em;
+  min-width: 0;
+  font-weight: 600;
+}
+.ax-sample-list__key {
+  font-family: var(--ax-mono);
+  font-size: var(--ax-fs-xs);
+  color: var(--ax-text-2);
+}
+.ax-sample-next {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ax-3);
+  margin: var(--ax-3) 0;
+  padding: var(--ax-3) var(--ax-4);
+  border-radius: var(--ax-r);
+  border: 1px solid var(--ax-success);
+  background: color-mix(in srgb, var(--ax-success) var(--ax-soft), transparent);
+}
+.ax-app .ax-sample-next p {
+  margin: 0;
+}
+.ax-sample-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ax-2);
+}
+.ax-app .ax-plan-summary__note {
+  flex-basis: 100%;
+  margin: 0;
+  font-size: var(--ax-fs-sm);
+  color: var(--ax-text-2);
+}

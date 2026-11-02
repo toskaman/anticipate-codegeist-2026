@@ -160,9 +160,12 @@ test("sample preparation requires preview and confirmation, then analyzes real J
   await page
     .getByRole("button", { name: "Preview sample data", exact: true })
     .click();
-  await expect(
-    page.getByText("api sample ticket · api · TO_CREATE"),
-  ).toBeVisible();
+  const apiRow = page
+    .getByRole("list", { name: "Sample tickets" })
+    .getByRole("listitem")
+    .filter({ hasText: "api sample ticket" });
+  await expect(apiRow).toContainText("not in Jira yet");
+  await expect(apiRow).toContainText("Will be created");
   await page
     .getByRole("button", {
       name: "Create missing sample data in Jira",
@@ -183,9 +186,16 @@ test("sample preparation requires preview and confirmation, then analyzes real J
   await page
     .getByRole("button", { name: "Create sample data", exact: true })
     .click();
+  await expect(apiRow).toContainText("ABC-1");
+  await expect(apiRow).toContainText("Created · verified in Jira");
+  // Once everything is in Jira, analyzing is the highlighted next step.
+  await expect(page.getByText("Sample data is in Jira.")).toBeVisible();
   await expect(
-    page.getByText("api sample ticket · ABC-1 · CREATED"),
-  ).toBeVisible();
+    page.getByRole("button", {
+      name: "Create missing sample data in Jira",
+      exact: true,
+    }),
+  ).toBeDisabled();
   expect(
     calls.filter((call) => call.operation === "createSampleProject"),
   ).toHaveLength(1);
@@ -367,7 +377,8 @@ test("display and accessibility menu applies theme and preferences everywhere an
   await page.setViewportSize({ width: 390, height: 844 });
   await sampleCore(page, "success", { openPanel: false });
   const app = page.locator(".ax-app");
-  await expect(app).toHaveAttribute("data-theme", "light");
+  // Product default since PR #25: Dark, whatever the host theme.
+  await expect(app).toHaveAttribute("data-theme", "dark");
   const menu = page.getByRole("button", {
     name: "Display & accessibility",
     exact: true,
@@ -377,7 +388,7 @@ test("display and accessibility menu applies theme and preferences everywhere an
   const dialog = page.getByRole("dialog", {
     name: "Display and accessibility",
   });
-  await dialog.getByRole("radio", { name: "Dark", exact: true }).check();
+  await dialog.getByRole("radio", { name: "Light", exact: true }).check();
   await dialog
     .getByRole("group", { name: "Text size" })
     .getByRole("radio", { name: "Larger", exact: true })
@@ -391,7 +402,7 @@ test("display and accessibility menu applies theme and preferences everywhere an
     .getByRole("radio", { name: "Reduce", exact: true })
     .check();
   await dialog.getByRole("radio", { name: "Simplified", exact: true }).check();
-  await expect(app).toHaveAttribute("data-theme", "dark");
+  await expect(app).toHaveAttribute("data-theme", "light");
   await expect(app).toHaveAttribute("data-text-size", "larger");
   await expect(app).toHaveAttribute("data-contrast", "high");
   await expect(app).toHaveAttribute("data-motion", "reduce");
@@ -418,7 +429,7 @@ test("display and accessibility menu applies theme and preferences everywhere an
   const settings = page.getByRole("region", {
     name: "Display & accessibility",
   });
-  await expect(settings).toContainText("Current theme: Dark");
+  await expect(settings).toContainText("Current theme: Light");
   await expect(
     settings.getByRole("radio", { name: "Larger", exact: true }),
   ).toBeChecked();
@@ -431,7 +442,7 @@ test("display and accessibility menu applies theme and preferences everywhere an
   ).toEqual([]);
   // Persisted in this browser.
   await page.reload();
-  await expect(page.locator(".ax-app")).toHaveAttribute("data-theme", "dark");
+  await expect(page.locator(".ax-app")).toHaveAttribute("data-theme", "light");
   await expect(page.locator(".ax-app")).toHaveAttribute(
     "data-text-size",
     "larger",
@@ -441,7 +452,7 @@ test("display and accessibility menu applies theme and preferences everywhere an
     .getByRole("dialog", { name: "Display and accessibility" })
     .getByRole("button", { name: "Reset display settings", exact: true })
     .click();
-  await expect(page.locator(".ax-app")).toHaveAttribute("data-theme", "light");
+  await expect(page.locator(".ax-app")).toHaveAttribute("data-theme", "dark");
   await expect(page.locator(".ax-app")).toHaveAttribute(
     "data-contrast",
     "system",

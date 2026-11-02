@@ -4,6 +4,24 @@ import { createRoot } from "react-dom/client";
 import CoreWorkspace from "../src/CoreWorkspace";
 import { ForgeClient } from "../src/api/ForgeClient";
 import "../src/styles/anticipate.css";
+import { STORAGE_KEY } from "../src/app/preferences";
+
+// `?theme=light|dark` is applied as the viewer's saved display choice (the
+// product default is Dark since PR #25, so a host theme alone no longer
+// changes it). `?host=` sets the Atlassian host theme for Automatic.
+const params = new URLSearchParams(location.search);
+const chosen = params.get("theme");
+if (chosen === "light" || chosen === "dark") {
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "{}");
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ ...saved, theme: chosen }),
+    );
+  } catch {
+    /* storage unavailable: product default applies */
+  }
+}
 const client = new ForgeClient(
   async (operation, input) =>
     (
@@ -37,10 +55,7 @@ createRoot(document.getElementById("root")!).render(
     ),
     React.createElement(CoreWorkspace, {
       client,
-      theme:
-        new URLSearchParams(location.search).get("theme") === "dark"
-          ? "dark"
-          : "light",
+      theme: params.get("host") === "dark" ? "dark" : "light",
     }),
   ),
 );
