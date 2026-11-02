@@ -74,6 +74,11 @@ export function createForgeJira(siteUrl: string | null, actor: 'user' | 'app' = 
         await call2(route`/rest/api/3/mypermissions?projectKey=${projectKey}&permissions=${permissions.join(',')}`), 'permission check');
       return Object.fromEntries(permissions.map((p) => [p, !!r.permissions[p]?.havePermission]));
     },
+    async globalPermissions(permissions) {
+      const r = await json<{ permissions: Record<string, { havePermission: boolean }> }>(
+        await call2(route`/rest/api/3/mypermissions?permissions=${permissions.join(',')}`), 'global permission check');
+      return Object.fromEntries(permissions.map((p) => [p, !!r.permissions[p]?.havePermission]));
+    },
     async createIssue(i) {
       return json<{ key: string }>(await call2(route`/rest/api/3/issue`, { method: 'POST', body: { fields: {
         project: { key: i.projectKey }, summary: i.summary, issuetype: { name: i.issueType }, labels: i.labels, description: adf(i.description) } } }), 'create issue');
@@ -121,7 +126,8 @@ export function retentionFor(key: string): { value: number; unit: 'DAYS' } {
 
 export const forgeStore: Store = {
   get: (k) => kvs.get(k),
-  set: (k, v) => kvs.set(k, v, { ttl: retentionFor(k) }),
+  // Admin configuration never expires; everything else follows the documented retention.
+  set: (k, v) => (k.startsWith('config:') ? kvs.set(k, v) : kvs.set(k, v, { ttl: retentionFor(k) })),
   async setIfAbsent(k, v) {
     try { await kvs.set(k, v, { keyPolicy: 'FAIL_IF_EXISTS', ttl: retentionFor(k) }); return true; }
     catch (e) { if ((await kvs.get(k)) !== undefined) return false; throw e; }

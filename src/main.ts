@@ -12,7 +12,7 @@ const service = (req: ResolverRequest) => createService({ jira: createForgeJira(
 type Svc = ReturnType<typeof createService>;
 
 const ops: OperationName[] = ['getCapabilities', 'getPolicies', 'listProjects', 'getChangeCandidates', 'getGraphSnapshot', 'getEvidenceGraph', 'simulateChange',
-  'compareScenarios', 'generatePreventionPlan', 'approvePlan', 'executeApprovedPlan', 'getExecutionStatus', 'getPreventionPassport', 'checkPlanFreshness', 'previewSampleProject', 'createSampleProject'];
+  'compareScenarios', 'generatePreventionPlan', 'approvePlan', 'executeApprovedPlan', 'getExecutionStatus', 'getPreventionPassport', 'checkPlanFreshness', 'previewSampleProject', 'createSampleProject', 'getValidatorPolicy', 'setValidatorPolicy'];
 
 for (const op of ops) {
   resolver.define(op, makeHandler(op, () => 'LIVE', newId, now, (ctx, input, req) => {
@@ -39,17 +39,16 @@ export const rovoCheckFreshness = rovo.checkFreshness;
 export { diagnostics, seedDemo } from './diagnostics';
 
 // ---- Jira workflow validator (opt-in per workflow transition) ----
-import { decideTransition, type DecisionRecord } from './validator';
+import { runValidator, type DecisionRecord } from './validator';
+import { VALIDATOR_POLICY_KEY } from './engine/service';
 export async function validateTransition(args: { issue?: { key?: string } }) {
   const key = args?.issue?.key;
   if (!key) return { result: true };
-  try {
-    const jira = createForgeJira(null, 'app');
-    const issue = await jira.getIssue(key);
-    const decision = await forgeStore.get<DecisionRecord>(`decision:${key}`);
-    return decideTransition(issue.kind === 'ok' ? issue.issue : null, decision, key);
-  } catch (e) {
-    console.warn(JSON.stringify({ app: 'anticipate', op: 'validateTransition', failOpen: true, detail: e instanceof Error ? e.message.slice(0, 200) : 'error' }));
-    return { result: true };
-  }
+  const jira = createForgeJira(null, 'app');
+  return runValidator(key, {
+    readIssue: (k) => jira.getIssue(k),
+    readDecision: (k) => forgeStore.get<DecisionRecord>(`decision:${k}`),
+    readPolicy: () => forgeStore.get<{ onOutage?: string }>(VALIDATOR_POLICY_KEY),
+    log: (f) => console.warn(JSON.stringify(f))
+  });
 }

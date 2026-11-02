@@ -22,6 +22,7 @@ import { stableHash } from '../../packages/simulation-core/src/index';
 import { ATTESTATION_VALID_DAYS, linksDigest, type DecisionRecord } from '../validator';
 
 export const CHANGE_LABEL = 'anticipate-change';
+export const VALIDATOR_POLICY_KEY = 'config:validator';
 const SNAPSHOT_TTL_HOURS = 24;
 const LEASE_MS = 120_000;
 const MAX_ATTEMPTS = 5;
@@ -132,6 +133,23 @@ export function createService(d: Deps) {
   }
 
   return {
+    /** Validator outage policy. Default ALLOW (never lock a workflow because ANTICIPATE is down). Only Jira site admins can change it. */
+    async getValidatorPolicy(ctx: Ctx) {
+      if (!ctx.accountId) fail('PERMISSION_DENIED', 'An authenticated Atlassian user is required.');
+      const cur = await d.store.get<{ onOutage: 'ALLOW' | 'BLOCK'; updatedBy: string | null; updatedAt: string | null }>(VALIDATOR_POLICY_KEY);
+      const canEdit = !!(await d.jira.globalPermissions(['ADMINISTER']))['ADMINISTER'];
+      return { onOutage: cur?.onOutage ?? 'ALLOW', updatedBy: cur?.updatedBy ?? null, updatedAt: cur?.updatedAt ?? null, canEdit };
+    },
+
+    async setValidatorPolicy(ctx: Ctx, input: { onOutage: 'ALLOW' | 'BLOCK' }) {
+      if (!ctx.accountId) fail('PERMISSION_DENIED', 'An authenticated Atlassian user is required.');
+      if (!(await d.jira.globalPermissions(['ADMINISTER']))['ADMINISTER']) fail('PERMISSION_DENIED', 'Only Jira administrators can change the validator outage policy.');
+      const rec = { onOutage: input.onOutage, updatedBy: ctx.accountId, updatedAt: iso() };
+      await d.store.set(VALIDATOR_POLICY_KEY, rec);
+      console.warn(JSON.stringify({ app: 'anticipate', op: 'setValidatorPolicy', onOutage: input.onOutage }));
+      return { ...rec, canEdit: true };
+    },
+
     async previewSampleProject(_ctx: Ctx, input: { projectKey: string }) { return previewSample(d.jira, input.projectKey); },
 
     async createSampleProject(ctx: Ctx, input: { projectKey: string; confirm: true }) {
@@ -423,7 +441,7 @@ export function normalizeDate(s: string): string {
 }
 
 export const OPERATION_NAMES = ['getCapabilities', 'getPolicies', 'listProjects', 'getChangeCandidates', 'getGraphSnapshot', 'getEvidenceGraph', 'simulateChange',
-  'compareScenarios', 'generatePreventionPlan', 'approvePlan', 'executeApprovedPlan', 'getExecutionStatus', 'getPreventionPassport', 'checkPlanFreshness', 'previewSampleProject', 'createSampleProject',
+  'compareScenarios', 'generatePreventionPlan', 'approvePlan', 'executeApprovedPlan', 'getExecutionStatus', 'getPreventionPassport', 'checkPlanFreshness', 'previewSampleProject', 'createSampleProject', 'getValidatorPolicy', 'setValidatorPolicy',
   // capability signals (not resolvers): scenario operations accepted by compareScenarios / generatePreventionPlan
-  'scenario:UPGRADE_NODE'];
+  'scenario:UPGRADE_NODE', 'validator:outage-policy'];
 export { issueNodeId };
