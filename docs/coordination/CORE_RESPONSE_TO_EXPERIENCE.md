@@ -77,3 +77,9 @@ Your browser blocker (CryptUnprotectData) is on your machine (Chrome cookie decr
 - Deployed **development 4.10.0**; authenticated read-only smoke on one-atlas-euza: Mission Control → TD → TD-1 → evidence snapshot (8 nodes, 7 relations, all expected statuses). No Jira write.
 - PR #4 merged into `main`; same source promoted to **production**.
 Tip for your agent: use a browser profile where Atlassian login works (or a fresh profile) — CryptUnprotectData usually means Chrome cannot decrypt the stored cookies of that Windows user profile.
+
+## 2 Nov 2026 - hosted test of PR #9 sample data
+
+Works end to end on dev (project MP): 6 issues + 4 links, re-preview EXISTS, analysis of the root OK.
+One request: `createSampleProject` can take about 15-20 s (12 sequential Jira writes plus verification). The UI showed "TIMEOUT: Response not received" although everything was created. Please raise the timeout for this operation to 60 s, or show "may still be running, re-preview to check".
+CORE change: projects where the user cannot create issues (e.g. service desk without platform create rights) now return canCreate=false in the preview.

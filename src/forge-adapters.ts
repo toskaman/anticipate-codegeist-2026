@@ -20,6 +20,7 @@ async function call(actor: 'user' | 'app', path: ReturnType<typeof route>, init?
 async function json<T>(res: Response, what: string): Promise<T> {
   if (res.status === 403) throw new AppError('PERMISSION_DENIED', `Jira denied: ${what}.`);
   if (res.status === 404) throw new AppError('NOT_FOUND', `Jira: ${what} not found.`);
+  if (res.status === 400) { let detail = ''; try { detail = (await res.text()).slice(0, 300); } catch { /* ignore */ } throw new AppError('UPSTREAM_UNAVAILABLE', `Jira ${what} rejected (HTTP 400): ${detail}`, false); }
   if (!res.ok) throw new AppError('UPSTREAM_UNAVAILABLE', `Jira ${what} failed (HTTP ${res.status}).`, res.status >= 500);
   const text = res.status === 204 ? '' : await res.text();
   return (text ? JSON.parse(text) : undefined) as T;
@@ -93,8 +94,11 @@ export function createForgeJira(siteUrl: string | null, actor: 'user' | 'app' = 
     },
     async addLabel(key, label) { await json(await call2(route`/rest/api/3/issue/${key}`, { method: 'PUT', body: { update: { labels: [{ add: label }] } } }), 'add label'); },
     async issueTypes(projectKey) {
-      const r = await json<{ issueTypes?: { name: string; subtask?: boolean }[] }>(await call2(route`/rest/api/3/project/${projectKey}`), 'project');
-      return (r.issueTypes ?? []).filter((t) => !t.subtask).map((t) => t.name);
+      // Only types the caller can actually create here (createmeta). Service-desk projects often expose none
+      // through the platform API, and listing project types would then promise writes that Jira rejects.
+      const r = await json<{ issueTypes?: { name: string; subtask?: boolean }[]; values?: { name: string; subtask?: boolean }[] }>(
+        await call2(route`/rest/api/3/issue/createmeta/${projectKey}/issuetypes?maxResults=50`), 'create metadata');
+      return (r.issueTypes ?? r.values ?? []).filter((t) => !t.subtask).map((t) => t.name);
     }
   };
 }
