@@ -14,6 +14,9 @@ import type { Ctx, Deps, JiraIssue } from '../core/ports';
 import { extractGraph, issueNodeId } from '../jira/extractor';
 import { DEFAULT_POLICIES } from './policies';
 import { actionMarker, buildPlan } from './plans';
+import { diffEvidence } from './drift';
+import { previewSample, createSample } from './sample';
+import type { EvidenceDrift } from '../../packages/contracts/src/index';
 
 export const CHANGE_LABEL = 'anticipate-change';
 const SNAPSHOT_TTL_HOURS = 24;
@@ -54,7 +57,48 @@ export function createService(d: Deps) {
     url: d.jira.siteUrl() ? `${d.jira.siteUrl()!.replace(/\/$/, '')}/browse/${i.key}` : null
   });
 
+  /** Re-extract the plan's evidence neighbourhood live and diff it (Continuous Decision Safety). */
+  async function evidenceDrift(rec: PlanRec, snap: SnapRec): Promise<EvidenceDrift> {
+    const checkedAt = iso();
+    if (snap.snapshot.mode !== 'LIVE') return diffEvidence({ planId: rec.plan.planId, before: snap.snapshot, after: snap.snapshot, planArtifactIssueKeys: [], checkedAt });
+    const after = await extractGraph(d.jira, snap.rootIssueKey, { maxDepth: snap.snapshot.limits.maxDepth, maxNodes: snap.snapshot.limits.maxNodes,
+      snapshotId: `${snap.snapshot.snapshotId}~recheck`, projectId: snap.snapshot.projectId, now: d.now(), ttlHours: SNAPSHOT_TTL_HOURS });
+    const records = await Promise.all(rec.plan.actions.map((a) => d.store.get<ExecutionRecord>(K.exec(rec.plan.planId, a.actionId))));
+    const creates = rec.plan.actions.filter((a) => a.type === 'CREATE_ISSUE');
+    const fromRecords = records.filter((r) => r?.resultRef?.issueKey && creates.some((a) => a.actionId === r.actionId)).map((r) => r!.resultRef!.issueKey!);
+    // Bookkeeping can be lost (timeouts); marker labels on created issues are the durable source of truth.
+    let fromMarkers: string[] = [];
+    if (creates.length) {
+      const labels = creates.map((a) => `"${actionMarker(rec.plan.planId, a.actionId)}"`).join(', ');
+      fromMarkers = (await d.jira.searchIssues(`labels in (${labels})`, null, 50)).items.map((i) => i.key);
+    }
+    const artifacts = [...new Set([...fromRecords, ...fromMarkers])].sort();
+    return diffEvidence({ planId: rec.plan.planId, before: snap.snapshot, after, planArtifactIssueKeys: artifacts, checkedAt });
+  }
+
+  async function guardFreshEvidence(rec: PlanRec, snap: SnapRec, stage: 'approval' | 'execution') {
+    const drift = await evidenceDrift(rec, snap);
+    if (drift.fresh) return;
+    rec.plan = { ...rec.plan, status: 'EVIDENCE_CHANGED' };
+    rec.timeline.push({ at: iso(), event: `Evidence changed before ${stage}: ${drift.reason}`.slice(0, 200) });
+    await d.store.set(K.plan(rec.plan.planId), rec);
+    throw new AppError('EVIDENCE_CHANGED', drift.reason, false, { addedEdges: drift.addedEdges, removedEdges: drift.removedEdges, becameUnknown: drift.becameUnknown });
+  }
+
   return {
+    async previewSampleProject(_ctx: Ctx, input: { projectKey: string }) { return previewSample(d.jira, input.projectKey); },
+
+    async createSampleProject(ctx: Ctx, input: { projectKey: string; confirm: true }) {
+      if (!ctx.accountId) fail('PERMISSION_DENIED', 'Creating sample data requires an authenticated Atlassian user.');
+      return createSample(d.jira, input.projectKey);
+    },
+
+    async checkPlanFreshness(ctx: Ctx, input: { planId: string }): Promise<EvidenceDrift> {
+      const rec = await loadPlan(ctx, input.planId);
+      const snap = await loadSnap(ctx, rec.plan.snapshotId);
+      return evidenceDrift(rec, snap);
+    },
+
     async getCapabilities(): Promise<CapabilityAvailability> {
       return {
         jiraRead: 'AVAILABLE', jiraWrite: 'AVAILABLE', confluenceRead: 'NOT_CONFIGURED', workflowValidator: 'NOT_CONFIGURED',
@@ -139,6 +183,7 @@ export function createService(d: Deps) {
       if (!['PENDING_APPROVAL', 'APPROVED', 'PARTIAL', 'FAILED'].includes(rec.plan.status)) fail('CONFLICT', `Plan is ${rec.plan.status}.`);
       const snap = await loadSnap(ctx, rec.plan.snapshotId);
       if (isExpired(snap.snapshot)) { await this.markExpired(rec); fail('SNAPSHOT_EXPIRED', 'Snapshot expired; regenerate the plan.'); }
+      await guardFreshEvidence(rec, snap, 'approval');
       const known = new Set(rec.plan.actions.map((a) => a.actionId));
       const bad = req.approvedActionIds.filter((id) => !known.has(id));
       if (bad.length) fail('VALIDATION', `Unknown actions: ${bad.join(', ')}`);
@@ -165,13 +210,19 @@ export function createService(d: Deps) {
       if (!latest || latest.planHash !== rec.plan.planHash) fail('STALE_APPROVAL', 'No valid approval for the current plan.');
       const snap = await loadSnap(ctx, rec.plan.snapshotId);
       if (isExpired(snap.snapshot)) { await this.markExpired(rec); fail('SNAPSHOT_EXPIRED', 'Snapshot expired; regenerate the plan.'); }
+      // Continuous Decision Safety: never write on evidence that changed after approval.
+      await guardFreshEvidence(rec, snap, 'execution');
 
       // Lease: one executor per plan at a time.
       const lockKey = K.lock(input.planId);
-      const lease = { until: d.now().getTime() + LEASE_MS, key: input.idempotencyKey };
+      const lease = { until: d.now().getTime() + LEASE_MS, key: input.idempotencyKey, token: d.newId() };
       if (!(await d.store.setIfAbsent(lockKey, lease))) {
         const cur = await d.store.get<typeof lease>(lockKey);
         if (cur && cur.until > d.now().getTime()) fail('CONFLICT', 'This plan is already executing.');
+        // Expired lease takeover is itself a race: only ONE contender may claim a given expired lease.
+        // The claim key is unique to that lease (its token/expiry), and setIfAbsent is atomic (KVS FAIL_IF_EXISTS).
+        const claim = `lock-takeover:${input.planId}:${cur?.token ?? cur?.until ?? 'missing'}`;
+        if (!(await d.store.setIfAbsent(claim, { by: lease.token, at: iso() }))) fail('CONFLICT', 'Another executor is taking over this plan.');
         await d.store.set(lockKey, lease);
       }
       try {
@@ -188,7 +239,8 @@ export function createService(d: Deps) {
         await d.store.set(K.plan(input.planId), rec);
         return out;
       } finally {
-        await d.store.delete(lockKey);
+        const held = await d.store.get<typeof lease>(lockKey);
+        if (held?.token === lease.token) await d.store.delete(lockKey); // never release someone else's lease
       }
     },
 
@@ -292,5 +344,5 @@ export function normalizeDate(s: string): string {
 }
 
 export const OPERATION_NAMES = ['getCapabilities', 'getPolicies', 'listProjects', 'getChangeCandidates', 'getGraphSnapshot', 'getEvidenceGraph', 'simulateChange',
-  'compareScenarios', 'generatePreventionPlan', 'approvePlan', 'executeApprovedPlan', 'getExecutionStatus', 'getPreventionPassport'];
+  'compareScenarios', 'generatePreventionPlan', 'approvePlan', 'executeApprovedPlan', 'getExecutionStatus', 'getPreventionPassport', 'checkPlanFreshness', 'previewSampleProject', 'createSampleProject'];
 export { issueNodeId };

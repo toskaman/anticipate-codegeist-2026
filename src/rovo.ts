@@ -44,6 +44,16 @@ export function createRovoActions(deps: (p: ActionPayload) => Deps) {
         c.recommendedScenarioId ? `Lowest-risk now: ${c.recommendedScenarioId}. ${c.recommendationReason}` : c.recommendationReason,
         'No Jira changes were made. Open ANTICIPATE to review and approve a prevention plan.'].join('\n');
     }),
+    checkFreshness: safe(async (p, c) => {
+      if (!p.planId) throw new AppError('VALIDATION', 'planId is required');
+      const d = await createService(deps(p)).checkPlanFreshness(ctxOf(p, c), { planId: p.planId });
+      const fmt = (e: { from: string; kind: string; to: string; status: string }) => `- ${e.from.replace('issue:', '')} ${e.kind} ${e.to.replace('issue:', '')} [${e.status}]`;
+      return [`Evidence freshness for plan ${d.planId} (snapshot ${d.snapshotId}, checked ${d.checkedAt}): ${d.fresh ? 'FRESH' : 'CHANGED'}`, d.reason,
+        ...(d.addedEdges.length ? ['New relations:', ...d.addedEdges.map(fmt)] : []),
+        ...(d.removedEdges.length ? ['Removed relations:', ...d.removedEdges.map(fmt)] : []),
+        ...(d.becameUnknown.length ? [`No longer readable: ${d.becameUnknown.join(', ')}`] : []),
+        'Read-only check. Execution of a plan with changed evidence is blocked server-side until a new plan is reviewed.'].join('\n');
+    }),
     getPassport: safe(async (p, c) => {
       if (!p.planId) throw new AppError('VALIDATION', 'planId is required');
       const pp = await createService(deps(p)).getPreventionPassport(ctxOf(p, c), { planId: p.planId });
