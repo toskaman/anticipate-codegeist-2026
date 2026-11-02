@@ -1,0 +1,12 @@
+{
+  "updated": "2026-11-02",
+  "branch": "feat/core-engine",
+  "baseCommit": "f898235",
+  "committed": false,
+  "contractVersion": "0.2.0",
+  "endpoints": { "implemented": ["getCapabilities","getPolicies","listProjects","getChangeCandidates","getGraphSnapshot","getEvidenceGraph","simulateChange","compareScenarios","generatePreventionPlan","approvePlan","executeApprovedPlan","getExecutionStatus","getPreventionPassport"], "verifiedAgainstRealJira": [] },
+  "tests": { "contracts": "3/3", "simulation-core": "8/8", "backend": "12/12 (fake Jira)", "bundle": "esbuild node22 PASS", "forgeLint": "NOT_RUN (needs auth)" },
+  "deploy": "NOT_EXECUTED",
+  "blockers": ["Forge CLI login on owner PC", "Commit/push from Windows (agent has no git identity/GitHub creds)", "Old API token revocation unconfirmed"],
+  "nextCheckpoint": "forge lint + forge deploy -e development + install on dev site + run docs/demo/JIRA_DEMO_SETUP.md"
+}
