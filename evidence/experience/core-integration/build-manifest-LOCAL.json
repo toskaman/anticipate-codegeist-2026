@@ -1,0 +1,46 @@
+{
+  "build": "LOCAL production bundle, not deployed",
+  "authoredTestMarkerMatches": [],
+  "files": [
+    {
+      "path": "assets/ForgeApp-BIIyuygu.css",
+      "bytes": 24114,
+      "sha256": "24c62531cb4a5a45e7c7960d0314c08b5d18f6a08c11c3f4e2c8700c2b430c38"
+    },
+    {
+      "path": "assets/ForgeApp-BJWsymPN.js",
+      "bytes": 274379,
+      "sha256": "dcb1a468746f84917b63177dac8d129d487e7ae9be39cc68584b88ea25fa0079"
+    },
+    {
+      "path": "assets/iframe-resizer-C-5li8o0.js",
+      "bytes": 29197,
+      "sha256": "57576e129ff62c662b52e7aa68ac0d92f32fe4bcf56cf487fb49b1219e6abe08"
+    },
+    {
+      "path": "assets/index-D32FB9Jc.js",
+      "bytes": 143185,
+      "sha256": "dbb20e05f9884fed79277b9963714481854ff4627c954e274e25e1d5cd0161b0"
+    },
+    {
+      "path": "assets/out-CorztIDd.js",
+      "bytes": 59601,
+      "sha256": "58e53a19ddb146c05ae2fdbf22decc41eec708e7e420535d07b554c64703db71"
+    },
+    {
+      "path": "assets/rolldown-runtime-BWaJ3C7D.js",
+      "bytes": 911,
+      "sha256": "d0e9044430006c5bb48f477501a5af465f0a6377d2fcd7495aa215b8b75aaee3"
+    },
+    {
+      "path": "index.html",
+      "bytes": 506,
+      "sha256": "58961dcbdece4cf31314bbdd131f56b2f7f06f6aa020df7cc62d83e954dd2ffa"
+    },
+    {
+      "path": "THIRD_PARTY_NOTICES.txt",
+      "bytes": 198431,
+      "sha256": "44616ae7de7375957b6519a1de0ad56963140e48f775c06ebbab42d1fae9b449"
+    }
+  ]
+}

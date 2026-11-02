@@ -1,8 +1,16 @@
 {
-  "timestampUTC": "2026-11-02T00:25:18.006Z",
-  "lockSha256": "138a0830e10d786021537907a2b413733d809b624279cf6b61810001f425a7d9",
+  "timestampUTC": "2026-11-02T01:44:20.022Z",
+  "lockSha256": "bf037e43effa8ee2eebb7caaf83150bdbe3592537bad3d5515dd5c0ae561cbc3",
   "scope": "Installed direct dependencies and available non-dev package license files. Inventory only; not a legal/compliance certification. Custom Forge terms require owner review.",
   "direct": [
+    {
+      "name": "@anticipate/contracts",
+      "version": "0.1.0",
+      "license": "NOT_DECLARED",
+      "path": "node_modules/@anticipate/contracts",
+      "licenseFiles": [],
+      "runtime": true
+    },
     {
       "name": "@axe-core/playwright",
       "version": "4.14.0",
@@ -235,8 +243,9 @@
       "runtime": true
     }
   ],
-  "runtimePackageCount": 160,
+  "runtimePackageCount": 162,
   "missingRuntimeLicenseText": [
+    "@anticipate/contracts",
     "@atlaskit/adf-schema-generator",
     "@atlaskit/platform-feature-flags",
     "@statsig/client-core",

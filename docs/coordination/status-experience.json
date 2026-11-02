@@ -1,46 +1,28 @@
 {
   "workstream": "EXPERIENCE",
   "branch": "feat/product-experience",
-  "revisionBase": "4365b83",
-  "revisionScope": "working tree: browser reliability, product research, license inventory",
-  "contractVersion": "frontend-proposal-v2 — TEMPORARY, not CORE approved",
-  "status": "VERIFIED_LOCAL",
-  "screens": {
-    "development": "seven fixture screens plus component showcase",
-    "production": "Forge capability and access onboarding; no fixture fallback"
-  },
+  "revisionBase": "9763165",
+  "revisionScope": "CORE 0.2.0 client and seven connected screens",
+  "contractVersion": "0.2.0",
+  "status": "VERIFIED_LOCAL_READY_FOR_HOSTED_VALIDATION",
   "tests": {
-    "unit": 41,
-    "browser": 21,
-    "lint": "PASS",
+    "unit": 42,
+    "browser": 41,
+    "coreScreenThemeViewportCases": 42,
+    "prototypeScreenThemeViewportCases": 42,
+    "core": 12,
+    "contracts": 3,
+    "simulation": 8,
     "typecheck": "PASS",
+    "lint": "PASS",
     "format": "PASS",
-    "build": "PASS",
-    "mode": "LOCAL/MOCK and LOCAL production preview — not Forge hosted"
+    "build": "PASS"
   },
-  "forgeVerification": "BLOCKED: no reviewed resolver bindings/shared contracts or verified installation access",
-  "requestedOperations": [
-    "getCapabilities",
-    "getProjects",
-    "getProjectSnapshot",
-    "getEvidenceGraph",
-    "simulateChange",
-    "compareScenarios",
-    "generatePreventionPlan",
-    "approvePreventionPlan",
-    "executeApprovedPlan",
-    "getExecutionStatus",
-    "getPreventionPassport"
-  ],
-  "evidenceMode": "LOCAL/MOCK only; no VERIFIED_FORGE evidence",
-  "limitations": [
-    "Authoritative shared schemas and resolver bindings remain unpublished by CORE",
-    "Scenario results are explicitly authored fixtures, not simulator output",
-    "No hosted Bridge/routing/CSP/theme/authentication or Jira outcome verification"
-  ],
+  "forgeVerification": "NOT_VERIFIED: frontend deployment and authenticated hosted session required",
+  "evidenceMode": "MOCK_TRANSPORT/LOCAL only; no real Jira action performed",
   "next": [
-    "Complete remaining reflow/long-text and screenshot QA",
-    "Prepare accurate Marketplace/jury assets without public submission",
-    "Integrate CORE contracts and verified installation access when provided"
+    "CORE/owner deploy reviewed build to development",
+    "Authorized user-context read/write and recovery acceptance",
+    "CORE dependency advisory remediation/release review"
   ]
 }

@@ -1,106 +1,196 @@
 import { describe, it, expect, vi } from "vitest";
+import { ErrorCode } from "@anticipate/contracts";
 import { ForgeClient } from "./ForgeClient";
 import { FixtureClient } from "./FixtureClient";
-describe("Forge boundary", () => {
-  it("does not call guessed resolver names or substitute fixtures", async () => {
-    const transport = vi.fn();
+import {
+  response,
+  meta,
+  capabilities,
+  graph,
+  plan,
+  passport,
+} from "../../tests/core-test-data";
+
+describe("CORE 0.2.0 Forge boundary", () => {
+  it("uses exact resolver keys, validates input and parses a LIVE envelope", async () => {
+    const transport = vi.fn(async () => response(capabilities));
     const client = new ForgeClient(transport);
-    expect((await client.getCapabilities()).operations).toEqual([]);
-    await expect(client.getProjects()).rejects.toMatchObject({
-      code: "UNSUPPORTED",
-    });
-    expect(transport).not.toHaveBeenCalled();
+    expect(await client.request("getCapabilities", {})).toEqual(capabilities);
+    expect(transport).toHaveBeenCalledWith("getCapabilities", {});
+    await expect(
+      client.request("executeApprovedPlan", {
+        planId: "p",
+        idempotencyKey: "short",
+      }),
+    ).rejects.toMatchObject({ code: "VALIDATION" });
+    expect(transport).toHaveBeenCalledTimes(1);
   });
-  it("validates real configured project payloads", async () => {
-    const client = new ForgeClient(async () => [{ id: "P", name: "Project" }], {
-      getProjects: "reviewed.projects",
-    });
-    expect(await client.getProjects()).toEqual([{ id: "P", name: "Project" }]);
-    const invalid = new ForgeClient(async () => [{ id: "P" }], {
-      getProjects: "reviewed.projects",
-    });
-    await expect(invalid.getProjects()).rejects.toMatchObject({
-      code: "INVALID_RESPONSE",
-    });
-  });
-  it("preserves permission and snapshot errors", async () => {
-    for (const code of ["FORBIDDEN", "SNAPSHOT_EXPIRED"]) {
-      const client = new ForgeClient(
-        async () => {
-          throw { code };
+  it("preserves every CORE error code, correlation and retryability", async () => {
+    for (const code of ErrorCode.options) {
+      const client = new ForgeClient(async () => ({
+        ok: false,
+        meta,
+        error: {
+          code,
+          message: "Server declined request",
+          requestId: meta.requestId,
+          retryable: true,
         },
-        { getProjects: "projects" },
+      }));
+      await expect(client.request("getCapabilities", {})).rejects.toMatchObject(
+        { code, requestId: meta.requestId, retryable: true },
       );
-      await expect(client.getProjects()).rejects.toMatchObject({ code });
     }
   });
-  it("times out without inventing a successful write", async () => {
+  it("rejects malformed, version-mismatched and demo envelopes without substituting fixtures", async () => {
+    for (const payload of [
+      capabilities,
+      { ...response(capabilities), meta: { ...meta, contractVersion: "9" } },
+      { ...response(capabilities), meta: { ...meta, mode: "DEMO_FIXTURE" } },
+      response({ operations: [] }),
+    ]) {
+      await expect(
+        new ForgeClient(async () => payload).request("getCapabilities", {}),
+      ).rejects.toMatchObject({ code: "INVALID_RESPONSE" });
+    }
+    await expect(
+      new ForgeClient(async () =>
+        response({ ...graph, mode: "DEMO_FIXTURE" }),
+      ).request("getEvidenceGraph", { snapshotId: graph.snapshotId }),
+    ).rejects.toMatchObject({ code: "INVALID_RESPONSE" });
+  });
+  it("rejects cross-snapshot graphs, invalid endpoints and fixture source references", async () => {
+    for (const bad of [
+      { ...graph, snapshotId: "other" },
+      { ...graph, edges: [{ ...graph.edges[0], to: "missing" }] },
+      { ...graph, nodes: [...graph.nodes, graph.nodes[0]] },
+      {
+        ...graph,
+        nodes: graph.nodes.map((n) => ({
+          ...n,
+          references: [
+            {
+              sourceSystem: "FIXTURE",
+              sourceId: "fake",
+              url: null,
+              extractor: "test",
+              observedAt: meta.generatedAt,
+            },
+          ],
+        })),
+      },
+    ]) {
+      await expect(
+        new ForgeClient(async () => response(bad)).request("getEvidenceGraph", {
+          snapshotId: graph.snapshotId,
+        }),
+      ).rejects.toMatchObject({ code: "INVALID_RESPONSE" });
+    }
+  });
+  it("validates scenario/hash identity and plan-based recovery", async () => {
+    await expect(
+      new ForgeClient(async () => response(plan)).request(
+        "generatePreventionPlan",
+        { snapshotId: plan.snapshotId, scenarioId: "wrong" },
+      ),
+    ).rejects.toMatchObject({ code: "INVALID_RESPONSE" });
+    await expect(
+      new ForgeClient(async () =>
+        response({ ...plan, planHash: "changed" }),
+      ).request("approvePlan", {
+        planId: plan.planId,
+        planHash: plan.planHash,
+        approvedActionIds: [plan.actions[0].actionId],
+        idempotencyKey: "test-approval-key-0001",
+      }),
+    ).rejects.toMatchObject({ code: "INVALID_RESPONSE" });
+    const transport = vi.fn(async () => response([]));
+    await expect(
+      new ForgeClient(transport).request("getExecutionStatus", {
+        planId: plan.planId,
+      }),
+    ).resolves.toEqual([]);
+    expect(transport).toHaveBeenCalledWith("getExecutionStatus", {
+      planId: plan.planId,
+    });
+    const report = structuredClone(passport());
+    report.plan!.snapshotId = "wrong";
+    await expect(
+      new ForgeClient(async () => response(report)).request(
+        "getPreventionPassport",
+        { planId: plan.planId },
+      ),
+    ).rejects.toMatchObject({ code: "INVALID_RESPONSE" });
+  });
+  it("times out without retrying a write", async () => {
     vi.useFakeTimers();
     try {
-      const client = new ForgeClient(
-        () => new Promise(() => {}),
-        { executeApprovedPlan: "execute" },
-        50,
-      );
-      const assertion = expect(
-        client.request("executeApprovedPlan", {
-          planId: "p",
-          version: 1,
-          actionIds: ["a"],
-          idempotencyKey: "k",
+      const transport = vi.fn(() => new Promise<unknown>(() => {}));
+      const pending = expect(
+        new ForgeClient(transport, 50).request("executeApprovedPlan", {
+          planId: plan.planId,
+          idempotencyKey: "test-execution-key-0001",
         }),
       ).rejects.toMatchObject({ code: "TIMEOUT" });
       await vi.advanceTimersByTimeAsync(51);
-      await assertion;
+      await pending;
+      expect(transport).toHaveBeenCalledTimes(1);
     } finally {
       vi.useRealTimers();
     }
   });
-  it("aborts observation when its consumer unmounts", async () => {
+  it("aborts observation and reports a Bridge failure explicitly", async () => {
     const controller = new AbortController();
-    const client = new ForgeClient(() => new Promise(() => {}), {
-      getProjects: "projects",
-    });
     const assertion = expect(
-      client.getProjects(controller.signal),
+      new ForgeClient(() => new Promise(() => {})).request(
+        "listProjects",
+        {},
+        controller.signal,
+      ),
     ).rejects.toMatchObject({ name: "AbortError" });
     controller.abort();
     await assertion;
+    await expect(
+      new ForgeClient(async () => {
+        throw new Error("host unavailable");
+      }).request("listProjects", {}),
+    ).rejects.toMatchObject({ code: "NETWORK_ERROR" });
   });
-  it("rejects malformed capabilities", async () => {
-    const client = new ForgeClient(async () => ({ operations: ["invented"] }), {
-      getCapabilities: "capabilities",
-    });
-    await expect(client.getCapabilities()).rejects.toMatchObject({
-      code: "INVALID_RESPONSE",
-    });
-  });
-  it("fixture client never grants real approvals or execution", async () => {
-    const client = new FixtureClient();
+  it("fixture client still refuses all real mutations", async () => {
     for (const operation of [
       "approvePreventionPlan",
       "executeApprovedPlan",
       "getExecutionStatus",
     ] as const)
-      await expect(client.request(operation, {})).rejects.toMatchObject({
-        code: "REQUIRES_LIVE_BACKEND",
-      });
+      await expect(
+        new FixtureClient().request(operation, {}),
+      ).rejects.toMatchObject({ code: "REQUIRES_LIVE_BACKEND" });
   });
 });
 
-it("never accepts fixture capability or plan payloads as Forge responses", async () => {
-  const fixture = new FixtureClient();
-  const capabilities = new ForgeClient(() => fixture.getCapabilities(), {
-    getCapabilities: "capabilities",
-  });
-  await expect(capabilities.getCapabilities()).rejects.toMatchObject({
-    code: "INVALID_RESPONSE",
-  });
-  const plans = new ForgeClient(
-    () => fixture.request("generatePreventionPlan", {}),
-    { generatePreventionPlan: "plan" },
-  );
+it("bounds oversized and deeply nested responses before recursive schema validation", async () => {
+  const huge = response({ ...graph, nodes: Array(20001).fill(graph.nodes[0]) });
   await expect(
-    plans.request("generatePreventionPlan", {}),
-  ).rejects.toMatchObject({ code: "INVALID_RESPONSE" });
+    new ForgeClient(async () => huge).request("getEvidenceGraph", {
+      snapshotId: graph.snapshotId,
+    }),
+  ).rejects.toMatchObject({
+    code: "INVALID_RESPONSE",
+    message: expect.stringContaining("collection"),
+  });
+  let nested: unknown = "leaf";
+  for (let i = 0; i < 70; i++) nested = { nested };
+  const deep = response({
+    ...plan,
+    actions: plan.actions.map((a) => ({ ...a, payload: { nested } })),
+  });
+  await expect(
+    new ForgeClient(async () => deep).request("generatePreventionPlan", {
+      snapshotId: plan.snapshotId,
+      scenarioId: plan.scenarioId,
+    }),
+  ).rejects.toMatchObject({
+    code: "INVALID_RESPONSE",
+    message: expect.stringContaining("nesting"),
+  });
 });

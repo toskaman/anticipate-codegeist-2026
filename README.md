@@ -89,8 +89,11 @@ npm ci
 npm start -- --host 127.0.0.1
 ```
 
-Open http://127.0.0.1:3000. Demo fixtures require no credentials and perform no Atlassian writes. Scripts: typecheck, test, build, test:browser (first run: npx playwright install chromium). Build output remains static/hello-world/build. See docs/STATUS.md for verified progress and remaining work; docs/integration for backend and Git handoff. No live integration or deployment is claimed.
+Open http://127.0.0.1:3000. Demo fixtures require no credentials and perform no Atlassian writes. Scripts: typecheck, test, build, test:browser (first run: npx playwright install chromium). Build output remains static/hello-world/build. See docs/STATUS.md for verified progress and remaining work; docs/integration for backend and Git handoff. The production/host iframe entry now uses CORE 0.2.0; no authenticated hosted validation or deployment is claimed.
 
 ## Current frontend checks and guide
 
 The detailed local developer guide is [docs/README.md](docs/README.md). It covers installation, architecture, provisional contracts, retained template files and limitations. Additional frontend scripts now include lint, format and format:check. Current presentation copy is in docs/jury/PRESENTATION.md; consult docs/STATUS.md for verified completion rather than the original template README.
+
+
+CORE 0.2.0 is merged and the Forge client is wired. See [connected frontend handoff](docs/integration/CORE_CLIENT_INTEGRATION.md). Local Vite at top level remains an isolated authored demo; inside a Forge iframe (including a tunnel), the connected entry loads instead.

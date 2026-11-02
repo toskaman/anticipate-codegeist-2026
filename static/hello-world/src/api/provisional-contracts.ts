@@ -1,4 +1,4 @@
-// TEMPORARY frontend proposal. Replace with packages/contracts after CORE review.
+// Historical authored-prototype schemas for DEV/test only. Production uses @anticipate/contracts.
 import { z } from "zod";
 export const errorCodes = [
   "UNAVAILABLE",

@@ -675,3 +675,37 @@ dialog::backdrop {
   min-height: 24px;
   flex-basis: 24px;
 }
+
+.core-workspace fieldset {
+  border: 1px solid var(--line);
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+  min-width: 0;
+}
+.core-workspace label {
+  display: grid;
+  gap: 6px;
+}
+.core-workspace pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 12px;
+}
+.core-workspace p,
+.core-workspace h3 {
+  overflow-wrap: anywhere;
+}
+.core-evidence-item {
+  display: flex;
+  width: 100%;
+  margin-bottom: 8px;
+}
+.core-workspace .action > div {
+  min-width: 0;
+  flex: 1;
+}
+
+.core-workspace a:not(.skip) {
+  color: var(--accent);
+}

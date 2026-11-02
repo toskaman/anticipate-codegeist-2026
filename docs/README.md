@@ -34,3 +34,6 @@ Reliability and research: tests/reliability.spec.ts measures local browser inter
 
 
 Latest milestone: [performance, visual quality and CORE readiness](design/PERFORMANCE_VISUAL_CORE.md), [CORE integration requirements](integration/CORE_INTEGRATION_REQUIREMENTS.md).
+
+
+Current connected frontend: [CORE 0.2.0 integration, tests and hosted gates](integration/CORE_CLIENT_INTEGRATION.md). Production uses the shared contracts; provisional schemas now serve only the authored local prototype.

@@ -215,8 +215,9 @@ export default function App() {
             <section className="panel">
               <h2>Integration unavailable</h2>
               <p>
-                Backend setup and agreed contracts are required. Demo results
-                are not substituted for live data.
+                The connected experience runs inside the installed Forge app.
+                This local prototype never substitutes demo results for live
+                data.
               </p>
               <button onClick={() => setMode("demo")}>Return to demo</button>
             </section>
@@ -575,10 +576,13 @@ export default function App() {
                         onChange={(e) => setMode(e.target.value)}
                       >
                         <option value="demo">Local demo</option>
-                        <option value="forge">Forge — unavailable</option>
+                        <option value="forge">Forge host required</option>
                       </select>
                     </label>
-                    <p>Jira · Confluence · Forge · AI: PENDING_BACKEND</p>
+                    <p>
+                      Local fictional data only. The installed Forge experience
+                      reads current CORE capabilities.
+                    </p>
                     <p>
                       Use Tab to move, Enter to select. Graph has a textual
                       dependency alternative. Reduced motion follows your

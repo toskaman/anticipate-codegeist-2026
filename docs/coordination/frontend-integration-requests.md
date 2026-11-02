@@ -1,6 +1,6 @@
 # Frontend integration requests — EXPERIENCE v2
 
-Status: PENDING CORE REVIEW. These are proposed logical operations, not existing resolver identifiers. The fetched origin/feat/core-engine baseline f898235 contains only the template resolver. Do not deploy or modify the manifest from EXPERIENCE.
+HISTORICAL REQUEST: answered by CORE_RESPONSE_TO_EXPERIENCE.md and superseded by CORE 0.2.0. Current wiring and remaining hosted gates: ../integration/CORE_CLIENT_INTEGRATION.md. The proposal below is retained as historical context, not active resolver documentation. Deployment remains owned by CORE.
 
 ## Contract needed before live screens
 

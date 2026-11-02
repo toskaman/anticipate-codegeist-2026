@@ -7,6 +7,7 @@
   "private": true,
   "homepage": ".",
   "dependencies": {
+    "@anticipate/contracts": "file:../../packages/contracts",
     "@forge/bridge": "7.2.1-next.13",
     "@xyflow/react": "^12.12.0",
     "lucide-react": "^1.66.0",

@@ -1,19 +1,7 @@
-# Forge handoff — current v2 boundary
+# Forge handoff — CORE 0.2.0 connected frontend
 
-EXPERIENCE owns static/hello-world; CORE owns the existing backend, manifest, permissions and deployment. Build output remains static/hello-world/build with relative URLs. Existing app identity is preserved. No deployment or live integration has been verified by EXPERIENCE.
+CORE 39b59df is merged. Production now loads the seven-screen CoreWorkspace and invokes the exact shared OPERATIONS through Forge Bridge. The installed contracts source matches the checked-in source. No fixture fallback, guessed resolver names or simulated approval/execution.
 
-Production entry loads ForgeApp. Development entry loads the labeled fixture prototype; production never falls back to it. ForgeApp opts into host theming through a lazy Bridge import and handles unavailable host context in local preview. CORE must verify actual CSP, routing, authentication, theme behavior and the full-page launch URL after an approved development deployment.
+Read [CORE client integration](CORE_CLIENT_INTEGRATION.md) for the operation matrix, input/output types, planHash approvals, recovery by planId, validation boundaries, tests and deployment gates. Build output remains static/hello-world/build; the existing Forge identity/module are unchanged from CORE.
 
-The TEMPORARY AnticipateClient proposal is in src/api/provisional-contracts.ts. ForgeClient has an empty resolver map until CORE supplies real identifiers. It validates capability/project payloads plus plan, execution and passport responses, suppresses fixture payloads in Forge mode and bounds observation with timeout/abort. Aborting a Bridge promise does not roll back a backend write.
-
-ActionReview is now in the main Plan screen: selected action IDs and plan version are confirmed before approval; execution is separate, requires approved actions, and uses a request key. A delayed response triggers status inspection rather than automatic resubmission. PARTIAL/FAILED outcomes are rendered without inventing success. FixtureClient supplies an authored review plan but rejects real approvals and execution. PassportView validates snapshot/scenario and exports the same data it displays; fixture timelines remain empty.
-
-Graph, dashboard and scenario reads now cross the same AnticipateClient boundary. The old DataAdapter/ExperienceAdapter providers and simulated mutation helpers are removed; adapters.ts is only a view-data composer. Both clients validate the same TEMPORARY schemas. Scenario results are authored fixtures, not a simulator. Replace provisional schemas with packages/contracts after CORE review rather than assuming our proposed fields are authoritative.
-
-Exact operation/input/error requirements and hosted acceptance tests are in ../coordination/frontend-integration-requests.md. Required access includes an owner-provided installation link, site, installation UUID and authorized test permissions. No Apps-menu entry, bonus integration, or successful Jira mutation should be inferred from screenshots or local tests.
-
-
-Graph contract proposal now includes root, explicit edges and metadata (relation, epistemic classification, source reference/HTTPS URL, observation time, freshness, impact scope and provenance). Graph payloads must include relationship endpoints and valid provenance steps. Renderer pagination is client-side on a bounded loaded payload; agree server paging semantics with CORE. See ../design/GRAPH_QA.md and the coordination request.
-
-
-Current milestone operation matrix, TypeScript maps, authorization/snapshot guarantees and release gates: [CORE integration requirements](CORE_INTEGRATION_REQUIREMENTS.md).
+No deployment or real Jira write has been performed by EXPERIENCE. The development launch URL from CORE redirects an unauthenticated browser to Atlassian login. Hosted acceptance requires the current frontend build to be deployed by CORE/owner and an authorized user session.

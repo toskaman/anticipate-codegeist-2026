@@ -1,13 +1,13 @@
 # ANTICIPATE EXPERIENCE — current status
 
-VERIFIED_LOCAL milestone: performance, visual quality and CORE integration readiness (2026-11-02). Branch feat/product-experience. CORE-owned manifest, backend and Forge identity remain unchanged. Publication to this branch and a Draft PR are now explicitly authorized; no merge or deployment.
+VERIFIED_LOCAL: CORE 0.2.0 connected frontend on feat/product-experience. CORE 39b59df merged as 9763165 without conflict. No authored CORE file changes, deployment or real Jira mutation.
 
-- Seven labeled fixture screens, bounded provenance-aware Evidence Graph, scenario comparison, policy review, per-action review and consistent Passport export.
-- Production loads Forge capability/access UI only. No fixture fallback and no simulated Jira success.
-- 41 unit tests, 26 browser tests (including 42 screen/theme/viewport cases), model benchmark, TypeScript, lint, formatting and production build pass.
-- Exact 100/500/1,000-node datasets measured in Chromium. See [performance and visual audit](design/PERFORMANCE_VISUAL_CORE.md) and raw evidence/experience/performance-visual-core. No SLA or statistically significant improvement is claimed.
-- [CORE requirements](integration/CORE_INTEGRATION_REQUIREMENTS.md) define TypeScript maps, operation inputs/outputs, snapshot handling, authorization, errors and hosted acceptance gates.
+Production and a Forge development iframe load the connected seven-screen experience. Top-level local Vite remains the labeled fixture prototype. Shared contracts, real resolver keys, LIVE envelopes, scenario-linked plans/planHash approvals, separate confirmed execution, planId recovery and authoritative Passport export are wired.
 
-CORE integration remains BLOCKED: reviewed contracts/bindings, scenario-linked plans/executions, structured Passport audit/error envelope and an authorized Forge installation are required. Latest fetched CORE branch is e621241; it was not merged or validated as an integration during publication preparation. Local results do not imply VERIFIED_FORGE.
+Latest verification: 42 frontend unit tests, 41 browser tests (including 42 CORE and 42 prototype screen/theme/viewport cases), CORE typecheck, 12 CORE tests, 3 contracts and 8 simulation tests pass. Frontend TypeScript, lint, formatting and build pass. [Current integration handoff](integration/CORE_CLIENT_INTEGRATION.md) includes the scope and limits of this evidence.
 
-Known limits: authored A/B/C results, C-only authored plan, sparse synthetic graph workloads, no total-process memory/long-soak certification, client-side paging, no full assistive-technology audit. Dependency advisories (13 moderate / 5 high at last recorded audit), ten missing root-license texts and custom Forge terms need release review. Product research contains unvalidated persona/pricing hypotheses. See docs/product/RESEARCH.md, docs/design/ASSET_LICENSES.md and historical milestone manifests under evidence/experience.
+Hosted validation remains BLOCKED: this frontend build has not been deployed by CORE/owner, and the browser check reaches Atlassian login. No authenticated hosted read/write, CSP/theme/routing or Jira outcome claim. No Forge token or colleague credentials used.
+
+Known release work: frontend audit 13 moderate / 7 high; root audit 15 moderate / 2 high / 2 critical; CORE Zod 3 is unchanged. Notices inventory has 11 missing root texts/custom terms requiring owner review. Client preflight bounds validator work but does not fix dependency advisories. See evidence/experience/core-integration and the integration handoff.
+
+Historical performance/visual benchmark results remain in docs/design/PERFORMANCE_VISUAL_CORE.md and evidence/experience/performance-visual-core. They are local synthetic measurements, not live CORE/Forge targets or speedup certification.

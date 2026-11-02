@@ -1,6 +1,5 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect } from "vitest";
 import { loadExperience, fixtureClient } from "./adapters";
-import { ForgeClient } from "./api/ForgeClient";
 import { planSchema, comparisonsSchema } from "./api/provisional-contracts";
 describe("single client integration boundary", () => {
   it("loads deterministic reads through the same snapshot", async () => {
@@ -38,12 +37,5 @@ describe("single client integration boundary", () => {
     );
     expect(result.source).toBe("authored-fixture");
     expect(result.results).toHaveLength(3);
-  });
-  it("unconfigured Forge reads never call guessed resolver names", async () => {
-    const transport = vi.fn();
-    await expect(
-      loadExperience(new ForgeClient(transport)),
-    ).rejects.toMatchObject({ code: "UNSUPPORTED" });
-    expect(transport).not.toHaveBeenCalled();
   });
 });
