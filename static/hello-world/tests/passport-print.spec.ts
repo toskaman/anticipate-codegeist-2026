@@ -202,3 +202,99 @@ test("historical Passport shows its retention state and recorded counts", async 
     path: "../../evidence/experience/v4-ux/passport-historical-light-1280-MOCK_TRANSPORT.png",
   });
 });
+
+test("Print button opens the browser print flow; display preferences do not leak into print", async ({
+  page,
+}) => {
+  await page.route("**/__core_test", async (route) => {
+    const call = route.request().postDataJSON() as { operation: string };
+    const data =
+      call.operation === "getCapabilities"
+        ? capabilities
+        : call.operation === "listProjects"
+          ? { items: [], page: { nextCursor: null, totalKnown: 0 } }
+          : call.operation === "getPreventionPassport"
+            ? report
+            : call.operation === "getExecutionStatus"
+              ? executions
+              : graph;
+    await route.fulfill({ json: response(data) });
+  });
+  // Stored display preferences: dark, larger text, high contrast.
+  await page.addInitScript(() => {
+    localStorage.setItem(
+      "anticipate-display-preferences",
+      JSON.stringify({ theme: "dark", textSize: "larger", contrast: "high" }),
+    );
+    (window as unknown as { printCalls: number }).printCalls = 0;
+    window.print = () => {
+      (window as unknown as { printCalls: number }).printCalls++;
+    };
+  });
+  await page.goto("/tests/core-harness.html");
+  await expect(page.locator(".ax-app")).toHaveAttribute("data-theme", "dark");
+  await page.getByLabel("Recovery plan ID").fill(longPlan.planId);
+  await page
+    .getByRole("button", { name: "Recover plan and execution status" })
+    .click();
+  await page
+    .getByRole("navigation")
+    .getByRole("button", { name: /^Prevention Passport/ })
+    .click();
+  await page
+    .getByRole("button", { name: "Print or save as PDF", exact: true })
+    .click();
+  expect(
+    await page.evaluate(
+      () => (window as unknown as { printCalls: number }).printCalls,
+    ),
+  ).toBe(1);
+  await page.emulateMedia({ media: "print" });
+  // No dark surface anywhere in the printed report.
+  const dark = await page.evaluate(() => {
+    const lum = (c: string) => {
+      const m = c.match(/rgba?\(([^)]+)\)/);
+      if (!m) return 1;
+      const [r, g, b, a = 1] = m[1].split(",").map(Number);
+      return a === 0 ? 1 : (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+    };
+    return (
+      [
+        document.querySelector(".ax-app")!,
+        ...document.querySelectorAll(".ax-report, .ax-report *"),
+      ]
+        // Ignore small decorative markers (timeline dots); check surfaces.
+        .filter((el) => {
+          const r = el.getBoundingClientRect();
+          return r.width * r.height > 400;
+        })
+        .filter((el) => lum(getComputedStyle(el).backgroundColor) < 0.6)
+        .map((el) => `${el.tagName}.${el.className}`)
+        .slice(0, 5)
+    );
+  });
+  expect(dark, "dark backgrounds in print").toEqual([]);
+  // Paper palette wins over the dark/high-contrast screen preferences.
+  expect(
+    await page.evaluate(() => {
+      const app = getComputedStyle(document.querySelector(".ax-app")!);
+      const body = getComputedStyle(
+        document.querySelector(".ax-report tbody td")!,
+      );
+      return [app.backgroundColor, app.color, body.color];
+    }),
+  ).toEqual(["rgb(255, 255, 255)", "rgb(0, 0, 0)", "rgb(0, 0, 0)"]);
+  await page.addStyleTag({
+    content: "#root > p[role=status] { position: static !important; }",
+  });
+  const pdf = await page.pdf({
+    format: "A4",
+    printBackground: true,
+    margin: { top: "12mm", bottom: "12mm", left: "12mm", right: "12mm" },
+    path: "../../evidence/experience/v4-ux/passport-print-dark-larger-high-contrast-MOCK_TRANSPORT.pdf",
+  });
+  const pages = (pdf.toString("latin1").match(/\/Type\s*\/Page[^s]/g) ?? [])
+    .length;
+  expect(pages).toBeGreaterThan(1);
+  expect(pages).toBeLessThanOrEqual(16);
+});

@@ -253,13 +253,19 @@ for (const unavailable of [false, true])
   test(`CORE empty or unavailable project listing has no invented project, unavailable=${unavailable}`, async ({
     page,
   }) => {
-    const calls = await pagedCore(page, { empty: true, unavailable });
+    // When Jira read is unavailable the backend still returns projects here,
+    // so the checks below prove the parallel listing is discarded.
+    const calls = await pagedCore(page, { empty: !unavailable, unavailable });
     await page.goto("/tests/core-harness.html");
     if (unavailable) {
       await expect(page.getByRole("alert")).toContainText(
         "PERMISSION_REQUIRED",
       );
-      expect(calls.map((c) => c.operation)).toEqual(["getCapabilities"]);
+      // Only the two startup reads (started in parallel); nothing else.
+      expect(calls.map((c) => c.operation).sort()).toEqual([
+        "getCapabilities",
+        "listProjects",
+      ]);
     } else
       await expect(
         page.getByText(
