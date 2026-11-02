@@ -59,5 +59,9 @@
       "last 1 safari version"
     ]
   },
-  "type": "module"
+  "type": "module",
+  "overrides": {
+    "prosemirror-view": "1.42.9",
+    "prosemirror-model": "1.25.12"
+  }
 }

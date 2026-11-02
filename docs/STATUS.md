@@ -1,25 +1,27 @@
 # ANTICIPATE EXPERIENCE — current status
 
-VERIFIED_LOCAL: CORE 0.2.0 connected frontend on feat/product-experience. CORE through 6356a28 merged as 4c68d90 without conflict. No authored CORE file changes, deployment or real Jira mutation.
+Frontend baseline: **4c68d90fc0990b751cb7bfa7dc6d0f2a77f60c12**, CORE contracts 0.2.0. CORE follow-up `1225a72` changes Rovo caller identity resolution and adds a regression test; merged through report `41c6c59`. Frontend application source remains unchanged; the later frontend ProseMirror dependency override is recorded below. EXPERIENCE has not authored changes to the merged backend, shared contracts, manifest or Forge identity.
 
-Production and a Forge development iframe load the connected seven-screen experience. Top-level local Vite remains the labeled fixture prototype. Shared contracts, real resolver keys, LIVE envelopes, scenario-linked plans/planHash approvals, separate confirmed execution, planId recovery and authoritative Passport export are wired.
+## Deployment and distribution
 
-Latest verification: 42 frontend unit tests, 51 browser tests (including 42 CORE and 42 prototype screen/theme/viewport cases), CORE typecheck, 18 CORE tests, 3 contracts and 8 simulation tests pass. Frontend TypeScript, lint, formatting and build pass. [Current integration handoff](integration/CORE_CLIENT_INTEGRATION.md) includes the scope and limits of this evidence.
+CORE reports development **4.8.0** with an authenticated read-only smoke, and production **2.1.0** from the runtime candidate. In `745fe69`, CORE reports successful production installation through the judge link on a second clean site and the honest empty-project state. This supersedes earlier deployment-request/deferral notes. These are CORE reports, not independent EXPERIENCE hosted verification.
 
-Hosted user-context validation remains unverified. CORE reports d9d6109 deployed earlier as development v4.3.0; the owner deferred deployment of the newer follow-up. The last EXPERIENCE browser check reached Atlassian login. No authenticated hosted read/write, CSP/theme/routing or Jira outcome claim. No Forge token or colleague credentials used.
+The requester authorized the existing Forge app owner identity and delegated publisher name, support and public privacy details to CORE. [Installation link](submission/INSTALL_LINK.md) · [owner authorization and response](coordination/PRODUCTION_GO_EXPERIENCE.md). CORE reports sharing enabled and policy/terms published on GitHub. EXPERIENCE has flagged factual policy review items; publication does not imply legal clearance.
 
-Known release work: frontend audit 13 moderate / 7 high; root audit 15 moderate / 2 high / 2 critical; CORE Zod 3 is unchanged. Notices inventory has 11 missing root texts/custom terms requiring owner review. Client preflight bounds validator work but does not fix dependency advisories. See evidence/experience/core-integration and the integration handoff.
+GitHub reports PR #2 merged into main as `1c77eea` at 2026-11-02 13:04:58 UTC. EXPERIENCE did not perform the merge or a Forge deployment. Follow-up documentation remains on feat/product-experience.
 
-Historical performance/visual benchmark results remain in docs/design/PERFORMANCE_VISUAL_CORE.md and evidence/experience/performance-visual-core. They are local synthetic measurements, not live CORE/Forge targets or speedup certification.
+## Frontend and evidence
 
+All seven hosted screens use the CORE client: project/change pagination, explicit snapshot capture, bounded accessible evidence graph, scenario-linked plans, planHash approval, separate execution confirmation, lost-response recovery and matching Passport export. Local fixtures and mock transport remain labeled and isolated; there is no production fixture fallback.
 
-Night follow-up: cursor/deduplication/project-isolation regressions, explicit rate-limit/permission feedback and mutation-error dismissal guards. See [overnight report](integration/CORE_NIGHT_FOLLOWUP.md).
+Latest full local run: **42 frontend unit / 51 browser tests**, build, TypeScript, lint and formatting passed. Candidate verification also passed **19 CORE / 3 contract / 8 simulation tests** after merging the Rovo follow-up. CI for `d518dbe` passed frontend clean install/build and CORE checks in run `41450610699`. Browser tests remain local/mock evidence; CI does not run that browser suite.
 
+[Integration handoff](integration/CORE_CLIENT_INTEGRATION.md) · [reflow evidence](integration/CORE_REFLOW_READINESS.md) · [historical performance measurements](design/PERFORMANCE_VISUAL_CORE.md). No hosted performance SLA or speedup is claimed.
 
-Reflow follow-up: long-label overflow/node overlap fixed; full payloads scroll at keyboard focus; graph selection survives viewport changes. See [readiness report](integration/CORE_REFLOW_READINESS.md). No deployment from EXPERIENCE.
+## Remaining gates
 
+Independent hosted journey, host permissions, real Jira outcomes and lost-response recovery remain unverified by EXPERIENCE. CORE's clean-site smoke establishes reported installation/empty-state behavior, not that entire journey. CORE now reports external Rovo MCP validation through its Claude connector on the original site: graph (8 nodes/7 relations), A/B/C simulation and Passport (COMPLETED, 6/6 VERIFIED records). Report `41c6c59` names development **4.9.0** / production **2.2.0** following the caller-identity fix. This supersedes the earlier pending MCP client gate; EXPERIENCE did not independently repeat it. Reading existing VERIFIED records is not evidence of new writes in that MCP check. The workflow validator remains deferred.
 
-CORE development deployment is now explicitly requested for pinned candidate 4c68d90 after green CI, using only the owner-approved Forge identity. See [request](coordination/DEPLOYMENT_REQUEST_EXPERIENCE.md). REQUESTED is not a deployment or hosted-verification claim.
+Latest frontend dependency follow-up: frontend ProseMirror view/model overrides passed clean install and the frontend checks (42 unit / 51 browser, 39.0 s). Full frontend audit is now **14 moderate / 2 high**; production-only **4 moderate / 2 high**. This is an installed dependency change, not a Forge deployment; previous root audit **15 moderate / 2 high / 2 critical**. [Dependency triage](integration/DEPENDENCY_TRIAGE.md) explains pinned transitive versions. CORE records Zod risk acceptance for the hackathon; this is not remediation or independently verified mitigation. Eleven missing root license texts/custom terms still require review. No security/legal clearance is claimed.
 
-
-Owner has now explicitly authorized requesting CORE to deploy pinned candidate 4c68d90 to production. See [production go-ahead](coordination/PRODUCTION_GO_EXPERIENCE.md). CORE reports development v4.8.0 smoke OK; production remains REQUESTED, and the prior Forge identity requirement remains unresolved/mandatory. No EXPERIENCE deploy or PR merge.
+Follow-up check after merging `41c6c59` on 2026-11-02: 19 CORE, 3 contract, 8 simulation, 42 frontend unit and 51 browser tests passed (browser run 39.7 s). Root/frontend TypeScript, frontend lint, formatting and build passed. No authored backend change or deployment was performed by EXPERIENCE; the Rovo change is merged from CORE. Historical browser captures were preserved rather than overwritten by this verification run.

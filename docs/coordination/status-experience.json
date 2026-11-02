@@ -2,7 +2,7 @@
   "workstream": "EXPERIENCE",
   "branch": "feat/product-experience",
   "revisionBase": "4c68d90fc0990b751cb7bfa7dc6d0f2a77f60c12",
-  "revisionScope": "Runtime candidate unchanged; CORE documentation merged through 36203cd; owner approved Toska Marley identity and delegated public publisher/support details to CORE",
+  "revisionScope": "Frontend source unchanged; frontend-only ProseMirror view/model overrides verified locally; CORE through 41c6c59",
   "contractVersion": "0.2.0",
   "status": "VERIFIED_LOCAL_READY_FOR_HOSTED_VALIDATION",
   "tests": {
@@ -10,7 +10,7 @@
     "browser": 51,
     "coreScreenThemeViewportCases": 42,
     "prototypeScreenThemeViewportCases": 42,
-    "core": 18,
+    "core": 19,
     "contracts": 3,
     "simulation": 8,
     "typecheck": "PASS",
@@ -18,14 +18,14 @@
     "format": "PASS",
     "build": "PASS"
   },
-  "forgeVerification": "CORE_REPORTED_PRODUCTION_2.1.0; TOSKA_MARLEY_AUTHORIZED_BY_REQUESTER; PRODUCTION_INSTALLATION_NOT_VERIFIED_BY_EXPERIENCE",
+  "forgeVerification": "CORE_REPORTED_PRODUCTION_2.1.0_CLEAN_SITE_INSTALL_AND_EMPTY_STATE; NOT_INDEPENDENTLY_VERIFIED_BY_EXPERIENCE",
   "evidenceMode": "MOCK_TRANSPORT/LOCAL only; no real Jira action performed",
   "next": [
-    "CORE owns public publisher name, support contact and privacy policy publication, as explicitly delegated by requester",
-    "CORE confirms actual production installation and authenticated read-only smoke; distribution link is reported available",
-    "Keep dependency/license release findings visible"
+    "Independent hosted frontend journey still requires working authenticated browser control",
+    "CORE owns policy accuracy and dependency release decisions; advisory remediation remains open",
+    "Workflow validator remains deferred"
   ],
-  "coreRef": "6356a28",
+  "coreRef": "1225a72",
   "deploymentRequest": {
     "status": "DEPLOYED_REPORTED_BY_CORE",
     "executor": "CORE",
@@ -50,7 +50,7 @@
       "reportCommit": "37de9c4",
       "readOnlySmoke": "CORE reported capabilities, project listing and completed-plan recovery OK"
     },
-    "credentialPolicy": "Requester explicitly authorized Toska Marley in this chat on 2026-11-02. CORE may use that existing authorized Forge session for this app. No token is supplied, copied or stored; EXPERIENCE does not deploy.",
+    "credentialPolicy": "Requester explicitly authorized the existing app owner in this chat on 2026-11-02. CORE may use that existing authorized Forge session for this app. No token is supplied, copied or stored; EXPERIENCE does not deploy.",
     "constraints": [
       "Existing app and verified existing production installation only",
       "No app creation, registration, sharing/distribution or scope changes",
@@ -68,8 +68,9 @@
     ],
     "reportedVersion": "2.1.0",
     "reportCommit": "10d75bb",
-    "identityPolicyFulfilment": "REQUESTER_APPROVED_TOSKA_MARLEY; CORE reports using that identity",
-    "productionInstallation": "CORE reported none at 12:50 UTC; later distribution availability does not establish an installed production site"
+    "identityPolicyFulfilment": "REQUESTER_APPROVED_EXISTING_APP_OWNER; CORE reports using that identity",
+    "productionInstallation": "CORE reports successful production 2.1.0 installation on a second clean site (installation prefix 32676e8b); full identifier not supplied",
+    "installationReportCommit": "745fe69"
   },
   "developmentDeployment": {
     "status": "DEPLOYED_REPORTED_BY_CORE",
@@ -113,13 +114,40 @@
     ],
     "reportedVersion": "4.8.0",
     "reportCommit": "37de9c4",
-    "identityPolicyFulfilment": "REQUESTER_NOW_EXPLICITLY_APPROVED_TOSKA_MARLEY"
+    "identityPolicyFulfilment": "REQUESTER_NOW_EXPLICITLY_APPROVED_EXISTING_APP_OWNER"
   },
   "publicDistribution": {
-    "status": "SHARING_AND_INSTALL_LINK_REPORTED_BY_CORE",
-    "reportCommit": "36203cd",
+    "status": "CLEAN_SITE_INSTALL_AND_EMPTY_STATE_REPORTED_BY_CORE",
+    "reportCommit": "745fe69",
     "documentation": "docs/submission/INSTALL_LINK.md",
     "publisherSupportPrivacyOwner": "CORE (explicit requester delegation)",
     "independentlyVerifiedByExperience": false
+  },
+  "latestCoreReport": {
+    "commit": "41c6c59",
+    "developmentVersion": "4.9.0",
+    "productionVersion": "2.2.0",
+    "scope": "External MCP graph/simulation/Passport through CORE connector; not independently verified by EXPERIENCE",
+    "sourceCommitReported": "1225a72 caller identity fix; full deployed tree SHA not supplied"
+  },
+  "frontendDependencyFollowup": {
+    "status": "VERIFIED_LOCAL_NOT_DEPLOYED_BY_EXPERIENCE",
+    "overrides": {
+      "prosemirror-view": "1.42.9",
+      "prosemirror-model": "1.25.12"
+    },
+    "scope": "frontend package only; installed ProseMirror tree currently originates through Forge Bridge",
+    "auditFull": {
+      "moderate": 14,
+      "high": 2
+    },
+    "auditProduction": {
+      "moderate": 4,
+      "high": 2
+    },
+    "browserTests": 51,
+    "unitTests": 42,
+    "evidence": "evidence/experience/dependency-remediation/audit-LOCAL.json",
+    "hostedCompatibility": "NOT_INDEPENDENTLY_VERIFIED"
   }
 }

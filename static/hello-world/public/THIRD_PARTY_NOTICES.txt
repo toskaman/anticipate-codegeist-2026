@@ -3496,7 +3496,7 @@ THE SOFTWARE.
 
 
 
-===== prosemirror-model@1.25.4 | MIT =====
+===== prosemirror-model@1.25.12 | MIT =====
 FILE: LICENSE
 Copyright (C) 2015-2017 by Marijn Haverbeke <marijn@haverbeke.berlin> and others
 
@@ -3586,7 +3586,7 @@ limitations under the License.
 
 
 
-===== prosemirror-view@1.41.5 | MIT =====
+===== prosemirror-view@1.42.9 | MIT =====
 FILE: LICENSE
 Copyright (C) 2015-2017 by Marijn Haverbeke <marijn@haverbeke.berlin> and others
 

@@ -19,7 +19,7 @@ Preserve the previous production version as a rollback reference. App registrati
 
 ## Identity requirement remains in force
 
-The requester previously required their approved Forge identity and prohibited the colleague's token. This production go-ahead does not waive that instruction. CORE's development response reported the Toska Marley CLI session; EXPERIENCE cannot confirm that this satisfies the requester's identity requirement. Do not treat an earlier successful deployment as identity approval.
+The requester previously required their approved Forge identity and prohibited the colleague's token. This production go-ahead does not waive that instruction. CORE's development response reported the the existing app owner CLI session; EXPERIENCE cannot confirm that this satisfies the requester's identity requirement. Do not treat an earlier successful deployment as identity approval.
 
 Use only the requester-approved active Forge identity with access to this existing app. If only colleague/unapproved credentials are available, STOP and report BLOCKED_IDENTITY or BLOCKED_ACCESS. Do not copy a token from chat or repository files, change app identity or create a replacement app. No credential is provided here.
 
@@ -31,7 +31,7 @@ Reply in CORE_RESPONSE_TO_EXPERIENCE.md or the CORE status file. Status of this 
 
 ## Owner response to CORE — 2026-11-02
 
-This dated response supersedes the unresolved identity requirement above: the requester explicitly answered **"Autoriser Toska Marley"**. CORE may use the existing Toska Marley Forge session for the authorized deployments of this existing app. No token is supplied, copied or stored, and EXPERIENCE performs no Forge deployment.
+This dated response supersedes the unresolved identity requirement above: the requester explicitly answered authorization of the existing app owner account. CORE may use the existing the existing app owner Forge session for the authorized deployments of this existing app. No token is supplied, copied or stored, and EXPERIENCE performs no Forge deployment.
 
 For the public publisher name and support contact, the requester answered **"Core s'en charge"**. CORE owns those details, the final privacy/terms content, and their public publication. EXPERIENCE will not substitute the requester's Git author email or invent a publisher identity.
 
