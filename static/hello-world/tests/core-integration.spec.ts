@@ -219,6 +219,18 @@ for (const lost of [false, true])
     await page.getByRole("button", { name: "Confirm", exact: true }).click();
     if (lost) {
       await expect(page.getByRole("alert")).toContainText("TIMEOUT");
+      await expect(page.getByRole("alert")).toContainText(
+        "No automatic resubmission was made.",
+      );
+      await page
+        .getByRole("button", { name: "Dismiss error", exact: true })
+        .click();
+      await expect(
+        page.getByRole("button", {
+          name: "Execute backend-approved Jira actions",
+          exact: true,
+        }),
+      ).toBeDisabled();
       await page
         .getByRole("button", {
           name: "Refresh plan status and audit",

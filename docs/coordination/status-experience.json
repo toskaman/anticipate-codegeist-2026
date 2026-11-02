@@ -1,16 +1,16 @@
 {
   "workstream": "EXPERIENCE",
   "branch": "feat/product-experience",
-  "revisionBase": "9763165",
-  "revisionScope": "CORE 0.2.0 client and seven connected screens",
+  "revisionBase": "ca2541d",
+  "revisionScope": "CORE overnight merge, cursor/project-isolation tests and distinct read/mutation feedback",
   "contractVersion": "0.2.0",
   "status": "VERIFIED_LOCAL_READY_FOR_HOSTED_VALIDATION",
   "tests": {
     "unit": 42,
-    "browser": 41,
+    "browser": 48,
     "coreScreenThemeViewportCases": 42,
     "prototypeScreenThemeViewportCases": 42,
-    "core": 12,
+    "core": 16,
     "contracts": 3,
     "simulation": 8,
     "typecheck": "PASS",
@@ -18,11 +18,12 @@
     "format": "PASS",
     "build": "PASS"
   },
-  "forgeVerification": "NOT_VERIFIED: frontend deployment and authenticated hosted session required",
+  "forgeVerification": "USER_CONTEXT_NOT_VERIFIED; CORE reports d9d6109 dev v4.3.0; owner deferred newer build deployment",
   "evidenceMode": "MOCK_TRANSPORT/LOCAL only; no real Jira action performed",
   "next": [
     "CORE/owner deploy reviewed build to development",
     "Authorized user-context read/write and recovery acceptance",
     "CORE dependency advisory remediation/release review"
-  ]
+  ],
+  "coreRef": "ea829ef"
 }

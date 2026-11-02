@@ -1,0 +1,33 @@
+{
+  "status": "VERIFIED_LOCAL only",
+  "coreRef": "ea829ef0b580dd5080ae0e73d9d6730794cf3467",
+  "coreMerge": "ca2541df0a58afe259f614cfa61ad084c150f99f",
+  "frontendUnitTests": 42,
+  "browserTests": 48,
+  "coreTests": 16,
+  "contractTests": 3,
+  "simulationTests": 8,
+  "screenCases": {
+    "core": 42,
+    "prototype": 42
+  },
+  "newBrowserCases": [
+    "opaque cursor paging and duplicate entries",
+    "project changes clear prior snapshot",
+    "RATE_LIMITED read, explicit retry only",
+    "PERMISSION_DENIED read, explicit retry only",
+    "non-advancing cursor rejected",
+    "empty project list",
+    "unadvertised project operation never invoked",
+    "manual root issue belongs to selected project",
+    "dismissed mutation error never unlocks duplicate execution"
+  ],
+  "checks": [
+    "frontend format:check, lint, typecheck, unit tests and build",
+    "full Playwright suite, one worker",
+    "CORE typecheck/tests, contract tests and simulation tests"
+  ],
+  "hostedVerification": false,
+  "deployment": "Deferred for this follow-up per owner; CORE reports d9d6109 deployed earlier as development v4.3.0",
+  "realJiraActionsByExperience": 0
+}

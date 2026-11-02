@@ -15,6 +15,9 @@ import { ForgeClient, CoreClientError } from "./api/ForgeClient";
 import { useResource } from "./useResource";
 import { usePage } from "./usePage";
 import ConfirmDialog from "./ConfirmDialog";
+import CoreOperationError, {
+  type OperationFailure,
+} from "./CoreOperationError";
 import CoreEvidenceGraph, { SourceLink } from "./CoreEvidenceGraph";
 
 const pages = [
@@ -153,7 +156,7 @@ export default function CoreWorkspace({
     "approve" | "execute" | null
   >(null);
   const [busy, setBusy] = useState("");
-  const [error, setError] = useState("");
+  const [error, setError] = useState<OperationFailure | null>(null);
   const [notice, setNotice] = useState("");
   const [now, setNow] = useState(Date.now());
   const pending = useRef(false);
@@ -235,11 +238,12 @@ export default function CoreWorkspace({
   async function run(
     label: string,
     task: (signal: AbortSignal) => Promise<void>,
+    mutation = false,
   ) {
     if (pending.current) return;
     pending.current = true;
     setBusy(label);
-    setError("");
+    setError(null);
     setNotice("");
     const abort = new AbortController();
     controller.current = abort;
@@ -247,11 +251,15 @@ export default function CoreWorkspace({
       await task(abort.signal);
     } catch (e) {
       if (active.current && !abort.signal.aborted)
-        setError(
-          e instanceof Error
-            ? e.message
-            : "Operation failed. No success assumed.",
-        );
+        setError({
+          message:
+            e instanceof Error
+              ? e.message
+              : "Operation failed. No success assumed.",
+          code: e instanceof CoreClientError ? e.code : "UNEXPECTED",
+          retryable: e instanceof CoreClientError && e.retryable,
+          mutation,
+        });
     } finally {
       if (active.current && !abort.signal.aborted) {
         pending.current = false;
@@ -383,6 +391,7 @@ export default function CoreWorkspace({
           );
         }
       },
+      true,
     );
   }
   const bootstrapFailed = resource.status !== "ready";
@@ -456,13 +465,10 @@ export default function CoreWorkspace({
             <>
               {busy && <p role="status">{busy}</p>}
               {error && (
-                <div className="panel" role="alert">
-                  {error}
-                  <p>
-                    Mutation responses can be uncertain. Recover status using
-                    the plan ID before any new write.
-                  </p>
-                </div>
+                <CoreOperationError
+                  failure={error}
+                  onDismiss={() => setError(null)}
+                />
               )}
               {notice && <p role="status">{notice}</p>}
               {expired && (
@@ -640,6 +646,19 @@ export default function CoreWorkspace({
                             requireOperation("getGraphSnapshot");
                             requireOperation("getEvidenceGraph");
                             clearSnapshot();
+                            const selectedProject = projects.find(
+                              (project) => project.id === projectId,
+                            );
+                            if (
+                              !selectedProject ||
+                              !rootIssueKey.startsWith(
+                                `${selectedProject.key}-`,
+                              )
+                            )
+                              throw new CoreClientError(
+                                "VALIDATION",
+                                "Choose an issue from the selected Jira project, or select its project first.",
+                              );
                             const created = await client.request(
                               "getGraphSnapshot",
                               {

@@ -1,34 +1,35 @@
-# ANTICIPATE — presentation copy
+# ANTICIPATE — presentation draft
+
+Local draft for review, not a public submission. Follow docs/STATUS.md and integration/CORE_NIGHT_FOLLOWUP.md for evidence and remaining gates.
 
 ## Elevator pitch
 
-Software changes cross service boundaries faster than teams can review them. ANTICIPATE is a decision firewall: inspect dependency evidence, compare consequences, and review safeguards before a risky change ships. Its Prevention Passport keeps the decision, uncertainty and approval history together.
+ANTICIPATE helps engineering teams inspect dependency evidence, compare consequences and review preventive actions before a risky Jira change ships. Its Prevention Passport keeps the selected decision, approval audit, execution records and unresolved uncertainty together.
 
-## Problem and solution
+## What the product does
 
-Removing a legacy API looks like one ticket but can affect checkout, mobile clients, support integrations and release pipelines. Evidence is fragmented and missing ownership can be mistaken for safety. ANTICIPATE brings the proposed change, dependency evidence, scenario alternatives and prevention actions into one decision workflow. Unknown evidence stays visible rather than becoming a reassuring score.
+Mission Control selects an accessible project and change. The Evidence Graph presents explicit Jira relationships and source references, preserving CONFIRMED, INFERRED and UNKNOWN states. Scenario Lab asks the deterministic CORE engine to compare removal, temporary retention and, only when a replacement is selected, migration before retirement. The interface reports the returned verdict, policy violations, impact paths and unknowns rather than inventing probabilities or savings.
 
-## Innovation and feature explanation
+The selected snapshot/scenario produces its own versioned prevention plan. A reviewer inspects exact Jira action payloads and approves selected actions against the plan hash. Execution is a separate confirmed operation; the UI retrieves per-action status by plan ID after an uncertain response and only calls VERIFIED records verified outcomes. The Passport exports the same validated backend report used on screen.
 
-The local prototype combines evidence classifications, deterministic alternative comparison and an auditable decision record. The graph distinguishes CONFIRMED, INFERRED and UNKNOWN relationships and has a textual alternative. Scenario Lab contrasts immediate removal, compatibility retention and guarded migration. Decision Firewall explains failed, passed and unknown conditions. Prevention Plan reviews individual action requirements and explicitly reports that approval requires the live authenticated backend. Prevention Passport exports fictional evidence and uncertainty without invented approval or execution history.
+## Technical description
+
+The Custom UI uses React/TypeScript and the authoritative CORE 0.2.0 runtime schemas. Forge Bridge invokes typed resolver operations. Snapshot, scenario and plan identities are checked at the boundary; read errors, permission denial, rate limits, stale approvals and uncertain writes have explicit states. Graph pagination and a readable keyboard list bound the view; snapshot freshness is not mislabeled as per-edge freshness.
+
+CORE supplies Jira extraction, deterministic simulation, policies, plan authorization, marker reconciliation and post-write checks. Its three read-only Rovo MCP tools are represented in the manifest; access depends on installation/admin enablement. A Jira workflow validator is research only, not implemented. Confluence, Teamwork Graph and paid AI are not portrayed as enabled when capabilities says otherwise.
+
+## Evidence and limits
+
+The frontend is wired to real resolver names and shared contracts. EXPERIENCE verified the journey with controlled transport, unit/browser checks and genuine local screenshots. Those captures are explicitly MOCK TRANSPORT. The top-level local authored prototype is separate and never mutates Atlassian. Production and a development host iframe use the connected entry and have no fixture fallback.
+
+CORE reports an integrated development deployment of d9d6109 as v4.3.0. EXPERIENCE has not independently verified an authenticated hosted user session or real Jira write. Hosted claims must wait for that acceptance; this draft does not turn a mocked response into a real outcome. Dependency advisories, license-text review and clean-install/judge access remain release work.
 
 ## Design rationale
 
-A restrained navy/teal interface makes dependency paths and selected alternatives prominent. Amber and explicit labels communicate uncertainty; color is never the sole status cue. Light mode, visible keyboard focus, reduced-motion behavior and a mobile dependency list support varied environments. The story moves from evidence to consequences to safeguards, so the jury can follow the decision rather than learn a dashboard taxonomy.
+A restrained navy/teal shell, explicit status text, light/dark themes, keyboard focus and a mobile evidence list support review. The main progression is evidence, alternatives, policies, action review and decision record. A failed read never becomes an execution warning alone; a dismissed error never enables duplicate execution.
 
-## Draft Devpost description
+## Suggested Devpost summary
 
-ANTICIPATE helps engineering teams test consequences before shipping a change. In our AUTH-142 demonstration, a team wants to retire legacy authentication API v1. Dependency evidence reveals affected consumers and an unresolved support integration. The team compares three authored alternatives, reviews policy conditions, examines safeguards and sees the explicit requires-live-backend approval state. A Prevention Passport preserves the context and uncertainty for review.
+Software changes cross team boundaries faster than a single Jira ticket suggests. ANTICIPATE brings dependency evidence, deterministic alternatives and preventive actions into one review flow. Unknown evidence remains visible. A human reviews the exact proposed Jira actions, records an approval and separately requests execution. The Prevention Passport preserves the decision and the outcomes reported by the backend.
 
-The frontend currently runs locally with clearly labeled deterministic fixtures. It does not call live Jira or Confluence, enforce server-side policy, perform AI simulation or create tickets. Forge, Rovo, MCP and Teamwork Graph are integration targets for the backend team, not verified features of this local prototype. The existing Forge application's deployment identity is preserved.
-
-## Screenshots and demonstration
-
-Use the actual screenshots in evidence/, favoring Mission Control, selected graph evidence, Scenario Lab comparison, action review with backend-required outcome and Passport. Avoid implying that fictional source references or simulated execution are live outputs. Follow DEMO_STORYBOARD.md for the three-minute sequence.
-
-## Roadmap and limitations
-
-Implemented locally: seven screens, typed provisional adapter, evidence graph, deterministic comparisons, individual action review, backend-required approval state, export and themes. Demonstrated with fixtures: dependency classifications, policies, safeguards and execution outcome. Awaiting backend: shared contracts, Jira/Confluence evidence, authorization, workflow enforcement, actual execution and AI. Verified against live services: none in this frontend session.
-
-Next: agree backend payloads and capability/error semantics; integrate read-only evidence with provenance; add server-authorized plan review and execution; verify iframe CSP and bridge behavior with CORE; test live workflows with owner-provided access. Current security and visual-review limitations are tracked in STATUS.md. Current official constraints are recorded in docs/ux/verified-requirements.md; eligibility and the final submission still require owner review.
-
+Before public use, replace local/mock demonstration segments only with actual authorized hosted observations. Do not claim a workflow transition was blocked, an optional integration was enabled, an action was executed, or a business impact was measured unless the corresponding evidence exists.

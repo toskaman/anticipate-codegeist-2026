@@ -1,6 +1,6 @@
 # CORE 0.2.0 frontend integration
 
-Status: VERIFIED_LOCAL wiring; hosted user-context/Jira validation is NOT VERIFIED. CORE branch 39b59df was merged without conflict as 9763165. No authored changes to manifest.yml, backend src/, packages/, root package files or Forge identity. No deployment and no real Jira write performed by EXPERIENCE.
+Status: VERIFIED_LOCAL wiring; hosted user-context/Jira validation is NOT VERIFIED. CORE branch 39b59df was first merged as 9763165; overnight additions through ea829ef are merged as ca2541d. No authored changes to manifest.yml, backend src/, packages/, root package files or Forge identity. No deployment and no real Jira write performed by EXPERIENCE.
 
 ## Authoritative boundary
 
@@ -43,18 +43,21 @@ Production always loads ForgeApp/CoreWorkspace. A development server inside a ho
 ## Verification evidence
 
 - Clean frontend npm ci --ignore-scripts passed with the local contracts package; TypeScript, ESLint, Prettier check, 42 frontend unit tests and Vite build passed.
-- 41 Playwright tests passed with one worker. Includes normal/lost execution responses, persisted uncertain requests after reload, empty execution records, failed writes, stale approvals, scenario invalidation, expired audit recovery, permission errors, JSON export contents, production isolation and the development iframe entry.
+- 48 Playwright tests passed with one worker. Includes normal/lost execution responses, persisted uncertain requests after reload, empty execution records, failed writes, stale approvals, scenario invalidation, expired audit recovery, permission errors, JSON export contents, production isolation and the development iframe entry.
 - 42 CORE screen/theme/viewport combinations (seven screens, light/dark, 1440/1024/390), axe WCAG-tagged checks and document overflow passed. Native PNGs and six derived contact sheets are under evidence/experience/core-integration. Contact-sheet visual review covered all six; mobile native graph was inspected for fit/readability. Canvas labels remain an overview; the accessible list is the readable alternative. No exhaustive assistive-technology or pixel-level claim.
 - Existing prototype screen matrix also passed; old benchmark evidence remains historical rather than being relabeled as hosted/core performance.
-- CORE typecheck plus 12 service/Rovo tests, 3 contract tests and 8 simulation tests passed after merge.
+- CORE typecheck plus 16 service/Rovo/adapter tests, 3 contract tests and 8 simulation tests passed after merge.
 - Production bundle inspection excludes authored fixture/test-harness markers. Build file hashes are recorded in evidence/experience/core-integration/build-manifest-LOCAL.json; build outputs are ignored by Git.
 
 ## Hosted gate and known limitations
 
 CORE supplies the development URL: https://one-atlas-euza.atlassian.net/apps/full-page/2ae8efdf-84b8-4851-a341-e4fa2499595c/hello-world/ . A read-only unauthenticated browser check redirected to https://id.atlassian.com/login. Native browser control failed during startup with a Windows CryptUnprotectData error. No authenticated user-context, hosted Bridge/CSP/theme/routing or real Jira outcome has been verified here. No colleague credentials or Forge CLI tokens were used or persisted.
 
-A CORE/owner development deployment of this frontend build and an authorized Atlassian browser session are required before claiming completion of hosted integration. AGENTS.md assigns deployment to CORE and says never deploy a Forge application here. Nothing was registered, installed, deployed or merged into main.
+CORE reports that d9d6109 was deployed to development as v4.3.0 at 02:10 UTC. This is not an authenticated EXPERIENCE verification. The owner deferred deployment of the newer overnight frontend follow-up; see CORE_NIGHT_FOLLOWUP.md. A reviewed current build and an authorized Atlassian browser session are required before claiming completion of hosted integration. AGENTS.md assigns deployment to CORE and says never deploy a Forge application here. Nothing was registered, installed, deployed or merged into main.
 
 Frontend npm audit: 20 advisories (13 moderate, 7 high), including inherited Zod 3 through the CORE package. Root audit observed 19 (15 moderate, 2 high, 2 critical). No forced upgrades or changes to CORE dependencies. Response preflight is a local mitigation only. Owners must review/remediate dependency risks before release. Current notices inventory: 24 direct packages, 162 runtime paths, 11 missing root-license texts, including the internal contracts package; custom Forge terms need owner review. No security/legal clearance is claimed.
 
 Still to verify on the deployed app: real project/change paging, host auth/permission denial, snapshot expiry, genuine A/B/C results and provenance, scenario-linked plans, selected approval audit, one explicitly authorized Jira action, status after a lost response, and the matching Passport/outcome. Optional Confluence/Rovo/AI states remain whatever capabilities reports. No unadvertised feature is portrayed as available.
+
+
+Latest read-error/pagination regression coverage and overnight integration details: [CORE night follow-up](CORE_NIGHT_FOLLOWUP.md).
