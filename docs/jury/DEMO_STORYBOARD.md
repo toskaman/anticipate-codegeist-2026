@@ -1,18 +1,34 @@
-# Three-minute demonstration plan — draft
+# Three-minute demonstration plan
 
-No video was recorded, published or submitted by this update. Current captures use MOCK TRANSPORT; preserve that label. The authored local prototype remains a separate fixture demonstration.
+No video has been recorded or submitted. Only film capabilities verified on the hosted site on recording day. Local captures are MOCK_TRANSPORT and must keep that label; never present them as hosted Jira execution.
 
-## Current local review
+## Setup (before recording)
 
-Show project/change selection, graph evidence and unknowns, actual-shaped comparison/plan responses, explicit approval versus execution, lost-response recovery and Passport export. State that the transport is controlled and makes no Atlassian call. The read-error captures in evidence/experience/core-night-followup show permission and rate-limit behavior, not genuine Jira failures.
+- Hosted dev or prod site with the latest deployed EXPERIENCE build (CORE deploys). Confirm the "Connected · live mode" badge.
+- A Jira project you may write to. Prepare sample data in advance (guided demo) or film it live: first-time creation takes about 15–20 s.
+- Browser window 1440×900, zoom 100 %, Light theme via Display & accessibility (best contrast on video). Hide bookmarks bar and notifications.
+- Rovo scene only if the Decision Reviewer is enabled on that site and answered in a dry run.
 
-## Future authenticated hosted recording
+## Scenes
 
-0:00–0:20: Select an authorized project/change; identify the actual issue, account context and snapshot.
-0:20–1:00: Inspect relationship provenance and unknown/access-limited evidence. Use the readable list on mobile; do not infer confidence or per-edge freshness that CORE did not supply.
-1:00–1:40: Compare A/B; select an actual replacement if C is appropriate. Explain the returned verdict, impacts and remaining uncertainty. Recommendation is not approval.
-1:40–2:10: Generate the chosen scenario's plan and review targets, payloads, permissions, verification rules and plan hash.
-2:10–2:40: Only with explicit authorization for those exact Jira actions, approve selected IDs and separately execute. Inspect actual status; report failure/partial/submitted states honestly. Otherwise cancel and state that no execution was performed.
-2:40–3:00: Open the matching Passport and export it. Show the real approval/execution records or their absence, plus unresolved unknowns.
+| Time | Screen | Action | Caption (on screen) |
+| --- | --- | --- | --- |
+| 0:00–0:20 | Mission Control | Show the hero and "Try the guided demo" | "Retiring or upgrading something in Jira? See what breaks before you change it." |
+| 0:20–0:40 | Mission Control → Evidence Graph | Choose project + sample root, Analyze | "Dependencies read from real Jira links, with their source." |
+| 0:40–1:05 | Evidence Graph | Select the inferred and unknown records; open a source link | "Confirmed, inferred and unknown are never mixed up." |
+| 1:05–1:30 | Scenario Lab | Compare remove / retain / migrate (or Upgrade a dependency if the site advertises it) | "Same evidence, three possible changes, deterministic results." |
+| 1:30–1:55 | Decision Firewall | Open the blocked option: reason chain + remaining uncertainty | "Policy blocks the unsafe option and says exactly why." |
+| 1:55–2:15 | Prevention Plan | Select actions → Approve → separately Execute → statuses read back | "Approval and execution are two human steps. Results are verified by reading Jira back." |
+| 2:15–2:35 | Prevention Plan | Only if prepared: change a Jira link, show EVIDENCE_CHANGED refusal | "Evidence changed, so the old approval no longer counts." |
+| 2:35–2:50 | Prevention Passport | Scroll the record, export JSON/print | "A verified decision record, not a compliance certificate." |
+| 2:50–3:00 | Rovo Chat (optional) / Settings | Ask the Decision Reviewer about the same issue, or show the Rovo panel | "Read-only in Rovo. People stay accountable for every write." |
 
-CORE owns Forge deployments. The owner deferred deploying the newer follow-up. CORE's earlier v4.3.0 deployment report does not establish authenticated user-context validation. Workflow validation and other optional capabilities must not be claimed until implemented and verified. No external submission is authorized by this draft.
+## Checklist
+
+- [ ] Every scene re-run once on the hosted site the same day.
+- [ ] No fabricated metrics, logos, testimonials or savings.
+- [ ] Execution scene performed only with explicit authorization for those exact Jira actions; otherwise show approval and stop.
+- [ ] Captions match what is on screen; no "AI decides" wording.
+- [ ] Video under three minutes; English.
+
+Still capture candidates (MOCK_TRANSPORT, for review only): `evidence/experience/v3-redesign/visual/` 01–12 and `evidence/experience/v4-ux/`.

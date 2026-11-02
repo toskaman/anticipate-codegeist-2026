@@ -32,3 +32,10 @@ Goal: a judge on a blank site gets a working demo in a few clicks.
 - `createSampleProject({ projectKey, confirm: true })` → same shape with statuses CREATED / EXISTS / FAILED, verified by re-reading Jira. Idempotent (safe to click twice). Never modifies existing issues. Errors: PERMISSION_DENIED (lists missing Jira permissions), VALIDATION.
 - Suggested flow: Mission Control empty state ("No projects/candidates") → "Prepare sample data" → choose project → show preview list → explicit confirm button → result → button "Analyze <rootIssueKey>" (prefill root key, and replacement = replacementIssueKey for scenario C).
 - Data is labelled `anticipate-sample` + `anticipate-sample-<role>`; root issue also `anticipate-change`, so it appears in change candidates.
+
+
+## EXPERIENCE → CORE requests (v4 UX pass, 2 Nov 2026)
+Details and context: `docs/design/UX_AUDIT_V4.md`. No CORE file was changed by EXPERIENCE.
+- **R1 — Upgrade capability signal.** Please add the string `scenario:UPGRADE_NODE` to `OPERATION_NAMES` (`src/engine/service.ts`) once `compareScenarios` + `generatePreventionPlan` accept `UPGRADE_NODE` scenarios on the deployed backend. The UI already sends exactly `upgradeScenarios()` (parity unit test) but keeps "Upgrade a dependency" disabled until this signal is present. Purely additive; contract version unchanged.
+- **R2 — Real Rovo/MCP availability.** `getCapabilities` hard-codes `rovoAgent` and `rovoMcp` as `NOT_CONFIGURED`, but EVIDENCE_PACK records a verified Rovo chat on dev 4.19.0. If availability can be determined, report it; otherwise keep NOT_CONFIGURED (the UI shows backend truth either way).
+- **R3 — Hosted acceptance.** After deploying `main`: Mission Control guided demo + "Start demo" button, Display & accessibility menu (theme override inside the Jira iframe), Scenario Lab change-kind picker (upgrade disabled until R1).

@@ -27,3 +27,27 @@ it("compares A/B without inventing a replacement and creates C only for a select
     "distinct replacement",
   );
 });
+
+it("sends exactly CORE's dependency-upgrade scenarios when the user chooses an upgrade", async () => {
+  // Read-only parity check against the CORE scenario builder.
+  const { upgradeScenarios, standardScenarios } =
+    await import("../../../src/engine/scenarios");
+  const upgrade = simulationRequest(graph, "ABC-1", "issue:ABC-3", "upgrade");
+  expect(upgrade.scenarios).toEqual(
+    upgradeScenarios("issue:ABC-1", "issue:ABC-3"),
+  );
+  expect(upgrade.change.description).toBe("Review dependency upgrade of ABC-1");
+  expect(
+    simulationRequest(graph, "ABC-1", "", "upgrade").scenarios.map(
+      (s) => s.scenarioId,
+    ),
+  ).toEqual(["A-breaking-upgrade-now", "B-compatible-upgrade"]);
+  // Retirement remains the default and keeps CORE's operations.
+  expect(
+    simulationRequest(graph, "ABC-1", "issue:ABC-3").scenarios.map(
+      (s) => s.operations,
+    ),
+  ).toEqual(
+    standardScenarios("issue:ABC-1", "issue:ABC-3").map((s) => s.operations),
+  );
+});

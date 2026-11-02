@@ -12,6 +12,8 @@ import {
 } from "../components/ui";
 import type { Workflow } from "../app/useCoreWorkflow";
 import {
+  changeKindCopy,
+  scenarioOrder,
   evidenceCopy,
   nodeKindCopy,
   plural,
@@ -21,7 +23,52 @@ import {
   type EvidenceStatus,
 } from "../app/copy";
 
-const order = ["A-remove-now", "B-retain-temporarily", "C-migrate-then-retire"];
+const uncertaintyReason: Record<string, string> = {
+  UNKNOWN_EDGE: "Unknown relationship",
+  INFERRED_ONLY: "Inferred only",
+  ACCESS_LIMITED: "Not readable",
+  TRUNCATED: "Outside analysis limits",
+  MISSING_TEST_EVIDENCE: "No verified test",
+};
+
+function ChangeKindPicker({ w }: { w: Workflow }) {
+  const kinds = ["retire", "upgrade"] as const;
+  return (
+    <fieldset className="ax-kind" disabled={!!w.busy}>
+      <legend>What kind of change are you planning?</legend>
+      <div className="ax-kind__options">
+        {kinds.map((k) => {
+          const copy = changeKindCopy[k];
+          const unavailable = k === "upgrade" && !w.upgradeSupported;
+          return (
+            <label
+              key={k}
+              className={`ax-kind__option ${w.changeKind === k ? "is-selected" : ""} ${unavailable ? "is-unavailable" : ""}`}
+            >
+              <input
+                type="radio"
+                name="change-kind"
+                value={k}
+                checked={w.changeKind === k}
+                disabled={unavailable}
+                aria-describedby={`kind-${k}-text`}
+                onChange={() => w.actions.chooseChangeKind(k)}
+              />
+              <span className="ax-kind__body">
+                <strong>{copy.title}</strong>
+                <span id={`kind-${k}-text`}>
+                  {unavailable
+                    ? "Not offered by this backend yet. Retirement comparison stays available."
+                    : copy.text}
+                </span>
+              </span>
+            </label>
+          );
+        })}
+      </div>
+    </fieldset>
+  );
+}
 
 function MetricRow({ r }: { r: SimulationResult }) {
   const s = r.summary;
@@ -57,11 +104,12 @@ export default function ScenarioLab({ w }: { w: Workflow }) {
   const results = c
     ? [...c.results].sort(
         (a, b) =>
-          (order.indexOf(a.scenarioId) + 1 || 99) -
-          (order.indexOf(b.scenarioId) + 1 || 99),
+          (scenarioOrder.indexOf(a.scenarioId) + 1 || 99) -
+          (scenarioOrder.indexOf(b.scenarioId) + 1 || 99),
       )
     : [];
-  const missingC = c && !c.results.some((r) => r.scenarioId === order[2]);
+  const missingC = c && !c.results.some((r) => r.scenarioId.startsWith("C-"));
+  const kind = changeKindCopy[w.changeKind];
   const selected = w.currentResult;
   return (
     <>
@@ -69,7 +117,7 @@ export default function ScenarioLab({ w }: { w: Workflow }) {
         step="Step 3 of 6 · Compare options"
         icon="scenarios"
         title="Scenario Lab"
-        lead="Three ways to make the change, simulated on the same snapshot. Deterministic, read-only, and reproducible."
+        lead="Compare up to three ways to make the change, simulated on the same dependency analysis. Deterministic, read-only and reproducible: nothing changes in Jira."
         actions={
           selected && (
             <button
@@ -104,18 +152,12 @@ export default function ScenarioLab({ w }: { w: Workflow }) {
             <Panel
               title="Set up the comparison"
               id="setup-title"
-              description={
-                <>
-                  <strong>A</strong> removes the change target now.{" "}
-                  <strong>B</strong> deprecates it and keeps it for now.{" "}
-                  <strong>C</strong> migrates its users to a replacement you
-                  choose, then removes it.
-                </>
-              }
+              description={kind.setup}
             >
+              <ChangeKindPicker w={w} />
               <div className="ax-setup">
                 <div className="ax-setup__field">
-                  <label htmlFor="replacement">Replacement for option C</label>
+                  <label htmlFor="replacement">{kind.replacementLabel}</label>
                   <select
                     id="replacement"
                     disabled={!!w.busy}
@@ -124,9 +166,7 @@ export default function ScenarioLab({ w }: { w: Workflow }) {
                       w.actions.chooseReplacement(e.target.value)
                     }
                   >
-                    <option value="">
-                      No replacement — compare A and B only
-                    </option>
+                    <option value="">{kind.noReplacement}</option>
                     {replacementOptions.map((n) => (
                       <option key={n.id} value={n.id}>
                         {n.label} ({nodeKindCopy[n.kind] ?? n.kind},{" "}
@@ -256,11 +296,35 @@ export default function ScenarioLab({ w }: { w: Workflow }) {
                       </div>
                       <div className="ax-scenario__section">
                         <p className="ax-scenario__k">Open questions</p>
-                        <p className="ax-small">
-                          {r.uncertainties.length
-                            ? `${plural(r.uncertainties.length, "uncertainty", "uncertainties")} ${r.uncertainties.length === 1 ? "remains" : "remain"}.`
-                            : "None reported by this simulation."}
-                        </p>
+                        {r.uncertainties.length ? (
+                          <ul className="ax-open-questions">
+                            {r.uncertainties.slice(0, 3).map((u, i) => (
+                              <li key={i}>
+                                <Badge tone="warning" size="sm" icon={null}>
+                                  {uncertaintyReason[u.reason] ?? u.reason}
+                                </Badge>
+                                <span>
+                                  {u.nodeId
+                                    ? nodeLabel(u.nodeId)
+                                    : u.explanation}
+                                </span>
+                              </li>
+                            ))}
+                            {r.uncertainties.length > 3 && (
+                              <li className="ax-muted">
+                                {plural(
+                                  r.uncertainties.length - 3,
+                                  "more open question",
+                                )}{" "}
+                                on Decision Firewall.
+                              </li>
+                            )}
+                          </ul>
+                        ) : (
+                          <p className="ax-small">
+                            None reported by this simulation.
+                          </p>
+                        )}
                         {diff &&
                           (diff.onlyImpacted.length > 0 ||
                             diff.onlyViolatedRules.length > 0) && (
@@ -313,11 +377,18 @@ export default function ScenarioLab({ w }: { w: Workflow }) {
                       <span className="ax-scenario__letter" aria-hidden="true">
                         C
                       </span>
-                      <span className="ax-scenario__title">Migrate first</span>
+                      <span className="ax-scenario__title">
+                        {w.changeKind === "upgrade"
+                          ? "Move consumers first"
+                          : "Migrate first"}
+                      </span>
                     </span>
                     <p className="ax-scenario__does">
-                      Not compared. Choose a replacement above and compare again
-                      to include this option.
+                      Not compared. Choose{" "}
+                      {w.changeKind === "upgrade"
+                        ? "a new-version record"
+                        : "a replacement"}{" "}
+                      above and compare again to include this option.
                     </p>
                   </article>
                 )}
@@ -353,7 +424,11 @@ export default function ScenarioLab({ w }: { w: Workflow }) {
                             {nodeLabel(i.nodeId)}
                           </span>
                           <span className="ax-impacts__meta">
-                            {plural(i.depth, "hop")} · weakest evidence{" "}
+                            {i.direct
+                              ? "Uses the changed record directly"
+                              : "Affected through another record"}{" "}
+                            · {plural(i.depth, "hop")} from{" "}
+                            {w.rootIssueKey || "the change"} · weakest evidence{" "}
                             {evidenceCopy[
                               i.weakestStatus as EvidenceStatus
                             ].label.toLowerCase()}
