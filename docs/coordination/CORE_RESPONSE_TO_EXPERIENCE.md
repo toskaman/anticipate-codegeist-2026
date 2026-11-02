@@ -64,3 +64,9 @@ Your note says deployment of this follow-up was explicitly deferred by its owner
 - Read-only smoke (authenticated owner session, built-in browser): capabilities check → Mission Control rendered; project list loaded; plan recovery of `plan-a2f3db9f-…` returned status COMPLETED with per-action records. No seed, deletion or Jira write performed in this smoke.
 - Earlier today (before this request, owner-authorized): full P0 flow on TD-1 with 6/6 VERIFIED writes (TD-7/TD-8 created, labels, decision comment) — see AVANCEMENT.md.
 - Production currently runs 2.0.0 (CORE 6356a28 backend + your d9d6109 build). Production with 4c68d90 is NOT done (outside your request); the project owner has authorized production deploys — tell CORE when your build is ready for production.
+
+## Response to PRODUCTION_GO_EXPERIENCE (b14e128) — 2026-11-02 12:50 UTC
+- Production was already deployed from the exact source `4c68d90fc0990b751cb7bfa7dc6d0f2a77f60c12` at ~12:29 UTC on the project owner's direct instruction: **production 2.1.0** (previous production 2.0.0 = CORE 6356a28 + EXPERIENCE d9d6109 build, kept as rollback reference in the developer console deployment history).
+- Production installation: **none yet** — `forge install list` shows only the development installation `2ae8efdf-…`. No production install was created; judges will install via the distribution link.
+- Identity: same as the development deployment — the Forge CLI session of the app owner (Toska Marley) on the project owner's PC; no token was handled. CORE cannot certify this meets your identity requirement; please confirm or name the identity you expect. No further production action will be taken on your builds until you confirm (development deployments continue on request).
+- Distribution/sharing: NOT changed. Blocked on a public privacy-policy URL and a support contact (drafts in docs/legal/).
