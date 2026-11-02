@@ -2,7 +2,7 @@
   "workstream": "EXPERIENCE",
   "branch": "feat/product-experience",
   "revisionBase": "4c68d90fc0990b751cb7bfa7dc6d0f2a77f60c12",
-  "revisionScope": "Runtime candidate unchanged; CORE documentation merged through 36203cd; owner approved Toska Marley identity and delegated public publisher/support details to CORE",
+  "revisionScope": "Runtime candidate unchanged; CORE documentation merged through 36203cd; owner approved the existing app owner identity and delegated public publisher/support details to CORE",
   "contractVersion": "0.2.0",
   "status": "VERIFIED_LOCAL_READY_FOR_HOSTED_VALIDATION",
   "tests": {
@@ -18,7 +18,7 @@
     "format": "PASS",
     "build": "PASS"
   },
-  "forgeVerification": "CORE_REPORTED_PRODUCTION_2.1.0; TOSKA_MARLEY_AUTHORIZED_BY_REQUESTER; PRODUCTION_INSTALLATION_NOT_VERIFIED_BY_EXPERIENCE",
+  "forgeVerification": "CORE_REPORTED_PRODUCTION_2.1.0; EXISTING_APP_OWNER_AUTHORIZED_BY_REQUESTER; PRODUCTION_INSTALLATION_NOT_VERIFIED_BY_EXPERIENCE",
   "evidenceMode": "MOCK_TRANSPORT/LOCAL only; no real Jira action performed",
   "next": [
     "CORE owns public publisher name, support contact and privacy policy publication, as explicitly delegated by requester",
@@ -50,7 +50,7 @@
       "reportCommit": "37de9c4",
       "readOnlySmoke": "CORE reported capabilities, project listing and completed-plan recovery OK"
     },
-    "credentialPolicy": "Requester explicitly authorized Toska Marley in this chat on 2026-11-02. CORE may use that existing authorized Forge session for this app. No token is supplied, copied or stored; EXPERIENCE does not deploy.",
+    "credentialPolicy": "Requester explicitly authorized the existing app owner in this chat on 2026-11-02. CORE may use that existing authorized Forge session for this app. No token is supplied, copied or stored; EXPERIENCE does not deploy.",
     "constraints": [
       "Existing app and verified existing production installation only",
       "No app creation, registration, sharing/distribution or scope changes",
@@ -68,7 +68,7 @@
     ],
     "reportedVersion": "2.1.0",
     "reportCommit": "10d75bb",
-    "identityPolicyFulfilment": "REQUESTER_APPROVED_TOSKA_MARLEY; CORE reports using that identity",
+    "identityPolicyFulfilment": "REQUESTER_APPROVED_EXISTING_APP_OWNER; CORE reports using that identity",
     "productionInstallation": "CORE reported none at 12:50 UTC; later distribution availability does not establish an installed production site"
   },
   "developmentDeployment": {
@@ -113,7 +113,7 @@
     ],
     "reportedVersion": "4.8.0",
     "reportCommit": "37de9c4",
-    "identityPolicyFulfilment": "REQUESTER_NOW_EXPLICITLY_APPROVED_TOSKA_MARLEY"
+    "identityPolicyFulfilment": "REQUESTER_NOW_EXPLICITLY_APPROVED_EXISTING_APP_OWNER"
   },
   "publicDistribution": {
     "status": "SHARING_AND_INSTALL_LINK_REPORTED_BY_CORE",
