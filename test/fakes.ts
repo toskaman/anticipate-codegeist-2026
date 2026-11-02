@@ -35,7 +35,9 @@ export class FakeJira implements JiraPort {
   async searchProjects() { return { items: [{ id: '10000', key: 'PAY', name: 'Payments', issueCount: this.issues.size }], isLast: true }; }
   async searchIssues(jql: string) {
     const m = /labels = "([^"]+)"/.exec(jql);
-    const items = [...this.issues.values()].filter((i) => !m || i.labels.includes(m[1]!)).map((i) => this.view(i));
+    const inList = /labels in \(([^)]*)\)/.exec(jql);
+    const wanted = inList ? [...inList[1]!.matchAll(/"([^"]+)"/g)].map((x) => x[1]!) : null;
+    const items = [...this.issues.values()].filter((i) => (wanted ? i.labels.some((l) => wanted.includes(l)) : !m || i.labels.includes(m[1]!))).map((i) => this.view(i));
     return { items, nextPageToken: null };
   }
   async getIssue(key: string): Promise<IssueFetch> {
@@ -47,7 +49,7 @@ export class FakeJira implements JiraPort {
   async createIssue(i: { projectKey: string; summary: string; labels: string[] }) {
     this.writes.create++; const key = `${i.projectKey}-${this.seq++}`; this.add(key, i.summary, { labels: i.labels }); return { key };
   }
-  async createLink(i: { typeName: string; inwardKey: string; outwardKey: string }) { this.writes.link++; this.link(i.typeName, 'blocks', 'is blocked by', i.outwardKey, i.inwardKey); }
+  async createLink(i: { typeName: string; inwardKey: string; outwardKey: string }) { this.writes.link++; const rel = i.typeName === 'Relates'; this.link(i.typeName, rel ? 'relates to' : 'blocks', rel ? 'relates to' : 'is blocked by', i.outwardKey, i.inwardKey); }
   async addComment(k: string, t: string) {
     this.writes.comment++;
     if (this.failNextComment) { this.failNextComment = false; throw new Error('HTTP 503'); }

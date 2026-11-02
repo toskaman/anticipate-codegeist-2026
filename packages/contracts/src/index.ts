@@ -5,7 +5,9 @@
  */
 import { z } from 'zod';
 
+/** Wire version stays 0.2.0: the EXPERIENCE client pins it exactly. 0.3 additions are additive and listed in CONTRACT_FEATURES. */
 export const CONTRACT_VERSION = '0.2.0';
+export const CONTRACT_FEATURES = ['continuous-decision-safety', 'sample-project'] as const;
 
 // ---------- primitives ----------
 export const Id = z.string().min(1).max(200);
@@ -19,7 +21,7 @@ export const DataMode = z.enum(['LIVE', 'DEMO_FIXTURE']);
 export type DataMode = z.infer<typeof DataMode>;
 
 export const ErrorCode = z.enum([
-  'PERMISSION_DENIED', 'NOT_FOUND', 'VALIDATION', 'SNAPSHOT_EXPIRED', 'STALE_APPROVAL', 'CONFLICT',
+  'EVIDENCE_CHANGED', 'PERMISSION_DENIED', 'NOT_FOUND', 'VALIDATION', 'SNAPSHOT_EXPIRED', 'STALE_APPROVAL', 'CONFLICT',
   'RATE_LIMITED', 'UPSTREAM_UNAVAILABLE', 'UNSUPPORTED', 'TIMEOUT', 'BUDGET_EXCEEDED', 'INTERNAL'
 ]);
 export type ErrorCode = z.infer<typeof ErrorCode>;
@@ -178,7 +180,7 @@ export const ProposedAction = z.object({
 export type ProposedAction = z.infer<typeof ProposedAction>;
 
 export const PreventionPlan = z.object({
-  planId: Id, snapshotId: Id, scenarioId: Id, createdAt: IsoDate, status: z.enum(['DRAFT', 'PENDING_APPROVAL', 'APPROVED', 'EXECUTING', 'COMPLETED', 'PARTIAL', 'FAILED', 'EXPIRED']),
+  planId: Id, snapshotId: Id, scenarioId: Id, createdAt: IsoDate, status: z.enum(['DRAFT', 'PENDING_APPROVAL', 'APPROVED', 'EXECUTING', 'COMPLETED', 'PARTIAL', 'FAILED', 'EXPIRED', 'EVIDENCE_CHANGED']),
   actions: z.array(ProposedAction).max(50), planHash: z.string()
 });
 export type PreventionPlan = z.infer<typeof PreventionPlan>;
@@ -205,6 +207,28 @@ export const PreventionPassport = z.object({
 });
 export type PreventionPassport = z.infer<typeof PreventionPassport>;
 
+// ---------- continuous decision safety ----------
+/** Structural difference between the evidence a plan was built on and the live Jira evidence now. */
+export const EvidenceDrift = z.object({
+  planId: Id, snapshotId: Id, checkedAt: IsoDate, fresh: z.boolean(),
+  addedEdges: z.array(z.object({ from: Id, to: Id, kind: EdgeKind, status: EvidenceStatus })).max(500),
+  removedEdges: z.array(z.object({ from: Id, to: Id, kind: EdgeKind, status: EvidenceStatus })).max(500),
+  becameUnknown: z.array(Id).max(500),
+  ignoredPlanArtifacts: z.array(z.string()).max(100), // issues created by this plan's own verified actions
+  reason: z.string().max(1000)
+});
+export type EvidenceDrift = z.infer<typeof EvidenceDrift>;
+
+// ---------- judge sample project ----------
+export const SampleItem = z.object({ role: z.string(), summary: z.string(), issueKey: z.string().nullable(), status: z.enum(['TO_CREATE', 'EXISTS', 'CREATED', 'FAILED']) });
+export const SampleLink = z.object({ from: z.string(), relation: z.literal('blocks'), to: z.string(), status: z.enum(['TO_CREATE', 'EXISTS', 'CREATED', 'FAILED']) });
+export const SampleProjectPlan = z.object({
+  projectKey: z.string(), issueType: z.string().nullable(), canCreate: z.boolean(), missingPermissions: z.array(z.string()),
+  items: z.array(SampleItem).max(10), links: z.array(SampleLink).max(10),
+  rootIssueKey: z.string().nullable(), replacementIssueKey: z.string().nullable(), note: z.string()
+});
+export type SampleProjectPlan = z.infer<typeof SampleProjectPlan>;
+
 // ---------- operation catalogue ----------
 export const OPERATIONS = {
   getCapabilities: { input: z.object({}), output: CapabilityAvailability },
@@ -219,6 +243,9 @@ export const OPERATIONS = {
   executeApprovedPlan: { input: z.object({ planId: Id, idempotencyKey: z.string().min(16).max(100) }), output: z.array(ExecutionRecord) },
   getExecutionStatus: { input: z.object({ planId: Id }), output: z.array(ExecutionRecord) },
   getPreventionPassport: { input: z.object({ planId: Id }), output: PreventionPassport },
-  getPolicies: { input: z.object({}), output: z.array(PolicyRule) }
+  getPolicies: { input: z.object({}), output: z.array(PolicyRule) },
+  checkPlanFreshness: { input: z.object({ planId: Id }), output: EvidenceDrift },
+  previewSampleProject: { input: z.object({ projectKey: z.string().regex(/^[A-Z][A-Z0-9_]+$/) }), output: SampleProjectPlan },
+  createSampleProject: { input: z.object({ projectKey: z.string().regex(/^[A-Z][A-Z0-9_]+$/), confirm: z.literal(true) }), output: SampleProjectPlan }
 } as const;
 export type OperationName = keyof typeof OPERATIONS;
