@@ -1055,6 +1055,11 @@ body:has(.ax-app) {
   font-weight: 560;
   overflow-wrap: anywhere;
 }
+/* Issue keys in tables stay on one line ("AVT-4", never "AV / T-4"). */
+.ax-table .ax-source-link {
+  overflow-wrap: normal;
+  white-space: nowrap;
+}
 .ax-spinner {
   width: 15px;
   height: 15px;
@@ -3398,6 +3403,20 @@ body:has(.ax-app) {
     font-size: 8pt;
     color: #3e4a57;
     overflow-wrap: anywhere;
+  }
+  /* In tables the issue key is enough; the full URL squeezed the column
+     (seen in a hosted dev print). */
+  .ax-table .ax-source-link::after {
+    content: none;
+  }
+  /* Keep the closing section and footer together: no orphaned last page. */
+  .ax-report__section:last-of-type,
+  .ax-report__footer {
+    break-inside: avoid;
+  }
+  .ax-report__footer {
+    break-before: avoid;
+    page-break-before: avoid;
   }
   .ax-app *,
   .ax-app *::before {

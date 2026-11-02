@@ -81,3 +81,10 @@ Local MOCK_TRANSPORT reading (dev server, Chromium, not a hosted measurement): f
 **Startup.** LIVE_FORGE timings (`evidence/experience/v4-ux/startup-timings-LIVE_FORGE.json`) showed `getCapabilities` then `listProjects` running one after the other (2.6–3.8 s on a cold start). They now start together; the listing is read-only and is discarded unless capabilities confirm Jira read. Expected saving per CORE: about 0.5–1.7 s. Not yet re-measured on the hosted site. The pagination test now gives the unavailable case a non-empty listing, proving it is discarded rather than relying on the call not happening.
 
 **Passport print, tested directly** (CORE could not click Print in its test browser). New test clicks "Print or save as PDF" (browser print stubbed, called once) with stored preferences dark + larger text + high contrast, then prints to PDF (`v4-ux/passport-print-dark-larger-high-contrast-MOCK_TRANSPORT.pdf`). **Defect found and fixed:** the high-contrast dark tokens and simplified-style rules from the display menu out-ranked the print palette, so the report printed as dark surfaces (near-unreadable). Those preference rules are now screen-only; print always uses the paper palette. The test asserts no dark surface larger than a marker anywhere in the printed report. Still not run: the real browser print dialog inside the Jira iframe.
+
+## 9. Hosted print review (LIVE_FORGE, dev, 2 Nov 2026)
+
+CORE printed a real Passport (AVT-3, 4 verified actions) from the dev site with "Print or save as PDF" (Microsoft Print to PDF, A4, 3 pages). Content was complete and readable. Two layout defects, invisible locally because test records had no Jira URL:
+- Execution receipt "Jira record" column printed the full Jira URL after each key, so keys broke ("AV / T-4") and URLs wrapped over several lines. Fixed: no URL suffix inside tables in print; issue keys never wrap in tables.
+- Page 3 held only the report footer. Fixed: footer and the closing Limitations section stay together.
+Test fixture now carries Jira URLs; the print test fails without these fixes (verified) and passes with them. Re-check on dev after deploy.

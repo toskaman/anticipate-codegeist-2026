@@ -29,7 +29,11 @@ const executions: ExecutionRecord[] = longPlan.actions.map((a, i) => ({
   status: "VERIFIED",
   attempt: 1,
   idempotencyKey: `idem-${i + 1}`,
-  resultRef: { issueKey: a.targetIssueKey, url: null },
+  // Hosted records carry the Jira URL (as in the dev-site print).
+  resultRef: {
+    issueKey: a.targetIssueKey,
+    url: `https://example.invalid/browse/${a.targetIssueKey}`,
+  },
   error: null,
   updatedAt: meta.generatedAt,
 }));
@@ -89,6 +93,8 @@ for (const theme of ["light", "dark"] as const)
     for (let i = 1; i <= ACTIONS; i++) expect(text).toContain(`ABC-${i}`);
     const overflow = await page.evaluate(() =>
       [...document.querySelectorAll<HTMLElement>(".ax-report *")]
+        // Screen-reader-only text is clipped to 1 px by design.
+        .filter((el) => !el.classList.contains("ax-sr"))
         .filter((el) => el.scrollWidth > el.clientWidth + 1)
         .filter((el) => getComputedStyle(el).overflowX !== "visible")
         .map((el) => el.className),
@@ -110,6 +116,26 @@ for (const theme of ["light", "dark"] as const)
     // top of the printed document so it cannot cover report content.
     await page.addStyleTag({
       content: "#root > p[role=status] { position: static !important; }",
+    });
+    // Issue keys in the receipt stay on one line and no URL is appended
+    // inside the table; the footer stays with the last section.
+    const receipt = await page.evaluate(() => {
+      const link = document.querySelector<HTMLElement>(
+        ".ax-report .ax-table .ax-source-link",
+      )!;
+      const lineHeight = parseFloat(getComputedStyle(link).lineHeight) || 20;
+      return {
+        oneLine: link.getBoundingClientRect().height < lineHeight * 1.6,
+        after: getComputedStyle(link, "::after").content,
+        footerBreak: getComputedStyle(
+          document.querySelector(".ax-report__footer")!,
+        ).breakBefore,
+      };
+    });
+    expect(receipt).toEqual({
+      oneLine: true,
+      after: "none",
+      footerBreak: "avoid",
     });
     // Real paginated output (Chromium print engine).
     const pdf = await page.pdf({
