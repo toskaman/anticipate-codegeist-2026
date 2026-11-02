@@ -1,0 +1,30 @@
+ANTICIPATE - Proprietary License (source available)
+
+Copyright (c) 2026 the ANTICIPATE team (GitHub: toskaman). All rights reserved.
+
+This repository is published so that it can be viewed and evaluated, including by
+the judges and organizers of Atlassian Codegeist 2026 and Devpost. It is NOT open
+source.
+
+Permitted without further permission:
+  1. Viewing and reading the source code.
+  2. Installing and running the app through the installation link provided by the
+     ANTICIPATE team, for evaluation or judging.
+  3. The rights the Codegeist 2026 official rules grant to the Sponsor and Devpost
+     (use for judging and promotion of the submission). Nothing in this license
+     limits those rights.
+
+Not permitted without prior written permission from the copyright holders:
+  copying, modifying, merging, publishing, distributing, sublicensing, selling,
+  hosting as a service, or creating derivative works of this code, in whole or
+  in part.
+
+Third-party components keep their own licenses (see THIRD_PARTY_NOTICES.txt in
+the built app and the package manifests). This license applies only to code
+written by the ANTICIPATE team.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND. IN NO EVENT SHALL
+THE COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY ARISING
+FROM THE SOFTWARE OR ITS USE.
+
+Licensing or commercial enquiries: info@lepcpro.fr

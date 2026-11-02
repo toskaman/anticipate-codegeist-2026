@@ -3,7 +3,7 @@
   "description": "ANTICIPATE — The Decision Firewall for Software Teams (Forge backend + Custom UI)",
   "version": "0.2.0",
   "main": "index.js",
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE",
   "private": true,
   "scripts": {
     "typecheck": "tsc --noEmit",
