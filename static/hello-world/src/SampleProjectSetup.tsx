@@ -2,10 +2,27 @@ import React, { useEffect, useRef, useState } from "react";
 import type { SampleProjectPlan } from "@anticipate/contracts";
 import { CoreClientError, ForgeClient } from "./api/ForgeClient";
 import DecisionDialog from "./components/DecisionDialog";
-import { Panel } from "./components/ui";
+import { Badge, Panel } from "./components/ui";
+import Icon from "./components/Icon";
 import CoreOperationError, {
   type OperationFailure,
 } from "./CoreOperationError";
+
+const sampleStatus = {
+  TO_CREATE: { tone: "neutral", label: "Will be created" },
+  EXISTS: { tone: "info", label: "Already in Jira · reused" },
+  CREATED: { tone: "success", label: "Created · verified in Jira" },
+  FAILED: { tone: "danger", label: "Failed" },
+} as const;
+
+function SampleStatus({ status }: { status: keyof typeof sampleStatus }) {
+  const s = sampleStatus[status];
+  return (
+    <Badge tone={s.tone} size="sm">
+      {s.label}
+    </Badge>
+  );
+}
 
 export default function SampleProjectSetup({
   client,
@@ -175,7 +192,7 @@ export default function SampleProjectSetup({
             )}
             <button
               id="sample-preview"
-              className="ax-btn ax-btn--primary"
+              className={`ax-btn ${result ? "" : "ax-btn--primary"}`}
               disabled={busy || !projectKey || !canPreview}
               onClick={() => void run(false)}
             >
@@ -195,80 +212,125 @@ export default function SampleProjectSetup({
                 onDismiss={() => setFailure(null)}
               />
             )}
-            {result && (
-              <>
-                <h3>Sample data in {result.projectKey}</h3>
-                <p>{result.note}</p>
-                <p>
-                  Labels: anticipate-sample and anticipate-sample-&lt;role&gt;.
-                  Sample tickets remain in Jira; no automatic deletion is
-                  performed.
-                </p>
-                {!!result.missingPermissions.length && (
-                  <p role="alert">
-                    Missing Jira permissions:{" "}
-                    {result.missingPermissions.join(", ")}
-                  </p>
-                )}
-                {!result.issueType && (
-                  <p role="alert">No usable Jira issue type is available.</p>
-                )}
-                <ul>
-                  {result.items.map((item) => (
-                    <li key={item.role}>
-                      {item.summary} · {item.issueKey ?? item.role} ·{" "}
-                      {item.status}
-                    </li>
-                  ))}
-                </ul>
-                <h3>Proposed / reported relations</h3>
-                <ul>
-                  {result.links.map((link, index) => (
-                    <li key={index}>
-                      {link.from} → {link.to} · {link.relation} · {link.status}
-                    </li>
-                  ))}
-                </ul>
-                <p>
-                  Relation labels above are returned by CORE. Preview is not
-                  proof of a completed write.
-                </p>
-                {result.items.some((item) => item.status === "FAILED") ||
-                result.links.some((link) => link.status === "FAILED") ? (
-                  <p role="alert">
-                    Some sample items or relations failed. Review the reported
-                    results and preview again before creating missing sample
-                    data.
-                  </p>
-                ) : null}
-                <button
-                  className="ax-btn"
-                  disabled={
-                    busy || !previewed || !result.canCreate || !canCreate
-                  }
-                  onClick={() => setConfirmed(true)}
-                >
-                  Create missing sample data in Jira
-                </button>
-                {!canCreate && (
-                  <p>Sample creation is unavailable for this installation.</p>
-                )}
-                <button
-                  className="ax-btn"
-                  disabled={busy || !result.rootIssueKey}
-                  onClick={() =>
-                    result.rootIssueKey &&
-                    onAnalyze(result.rootIssueKey, result.replacementIssueKey)
-                  }
-                >
-                  Analyze {result.rootIssueKey ?? "sample root"}
-                </button>
-                <p>
-                  Analysis uses real Jira evidence. A reported root can be
-                  analyzed even if other sample items failed.
-                </p>
-              </>
-            )}
+            {result &&
+              (() => {
+                const missing =
+                  result.items.some((i) => i.status === "TO_CREATE") ||
+                  result.links.some((l) => l.status === "TO_CREATE");
+                const failed =
+                  result.items.some((i) => i.status === "FAILED") ||
+                  result.links.some((l) => l.status === "FAILED");
+                const ready = !!result.rootIssueKey && !missing;
+                const analyze = (
+                  <button
+                    className={`ax-btn ${ready ? "ax-btn--primary ax-btn--lg" : ""}`}
+                    disabled={busy || !result.rootIssueKey}
+                    onClick={() =>
+                      result.rootIssueKey &&
+                      onAnalyze(result.rootIssueKey, result.replacementIssueKey)
+                    }
+                  >
+                    <Icon name="graph" size={16} />
+                    Analyze {result.rootIssueKey ?? "sample root"}
+                  </button>
+                );
+                return (
+                  <>
+                    <h3>Sample data in {result.projectKey}</h3>
+                    {!!result.missingPermissions.length && (
+                      <p role="alert">
+                        Missing Jira permissions:{" "}
+                        {result.missingPermissions.join(", ")}
+                      </p>
+                    )}
+                    {!result.issueType && (
+                      <p role="alert">
+                        No usable Jira issue type is available.
+                      </p>
+                    )}
+                    {failed && (
+                      <p role="alert">
+                        Some sample items or relations failed. Review the
+                        reported results and preview again before creating
+                        missing sample data.
+                      </p>
+                    )}
+                    {ready && (
+                      <div className="ax-sample-next">
+                        <p>
+                          <strong>Sample data is in Jira.</strong> Next: analyze
+                          the sample change to see its dependencies.
+                        </p>
+                        {analyze}
+                      </div>
+                    )}
+                    <ul className="ax-sample-list" aria-label="Sample tickets">
+                      {result.items.map((item) => (
+                        <li key={item.role}>
+                          <span className="ax-sample-list__name">
+                            {item.summary}
+                          </span>
+                          <span className="ax-sample-list__key">
+                            {item.issueKey ?? "not in Jira yet"}
+                          </span>
+                          <SampleStatus status={item.status} />
+                        </li>
+                      ))}
+                    </ul>
+                    <h3>Relations</h3>
+                    <ul
+                      className="ax-sample-list"
+                      aria-label="Sample relations"
+                    >
+                      {result.links.map((link, index) => (
+                        <li key={index}>
+                          <span className="ax-sample-list__name">
+                            {link.from} → {link.to}
+                          </span>
+                          <span className="ax-sample-list__key">
+                            {link.relation}
+                          </span>
+                          <SampleStatus status={link.status} />
+                        </li>
+                      ))}
+                    </ul>
+                    <p className="ax-small ax-muted">
+                      {result.note} Labels: anticipate-sample and
+                      anticipate-sample-&lt;role&gt;. Sample tickets remain in
+                      Jira; nothing is deleted automatically. A preview is not
+                      proof of a completed write; Created means the backend read
+                      the ticket back from Jira.
+                    </p>
+                    <div className="ax-sample-actions">
+                      <button
+                        className={`ax-btn ${missing ? "ax-btn--primary" : ""}`}
+                        disabled={
+                          busy ||
+                          !missing ||
+                          !previewed ||
+                          !result.canCreate ||
+                          !canCreate
+                        }
+                        onClick={() => setConfirmed(true)}
+                      >
+                        Create missing sample data in Jira
+                      </button>
+                      {!ready && analyze}
+                    </div>
+                    {!canCreate && missing && (
+                      <p>
+                        Sample creation is unavailable for this installation.
+                      </p>
+                    )}
+                    {!ready && (
+                      <p className="ax-small ax-muted">
+                        Analysis uses real Jira evidence. A reported root can be
+                        analyzed even if other sample items failed.
+                      </p>
+                    )}
+                  </>
+                );
+              })()}
             {confirmed && result && (
               <DecisionDialog
                 icon="target"

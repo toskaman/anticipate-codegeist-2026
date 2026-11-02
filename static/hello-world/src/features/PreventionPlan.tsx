@@ -19,7 +19,7 @@ import {
   actionTypeCopy,
   executionCopy,
   formatTime,
-  planStatusCopy,
+  planStatusDisplay,
   plural,
   scenarioName,
   type Tone,
@@ -205,7 +205,7 @@ export default function PreventionPlan({ w }: { w: Workflow }) {
               : w.approvalUncertain
                 ? "Approval outcome is uncertain. Check execution status first."
                 : "Execution is not available for this plan in its current state.";
-  const status = planStatusCopy[plan.status];
+  const status = planStatusDisplay(plan, w.records);
   return (
     <>
       <PageHeader

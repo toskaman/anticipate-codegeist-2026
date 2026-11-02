@@ -160,9 +160,12 @@ test("sample preparation requires preview and confirmation, then analyzes real J
   await page
     .getByRole("button", { name: "Preview sample data", exact: true })
     .click();
-  await expect(
-    page.getByText("api sample ticket · api · TO_CREATE"),
-  ).toBeVisible();
+  const apiRow = page
+    .getByRole("list", { name: "Sample tickets" })
+    .getByRole("listitem")
+    .filter({ hasText: "api sample ticket" });
+  await expect(apiRow).toContainText("not in Jira yet");
+  await expect(apiRow).toContainText("Will be created");
   await page
     .getByRole("button", {
       name: "Create missing sample data in Jira",
@@ -183,9 +186,16 @@ test("sample preparation requires preview and confirmation, then analyzes real J
   await page
     .getByRole("button", { name: "Create sample data", exact: true })
     .click();
+  await expect(apiRow).toContainText("ABC-1");
+  await expect(apiRow).toContainText("Created · verified in Jira");
+  // Once everything is in Jira, analyzing is the highlighted next step.
+  await expect(page.getByText("Sample data is in Jira.")).toBeVisible();
   await expect(
-    page.getByText("api sample ticket · ABC-1 · CREATED"),
-  ).toBeVisible();
+    page.getByRole("button", {
+      name: "Create missing sample data in Jira",
+      exact: true,
+    }),
+  ).toBeDisabled();
   expect(
     calls.filter((call) => call.operation === "createSampleProject"),
   ).toHaveLength(1);

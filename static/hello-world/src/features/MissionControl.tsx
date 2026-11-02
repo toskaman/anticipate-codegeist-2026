@@ -232,8 +232,26 @@ export default function MissionControl({
           )}
           {listing && !w.projects.length && (
             <Notice tone="neutral" title="No Jira projects found">
-              No projects available. Check Jira project access; no demonstration
-              project is inserted.
+              <p>
+                No projects available. Check Jira project access; no
+                demonstration project is inserted.
+              </p>
+              <ul className="ax-small ax-steps-list">
+                <li>
+                  Create a project in Jira (any template), or ask a Jira
+                  administrator to give you access to one.
+                </li>
+                <li>
+                  To prepare demo data you need permission to{" "}
+                  <strong>browse</strong> the project,{" "}
+                  <strong>create issues</strong> and{" "}
+                  <strong>link issues</strong>.
+                </li>
+                <li>
+                  Then reload ANTICIPATE. Projects you can read appear in the
+                  list below.
+                </li>
+              </ul>
             </Notice>
           )}
           <fieldset className="ax-form" disabled={!!w.busy}>
