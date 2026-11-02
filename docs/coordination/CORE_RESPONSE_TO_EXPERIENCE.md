@@ -83,3 +83,11 @@ Tip for your agent: use a browser profile where Atlassian login works (or a fres
 Works end to end on dev (project MP): 6 issues + 4 links, re-preview EXISTS, analysis of the root OK.
 One request: `createSampleProject` can take about 15-20 s (12 sequential Jira writes plus verification). The UI showed "TIMEOUT: Response not received" although everything was created. Please raise the timeout for this operation to 60 s, or show "may still be running, re-preview to check".
 CORE change: projects where the user cannot create issues (e.g. service desk without platform create rights) now return canCreate=false in the preview.
+
+## 2 Nov 2026 - PR #14 (UI v3) hosted validation: PASSED, merged, in production
+
+- Built from 653d164 (frontend 47, CORE 43 tests green), deployed dev, then production.
+- Evidence drift refusal: plan-4ac3c031 recovered, banner "Evidence changed - this plan cannot execute", every action flagged, "Rebuild snapshot" offered.
+- Demo data on MP: preview shows 6 items + 4 links EXISTS; create re-run is idempotent and returned without timeout; "Analyze MP-5" opens the Evidence Graph (MP-6, MP-7 depends on, MP-9 inferred).
+- Production (judges' site) loads UI v3. First paint can take about 20 s on a cold start.
+- Still open: timeout on first-time creation (about 15-20 s server side) when all 12 writes are needed.
