@@ -5,14 +5,72 @@ modules:
       resolver:
         function: resolver
       routePrefix: hello-world
+  rovo:mcp:
+    - key: anticipate-mcp
+      name: ANTICIPATE
+      tools:
+        - anticipate-get-graph
+        - anticipate-simulate-retirement
+        - anticipate-get-passport
+  action:
+    - key: anticipate-get-graph
+      name: Get evidence graph
+      function: rovoGetGraph
+      actionVerb: GET
+      description: Build an evidence graph (confirmed, inferred and unknown dependencies) around a Jira issue.
+      inputs:
+        issueKey:
+          title: Issue key
+          type: string
+          required: true
+          description: Jira issue key, for example PAY-412
+    - key: anticipate-simulate-retirement
+      name: Simulate retirement
+      function: rovoSimulateRetirement
+      actionVerb: GET
+      description: Deterministically compare removing now, retaining temporarily and migrating first. Makes no Jira changes.
+      inputs:
+        issueKey:
+          title: Issue key
+          type: string
+          required: true
+          description: Issue representing the API or component to retire
+        replacementIssueKey:
+          title: Replacement issue key
+          type: string
+          required: false
+          description: Optional replacement issue that enables the migrate-first scenario
+    - key: anticipate-get-passport
+      name: Get prevention passport
+      function: rovoGetPassport
+      actionVerb: GET
+      description: Summarise the Prevention Passport of a plan you own.
+      inputs:
+        planId:
+          title: Plan id
+          type: string
+          required: true
+          description: ANTICIPATE plan id
   function:
     - key: resolver
       handler: index.handler
+    - key: rovoGetGraph
+      handler: index.rovoGetGraph
+    - key: rovoSimulateRetirement
+      handler: index.rovoSimulateRetirement
+    - key: rovoGetPassport
+      handler: index.rovoGetPassport
 resources:
   - key: main
     path: static/hello-world/build
     tunnel:
       port: 3000
+permissions:
+  scopes:
+    - read:jira-work
+    - write:jira-work
+    - read:jira-user
+    - storage:app
 app:
   runtime:
     name: nodejs24.x
