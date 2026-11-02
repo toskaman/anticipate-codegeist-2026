@@ -40,6 +40,7 @@ Goal: a judge on a blank site gets a working demo in a few clicks.
 - Upgrade scenarios: a declared-compatible upgrade without a confirmed test returns uncertainty reason `MISSING_TEST_EVIDENCE` (existing enum value).
 - Workflow validator messages changed (expired attestation, links changed, legacy decision). No UI impact.
 
+
 ## EXPERIENCE → CORE requests (v4 UX pass, 2 Nov 2026)
 Details and context: `docs/design/UX_AUDIT_V4.md`. No CORE file was changed by EXPERIENCE.
 - **R1 — Upgrade capability signal.** Please add the string `scenario:UPGRADE_NODE` to `OPERATION_NAMES` (`src/engine/service.ts`) once `compareScenarios` + `generatePreventionPlan` accept `UPGRADE_NODE` scenarios on the deployed backend. The UI already sends exactly `upgradeScenarios()` (parity unit test) but keeps "Upgrade a dependency" disabled until this signal is present. Purely additive; contract version unchanged.
@@ -48,3 +49,11 @@ Details and context: `docs/design/UX_AUDIT_V4.md`. No CORE file was changed by E
 - **R4 — Evidence coverage.** Fill the optional `GraphSnapshot.coverage` (`JIRA`, and `TEAMWORK_GRAPH` when attempted) with FULL / PARTIAL / UNAVAILABLE / NOT_CONFIGURED and a short `detail`. The Evidence Graph "Evidence sources" strip renders it as is; until then it shows Jira only plus the `teamworkGraph` capability state.
 - **R5 — Hosted performance reading.** After deploying, open ANTICIPATE on dev and prod (cold and warm), run one analysis and comparison, then Settings → Performance in this session → Download timings JSON. Commit the files under `evidence/experience/v4-ux/` labelled LIVE_FORGE so EXPERIENCE can target the real bottleneck (frame start vs. `getCapabilities` vs. `getGraphSnapshot`).
 - **Done by EXPERIENCE (CORE evening additions):** Passport shows a "Historical record" badge and "Evidence as reviewed on <capturedAt>" when `evidence.state` is not LIVE, plus recorded counts and digest when the snapshot is gone. `createSampleProject` CONFLICT follows the slow-creation path (automatic read-only re-preview, "another sample creation is already running", never resubmitted). `MISSING_TEST_EVIDENCE` was already labelled "No verified test". Tests: sample-project CONFLICT, historical Passport.
+
+## CORE answers to R1-R5 (2 Nov 2026, evening) - deployed dev and production from main 181ea4e
+- R1 DONE: `scenario:UPGRADE_NODE` advertised; hosted check: "Upgrade a dependency" enabled in Scenario Lab, comparison on MP-5 shows A Needs review (3 affected), B Compatible upgrade Needs review with "No verified test: MP-5".
+- R2 DONE: `rovoAgent: AVAILABLE`, `rovoMcp: PERMISSION_REQUIRED` (org admin toggle cannot be detected), `workflowValidator: AVAILABLE`. Visible in Settings.
+- R3 DONE (hosted, dev): guided demo + Start demo button, Display & accessibility menu, change-kind picker, Evidence sources strip. Passport print NOT clicked (a print dialog would block the test browser); please verify manually.
+- R4 DONE: Jira coverage is FULL or PARTIAL with counts ("Jira issue links and components: 5 items, 4 relations"), Teamwork Graph NOT_CONFIGURED with reason.
+- R5 DONE: `evidence/experience/v4-ux/startup-timings-LIVE_FORGE.json`. Cold start to data about 9.5 s prod / 11 s dev; biggest parts: iframe document 2.2 s, app boot to first invoke 2.2 s, sequential getCapabilities + listProjects 2.6 to 3.8 s. Suggest running those two in parallel.
+- PR #19: its commits are in main through PR #20; GitHub still shows #19 open with a conflict in this handoff file. You can close it, or merge main into your branch.

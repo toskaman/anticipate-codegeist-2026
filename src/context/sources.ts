@@ -26,7 +26,13 @@ const DOCUMENTARY: Record<string, EdgeKind> = { documented_in: 'DOCUMENTED_IN', 
 const nodeIdFor = (o: ExternalObject) => (o.jiraIssueKey ? `issue:${o.jiraIssueKey}` : `twg:${o.id}`);
 
 export function mergeSource(snapshot: GraphSnapshot, res: SourceResult, maxExtraNodes = 100): GraphSnapshot {
-  const coverage = [...(snapshot.coverage ?? [{ source: 'JIRA' as const, state: 'FULL' as const, detail: 'Jira issue links and components' }]),
+  const unknown = snapshot.nodes.filter((n) => n.status === 'UNKNOWN').length;
+  const limited = snapshot.edges.filter((e) => e.accessLimited).length;
+  const jiraPartial = snapshot.truncated || unknown > 0 || limited > 0;
+  const jiraDetail = `Jira issue links and components: ${snapshot.nodes.length} items, ${snapshot.edges.length} relations`
+    + (snapshot.truncated ? `; stopped at the crawl limit (depth ${snapshot.limits.maxDepth}, ${snapshot.limits.maxNodes} items)` : '')
+    + (unknown ? `; ${unknown} item(s) not readable with your permissions` : '');
+  const coverage = [...(snapshot.coverage ?? [{ source: 'JIRA' as const, state: (jiraPartial ? 'PARTIAL' : 'FULL') as 'PARTIAL' | 'FULL', detail: jiraDetail.slice(0, 300) }]),
     { source: 'TEAMWORK_GRAPH' as const, state: res.state, detail: res.detail.slice(0, 300) }];
   if (res.state === 'UNAVAILABLE' || res.state === 'NOT_CONFIGURED') return { ...snapshot, coverage };
   const nodes = new Map(snapshot.nodes.map((n) => [n.id, n]));
