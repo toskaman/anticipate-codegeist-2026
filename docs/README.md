@@ -31,3 +31,6 @@ npm start serves the development-only fixture prototype on port 3000. npm run bu
 Graph QA: docs/design/GRAPH_QA.md records relationship/provenance semantics, rendering bounds, limitations and the local baseline. Run npm run benchmark:graph for a separate synthetic model benchmark; this is not included in npm test and is not a browser/Forge performance claim. The benchmark and scripts are covered by formatting/lint/type checks.
 
 Reliability and research: tests/reliability.spec.ts measures local browser interaction samples and 30 warmed route cycles; docs/design/RELIABILITY.md explains limits. Product/competitive hypotheses and primary sources are in docs/product/RESEARCH.md. Run npm run licenses:inventory for the installed dependency inventory and generated public notices; unresolved license paths and custom Forge terms are documented in docs/design/ASSET_LICENSES.md.
+
+
+Latest milestone: [performance, visual quality and CORE readiness](design/PERFORMANCE_VISUAL_CORE.md), [CORE integration requirements](integration/CORE_INTEGRATION_REQUIREMENTS.md).

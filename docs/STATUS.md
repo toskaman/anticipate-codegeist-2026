@@ -1,29 +1,13 @@
 # ANTICIPATE EXPERIENCE — current status
 
-Worktree: original C: workspace; branch feat/product-experience. CORE owns the unchanged manifest, app identity and backend. Latest fetched CORE ref remains f898235 (bootstrap). No push, deployment, live Jira mutation or verified Forge session has been performed.
+VERIFIED_LOCAL milestone: performance, visual quality and CORE integration readiness (2026-11-02). Branch feat/product-experience. CORE-owned manifest, backend and Forge identity remain unchanged. Publication to this branch and a Draft PR are now explicitly authorized; no merge or deployment.
 
-## VERIFIED_LOCAL
+- Seven labeled fixture screens, bounded provenance-aware Evidence Graph, scenario comparison, policy review, per-action review and consistent Passport export.
+- Production loads Forge capability/access UI only. No fixture fallback and no simulated Jira success.
+- 41 unit tests, 26 browser tests (including 42 screen/theme/viewport cases), model benchmark, TypeScript, lint, formatting and production build pass.
+- Exact 100/500/1,000-node datasets measured in Chromium. See [performance and visual audit](design/PERFORMANCE_VISUAL_CORE.md) and raw evidence/experience/performance-visual-core. No SLA or statistically significant improvement is claimed.
+- [CORE requirements](integration/CORE_INTEGRATION_REQUIREMENTS.md) define TypeScript maps, operation inputs/outputs, snapshot handling, authorization, errors and hosted acceptance gates.
 
-- Seven local fixture screens and development component gallery; production loads only the Forge capability/access view, with no fixture fallback.
-- Single AnticipateClient interface with FixtureClient and ForgeClient; identical provisional runtime schemas for capabilities, projects, snapshots, graphs, comparison results, plans, execution and passports.
-- Old DataAdapter/ExperienceAdapter providers and fake approval/execution transitions removed. adapters.ts now only composes view data.
-- Graph/dashboard/scenario reads share a validated snapshot; client/data mode and result provenance must agree. Empty project lists remain genuinely empty. Counts are derived from loaded fixture data.
-- Main Plan uses action-level review, explicit confirmation and separate backend-approved execution. Fixtures refuse actual approval/execution. Partial/failed backend-response rendering is tested with MOCK transport responses, not Jira.
-- Passport checks snapshot/scenario and exports the displayed client payload. No invented approvals or verified execution in fixture reports. One-page print proof exists from the preceding milestone.
-- 34 unit tests passed; 18 browser tests passed, including 42 screen/theme/viewport combinations, graph interaction, empty/loading/retry, keyboard focus, main journey/export and production isolation. Lint, formatting, TypeScript and production build pass. The final provenance guard has dedicated unit coverage.
+CORE integration remains BLOCKED: reviewed contracts/bindings, scenario-linked plans/executions, structured Passport audit/error envelope and an authorized Forge installation are required. Latest fetched CORE branch is e621241; it was not merged or validated as an integration during publication preparation. Local results do not imply VERIFIED_FORGE.
 
-## Pending requirements
-
-- CORE-reviewed packages/contracts, actual resolver bindings and installation/site access. Current schemas are explicitly frontend proposals.
-- Forge-hosted routing, Bridge, CSP, theme, authentication and actual Jira outcome verification; none is VERIFIED_FORGE.
-- Genuine simulator controls/draft invalidation: current A/B/C results remain authored fixtures, not a simulation engine.
-- Graph relation/provenance/freshness expansion, 100+ node/cycle cases, representative performance and long-run reliability.
-- Complete screenshot inspection, 200% zoom/long-text checks, rights/license inventory and dependency remediation (last recorded audit: 13 moderate, 5 high).
-- Product research/persona/competitive matrix, measured internal impact, Marketplace pack and final real-code jury video. No public submission is authorized by local progress.
-- Judge clean-site installation and distribution are CORE/owner-dependent. No installation URL or Apps-menu entry is invented.
-
-Evidence is LOCAL/MOCK only. Current coordination requirements and test details are in docs/coordination/ and evidence/experience/. Historic audits and screenshot milestones remain historical evidence, not current live-integration claims.
-
-Graph milestone: explicit relationships and supplied provenance/freshness/direct-transitive scope now render with matching filters and a bounded visual/list window. Cyclic and 120/1000-node synthetic datasets are tested. Final suite: 41 unit tests, 20 browser tests, lint/format/typecheck/build pass after fixing a connector-position import error found during verification. npm run benchmark:graph records LOCAL model-only median/p95; no browser or Forge performance claim. Details and residual limits are in docs/design/GRAPH_QA.md. Product research, browser/long-run measurements and CORE integration remain open.
-
-Reliability/research increment: 41 unit tests and 21 browser tests pass. Browser specs now participate in strict TypeScript checks. The 30-cycle warmed route sample preserves 281 DOM nodes, 173 event listeners and one app hashchange listener, with no page errors; heap rises modestly, so no long-soak/leak-free claim is made. Latest five-sample browser search median is ~20 ms including automation overhead; raw values are in evidence/experience/v2-reliability/. Product research with vendor/research citations and unvalidated persona/pricing hypotheses is in docs/product/RESEARCH.md. License inventory records 23 direct dependencies and 160 runtime paths, with ten root-license-text misses; notices are included in the built static resource. Custom Forge terms and missing texts remain owner/release-review items. None of this is VERIFIED_FORGE.
+Known limits: authored A/B/C results, C-only authored plan, sparse synthetic graph workloads, no total-process memory/long-soak certification, client-side paging, no full assistive-technology audit. Dependency advisories (13 moderate / 5 high at last recorded audit), ten missing root-license texts and custom Forge terms need release review. Product research contains unvalidated persona/pricing hypotheses. See docs/product/RESEARCH.md, docs/design/ASSET_LICENSES.md and historical milestone manifests under evidence/experience.

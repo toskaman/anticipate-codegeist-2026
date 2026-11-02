@@ -1,4 +1,21 @@
 import { test, expect } from "@playwright/test";
+test("mobile skip link focuses content without changing the current screen", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 1000 });
+  await page.goto("/#Scenario%20Lab");
+  const skip = page.getByRole("link", { name: "Skip to content" });
+  await expect(skip).toHaveCSS("clip-path", "inset(50%)");
+  await page.keyboard.press("Tab");
+  await expect(skip).toBeFocused();
+  await expect(skip).toHaveCSS("top", "0px");
+  await page.keyboard.press("Enter");
+  await expect(page.locator("#main")).toBeFocused();
+  await expect(page).toHaveURL(/#Scenario%20Lab$/);
+  await expect(
+    page.getByRole("heading", { name: "Scenario Lab", exact: true }),
+  ).toBeVisible();
+});
 test("history, keyboard dialog and reset on plan page", async ({ page }) => {
   await page.goto("/");
   await page

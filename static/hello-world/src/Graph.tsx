@@ -13,7 +13,12 @@ import {
   graphSchema,
 } from "./api/provisional-contracts";
 import { useResource } from "./useResource";
-import { graphPage, pathToRoot, type EvidenceGraph } from "./graphModel";
+import {
+  graphPage,
+  pathToRoot,
+  indexGraph,
+  type EvidenceGraph,
+} from "./graphModel";
 const emptyGraph: EvidenceGraph = {
   mode: "fixture",
   snapshotId: "",
@@ -41,6 +46,7 @@ export default function Graph({
   );
   const resource = useResource(load);
   const graph = resource.status === "ready" ? resource.data : emptyGraph;
+  const graphIndex = useMemo(() => indexGraph(graph), [graph]);
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("ALL");
   const [freshness, setFreshness] = useState("ALL");
@@ -49,17 +55,16 @@ export default function Graph({
   const [selectedId, setSelectedId] = useState("checkout");
   const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null);
   const windowed = useMemo(
-    () => graphPage(graph, query, filter, freshness, impact, page),
-    [graph, query, filter, freshness, impact, page],
+    () => graphPage(graph, query, filter, freshness, impact, page, graphIndex),
+    [graph, query, filter, freshness, impact, page, graphIndex],
   );
   const selected =
     windowed.services.find((service) => service.id === selectedId) ??
     windowed.services[0];
   const path = useMemo(
-    () => (selected ? pathToRoot(graph, selected.id) : []),
-    [graph, selected],
+    () => (selected ? pathToRoot(graph, selected.id, graphIndex) : []),
+    [graph, selected, graphIndex],
   );
-  const pathIds = new Set(path.map((edge) => edge.id));
   const displayed = useMemo(() => {
     const ids = new Set(windowed.services.map((service) => service.id));
     for (const edge of path.slice(0, 20)) {
@@ -68,73 +73,77 @@ export default function Graph({
     }
     return graph.services.filter((service) => ids.has(service.id));
   }, [graph, windowed.services, path]);
-  const nodes = [
-    {
-      id: graph.root.id,
-      position: { x: 320, y: displayed.length > 5 ? -130 : 160 },
-      data: { label: graph.root.label },
-      className: "root-node",
-    },
-    ...displayed.map((service, index) => ({
-      id: service.id,
-      position:
-        displayed.length > 5
-          ? { x: (index % 4) * 225, y: Math.floor(index / 4) * 110 }
-          : {
-              x: index < 3 ? 30 : 650,
-              y: (index < 3 ? index : index - 3) * 140,
-            },
-      data: { label: service.label },
-      className: service.id === selected?.id ? "selected-node" : "",
-    })),
-  ];
-  const positions = new Map(nodes.map((node) => [node.id, node.position]));
-  const flowNodes = nodes.map((node) => {
-    const outgoing = graph.edges.find((edge) => edge.source === node.id);
-    const incoming = graph.edges.find((edge) => edge.target === node.id);
-    const destination = outgoing ? positions.get(outgoing.target) : undefined;
-    const origin = incoming ? positions.get(incoming.source) : undefined;
-    return {
-      ...node,
-      sourcePosition:
-        destination && destination.y < node.position.y
-          ? Position.Top
-          : Position.Bottom,
-      targetPosition:
-        origin && origin.y > node.position.y ? Position.Bottom : Position.Top,
-    };
-  });
-  const nodeIds = new Set(nodes.map((node) => node.id));
-  const availableEdges = graph.edges.filter(
-    (edge) => nodeIds.has(edge.source) && nodeIds.has(edge.target),
-  );
-  const edgeWindow = Array.from(
-    new Map(
-      [
-        ...path.filter(
-          (edge) => nodeIds.has(edge.source) && nodeIds.has(edge.target),
-        ),
-        ...availableEdges,
-      ].map((edge) => [edge.id, edge]),
-    ).values(),
-  ).slice(0, 80);
-  const edges = edgeWindow.map((edge) => ({
-    id: edge.id,
-    source: edge.source,
-    target: edge.target,
-    label: `${edge.relation} · ${edge.evidence}`,
-    style: {
-      stroke:
-        edge.evidence === "UNKNOWN"
-          ? "#efa958"
-          : edge.freshness === "STALE"
-            ? "#a5a8b8"
-            : "#54b9b2",
-      strokeWidth: pathIds.has(edge.id) ? 3 : 1,
-      strokeDasharray: edge.evidence === "CONFIRMED" ? undefined : "5 5",
-    },
-    markerEnd: { type: MarkerType.ArrowClosed },
-  }));
+  const { flowNodes, edges } = useMemo(() => {
+    const pathIds = new Set(path.map((edge) => edge.id));
+    const nodes = [
+      {
+        id: graph.root.id,
+        position: { x: 320, y: displayed.length > 5 ? -130 : 160 },
+        data: { label: graph.root.label },
+        className: "root-node",
+      },
+      ...displayed.map((service, index) => ({
+        id: service.id,
+        position:
+          displayed.length > 5
+            ? { x: (index % 4) * 225, y: Math.floor(index / 4) * 110 }
+            : {
+                x: index < 3 ? 30 : 650,
+                y: (index < 3 ? index : index - 3) * 140,
+              },
+        data: { label: service.label },
+        className: service.id === selected?.id ? "selected-node" : "",
+      })),
+    ];
+    const positions = new Map(nodes.map((node) => [node.id, node.position]));
+    const flowNodes = nodes.map((node) => {
+      const outgoing = graphIndex.outgoing.get(node.id)?.[0];
+      const incoming = graphIndex.incoming.get(node.id);
+      const destination = outgoing ? positions.get(outgoing.target) : undefined;
+      const origin = incoming ? positions.get(incoming.source) : undefined;
+      return {
+        ...node,
+        sourcePosition:
+          destination && destination.y < node.position.y
+            ? Position.Top
+            : Position.Bottom,
+        targetPosition:
+          origin && origin.y > node.position.y ? Position.Bottom : Position.Top,
+      };
+    });
+    const nodeIds = new Set(nodes.map((node) => node.id));
+    const availableEdges = graph.edges.filter(
+      (edge) => nodeIds.has(edge.source) && nodeIds.has(edge.target),
+    );
+    const edgeWindow = Array.from(
+      new Map(
+        [
+          ...path.filter(
+            (edge) => nodeIds.has(edge.source) && nodeIds.has(edge.target),
+          ),
+          ...availableEdges,
+        ].map((edge) => [edge.id, edge]),
+      ).values(),
+    ).slice(0, 80);
+    const edges = edgeWindow.map((edge) => ({
+      id: edge.id,
+      source: edge.source,
+      target: edge.target,
+      label: `${edge.relation} · ${edge.evidence}`,
+      style: {
+        stroke:
+          edge.evidence === "UNKNOWN"
+            ? "#efa958"
+            : edge.freshness === "STALE"
+              ? "#a5a8b8"
+              : "#54b9b2",
+        strokeWidth: pathIds.has(edge.id) ? 3 : 1,
+        strokeDasharray: edge.evidence === "CONFIRMED" ? undefined : "5 5",
+      },
+      markerEnd: { type: MarkerType.ArrowClosed },
+    }));
+    return { flowNodes, edges };
+  }, [graph, displayed, path, selected?.id, graphIndex]);
   const selectedEdge =
     graph.edges.find(
       (edge) => edge.id === selectedEdgeId && edge.source === selected?.id,

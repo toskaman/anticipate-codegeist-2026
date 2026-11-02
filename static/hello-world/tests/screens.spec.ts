@@ -32,6 +32,28 @@ for (const width of [1440, 1024, 390])
           ),
           `${name} horizontal overflow at ${width}`,
         ).toBe(true);
+        const clippedText = await page
+          .locator("h1,h2,h3,p,button,label,small,.badge")
+          .evaluateAll((elements) =>
+            elements
+              .filter((element) => {
+                const el = element as HTMLElement;
+                return (
+                  el.clientWidth > 0 &&
+                  el.scrollWidth > el.clientWidth + 2 &&
+                  getComputedStyle(el).whiteSpace !== "nowrap"
+                );
+              })
+              .map((element) => ({
+                tag: element.tagName,
+                text: element.textContent?.slice(0, 90),
+                width: (element as HTMLElement).clientWidth,
+                scroll: (element as HTMLElement).scrollWidth,
+              })),
+          );
+        expect(clippedText, `${name} clipped text ${theme} ${width}`).toEqual(
+          [],
+        );
         const results = await new AxeBuilder({ page })
           .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
           .analyze();
@@ -45,7 +67,7 @@ for (const width of [1440, 1024, 390])
             (element as HTMLElement).focus({ preventScroll: true }),
           );
         await page.screenshot({
-          path: `../../evidence/${name.toLowerCase().replace(/ /g, "-")}-${theme}-${width}.png`,
+          path: `../../evidence/experience/performance-visual-core/screens/${name.toLowerCase().replace(/ /g, "-")}-${theme}-${width}.png`,
           fullPage: true,
         });
       }

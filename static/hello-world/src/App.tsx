@@ -94,6 +94,20 @@ export default function App() {
     );
   const { scenarios } = resource.data;
   const result = scenarios[scenario];
+  const nextStep =
+    page === "Scenario Lab"
+      ? { page: "Decision Firewall", label: "Review policy checks" }
+      : page === "Decision Firewall"
+        ? { page: "Prevention Plan", label: "Review prevention plan" }
+        : page === "Prevention Plan"
+          ? { page: "Prevention Passport", label: "View Prevention Passport" }
+          : {
+              page: "Scenario Lab",
+              label:
+                page === "Mission Control"
+                  ? "Analyze a change"
+                  : "Open Scenario Lab",
+            };
   function go(next: string) {
     setPage(next);
     location.hash = encodeURIComponent(next);
@@ -101,7 +115,14 @@ export default function App() {
   }
   return (
     <div className="app" data-theme={theme}>
-      <a className="skip" href="#main">
+      <a
+        className="skip"
+        href="#main"
+        onClick={(event) => {
+          event.preventDefault();
+          document.getElementById("main")?.focus();
+        }}
+      >
         Skip to content
       </a>
       <aside>
@@ -172,15 +193,8 @@ export default function App() {
                 Test the consequences. Prove the safeguards. Then ship.
               </p>
             </div>
-            <button
-              className="primary"
-              onClick={() =>
-                go(page === "Scenario Lab" ? "Prevention Plan" : "Scenario Lab")
-              }
-            >
-              {page === "Scenario Lab"
-                ? "Review prevention plan"
-                : "Open Scenario Lab"}
+            <button className="primary" onClick={() => go(nextStep.page)}>
+              {nextStep.label}
               <ArrowUpRight size={17} />
             </button>
           </div>

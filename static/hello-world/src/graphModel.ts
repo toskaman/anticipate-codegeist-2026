@@ -2,14 +2,29 @@ import { type z } from "zod";
 import { type graphSchema } from "./api/provisional-contracts";
 export type EvidenceGraph = z.infer<typeof graphSchema>;
 export const GRAPH_PAGE_SIZE = 20;
-// Iterative breadth-first search terminates on cycles. Only supplied edges are traversed.
-export function pathToRoot(graph: EvidenceGraph, start: string) {
-  const adjacency = new Map<string, EvidenceGraph["edges"]>();
+export function indexGraph(graph: EvidenceGraph) {
+  const outgoing = new Map<string, EvidenceGraph["edges"]>();
+  const incoming = new Map<string, EvidenceGraph["edges"][number]>();
+  const byEdgeId = new Map<string, EvidenceGraph["edges"][number]>();
+  const labels = new Map(
+    graph.services.map((service) => [service.id, service.label.toLowerCase()]),
+  );
   for (const edge of graph.edges) {
-    const list = adjacency.get(edge.source) ?? [];
+    const list = outgoing.get(edge.source) ?? [];
     list.push(edge);
-    adjacency.set(edge.source, list);
+    outgoing.set(edge.source, list);
+    if (!incoming.has(edge.target)) incoming.set(edge.target, edge);
+    byEdgeId.set(edge.id, edge);
   }
+  return { outgoing, incoming, byEdgeId, labels };
+}
+export type GraphIndex = ReturnType<typeof indexGraph>;
+// Iterative traversal uses the snapshot index and terminates on cycles.
+export function pathToRoot(
+  graph: EvidenceGraph,
+  start: string,
+  graphIndex: GraphIndex = indexGraph(graph),
+) {
   const queue = [start];
   const visited = new Set(queue);
   const previous = new Map<string, EvidenceGraph["edges"][number]>();
@@ -26,7 +41,7 @@ export function pathToRoot(graph: EvidenceGraph, start: string) {
       }
       return edges;
     }
-    for (const edge of adjacency.get(current) ?? []) {
+    for (const edge of graphIndex.outgoing.get(current) ?? []) {
       if (!visited.has(edge.target)) {
         visited.add(edge.target);
         previous.set(edge.target, edge);
@@ -43,23 +58,19 @@ export function graphPage(
   freshness: string,
   impact: string,
   page: number,
+  graphIndex: GraphIndex = indexGraph(graph),
 ) {
-  const outgoing = new Map<string, EvidenceGraph["edges"]>();
-  for (const edge of graph.edges) {
-    const edges = outgoing.get(edge.source) ?? [];
-    edges.push(edge);
-    outgoing.set(edge.source, edges);
-  }
+  const normalized = query.toLowerCase();
   const filtered = graph.services.filter(
     (service) =>
-      service.label.toLowerCase().includes(query.toLowerCase()) &&
+      (graphIndex.labels.get(service.id) ?? "").includes(normalized) &&
       (classification === "ALL" || service.evidence === classification) &&
       (freshness === "ALL" ||
-        (outgoing.get(service.id) ?? []).some(
+        (graphIndex.outgoing.get(service.id) ?? []).some(
           (edge) => edge.freshness === freshness,
         )) &&
       (impact === "ALL" ||
-        (outgoing.get(service.id) ?? []).some(
+        (graphIndex.outgoing.get(service.id) ?? []).some(
           (edge) => edge.impact === impact,
         )),
   );

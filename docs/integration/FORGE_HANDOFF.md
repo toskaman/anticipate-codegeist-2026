@@ -14,3 +14,6 @@ Exact operation/input/error requirements and hosted acceptance tests are in ../c
 
 
 Graph contract proposal now includes root, explicit edges and metadata (relation, epistemic classification, source reference/HTTPS URL, observation time, freshness, impact scope and provenance). Graph payloads must include relationship endpoints and valid provenance steps. Renderer pagination is client-side on a bounded loaded payload; agree server paging semantics with CORE. See ../design/GRAPH_QA.md and the coordination request.
+
+
+Current milestone operation matrix, TypeScript maps, authorization/snapshot guarantees and release gates: [CORE integration requirements](CORE_INTEGRATION_REQUIREMENTS.md).

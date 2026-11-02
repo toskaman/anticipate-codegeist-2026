@@ -602,7 +602,11 @@ dialog::backdrop {
   border-color: var(--accent);
 }
 .skip:not(:focus) {
-  transform: translateY(-300%);
+  clip-path: inset(50%);
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  white-space: nowrap;
 }
 @page {
   size: A4;

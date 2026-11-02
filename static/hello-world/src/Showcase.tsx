@@ -21,9 +21,11 @@ export default function Showcase() {
               services: [],
               edges: [],
             };
-          if (preview === "large") {
+          if (preview === "large" || preview.startsWith("large-")) {
             const { largeGraph } = await import("./graphFixtures");
-            return largeGraph(120);
+            return largeGraph(
+              preview === "large" ? 120 : Number(preview.slice(6)) - 1,
+            );
           }
           if (preview === "retry" && attempts++ === 0)
             throw new Error(
@@ -72,6 +74,15 @@ export default function Showcase() {
             <option value="retry">Fail once, then retry</option>
             <option value="slow">Slow loading snapshot</option>
             <option value="large">120 dependencies with a cycle</option>
+            <option value="large-100">
+              100 nodes including root, with a cycle
+            </option>
+            <option value="large-500">
+              500 nodes including root, with a cycle
+            </option>
+            <option value="large-1000">
+              1,000 nodes including root, with a cycle
+            </option>
           </select>
         </label>
       </section>
