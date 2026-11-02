@@ -1053,7 +1053,13 @@ export default function CoreWorkspace({
                             </p>
                             <details>
                               <summary>Review exact action payload</summary>
-                              <pre>{JSON.stringify(a.payload, null, 2)}</pre>
+                              <pre
+                                role="region"
+                                tabIndex={0}
+                                aria-label={`Payload for ${a.actionId}`}
+                              >
+                                {JSON.stringify(a.payload, null, 2)}
+                              </pre>
                             </details>
                             <p>
                               {approvedIds.has(a.actionId)

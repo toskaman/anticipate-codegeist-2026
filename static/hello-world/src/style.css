@@ -709,3 +709,42 @@ dialog::backdrop {
 .core-workspace a:not(.skip) {
   color: var(--accent);
 }
+
+.core-workspace h1,
+.core-workspace h2,
+.core-workspace button,
+.core-workspace summary {
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+.core-evidence-item {
+  white-space: normal;
+}
+.core-workspace pre {
+  max-height: 24rem;
+  overflow: auto;
+}
+.core-workspace header {
+  flex-wrap: wrap;
+  height: auto;
+  min-height: 64px;
+  gap: 12px;
+}
+.core-workspace header .badge {
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.core-node-label {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.4;
+}
+.core-workspace .react-flow__node small {
+  display: block;
+  font-size: 10px;
+  line-height: 1.4;
+}

@@ -19,6 +19,9 @@ export function SourceLink({
     <span>{children}</span>
   );
 }
+const sizeForViewport = () =>
+  window.innerWidth < 700 ? 6 : window.innerWidth < 1100 ? 12 : 20;
+
 export default function CoreEvidenceGraph({
   graph,
   result,
@@ -26,14 +29,7 @@ export default function CoreEvidenceGraph({
   graph: GraphSnapshot;
   result?: SimulationResult;
 }) {
-  const sizeForViewport = () =>
-    window.innerWidth < 700 ? 6 : window.innerWidth < 1100 ? 12 : 20;
   const [pageSize, setPageSize] = useState(sizeForViewport);
-  useEffect(() => {
-    const resize = () => setPageSize(sizeForViewport());
-    window.addEventListener("resize", resize);
-    return () => window.removeEventListener("resize", resize);
-  }, []);
   const columns = pageSize === 6 ? 2 : pageSize === 12 ? 3 : 4;
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("ALL");
@@ -55,13 +51,34 @@ export default function CoreEvidenceGraph({
     [filtered, current, pageSize],
   );
   const selected = visible.find((n) => n.id === selectedId) ?? visible[0];
+  useEffect(() => {
+    const resize = () => {
+      const nextSize = sizeForViewport();
+      const index = filtered.findIndex((node) => node.id === selected?.id);
+      setPage(Math.max(0, Math.floor(index / nextSize)));
+      setPageSize(nextSize);
+    };
+    window.addEventListener("resize", resize);
+    return () => window.removeEventListener("resize", resize);
+  }, [filtered, selected?.id]);
   const { nodes, edges } = useMemo(() => {
     const ids = new Set(visible.map((n) => n.id));
     return {
       nodes: visible.map((n, i) => ({
         id: n.id,
         position: { x: (i % columns) * 240, y: Math.floor(i / columns) * 120 },
-        data: { label: `${n.label} · ${n.status}` },
+        data: {
+          label: (
+            <>
+              <span className="core-node-label" title={n.label}>
+                {n.label}
+              </span>
+              <small>{n.status}</small>
+            </>
+          ),
+        },
+        ariaLabel: `${n.label} · ${n.status}`,
+        style: { width: 190, minHeight: 64, overflowWrap: "anywhere" as const },
         className: n.id === selected?.id ? "selected-node" : "",
       })),
       edges: graph.edges
@@ -128,7 +145,7 @@ export default function CoreEvidenceGraph({
         {visible.length ? (
           <div className="graph">
             <ReactFlow
-              key={`${current}-${query}-${status}`}
+              key={`${pageSize}-${current}-${query}-${status}`}
               nodes={nodes}
               edges={edges}
               fitView

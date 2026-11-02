@@ -43,7 +43,7 @@ Production always loads ForgeApp/CoreWorkspace. A development server inside a ho
 ## Verification evidence
 
 - Clean frontend npm ci --ignore-scripts passed with the local contracts package; TypeScript, ESLint, Prettier check, 42 frontend unit tests and Vite build passed.
-- 48 Playwright tests passed with one worker. Includes normal/lost execution responses, persisted uncertain requests after reload, empty execution records, failed writes, stale approvals, scenario invalidation, expired audit recovery, permission errors, JSON export contents, production isolation and the development iframe entry.
+- 51 Playwright tests passed with one worker. Includes normal/lost execution responses, persisted uncertain requests after reload, empty execution records, failed writes, stale approvals, scenario invalidation, expired audit recovery, permission errors, JSON export contents, production isolation and the development iframe entry.
 - 42 CORE screen/theme/viewport combinations (seven screens, light/dark, 1440/1024/390), axe WCAG-tagged checks and document overflow passed. Native PNGs and six derived contact sheets are under evidence/experience/core-integration. Contact-sheet visual review covered all six; mobile native graph was inspected for fit/readability. Canvas labels remain an overview; the accessible list is the readable alternative. No exhaustive assistive-technology or pixel-level claim.
 - Existing prototype screen matrix also passed; old benchmark evidence remains historical rather than being relabeled as hosted/core performance.
 - CORE typecheck plus 16 service/Rovo/adapter tests, 3 contract tests and 8 simulation tests passed after merge.
@@ -61,3 +61,6 @@ Still to verify on the deployed app: real project/change paging, host auth/permi
 
 
 Latest read-error/pagination regression coverage and overnight integration details: [CORE night follow-up](CORE_NIGHT_FOLLOWUP.md).
+
+
+Reflow fixes and the owner-authorized CORE development deployment relay are tracked in [reflow readiness](CORE_REFLOW_READINESS.md). This supersedes the earlier deferral only for the pinned, CI-verified development candidate; no production authorization.

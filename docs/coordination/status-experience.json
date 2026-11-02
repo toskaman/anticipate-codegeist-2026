@@ -1,13 +1,13 @@
 {
   "workstream": "EXPERIENCE",
   "branch": "feat/product-experience",
-  "revisionBase": "ca2541d",
-  "revisionScope": "CORE overnight merge, cursor/project-isolation tests and distinct read/mutation feedback",
+  "revisionBase": "46f2b81",
+  "revisionScope": "reflow and preserved graph selection; preparing pinned candidate for CORE development deployment",
   "contractVersion": "0.2.0",
   "status": "VERIFIED_LOCAL_READY_FOR_HOSTED_VALIDATION",
   "tests": {
     "unit": 42,
-    "browser": 48,
+    "browser": 51,
     "coreScreenThemeViewportCases": 42,
     "prototypeScreenThemeViewportCases": 42,
     "core": 16,
@@ -18,12 +18,19 @@
     "format": "PASS",
     "build": "PASS"
   },
-  "forgeVerification": "USER_CONTEXT_NOT_VERIFIED; CORE reports d9d6109 dev v4.3.0; owner deferred newer build deployment",
+  "forgeVerification": "USER_CONTEXT_NOT_VERIFIED; owner approved CORE development deployment relay after candidate CI",
   "evidenceMode": "MOCK_TRANSPORT/LOCAL only; no real Jira action performed",
   "next": [
     "CORE/owner deploy reviewed build to development",
     "Authorized user-context read/write and recovery acceptance",
     "CORE dependency advisory remediation/release review"
   ],
-  "coreRef": "ea829ef"
+  "coreRef": "2fb9628",
+  "deploymentIntent": {
+    "state": "PREPARING_CANDIDATE_NOT_YET_REQUESTED",
+    "environment": "development",
+    "executor": "CORE",
+    "productionAuthorized": false,
+    "identityPolicy": "Only owner-approved Forge identity; never colleague token; no secrets in coordination files"
+  }
 }

@@ -21,7 +21,18 @@ createRoot(document.getElementById("root")!).render(
     null,
     React.createElement(
       "p",
-      { role: "status" },
+      {
+        role: "status",
+        style: {
+          position: "sticky",
+          top: 0,
+          zIndex: 1000,
+          background: "white",
+          color: "#111",
+          margin: 0,
+          padding: 8,
+        },
+      },
       "MOCK TRANSPORT TEST ONLY. No Forge session or real Jira action.",
     ),
     React.createElement(CoreWorkspace, {
