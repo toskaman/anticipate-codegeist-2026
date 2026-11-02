@@ -2,7 +2,7 @@
   "workstream": "EXPERIENCE",
   "branch": "feat/product-experience",
   "revisionBase": "4c68d90fc0990b751cb7bfa7dc6d0f2a77f60c12",
-  "revisionScope": "Runtime candidate unchanged; CORE documentation merged through 36203cd; owner approved the existing app owner identity and delegated public publisher/support details to CORE",
+  "revisionScope": "Runtime unchanged from 4c68d90; CORE reports merged through 745fe69, including clean-site production installation",
   "contractVersion": "0.2.0",
   "status": "VERIFIED_LOCAL_READY_FOR_HOSTED_VALIDATION",
   "tests": {
@@ -18,12 +18,12 @@
     "format": "PASS",
     "build": "PASS"
   },
-  "forgeVerification": "CORE_REPORTED_PRODUCTION_2.1.0; EXISTING_APP_OWNER_AUTHORIZED_BY_REQUESTER; PRODUCTION_INSTALLATION_NOT_VERIFIED_BY_EXPERIENCE",
+  "forgeVerification": "CORE_REPORTED_PRODUCTION_2.1.0_CLEAN_SITE_INSTALL_AND_EMPTY_STATE; NOT_INDEPENDENTLY_VERIFIED_BY_EXPERIENCE",
   "evidenceMode": "MOCK_TRANSPORT/LOCAL only; no real Jira action performed",
   "next": [
-    "CORE owns public publisher name, support contact and privacy policy publication, as explicitly delegated by requester",
-    "CORE confirms actual production installation and authenticated read-only smoke; distribution link is reported available",
-    "Keep dependency/license release findings visible"
+    "Authenticated hosted journey beyond empty state remains outside independent EXPERIENCE evidence",
+    "CORE owns final public policy accuracy and dependency risk decisions; frontend triage documents unresolved advisory and pinned transitive version",
+    "External Rovo MCP client verification remains pending; workflow validator remains deferred"
   ],
   "coreRef": "6356a28",
   "deploymentRequest": {
@@ -69,7 +69,8 @@
     "reportedVersion": "2.1.0",
     "reportCommit": "10d75bb",
     "identityPolicyFulfilment": "REQUESTER_APPROVED_EXISTING_APP_OWNER; CORE reports using that identity",
-    "productionInstallation": "CORE reported none at 12:50 UTC; later distribution availability does not establish an installed production site"
+    "productionInstallation": "CORE reports successful production 2.1.0 installation on a second clean site (installation prefix 32676e8b); full identifier not supplied",
+    "installationReportCommit": "745fe69"
   },
   "developmentDeployment": {
     "status": "DEPLOYED_REPORTED_BY_CORE",
@@ -116,8 +117,8 @@
     "identityPolicyFulfilment": "REQUESTER_NOW_EXPLICITLY_APPROVED_EXISTING_APP_OWNER"
   },
   "publicDistribution": {
-    "status": "SHARING_AND_INSTALL_LINK_REPORTED_BY_CORE",
-    "reportCommit": "36203cd",
+    "status": "CLEAN_SITE_INSTALL_AND_EMPTY_STATE_REPORTED_BY_CORE",
+    "reportCommit": "745fe69",
     "documentation": "docs/submission/INSTALL_LINK.md",
     "publisherSupportPrivacyOwner": "CORE (explicit requester delegation)",
     "independentlyVerifiedByExperience": false

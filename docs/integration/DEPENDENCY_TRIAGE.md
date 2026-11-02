@@ -21,3 +21,5 @@ Other affected runtime entries include `glob@13.0.6` / `minimatch@10.2.6` throug
 ## Next useful gate
 
 CORE should assess the shared Zod remediation and bridge compatibility alongside the existing release findings. EXPERIENCE can test an agreed bridge/override candidate locally. Keep the pinned deployment candidate until that candidate has actual verification; do not use `npm audit fix --force` as a deployment decision. No Forge deployment, scope change, Jira mutation or credential access was performed for this audit.
+
+CORE follow-up `745fe69` records hackathon risk acceptance and defers the shared Zod 4 migration. Its reference to schema `.max()` bounds must not be interpreted as a demonstrated fix: this advisory specifically concerns oversized constrained collections. Frontend preflight bounds and Forge transport limits are distinct controls; backend mitigation effectiveness has not been established by EXPERIENCE. The advisory remains open despite that recorded release decision.
