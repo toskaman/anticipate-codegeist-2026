@@ -12,6 +12,7 @@ modules:
         - anticipate-get-graph
         - anticipate-simulate-retirement
         - anticipate-get-passport
+        - anticipate-check-plan-freshness
   action:
     - key: anticipate-get-graph
       name: Get evidence graph
@@ -51,6 +52,17 @@ modules:
           type: string
           required: true
           description: ANTICIPATE plan id
+    - key: anticipate-check-plan-freshness
+      name: Check plan freshness
+      function: rovoCheckFreshness
+      actionVerb: GET
+      description: Re-read the live Jira evidence behind a plan you own and report new, removed or unreadable dependencies since it was built. Makes no Jira changes.
+      inputs:
+        planId:
+          title: Plan id
+          type: string
+          required: true
+          description: ANTICIPATE plan id
   function:
     - key: resolver
       handler: index.handler
@@ -60,6 +72,8 @@ modules:
       handler: index.rovoSimulateRetirement
     - key: rovoGetPassport
       handler: index.rovoGetPassport
+    - key: rovoCheckFreshness
+      handler: index.rovoCheckFreshness
 resources:
   - key: main
     path: static/hello-world/build

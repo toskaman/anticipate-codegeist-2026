@@ -35,7 +35,9 @@ export class FakeJira implements JiraPort {
   async searchProjects() { return { items: [{ id: '10000', key: 'PAY', name: 'Payments', issueCount: this.issues.size }], isLast: true }; }
   async searchIssues(jql: string) {
     const m = /labels = "([^"]+)"/.exec(jql);
-    const items = [...this.issues.values()].filter((i) => !m || i.labels.includes(m[1]!)).map((i) => this.view(i));
+    const inList = /labels in \(([^)]*)\)/.exec(jql);
+    const wanted = inList ? [...inList[1]!.matchAll(/"([^"]+)"/g)].map((x) => x[1]!) : null;
+    const items = [...this.issues.values()].filter((i) => (wanted ? i.labels.some((l) => wanted.includes(l)) : !m || i.labels.includes(m[1]!))).map((i) => this.view(i));
     return { items, nextPageToken: null };
   }
   async getIssue(key: string): Promise<IssueFetch> {
