@@ -105,3 +105,5 @@ Teamwork Graph API allowlisting (request sent by the team). Production smoke dep
 | R15 | MEDIUM | Empty approval relied only on the resolver contract. | FIXED: service-level VALIDATION. |
 
 Tests: backend 63 (8 new adversarial tests: partial approval, BLOCKED completion, failed-after-verified, empty approval, cross-user read/approve/execute with zero Jira writes, anonymous caller, idempotency payload mismatch). Validator outage policy is still fail-open (documented, unchanged).
+
+Hosted proof (dev, 2 Nov 2026 23:24 CET, isolated project AVT): new plan `plan-650c2202...` on AVT-3, only the decision comment approved and executed (VERIFIED). Jira transition to "En cours" refused with HTTP 400: "...the latest prevention plan plan-650c2202-... is PARTIAL, not COMPLETED." Before the fix the same sequence produced COMPLETED.
