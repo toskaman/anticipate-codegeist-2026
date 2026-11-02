@@ -141,10 +141,10 @@ test("CORE cursor pagination deduplicates pages and project changes invalidate p
   ]);
   await candidates.selectOption("ABC-1");
   await page
-    .getByRole("button", { name: "Read evidence snapshot", exact: true })
+    .getByRole("button", { name: "Analyze dependencies", exact: true })
     .click();
   await expect(
-    page.getByRole("heading", { name: "Snapshot evidence", exact: true }),
+    page.getByRole("heading", { name: "Dependency map", exact: true }),
   ).toBeVisible();
   await page
     .getByRole("navigation")
@@ -152,7 +152,7 @@ test("CORE cursor pagination deduplicates pages and project changes invalidate p
     .click();
   await projects.selectOption("200");
   await expect(
-    page.getByRole("textbox", { name: "Root Jira issue key", exact: true }),
+    page.getByRole("textbox", { name: "Jira issue key", exact: true }),
   ).toHaveValue("");
   await expect(candidates).toHaveCount(0);
   await page
@@ -164,7 +164,7 @@ test("CORE cursor pagination deduplicates pages and project changes invalidate p
     ),
   ).toBeVisible();
   await expect(
-    page.getByRole("button", { name: "Read evidence snapshot", exact: true }),
+    page.getByRole("button", { name: "Analyze dependencies", exact: true }),
   ).toBeDisabled();
   await page
     .getByRole("navigation")
@@ -176,7 +176,7 @@ test("CORE cursor pagination deduplicates pages and project changes invalidate p
     ),
   ).toBeVisible();
   await expect(
-    page.getByRole("heading", { name: "Snapshot evidence", exact: true }),
+    page.getByRole("heading", { name: "Dependency map", exact: true }),
   ).toHaveCount(0);
 });
 for (const code of ["RATE_LIMITED", "PERMISSION_DENIED"] as const)
@@ -211,7 +211,7 @@ for (const code of ["RATE_LIMITED", "PERMISSION_DENIED"] as const)
       ),
     ).toBe(false);
     await page.screenshot({
-      path: `../../evidence/experience/core-night-followup/read-${code}-MOCK-1440.png`,
+      path: `../../evidence/experience/v3-redesign/transport/read-${code}-MOCK-1440.png`,
       fullPage: true,
     });
     await page
@@ -272,7 +272,7 @@ for (const unavailable of [false, true])
         .locator("option"),
     ).toHaveCount(1);
     await expect(
-      page.getByRole("button", { name: "Read evidence snapshot", exact: true }),
+      page.getByRole("button", { name: "Analyze dependencies", exact: true }),
     ).toBeDisabled();
   });
 
@@ -285,10 +285,10 @@ test("CORE manual root issue must belong to the selected project", async ({
     .getByRole("combobox", { name: "Jira project", exact: true })
     .selectOption("100");
   await page
-    .getByRole("textbox", { name: "Root Jira issue key", exact: true })
+    .getByRole("textbox", { name: "Jira issue key", exact: true })
     .fill("OTHER-9");
   await page
-    .getByRole("button", { name: "Read evidence snapshot", exact: true })
+    .getByRole("button", { name: "Analyze dependencies", exact: true })
     .click();
   await expect(page.getByRole("alert")).toContainText(
     "Choose an issue from the selected Jira project",

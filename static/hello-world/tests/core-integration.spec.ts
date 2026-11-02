@@ -192,6 +192,17 @@ async function mockedCore(
   });
   return calls;
 }
+/** Plan status is shown as a human label; exact hash and status stay in technical details. */
+async function expectPlan(page: Page, status: string, label: string) {
+  await expect(
+    page.getByRole("region", { name: "Plan summary" }),
+  ).toContainText(label);
+  const details = page.getByText("Plan technical details", { exact: true });
+  await details.click();
+  await expect(page.getByText("test-plan-hash", { exact: true })).toBeVisible();
+  await expect(page.getByText(status, { exact: true })).toBeVisible();
+  await details.click();
+}
 async function reachPlan(page: Page, theme: "light" | "dark" = "light") {
   await page.goto(`/tests/core-harness.html?theme=${theme}`);
   await page
@@ -204,34 +215,26 @@ async function reachPlan(page: Page, theme: "light" | "dark" = "light") {
     .getByRole("combobox", { name: "Change candidate", exact: true })
     .selectOption("ABC-1");
   await page
-    .getByRole("button", { name: "Read evidence snapshot", exact: true })
+    .getByRole("button", { name: "Analyze dependencies", exact: true })
     .click();
   await expect(
     page.getByRole("heading", { name: "Evidence Graph", exact: true }),
   ).toBeVisible();
-  await page.getByRole("button", { name: "Compare change scenarios" }).click();
+  await page.getByRole("button", { name: "Compare options" }).click();
   await page
     .getByRole("combobox", {
-      name: "Replacement node for scenario C",
+      name: "Replacement for option C",
       exact: true,
     })
     .selectOption("issue:ABC-3");
   await page
-    .getByRole("button", { name: "Run CORE comparison", exact: true })
+    .getByRole("button", { name: "Compare options", exact: true })
     .click();
-  await page
-    .getByRole("combobox", { name: "Selected CORE scenario", exact: true })
-    .selectOption("C-migrate-then-retire");
-  await page.getByRole("button", { name: "Review CORE policy checks" }).click();
-  await expect(
-    page.getByText("ACCESS_LIMITED: Consumer access is limited."),
-  ).toBeVisible();
-  await page
-    .getByRole("button", { name: "Generate selected scenario plan" })
-    .click();
-  await expect(
-    page.getByText("Plan hash: test-plan-hash · status PENDING_APPROVAL"),
-  ).toBeVisible();
+  await page.getByRole("radio", { name: /Migrate first/ }).check();
+  await page.getByRole("button", { name: "Check safeguards" }).click();
+  await expect(page.getByText("Consumer access is limited.")).toBeVisible();
+  await page.getByRole("button", { name: "Generate prevention plan" }).click();
+  await expectPlan(page, "PENDING_APPROVAL", "Awaiting approval");
 }
 for (const refusalAt of ["approvePlan", "executeApprovedPlan"] as const) {
   test(`CORE evidence change refusal at ${refusalAt} remains blocked after dismiss, refresh and reload`, async ({
@@ -249,7 +252,9 @@ for (const refusalAt of ["approvePlan", "executeApprovedPlan"] as const) {
     await page
       .getByRole("button", { name: "Approve selected actions", exact: true })
       .click();
-    await page.getByRole("button", { name: "Confirm", exact: true }).click();
+    await page
+      .getByRole("button", { name: "Record approval", exact: true })
+      .click();
     if (refusalAt === "executeApprovedPlan") {
       await expect(
         page.getByText(
@@ -258,11 +263,13 @@ for (const refusalAt of ["approvePlan", "executeApprovedPlan"] as const) {
       ).toBeVisible();
       await page
         .getByRole("button", {
-          name: "Execute backend-approved Jira actions",
+          name: "Execute approved actions",
           exact: true,
         })
         .click();
-      await page.getByRole("button", { name: "Confirm", exact: true }).click();
+      await page
+        .getByRole("button", { name: "Execute in Jira", exact: true })
+        .click();
     }
     await expect(
       page.getByRole("heading", {
@@ -288,13 +295,11 @@ for (const refusalAt of ["approvePlan", "executeApprovedPlan"] as const) {
       .click();
     await page
       .getByRole("button", {
-        name: "Refresh plan status and audit",
+        name: "Check execution status",
         exact: true,
       })
       .click();
-    await expect(
-      page.getByText("Plan hash: test-plan-hash · status EVIDENCE_CHANGED"),
-    ).toBeVisible();
+    await expectPlan(page, "EVIDENCE_CHANGED", "Evidence changed · re-review");
     await expect(
       page.getByRole("button", {
         name: "Approve selected actions",
@@ -303,7 +308,7 @@ for (const refusalAt of ["approvePlan", "executeApprovedPlan"] as const) {
     ).toBeDisabled();
     await expect(
       page.getByRole("button", {
-        name: "Execute backend-approved Jira actions",
+        name: "Execute approved actions",
         exact: true,
       }),
     ).toBeDisabled();
@@ -320,7 +325,7 @@ for (const refusalAt of ["approvePlan", "executeApprovedPlan"] as const) {
       .analyze();
     expect(axe.violations).toEqual([]);
     await page.screenshot({
-      path: `../../evidence/experience/continuous-safety/${refusalAt}-MOCK.png`,
+      path: `../../evidence/experience/v3-redesign/visual/30-${refusalAt}-MOCK.png`,
       fullPage: true,
     });
     await page.reload();
@@ -333,9 +338,7 @@ for (const refusalAt of ["approvePlan", "executeApprovedPlan"] as const) {
         exact: true,
       })
       .click();
-    await expect(
-      page.getByText("Plan hash: test-plan-hash · status EVIDENCE_CHANGED"),
-    ).toBeVisible();
+    await expectPlan(page, "EVIDENCE_CHANGED", "Evidence changed · re-review");
     await expect(
       page.getByRole("button", {
         name: "Approve selected actions",
@@ -344,23 +347,23 @@ for (const refusalAt of ["approvePlan", "executeApprovedPlan"] as const) {
     ).toBeDisabled();
     await expect(
       page.getByRole("button", {
-        name: "Execute backend-approved Jira actions",
+        name: "Execute approved actions",
         exact: true,
       }),
     ).toBeDisabled();
     expect(calls.filter((c) => c.operation === refusalAt)).toHaveLength(1);
     await page
       .getByRole("button", {
-        name: "Open CORE Prevention Passport",
+        name: "Open Prevention Passport",
         exact: true,
       })
       .click();
     await expect(
-      page.getByText("Plan status: EVIDENCE_CHANGED", { exact: true }),
+      page.getByText("Evidence changed · re-review", { exact: true }).first(),
     ).toBeVisible();
     const downloaded = page.waitForEvent("download");
     await page
-      .getByRole("button", { name: "Export CORE Passport JSON", exact: true })
+      .getByRole("button", { name: "Export Passport JSON", exact: true })
       .click();
     const downloadPath = await (await downloaded).path();
     expect(JSON.parse(await readFile(downloadPath!, "utf-8")).plan.status).toBe(
@@ -373,7 +376,7 @@ for (const refusalAt of ["approvePlan", "executeApprovedPlan"] as const) {
       .getByRole("button", { name: "Rebuild snapshot", exact: true })
       .click();
     await expect(
-      page.getByRole("heading", { name: "Choose a Jira change", exact: true }),
+      page.getByRole("heading", { name: "Analyze a change", exact: true }),
     ).toBeVisible();
   });
 }
@@ -414,7 +417,7 @@ for (const lost of [false, true])
     ).toHaveLength(0);
     await expect(
       page.getByRole("button", {
-        name: "Execute backend-approved Jira actions",
+        name: "Execute approved actions",
         exact: true,
       }),
     ).toBeDisabled();
@@ -424,7 +427,9 @@ for (const lost of [false, true])
     await page
       .getByRole("button", { name: "Approve selected actions", exact: true })
       .click();
-    await page.getByRole("button", { name: "Confirm", exact: true }).click();
+    await page
+      .getByRole("button", { name: "Record approval", exact: true })
+      .click();
     await expect(
       page.getByText("Backend approval recorded. No execution was requested."),
     ).toBeVisible();
@@ -440,11 +445,13 @@ for (const lost of [false, true])
     expect(String(approval.idempotencyKey).length).toBeGreaterThanOrEqual(16);
     await page
       .getByRole("button", {
-        name: "Execute backend-approved Jira actions",
+        name: "Execute approved actions",
         exact: true,
       })
       .click();
-    await page.getByRole("button", { name: "Confirm", exact: true }).click();
+    await page
+      .getByRole("button", { name: "Execute in Jira", exact: true })
+      .click();
     if (lost) {
       await expect(page.getByRole("alert")).toContainText("TIMEOUT");
       await expect(page.getByRole("alert")).toContainText(
@@ -455,13 +462,13 @@ for (const lost of [false, true])
         .click();
       await expect(
         page.getByRole("button", {
-          name: "Execute backend-approved Jira actions",
+          name: "Execute approved actions",
           exact: true,
         }),
       ).toBeDisabled();
       await page
         .getByRole("button", {
-          name: "Refresh plan status and audit",
+          name: "Check execution status",
           exact: true,
         })
         .click();
@@ -474,7 +481,7 @@ for (const lost of [false, true])
     ).toBeVisible();
     await expect(
       page.getByRole("button", {
-        name: "Execute backend-approved Jira actions",
+        name: "Execute approved actions",
         exact: true,
       }),
     ).toBeDisabled();
@@ -482,7 +489,7 @@ for (const lost of [false, true])
       calls.filter((c) => c.operation === "executeApprovedPlan"),
     ).toHaveLength(1);
     await page
-      .getByRole("button", { name: "Open CORE Prevention Passport" })
+      .getByRole("button", { name: "Open Prevention Passport" })
       .click();
     await expect(
       page.getByText(
@@ -490,9 +497,7 @@ for (const lost of [false, true])
       ),
     ).toBeVisible();
     const download = page.waitForEvent("download");
-    await page
-      .getByRole("button", { name: "Export CORE Passport JSON" })
-      .click();
+    await page.getByRole("button", { name: "Export Passport JSON" }).click();
     const exported = await download;
     expect(exported.suggestedFilename()).toBe("ANTICIPATE-test-passport.json");
     const exportedData = JSON.parse(
@@ -509,7 +514,7 @@ for (const lost of [false, true])
     expect(exportedData.executions[0].status).toBe("VERIFIED");
     expect(exportedData.approvals[0].actionIds).toEqual(["record:ABC-1"]);
     await page.screenshot({
-      path: `../../evidence/experience/core-integration/passport-transport-${lost ? "recovered" : "normal"}-1440.png`,
+      path: `../../evidence/experience/v3-redesign/transport/passport-transport-${lost ? "recovered" : "normal"}-1440.png`,
       fullPage: true,
     });
     await page.reload();
@@ -521,9 +526,7 @@ for (const lost of [false, true])
     await page
       .getByRole("button", { name: "Recover plan and execution status" })
       .click();
-    await expect(
-      page.getByText("Plan hash: test-plan-hash · status COMPLETED"),
-    ).toBeVisible();
+    await expectPlan(page, "COMPLETED", "Completed");
     expect(
       calls.filter((c) => c.operation === "executeApprovedPlan"),
     ).toHaveLength(1);
@@ -561,7 +564,7 @@ for (const width of [1440, 1024, 390])
       await mockedCore(page);
       await reachPlan(page, theme);
       await page
-        .getByRole("button", { name: "Open CORE Prevention Passport" })
+        .getByRole("button", { name: "Open Prevention Passport" })
         .click();
       for (const name of [
         "Mission Control",
@@ -591,13 +594,16 @@ for (const width of [1440, 1024, 390])
         expect(
           results.violations.map((v) => ({
             id: v.id,
-            nodes: v.nodes.map((n) => n.target),
+            nodes: v.nodes.map((n) => ({
+              target: n.target,
+              checks: n.any.map((check) => check.data),
+            })),
           })),
           name,
         ).toEqual([]);
         await page.locator("#main").focus();
         await page.screenshot({
-          path: `../../evidence/experience/core-integration/${name.toLowerCase().replace(/ /g, "-")}-transport-${theme}-${width}.png`,
+          path: `../../evidence/experience/v3-redesign/transport/${name.toLowerCase().replace(/ /g, "-")}-transport-${theme}-${width}.png`,
           fullPage: true,
         });
       }
@@ -610,7 +616,9 @@ async function approveCurrent(page: Page) {
   await page
     .getByRole("button", { name: "Approve selected actions", exact: true })
     .click();
-  await page.getByRole("button", { name: "Confirm", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Record approval", exact: true })
+    .click();
   await expect(
     page.getByText("Backend approval recorded. No execution was requested."),
   ).toBeVisible();
@@ -640,11 +648,13 @@ test("CORE stale approval never unlocks execution", async ({ page }) => {
   await page
     .getByRole("button", { name: "Approve selected actions", exact: true })
     .click();
-  await page.getByRole("button", { name: "Confirm", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Record approval", exact: true })
+    .click();
   await expect(page.getByRole("alert")).toContainText("STALE_APPROVAL");
   await expect(
     page.getByRole("button", {
-      name: "Execute backend-approved Jira actions",
+      name: "Execute approved actions",
       exact: true,
     }),
   ).toBeDisabled();
@@ -659,9 +669,7 @@ test("CORE changing scenario invalidates the prior reviewed plan", async ({
     .getByRole("navigation")
     .getByRole("button", { name: "Scenario Lab", exact: true })
     .click();
-  await page
-    .getByRole("combobox", { name: "Selected CORE scenario", exact: true })
-    .selectOption("A-remove-now");
+  await page.getByRole("radio", { name: /Remove now/ }).check();
   await page
     .getByRole("navigation")
     .getByRole("button", { name: "Prevention Plan", exact: true })
@@ -673,7 +681,7 @@ test("CORE changing scenario invalidates the prior reviewed plan", async ({
   ).toBeVisible();
   await expect(
     page.getByRole("button", {
-      name: "Execute backend-approved Jira actions",
+      name: "Execute approved actions",
       exact: true,
     }),
   ).toHaveCount(0);
@@ -686,11 +694,13 @@ test("CORE failed execution remains failed and is not retried", async ({
   await approveCurrent(page);
   await page
     .getByRole("button", {
-      name: "Execute backend-approved Jira actions",
+      name: "Execute approved actions",
       exact: true,
     })
     .click();
-  await page.getByRole("button", { name: "Confirm", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Execute in Jira", exact: true })
+    .click();
   await expect(
     page.getByText("record:ABC-1: FAILED · attempt 1", { exact: false }),
   ).toBeVisible();
@@ -699,7 +709,7 @@ test("CORE failed execution remains failed and is not retried", async ({
   ).toHaveCount(0);
   await expect(
     page.getByRole("button", {
-      name: "Execute backend-approved Jira actions",
+      name: "Execute approved actions",
       exact: true,
     }),
   ).toBeDisabled();
@@ -723,11 +733,13 @@ test("CORE uncertain execution survives reload even with no status records", asy
   });
   await page
     .getByRole("button", {
-      name: "Execute backend-approved Jira actions",
+      name: "Execute approved actions",
       exact: true,
     })
     .click();
-  await page.getByRole("button", { name: "Confirm", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Execute in Jira", exact: true })
+    .click();
   await expect(page.getByRole("alert")).toContainText("TIMEOUT");
   await page.reload();
   await page
@@ -737,12 +749,10 @@ test("CORE uncertain execution survives reload even with no status records", asy
   await page
     .getByRole("button", { name: "Recover plan and execution status" })
     .click();
-  await expect(
-    page.getByText("Plan hash: test-plan-hash · status APPROVED"),
-  ).toBeVisible();
+  await expectPlan(page, "APPROVED", "Approved · not executed");
   await expect(
     page.getByRole("button", {
-      name: "Execute backend-approved Jira actions",
+      name: "Execute approved actions",
       exact: true,
     }),
   ).toBeDisabled();
@@ -785,9 +795,7 @@ test("CORE expired snapshot still permits audit and status recovery", async ({
   await expect(
     page.getByRole("checkbox", { name: "Approve record:ABC-1", exact: true }),
   ).toBeDisabled();
-  await page
-    .getByRole("button", { name: "Open CORE Prevention Passport" })
-    .click();
+  await page.getByRole("button", { name: "Open Prevention Passport" }).click();
   await expect(
     page.getByText(
       "Mode LIVE · snapshot test-snapshot · plan test-plan · scenario C-migrate-then-retire",

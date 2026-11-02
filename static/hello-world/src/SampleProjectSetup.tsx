@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import type { SampleProjectPlan } from "@anticipate/contracts";
 import { CoreClientError, ForgeClient } from "./api/ForgeClient";
-import ConfirmDialog from "./ConfirmDialog";
+import DecisionDialog from "./components/DecisionDialog";
+import { Panel } from "./components/ui";
 import CoreOperationError, {
   type OperationFailure,
 } from "./CoreOperationError";
@@ -83,11 +84,12 @@ export default function SampleProjectSetup({
     }
   }
   return (
-    <section className="panel">
-      <fieldset disabled={disabled || busy}>
+    <Panel title="Demo project preparation" className="ax-sample-setup">
+      <fieldset className="ax-sample-fields" disabled={disabled || busy}>
         <legend>Sample Jira data</legend>
-        <h2>Demo project preparation</h2>
+
         <button
+          className="ax-btn"
           disabled={busy}
           onClick={() => setOpen(!open)}
           aria-expanded={open}
@@ -115,6 +117,7 @@ export default function SampleProjectSetup({
               </p>
             )}
             <button
+              className="ax-btn"
               disabled={busy || !projectKey || !canPreview}
               onClick={() => void run(false)}
             >
@@ -178,6 +181,7 @@ export default function SampleProjectSetup({
                   </p>
                 ) : null}
                 <button
+                  className="ax-btn"
                   disabled={
                     busy || !previewed || !result.canCreate || !canCreate
                   }
@@ -189,6 +193,7 @@ export default function SampleProjectSetup({
                   <p>Sample creation is unavailable for this installation.</p>
                 )}
                 <button
+                  className="ax-btn"
                   disabled={busy || !result.rootIssueKey}
                   onClick={() =>
                     result.rootIssueKey &&
@@ -204,16 +209,25 @@ export default function SampleProjectSetup({
               </>
             )}
             {confirmed && result && (
-              <ConfirmDialog
+              <DecisionDialog
+                icon="target"
+                tone="danger"
+                confirmLabel="Create sample data"
                 title="Create labelled sample tickets in Jira?"
-                description={`Project ${projectKey}: create the missing entries shown in the preview (up to six tickets and four relations). Existing sample entries are reused. This is a real Jira write, not a simulation. It does not approve or execute a prevention plan.`}
                 onCancel={() => setConfirmed(false)}
                 onConfirm={() => void run(true)}
-              />
+              >
+                <p>
+                  Project {projectKey}: create the missing entries shown in the
+                  preview (up to six tickets and four relations). Existing
+                  sample entries are reused. This is a real Jira write, not a
+                  simulation. It does not approve or execute a prevention plan.
+                </p>
+              </DecisionDialog>
             )}
           </>
         )}
       </fieldset>
-    </section>
+    </Panel>
   );
 }

@@ -176,6 +176,63 @@ describe("CORE 0.2.0 Forge boundary", () => {
       ),
     ).rejects.toMatchObject({ code: "INVALID_RESPONSE" });
   });
+  it("waits for a 20-second sample creation instead of reporting a false 12-second timeout", async () => {
+    vi.useFakeTimers();
+    try {
+      const sample = {
+        projectKey: "ABC",
+        issueType: "Task",
+        canCreate: true,
+        missingPermissions: [],
+        items: [],
+        links: [],
+        rootIssueKey: "ABC-1",
+        replacementIssueKey: null,
+        note: "Created",
+      };
+      const transport = vi.fn(
+        () =>
+          new Promise<unknown>((resolve) =>
+            setTimeout(() => resolve(response(sample)), 20000),
+          ),
+      );
+      const result = new ForgeClient(transport).request("createSampleProject", {
+        projectKey: "ABC",
+        confirm: true,
+      });
+      const completed = vi.fn();
+      void result.then(completed);
+      await vi.advanceTimersByTimeAsync(12001);
+      expect(completed).not.toHaveBeenCalled();
+      await vi.advanceTimersByTimeAsync(8000);
+      await expect(result).resolves.toEqual(sample);
+      expect(transport).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+  it("bounds sample creation at 60 seconds and requires preview recovery without retrying", async () => {
+    vi.useFakeTimers();
+    try {
+      const transport = vi.fn(() => new Promise<unknown>(() => {}));
+      const assertion = expect(
+        new ForgeClient(transport).request("createSampleProject", {
+          projectKey: "ABC",
+          confirm: true,
+        }),
+      ).rejects.toMatchObject({
+        code: "TIMEOUT",
+        message: expect.stringContaining(
+          "may still be running. Preview sample data",
+        ),
+      });
+      await vi.advanceTimersByTimeAsync(60001);
+      await assertion;
+      expect(transport).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
   it("times out without retrying a write", async () => {
     vi.useFakeTimers();
     try {

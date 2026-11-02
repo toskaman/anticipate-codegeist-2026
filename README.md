@@ -1,99 +1,87 @@
-# Forge Hello World
+# ANTICIPATE
 
-This project contains a Forge app written in Javascript that displays `Hello World!` in a global full page with Custom UI. 
+**Understand the dependencies before changing them. Approve preventive actions. Verify what actually happened.**
 
-See [developer.atlassian.com/platform/forge/](https://developer.atlassian.com/platform/forge) for documentation and tutorials explaining Forge.
+ANTICIPATE is a Forge application for Jira built for Codegeist 2026. It turns readable Jira evidence into a dependency graph, compares deterministic change scenarios, explains policy decisions and records approvals and verified execution outcomes in a Prevention Passport. Unknown evidence stays unknown; a recommendation is never an approval.
 
-See [Global full page](https://developer.atlassian.com/platform/forge/manifest-reference/modules/global-full-page/) for
-information on how to use this module. 
+[Install in Jira — judge instructions](docs/submission/INSTALL_LINK.md) · [Current delivery status](docs/STATUS.md) · [CORE integration contract](docs/integration/CORE_CLIENT_INTEGRATION.md) · [Jury walkthrough](docs/jury/JURY_UI_SHOWCASE.md)
 
-## Requirements
+## A complete decision journey
 
-See [Set up Forge](https://developer.atlassian.com/platform/forge/set-up-forge/) for instructions to get set up.
+1. **Mission Control:** choose an accessible project and the Jira issue describing the change; capture a snapshot.
+2. **Evidence Graph:** inspect confirmed, inferred and unknown relationships, their sources and a keyboard-accessible list. Rendering uses bounded windows rather than an unreadable wall of nodes.
+3. **Scenario Lab:** compare removal, temporary retention and migration first against the same snapshot.
+4. **Decision Firewall:** understand blocking policies and unresolved questions. Administrator-configured Jira workflow enforcement is a separate optional capability.
+5. **Prevention Plan:** select actions, explicitly approve them and separately confirm execution. The backend authorizes actions and verifies their results.
+6. **Prevention Passport:** inspect evidence, alternatives, approvals, per-action outcomes and the decision timeline; export JSON or print.
+7. **Settings:** distinguish manifest declarations, backend-reported availability and what has actually been verified.
 
-## Development
+If dependencies change after a plan was reviewed, approval/execution is refused. The UI displays the backend reason and reported added/removed relations or newly unknown evidence. It blocks the old plan and offers rebuilding the snapshot and reviewing a new comparison.
 
-1. **Install top-level dependencies:**
+## Real browser captures
 
-   ```sh
-   npm install
-   ```
+These are genuine Playwright screenshots of the connected UI running locally with **MOCK_TRANSPORT**, not design mockups or proof of hosted Jira execution. Their visible test banner identifies the provenance. CORE's separate hosted reports are in [the evidence pack](docs/evidence/EVIDENCE_PACK.md).
 
-2. **Install frontend dependencies:**
+### Evidence Graph
 
-   ```sh
-   cd static/hello-world
-   npm install
-   ```
+![Evidence Graph: dependency map, provenance inspector and accessible evidence list](evidence/experience/v3-redesign/visual/02-evidence-graph-desktop-light.png)
 
-3. **Start the Vite dev server:**
+### Scenario comparison
 
-   ```sh
-   cd static/hello-world
-   npm start
-   ```
+![Scenario Lab: removal, temporary retention and migration-first alternatives](evidence/experience/v3-redesign/visual/03-scenario-lab-desktop-dark.png)
 
-   This starts the Vite dev server on `http://localhost:3000` with hot module
-   replacement (HMR).
+### Prevention Passport
 
-4. **Start the Forge tunnel** (from the repo root, in a separate terminal):
+![Prevention Passport: decision evidence, approvals and per-action execution outcomes](evidence/experience/v3-redesign/visual/11-prevention-passport-desktop-light.png)
 
-   ```sh
-   forge tunnel
-   ```
+[All seven screens, mobile views and error states](docs/design/UI_VISUAL_QA.md) · [Evidence-changed refusal capture](evidence/experience/v3-redesign/visual/30-executeApprovedPlan-MOCK.png) · [Sample preparation result capture](evidence/experience/v3-redesign/visual/31-sample-result-MOCK-390.png)
 
-   The tunnel proxies the frontend to the Vite dev server instead of the built files. 
-   Edits to the frontend are reflected live via HMR — no rebuild or page reload needed.
+## Judges: prepare sample Jira data
 
-   > **Note:** Opening `http://localhost:3000` directly will fail, because
-   > `@forge/bridge` only works inside the Atlassian product. Always load the app
-   > through the product page while tunneling. Tunneling Custom UI is only
-   > supported in Chrome and Firefox. If you change `manifest.yml`, run
-   > `forge deploy` so the tunnel picks up the change.
+After installing, open ANTICIPATE and choose an existing Jira project where you may create and link issues. In Mission Control, click **Prepare a demo project** (the English UI label for « Préparer un projet de démo »), then **Preview sample data**. Review the proposed labelled tickets and links before explicitly confirming **Create sample data**. Use **Analyze <issue key>** to begin the journey.
 
-### Building for deploy
+Opening or previewing does not write Jira. Confirmation creates real labelled sample issues in the selected project; it does not create a Jira project. Existing sample entries are reused, and no automatic cleanup is performed. If no project is accessible, create one in Jira or ask an administrator for access.
 
-```sh
-cd static/hello-world
-npm run build     
-```
+Sample creation may take 15–20 seconds according to CORE's hosted report. The client allows **60 seconds** for this operation. If the response still times out, creation may continue: click **Preview sample data** again to inspect existing results before any further creation. The UI never automatically resubmits the write or assumes success from a timeout.
 
-### Quick deploy
+## Develop locally on Windows
 
-- Deploy your app by running:
-```
-forge deploy
-```
-
-- Install your app in an Atlassian site by running:
-```
-forge install
-```
-
-### Notes
-- Use the `forge deploy` command when you want to persist code changes.
-- Use the `forge install` command when you want to install the app on a new site.
-- Once the app is installed on a site, the site picks up the new app changes you deploy without needing to rerun the install command.
-
-## Support
-
-See [Get help](https://developer.atlassian.com/platform/forge/get-help/) for how to get help and provide feedback.
-
-## Local EXPERIENCE frontend
-
-The existing frontend now contains the local ANTICIPATE demo. From the repository root:
+Use the existing checkout; do not register another Forge app. The GitHub workflow uses Node 22; the frontend requires the Node version supported by the pinned Vite release (see package metadata).
 
 ```powershell
-cd static/hello-world
+Set-Location -LiteralPath 'C:\Users\Orpheane\Desktop\PROJECT-ANTIGRAVITY\ANTICIPATE'
+npm ci
+Set-Location -LiteralPath 'static\hello-world'
 npm ci
 npm start -- --host 127.0.0.1
 ```
 
-Open http://127.0.0.1:3000. Demo fixtures require no credentials and perform no Atlassian writes. Scripts: typecheck, test, build, test:browser (first run: npx playwright install chromium). Build output remains static/hello-world/build. See docs/STATUS.md for verified progress and remaining work; docs/integration for backend and Git handoff. The production/host iframe entry now uses CORE 0.2.0; no authenticated hosted validation or deployment is claimed.
+Open `http://127.0.0.1:3000` for the isolated development fixture prototype. It performs no Atlassian writes and does not demonstrate the connected hosted journey. In a Forge iframe, the app loads `ForgeApp` → `CoreWorkspace` with the real Forge client and shared contracts; there is no production fixture fallback. A standalone production preview cannot supply an authenticated Forge bridge.
 
-## Current frontend checks and guide
+[Frontend guide and architecture](docs/README.md) · [Build/test evidence and limitations](docs/design/UI_RELEASE_READINESS.md)
 
-The detailed local developer guide is [docs/README.md](docs/README.md). It covers installation, architecture, provisional contracts, retained template files and limitations. Additional frontend scripts now include lint, format and format:check. Current presentation copy is in docs/jury/PRESENTATION.md; consult docs/STATUS.md for verified completion rather than the original template README.
+## Checks
 
+From `static/hello-world`:
 
-CORE 0.2.0 is merged and the Forge client is wired. See [connected frontend handoff](docs/integration/CORE_CLIENT_INTEGRATION.md). Local Vite at top level remains an isolated authored demo; inside a Forge iframe (including a tunnel), the connected entry loads instead.
+```powershell
+npm run typecheck
+npm run lint
+npm run format:check
+npm test
+npm run build
+npx playwright install chromium
+npx playwright test --workers=1
+```
+
+From the repository root: `npm run typecheck`, `npm test`, `npx vitest run --root packages/contracts` and `npx vitest run --root packages/simulation-core`.
+
+The sample-timeout follow-up passed 49 frontend unit tests; the full UI v3 baseline passed 72 Chromium tests. Exact final results, engine scope and retry history are recorded in the release report and PR. CI runs CORE checks and the frontend install/build; local browser/axe checks are separate evidence.
+
+## Ownership and limits
+
+EXPERIENCE owns the frontend and its documentation. CORE owns the backend, shared contracts, manifest, Forge identity, deployment and authenticated hosted acceptance. This branch does not register/deploy apps or merge pull requests.
+
+CORE's newer upgrade operation and read-only MCP tool are available through the backend/Rovo integration; the frontend scenario picker currently presents the retirement journey. Teamwork Graph availability depends on backend capabilities and external enablement. Local tests do not prove live permissions, Jira mutations, host sizing/themes or production readiness. Native screen-reader/zoom testing and long stability soaks remain outstanding; dependency and license findings are documented in the release report.
+
+For public support, publisher and privacy details, use the [installation information](docs/submission/INSTALL_LINK.md) and CORE-maintained [privacy policy](docs/legal/PRIVACY.md) and [terms](docs/legal/TERMS.md).

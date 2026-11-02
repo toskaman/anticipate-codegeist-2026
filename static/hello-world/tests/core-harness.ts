@@ -3,7 +3,7 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 import CoreWorkspace from "../src/CoreWorkspace";
 import { ForgeClient } from "../src/api/ForgeClient";
-import "../src/style.css";
+import "../src/styles/anticipate.css";
 const client = new ForgeClient(
   async (operation, input) =>
     (

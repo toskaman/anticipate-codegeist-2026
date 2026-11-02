@@ -1,39 +1,21 @@
-# Local frontend developer guide
+# Frontend developer guide
 
-## Prerequisites and startup
+Use the [project README](../README.md) for Windows setup, judge sample preparation, genuine screenshots and check commands. [STATUS](STATUS.md) and [release readiness](design/UI_RELEASE_READINESS.md) record current verification; older reports retain their dated scope.
 
-Use Node 24 LTS, at least 24.0 (the installed development machine uses 26.7.0). From the repository root, enter static/hello-world and run npm ci, then npm start -- --host 127.0.0.1. Open http://127.0.0.1:3000. No credentials or separate backend are required. Build with npm run build; static assets are emitted to static/hello-world/build with relative URLs, matching the existing manifest resource. Do not modify manifest.yml for local development.
+## Two separate entry paths
 
-## Repeatable checks
+`static/hello-world/src/index.jsx` selects the isolated `App.tsx` fixture prototype for standalone development, or `ForgeApp.tsx` for production and Forge-hosted development. The prototype never mutates Atlassian. The connected entry uses the Forge bridge and fails explicitly outside a supported installation; it never substitutes fixtures.
 
-Run npm run typecheck, npm run lint, npm run format:check, npm test, npm run test:browser and npm run build from static/hello-world. On first browser setup run npx playwright install chromium. npm run format applies the repository formatter. Browser results go to test-results; screenshots go to the repository evidence folder. Browser tests use the running local server when available. Component Showcase appears in development navigation only and has reproducible empty/error/loading previews.
+`CoreWorkspace.tsx` is the UI v3 composition root. `app/useCoreWorkflow.ts` owns operation state, snapshot/plan identity, approval and execution guards, recovery, evidence-drift refusal and sample busy/replacement state. `app/journey.ts` derives navigation state from actual artifacts. `features/` contains the seven screens; `components/` holds shared UI and confirmation dialogs; `styles/anticipate.css` provides scoped styles. The lazy graph renders bounded 8/20/36-node windows, discloses off-window edges and offers an accessible list.
 
-## Architecture and trust
+## CORE boundary and slow operations
 
-App.tsx composes screens and local state. domain.ts holds frontend fixture data only; legacy workflow transitions and data providers have been removed. src/api/provisional-contracts.ts defines the single AnticipateClient boundary and shared runtime schemas used by FixtureClient and ForgeClient. adapters.ts only composes view data from that client, requiring common data mode, snapshot and provenance. schemas.ts re-exports those same definitions for compatibility. useResource.ts ignores obsolete responses after dependency changes/unmount. Graph.tsx lazily loads React Flow and offers a keyboard-accessible list alternative. ActionReview.tsx handles selected actions and explicit backend confirmations. PassportView.tsx validates reports and exports the displayed client payload. ConfirmDialog.tsx handles modal keyboard focus and restoration. ErrorBoundary.tsx provides reload/navigation recovery for render failures.
+`api/ForgeClient.ts` validates inputs and LIVE envelopes with `@anticipate/contracts`. Provisional schemas serve only the fixture prototype. It preserves structured errors, correlates artifacts and refuses malformed or fixture responses in LIVE mode. Default request observation is 12 seconds; confirmed sample creation gets 60 seconds because CORE reports 15–20 seconds of sequential Jira writes. An explicitly injected timeout remains available to the test harness. Timing out or aborting observation does not cancel or roll back server work. Never automatically retry a mutation; re-preview sample data or recover plan execution status first.
 
-The local workflow lives in memory and resets on page reload. Theme preference alone persists in localStorage. Fictional evidence references describe authored fixtures, not verified source files. Fixture approval requests are rejected as requiring a live backend. No simulated approval/execution success remains in the main UI; unknown support usage remains unknown. All render text uses React escaping; no raw HTML rendering is used. Demo mode never calls Jira/Confluence and requires no secrets.
+Evidence refusal details are rendered on Plan, Firewall and Passport. Refused plans cannot be re-approved or executed, including after refresh/recovery. Rebuild a snapshot and compare again. Sample creation requires a read-only preview and separate confirmation in an accessible existing Jira project.
 
-## Integration and ownership
+## Verification
 
-EXPERIENCE owns static/hello-world and frontend documentation; CORE owns backend, manifest and deployments. Keep existing registration unchanged. Replace provisional contracts after agreement with CORE. See integration/FORGE_HANDOFF.md and integration/GITHUB_HANDOFF.md. Forge mode fails explicitly until those contracts exist. Browser demo results do not prove live Forge compatibility, CSP compatibility or actual authorization.
+Run frontend TypeScript, lint, formatting, unit tests, build and Playwright before handoff. `npm run test:browser` builds and starts the configured local test servers; one worker avoids the harness's intentionally short request timeout under concurrent load. Install Chromium first; Firefox/WebKit are needed for scoped engine runs. Browser captures use explicit MOCK_TRANSPORT provenance. See [visual QA](design/UI_VISUAL_QA.md) for native screenshots and [release readiness](design/UI_RELEASE_READINESS.md) for exact results and known retries.
 
-## Limitations and source preservation
-
-The template's original App.jsx is preserved but unused; index.jsx loads App.tsx only in development and ForgeApp.tsx for production. Do not restore the template's automatic bridge call into demo startup. No AI inference or backend simulation runs. Scenarios are authored fixtures, and custom parameters are unavailable. Dependency audits include the retained bridge; review actual reports before integration. The current work has no remote push or PR. See STATUS.md for remaining verification and known limitations.
-
-## V2 production boundary
-
-npm start serves the development-only fixture prototype on port 3000. npm run build produces the Forge production access/capability interface, which has no fixture fallback. npm run preview -- --host 127.0.0.1 --port 3001 previews that build locally; it intentionally reports PENDING_BACKEND until reviewed CORE resolver bindings are configured. npm run test:browser builds first and tests both development and production servers. Host theming is implemented but requires Forge-hosted verification. See coordination/frontend-integration-requests.md for the exact backend dependency list.
-
-
-
-Graph QA: docs/design/GRAPH_QA.md records relationship/provenance semantics, rendering bounds, limitations and the local baseline. Run npm run benchmark:graph for a separate synthetic model benchmark; this is not included in npm test and is not a browser/Forge performance claim. The benchmark and scripts are covered by formatting/lint/type checks.
-
-Reliability and research: tests/reliability.spec.ts measures local browser interaction samples and 30 warmed route cycles; docs/design/RELIABILITY.md explains limits. Product/competitive hypotheses and primary sources are in docs/product/RESEARCH.md. Run npm run licenses:inventory for the installed dependency inventory and generated public notices; unresolved license paths and custom Forge terms are documented in docs/design/ASSET_LICENSES.md.
-
-
-Latest milestone: [performance, visual quality and CORE readiness](design/PERFORMANCE_VISUAL_CORE.md), [CORE integration requirements](integration/CORE_INTEGRATION_REQUIREMENTS.md).
-
-
-Current connected frontend: [CORE 0.2.0 integration, tests and hosted gates](integration/CORE_CLIENT_INTEGRATION.md). Production uses the shared contracts; provisional schemas now serve only the authored local prototype.
+Build output, node_modules and test-results stay untracked. Preserve unrelated user outputs. Only CORE registers, deploys or changes the existing Forge app. Hosted acceptance, permissions, real Jira outcomes and native assistive-technology testing are separate from local checks.
