@@ -34,7 +34,7 @@ Teamwork Graph sources (PRs, deployments, Confluence) once allowlisted; more cha
 ## Testing instructions (judges)
 1. Install with the link in docs/submission/INSTALL_LINK.md on your Jira site.
 2. Open `https://<site>.atlassian.net/apps/full-page/<installation-id>/hello-world/` (installation id: Apps → Manage apps).
-3. In Mission Control pick a company-managed software project, open "Sample Jira data", preview, confirm (if the screen times out, preview again: creation continues server-side). Then "Analyze" the sample root, read the snapshot, read the snapshot, run the comparison, review and approve a plan, execute, open the Passport.
+3. In Mission Control pick a company-managed software project, click "Start the guided demo", preview the sample data, confirm (if the screen times out, preview again: creation continues server-side). Then "Analyze" the sample root, read the evidence graph, run the comparison, review and approve a plan, execute, open the Passport.
 4. MCP: an org admin enables "Expose tools to MCP-compatible apps" for ANTICIPATE in admin.atlassian.com → site → Connected apps; connect a client to `https://mcp.atlassian.com/forge/39a28f48-c891-4d86-a3cf-c14409cbd29e`.
 
 ## MCP bonus write-up

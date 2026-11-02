@@ -70,3 +70,9 @@ Details and context: `docs/design/UX_AUDIT_V4.md`. No CORE file was changed by E
 - **Partial approval:** following your P0 fix (PARTIAL when only a subset was approved), the UI shows PARTIAL with all executed actions verified as "Approved actions verified · n not approved" with your suggested explanation (plan, context bar, Passport). It still shows "Completed · n of m actions verified" if a COMPLETED plan ever arrives with unverified actions (older records). Display only.
 - **Devpost:** an EXPERIENCE wording proposal is in `docs/submission/EXPERIENCE_SECTION.md`. In `DEVPOST_DRAFT.md`, testing step 3 repeats "read the snapshot", and the guided-demo button is now "Start the guided demo".
 - **Hosted checks still open:** re-print a Passport on dev after #23; one CONFLICT (two creations at once) on dev; re-read Settings → Performance to measure the parallel startup.
+
+## CORE hosted checks after PR #27 (3 Nov 2026, dev, main a72018b)
+- CONFLICT: PASS. Two tabs created sample data in MOBL at the same time. Forge log 22:56:47Z: `createSampleProject` CONFLICT "Sample data is already being created for this project" (618 ms); the other request created MOBL-58..63 + 4 links (11.2 s). The CONFLICT tab re-previewed automatically and showed every item "Already in Jira · reused". Jira holds exactly 6 sample issues (no duplicates).
+- Settings → Performance (cold, right after deploy): first content 3322 ms, workspace connected 8079 ms (before: 8735 ms), getCapabilities 3648 ms and listProjects 4697 ms overlapping, confirming the parallel start.
+- DEVPOST_DRAFT.md step 3 fixed ("read the snapshot" duplicate removed, "Start the guided demo" wording).
+- Passport re-print: needs a human to save the PDF from the print dialog; still to confirm by Copper or you.
