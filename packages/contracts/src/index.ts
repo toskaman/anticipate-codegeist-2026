@@ -236,6 +236,12 @@ export const SampleProjectPlan = z.object({
 export type SampleProjectPlan = z.infer<typeof SampleProjectPlan>;
 
 // ---------- operation catalogue ----------
+/** Admin-controlled behaviour of the Jira workflow validator when ANTICIPATE cannot verify a decision (outage). */
+export const ValidatorPolicy = z.object({
+  onOutage: z.enum(['ALLOW', 'BLOCK']), updatedBy: Id.nullable(), updatedAt: IsoDate.nullable(), canEdit: z.boolean()
+});
+export type ValidatorPolicy = z.infer<typeof ValidatorPolicy>;
+
 export const OPERATIONS = {
   getCapabilities: { input: z.object({}), output: CapabilityAvailability },
   listProjects: { input: z.object({ cursor: z.string().nullable().default(null) }), output: z.object({ items: z.array(ProjectSummary), page: PageInfo }) },
@@ -252,6 +258,8 @@ export const OPERATIONS = {
   getPolicies: { input: z.object({}), output: z.array(PolicyRule) },
   checkPlanFreshness: { input: z.object({ planId: Id }), output: EvidenceDrift },
   previewSampleProject: { input: z.object({ projectKey: z.string().regex(/^[A-Z][A-Z0-9_]+$/) }), output: SampleProjectPlan },
-  createSampleProject: { input: z.object({ projectKey: z.string().regex(/^[A-Z][A-Z0-9_]+$/), confirm: z.literal(true) }), output: SampleProjectPlan }
+  createSampleProject: { input: z.object({ projectKey: z.string().regex(/^[A-Z][A-Z0-9_]+$/), confirm: z.literal(true) }), output: SampleProjectPlan },
+  getValidatorPolicy: { input: z.object({}), output: ValidatorPolicy },
+  setValidatorPolicy: { input: z.object({ onOutage: z.enum(['ALLOW', 'BLOCK']) }), output: ValidatorPolicy }
 } as const;
 export type OperationName = keyof typeof OPERATIONS;

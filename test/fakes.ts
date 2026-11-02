@@ -46,6 +46,8 @@ export class FakeJira implements JiraPort {
     return i ? { kind: 'ok', issue: this.view(i) } : { kind: 'not_found' };
   }
   async myPermissions(_p: string, ps: string[]) { return Object.fromEntries(ps.map((p) => [p, !!this.perms[p]])); }
+  globalPerms: Record<string, boolean> = {};
+  async globalPermissions(ps: string[]) { return Object.fromEntries(ps.map((p) => [p, !!this.globalPerms[p]])); }
   async createIssue(i: { projectKey: string; summary: string; labels: string[] }) {
     this.writes.create++; const key = `${i.projectKey}-${this.seq++}`; this.add(key, i.summary, { labels: i.labels }); return { key };
   }

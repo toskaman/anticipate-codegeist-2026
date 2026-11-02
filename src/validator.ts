@@ -42,3 +42,29 @@ export function decideTransition(issue: { labels: string[]; links: Link[] } | nu
   if (linksDigest(issue.links) !== decision.linksDigest) return block(`its dependency links changed after plan ${decision.planId} was verified`);
   return { result: true };
 }
+
+/**
+ * Full validator run with an explicit outage policy. Any failure to read the issue or the decision is an outage.
+ * Policy ALLOW (default): the transition passes and the degradation is logged. Policy BLOCK (opt-in by a Jira admin):
+ * the transition is refused with a message that names the outage and the recovery path. If even the policy cannot be
+ * read, ALLOW applies, so a full storage outage can never lock every gated workflow.
+ */
+export async function runValidator(key: string, io: {
+  readIssue(k: string): Promise<{ kind: string; issue?: { labels: string[]; links: Link[] } }>;
+  readDecision(k: string): Promise<DecisionRecord | undefined>;
+  readPolicy(): Promise<{ onOutage?: string } | undefined>;
+  log(fields: Record<string, unknown>): void;
+  now?: Date;
+}): Promise<{ result: boolean; errorMessage?: string }> {
+  try {
+    const issue = await io.readIssue(key);
+    const decision = await io.readDecision(key);
+    return decideTransition(issue.kind === 'ok' && issue.issue ? issue.issue : null, decision, key, io.now ?? new Date());
+  } catch (e) {
+    let policy = 'ALLOW';
+    try { policy = (await io.readPolicy())?.onOutage === 'BLOCK' ? 'BLOCK' : 'ALLOW'; } catch { policy = 'ALLOW'; }
+    io.log({ app: 'anticipate', op: 'validateTransition', outage: true, policy, detail: e instanceof Error ? e.message.slice(0, 200) : 'error' });
+    if (policy === 'BLOCK') return { result: false, errorMessage: `ANTICIPATE Decision Firewall: ${key} cannot be verified right now (ANTICIPATE or Jira is unavailable) and your administrator chose to block transitions during outages. Try again in a few minutes, or ask a Jira administrator to switch the outage policy to Allow in ANTICIPATE Settings.` };
+    return { result: true };
+  }
+}

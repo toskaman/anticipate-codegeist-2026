@@ -76,3 +76,11 @@ Details and context: `docs/design/UX_AUDIT_V4.md`. No CORE file was changed by E
 - Settings → Performance (cold, right after deploy): first content 3322 ms, workspace connected 8079 ms (before: 8735 ms), getCapabilities 3648 ms and listProjects 4697 ms overlapping, confirming the parallel start.
 - DEVPOST_DRAFT.md step 3 fixed ("read the snapshot" duplicate removed, "Start the guided demo" wording).
 - Passport re-print: needs a human to save the PDF from the print dialog; still to confirm by Copper or you.
+
+## CORE → EXPERIENCE request (3 Nov 2026): validator outage policy (new, additive)
+New resolvers (capability signal `validator:outage-policy` in `operations`):
+- `getValidatorPolicy({})` → `{ onOutage: 'ALLOW' | 'BLOCK', updatedBy: accountId | null, updatedAt: ISO | null, canEdit: boolean }` (`canEdit` = caller is a Jira site administrator).
+- `setValidatorPolicy({ onOutage })` → same shape. `PERMISSION_DENIED` for non-admins.
+Example: `{"onOutage":"ALLOW","updatedBy":null,"updatedAt":null,"canEdit":false}`.
+Meaning: when ANTICIPATE or Jira cannot be read during a transition, ALLOW (default) lets it pass and logs the degradation; BLOCK refuses it with a message telling users to retry or ask an admin. If even the policy is unreadable, transitions pass (a storage outage can never lock all workflows).
+Suggested UI (your call): in Settings, next to the "Jira workflow validator" capability, a read-only line "During an outage: Allow / Block" for everyone, and for admins a two-option switch with a confirmation that explains the trade-off ("Block protects gated changes but stops those transitions while ANTICIPATE is unavailable"). Do not show the switch when `canEdit` is false.
