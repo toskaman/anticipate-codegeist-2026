@@ -39,8 +39,8 @@ Before/after: `03-scenario-lab-desktop-light.png` → `v4-ux/scenario-lab-upgrad
 | P | Item | Needs CORE? |
 | --- | --- | --- |
 | P0 | Hosted acceptance of PR #17 + this pass on dev (guided demo, display menu, upgrade gating) | Yes (deploy) |
-| P1 | Connected-Passport long-report print test (page breaks, 50+ actions) | No |
-| P1 | Evidence coverage strip from optional `GraphSnapshot.coverage` (JIRA / TEAMWORK_GRAPH: FULL, PARTIAL, UNAVAILABLE, NOT_CONFIGURED); hide when absent = Jira only | No (contract already additive) |
+| ~~P1~~ | Connected-Passport long-report print test — **done**, see §7 | No |
+| ~~P1~~ | Evidence sources strip — **done**, see §7; shows Teamwork Graph data only when CORE fills `coverage` (R4) | Partly |
 | P1 | Honest Rovo/MCP states once CORE reports real availability (R2) | Yes |
 | P2 | Path explanation in Graph inspector (reuse Firewall `EvidencePath`) | No |
 | P2 | "Open Prevention Passport" secondary until a plan status exists | No |
@@ -62,3 +62,16 @@ Before/after: `03-scenario-lab-desktop-light.png` → `v4-ux/scenario-lab-upgrad
 
 - Upgrade journey cannot appear on hosted sites until CORE adds the capability signal (R1); until then it is visibly disabled.
 - All evidence above is MOCK_TRANSPORT. Visual or behavioural differences in the Forge iframe (host theme, CSP, fonts) are unverified.
+
+## 7. Follow-up pass (same day)
+
+**Evidence sources** (Evidence Graph, above the map). Uses only backend-reported `GraphSnapshot.coverage` (FULL → Included, PARTIAL → Partial coverage, UNAVAILABLE, NOT_CONFIGURED). When coverage is absent the contract means Jira only, so Teamwork Graph shows the capability state instead: Not configured / Permission required / Unavailable / "Not used in this analysis" when reported available but absent from the snapshot. Never shown as connected because it is declared. CORE does not fill `coverage` yet (R4).
+
+**Connected Passport print** (`tests/passport-print.spec.ts`, light and dark): a recovered plan with 40 verified actions and 30 timeline events, printed with Chromium to A4 PDF (`evidence/experience/v4-ux/passport-long-print-MOCK_TRANSPORT.pdf`). Asserts: app chrome hidden, black-on-white palette in both themes, all 40 targets printed, no clipped horizontal content, rows unsplit, table headers repeated, 2–14 pages.
+Defects found by looking at the PDF and fixed:
+- Sections used `break-inside: avoid`, so long tables jumped whole to the next page and left half-empty pages (8 → 7 pages after the fix; headings, rows, list and timeline items still never split).
+- Approvals listed every action type ("Add a decision comment, Add a decision comment, …" ×40), on screen too. Now "40 actions approved: Add a decision comment ×40" plus the target issues (first 12, then "and N more").
+
+**Session performance** (Settings → Performance in this session, collapsed). Real measurements in the viewer's browser, nothing sent anywhere: milestones from frame start (First content, Workspace connected, Dependency map shown), dependency-map first render with record counts, and per-operation backend call durations (median/slowest, failures counted). "Download timings JSON" exports them with user agent and viewport. On the hosted site this gives LIVE_FORGE numbers; inside Jira, milestones exclude Jira's own page load.
+
+Local MOCK_TRANSPORT reading (dev server, Chromium, not a hosted measurement): first content 423 ms, workspace connected 484 ms, dependency map shown 1264 ms after frame start; map first render 206 ms for 3 records; mocked backend calls 6–24 ms. Hosted numbers still need a run on the Forge site (R5).

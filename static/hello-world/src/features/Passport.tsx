@@ -45,6 +45,36 @@ function Section({
   );
 }
 
+type ActionLookup = (
+  id: string,
+) =>
+  | { type: string; targetIssueKey: string | null; targetProjectKey: string }
+  | undefined;
+
+/** "3 actions approved: Add a decision comment ×2, Link Jira issues". */
+function approvalSummary(ids: string[], actionOf: ActionLookup) {
+  const counts = new Map<string, number>();
+  for (const id of ids) {
+    const a = actionOf(id);
+    const label = a
+      ? (actionTypeCopy[a.type as keyof typeof actionTypeCopy] ?? a.type)
+      : id;
+    counts.set(label, (counts.get(label) ?? 0) + 1);
+  }
+  const parts = [...counts].map(([l, n]) => (n > 1 ? `${l} ×${n}` : l));
+  return `${ids.length} action${ids.length === 1 ? "" : "s"} approved: ${parts.join(", ")}`;
+}
+
+function approvalTargets(ids: string[], actionOf: ActionLookup) {
+  const keys = ids.map((id) => {
+    const a = actionOf(id);
+    if (!a) return id;
+    return a.targetIssueKey ?? `new issue in ${a.targetProjectKey}`;
+  });
+  const shown = keys.slice(0, 12).join(", ");
+  return keys.length > 12 ? `${shown} and ${keys.length - 12} more` : shown;
+}
+
 export default function Passport({ w }: { w: Workflow }) {
   const p = w.passport;
   const evidence = useMemo(() => {
@@ -272,14 +302,10 @@ export default function Passport({ w }: { w: Workflow }) {
                   <Icon name="userCheck" size={15} />
                   <div>
                     <p>
-                      <strong>
-                        {a.actionIds
-                          .map((id) => {
-                            const action = actionOf(id);
-                            return action ? actionTypeCopy[action.type] : id;
-                          })
-                          .join(", ")}
-                      </strong>
+                      <strong>{approvalSummary(a.actionIds, actionOf)}</strong>
+                    </p>
+                    <p className="ax-small">
+                      Targets: {approvalTargets(a.actionIds, actionOf)}
                     </p>
                     <p className="ax-small ax-muted">
                       Approver account: {a.accountId ?? "No account supplied"} ·{" "}

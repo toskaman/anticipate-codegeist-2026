@@ -12,6 +12,7 @@ import type { Workflow } from "../app/useCoreWorkflow";
 import { capabilityStateCopy } from "../app/copy";
 import { AccessibilityControls } from "../components/AccessibilityControls";
 import type { PreferencesApi } from "../app/preferences";
+import PerformancePanel from "../components/PerformancePanel";
 
 type Key = Exclude<keyof CapabilityAvailability, "operations">;
 const rows: { key: Key; name: string; what: string; inApp: string }[] = [
@@ -253,6 +254,7 @@ export default function Settings({
           </ul>
         </Panel>
       </div>
+      <PerformancePanel />
       <TechDetails label="Enabled backend operations">
         <p className="ax-small">
           Enabled operations: {caps?.operations.join(", ") || "none reported"}

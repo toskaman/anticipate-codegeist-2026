@@ -5,6 +5,7 @@ import {
   type OperationName,
   type ErrorCode,
 } from "@anticipate/contracts";
+import { recordRequest, startTimer } from "../app/perf";
 
 export type CoreInput<K extends OperationName> =
   (typeof OPERATIONS)[K]["input"]["_input"];
@@ -89,6 +90,8 @@ export class ForgeClient {
       throw new DOMException("Request aborted", "AbortError");
     let timer: ReturnType<typeof setTimeout> | undefined;
     let onAbort: (() => void) | undefined;
+    const elapsed = startTimer();
+    let ok = false;
     try {
       const raw = await Promise.race([
         this.transport(operation, parsed.data),
@@ -234,6 +237,7 @@ export class ForgeClient {
         )
           return invalid("Passport does not match its plan and snapshot.");
       }
+      ok = true;
       return data;
     } catch (error) {
       if (
@@ -246,6 +250,7 @@ export class ForgeClient {
         "Forge Bridge is unavailable or the request failed. No success is assumed.",
       );
     } finally {
+      recordRequest(operation, elapsed(), ok);
       clearTimeout(timer);
       if (onAbort) signal?.removeEventListener("abort", onAbort);
     }

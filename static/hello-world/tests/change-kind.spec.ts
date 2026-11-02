@@ -161,3 +161,38 @@ test("upgrade journey requests CORE's upgrade scenarios and labels them plainly"
   ).toEqual([]);
   expect(meta.mode).toBe("LIVE");
 });
+
+test("session timings show real milestones and backend call durations", async ({
+  page,
+}) => {
+  await scenarioLab(page, false);
+  await page
+    .getByRole("button", { name: "Compare options", exact: true })
+    .click();
+  await expect(page.getByRole("radio", { name: /Remove now/ })).toBeVisible();
+  // Evidence sources: Jira only unless the backend reports more.
+  await page
+    .getByRole("navigation")
+    .getByRole("button", { name: /^Evidence Graph/ })
+    .click();
+  const sources = page.getByRole("region", { name: "Evidence sources" });
+  await expect(sources).toContainText("Jira");
+  await expect(sources).toContainText("Teamwork Graph");
+  await expect(sources).toContainText("Not configured");
+  await page
+    .getByRole("navigation")
+    .getByRole("button", { name: /^Settings/ })
+    .click();
+  await page.getByText("Performance in this session").click();
+  const table = page.getByRole("region", { name: "Session timings" });
+  for (const row of [
+    "First content",
+    "Workspace connected (capabilities and projects)",
+    "Dependency map first render",
+    "getCapabilities",
+    "getGraphSnapshot",
+    "compareScenarios",
+  ])
+    await expect(table).toContainText(row);
+  await expect(table).toContainText(/\d+ ms/);
+});

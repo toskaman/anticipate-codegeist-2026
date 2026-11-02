@@ -2,6 +2,7 @@ import React, { lazy, Suspense } from "react";
 import Icon from "../components/Icon";
 import { EmptyState, PageHeader } from "../components/ui";
 import type { Workflow } from "../app/useCoreWorkflow";
+import EvidenceCoverage from "../components/EvidenceCoverage";
 
 // React Flow loads only when a snapshot is shown, keeping first paint light.
 const EvidenceGraph = lazy(() => import("./graph/EvidenceGraph"));
@@ -41,6 +42,12 @@ export default function EvidencePage({ w }: { w: Workflow }) {
           )
         }
       />
+      {s && (
+        <EvidenceCoverage
+          graph={s}
+          teamworkGraph={w.capabilities?.teamworkGraph}
+        />
+      )}
       {s ? (
         <Suspense
           fallback={

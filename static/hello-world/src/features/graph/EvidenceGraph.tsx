@@ -38,6 +38,7 @@ import {
   type EvidenceStatus,
 } from "../../app/copy";
 import { hopDistances, layeredLayout, orderNodes, NODE_W } from "./layout";
+import { milestone, recordRender, startTimer } from "../../app/perf";
 
 const kindIcon: Record<string, IconName> = {
   ISSUE: "target",
@@ -142,6 +143,17 @@ export default function EvidenceGraph({
   scenarioId: string;
 }) {
   const [pageSize, setPageSize] = useState(sizeForViewport);
+  const renderStart = useRef(startTimer());
+  useEffect(() => {
+    // Layout + first commit of the map for this snapshot (after lazy load).
+    recordRender(
+      "Dependency map first render",
+      renderStart.current(),
+      `${graph.nodes.length} records, ${graph.edges.length} relationships`,
+    );
+    milestone("Dependency map shown");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<(typeof statusFilters)[number]>("ALL");
   const [page, setPage] = useState(0);

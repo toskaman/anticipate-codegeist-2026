@@ -3361,12 +3361,20 @@ body:has(.ax-app) {
   .ax-report__header {
     border-bottom-color: #000;
   }
+  /* Long sections (tables, timelines) flow across pages instead of being
+     pushed whole to the next page; headings, rows and items stay intact. */
   .ax-report__section {
-    break-inside: avoid;
-    page-break-inside: avoid;
+    break-inside: auto;
   }
-  .ax-report__section h2 {
+  .ax-report__section h2,
+  .ax-report__section > :first-child {
     break-after: avoid;
+    page-break-after: avoid;
+  }
+  .ax-report__list > li,
+  .ax-report__facts > div,
+  .ax-timeline > li {
+    break-inside: avoid;
   }
   .ax-table-wrap {
     overflow: visible;
@@ -3922,4 +3930,47 @@ body:has(.ax-app) {
 .ax-rovo__tools {
   margin: 0;
   padding-left: 1.2em;
+}
+
+/* 14 · EVIDENCE COVERAGE ---------------------------------------------------- */
+.ax-coverage {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--ax-2) var(--ax-6);
+  margin-bottom: var(--ax-4);
+  padding: var(--ax-3) var(--ax-5);
+  border-radius: var(--ax-r);
+  border: 1px solid var(--ax-border);
+  background: var(--ax-surface);
+}
+.ax-app .ax-coverage__title {
+  margin: 0;
+  font-size: var(--ax-fs-xs);
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ax-text-3);
+}
+.ax-coverage__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ax-2) var(--ax-6);
+}
+.ax-coverage__list li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px var(--ax-2);
+  font-size: var(--ax-fs-sm);
+}
+.ax-coverage__name {
+  font-weight: 600;
+}
+.ax-coverage__detail {
+  color: var(--ax-text-2);
+  font-size: var(--ax-fs-xs);
 }

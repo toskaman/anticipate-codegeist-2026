@@ -14,6 +14,7 @@ import Passport from "./features/Passport";
 import Settings from "./features/Settings";
 import { stageFor } from "./app/journey";
 import { resolveTheme, usePreferences } from "./app/preferences";
+import { milestone } from "./app/perf";
 
 export { simulationRequest } from "./app/workflow";
 
@@ -33,6 +34,10 @@ export default function CoreWorkspace({
   // Incremented to ask Mission Control to open and focus the demo setup.
   const [demoRequest, setDemoRequest] = React.useState(0);
   const ready = w.resource.status === "ready";
+  React.useEffect(() => milestone("First content"), []);
+  React.useEffect(() => {
+    if (ready) milestone("Workspace connected (capabilities and projects)");
+  }, [ready]);
   const startDemo = () => {
     if (w.page !== "Mission Control") w.actions.go("Mission Control");
     setDemoRequest((n) => n + 1);
