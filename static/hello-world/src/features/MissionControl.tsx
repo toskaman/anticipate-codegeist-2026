@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import SampleProjectSetup from "../SampleProjectSetup";
 import type { ProjectSummary } from "@anticipate/contracts";
 import Icon from "../components/Icon";
@@ -41,7 +41,121 @@ const journey = [
   },
 ] as const;
 
-export default function MissionControl({ w }: { w: Workflow }) {
+const demoSteps = [
+  { title: "Choose a Jira project", text: "Any project you can edit." },
+  {
+    title: "Preview, then create sample tickets",
+    text: "Six labelled tickets; nothing is written before you confirm.",
+  },
+  {
+    title: "Analyze the sample change",
+    text: "Walk the full decision journey on real Jira evidence.",
+  },
+] as const;
+
+function DemoCallout({
+  w,
+  projectKey,
+  onStart,
+}: {
+  w: Workflow;
+  projectKey: string;
+  onStart(): void;
+}) {
+  const available = w.allowed("previewSampleProject");
+  const current = !projectKey ? 0 : 1;
+  return (
+    <section className="ax-demo" aria-labelledby="demo-title">
+      <div className="ax-demo__copy">
+        <p className="ax-demo__eyebrow">
+          <Icon name="sparkline" size={14} />
+          New here? Start here
+        </p>
+        <h2 id="demo-title" className="ax-demo__title">
+          Try the guided demo
+        </h2>
+        <p className="ax-demo__text">
+          See ANTICIPATE end to end in a few minutes, using clearly labelled
+          sample tickets in one of your Jira projects.
+        </p>
+        <div className="ax-demo__actions">
+          <button
+            type="button"
+            className="ax-btn ax-btn--primary ax-btn--lg ax-demo__cta"
+            disabled={!available || !!w.busy}
+            aria-describedby="demo-cta-hint"
+            onClick={onStart}
+          >
+            <Icon name="play" size={17} />
+            Start the guided demo
+            <Icon name="arrowRight" size={16} />
+          </button>
+          <p className="ax-demo__hint" id="demo-cta-hint">
+            {available
+              ? "Opens the demo setup below. No Jira write happens until you confirm."
+              : "Sample preparation is not enabled by this backend."}
+          </p>
+        </div>
+      </div>
+      <ol className="ax-demo__steps" aria-label="Guided demo steps">
+        {demoSteps.map((s, i) => (
+          <li
+            key={s.title}
+            className={
+              i === current ? "is-current" : i < current ? "is-done" : ""
+            }
+            aria-current={i === current ? "step" : undefined}
+          >
+            <span className="ax-demo__num" aria-hidden="true">
+              {i < current ? <Icon name="check" size={13} /> : i + 1}
+            </span>
+            <span>
+              <strong>{s.title}</strong>
+              <span>{s.text}</span>
+            </span>
+          </li>
+        ))}
+      </ol>
+    </section>
+  );
+}
+
+export default function MissionControl({
+  w,
+  demoRequest = 0,
+  onStartDemo,
+}: {
+  w: Workflow;
+  demoRequest?: number;
+  onStartDemo?(): void;
+}) {
+  const [demoOpen, setDemoOpen] = useState(false);
+  useEffect(() => {
+    if (!demoRequest) return;
+    setDemoOpen(true);
+    // Wait for the panel to render (and the page to settle after navigation),
+    // then bring it into view and focus the next useful control: the project
+    // picker, or the preview button once a project is chosen.
+    let frame = 0;
+    let tries = 0;
+    const focusNext = () => {
+      const target = document.getElementById(
+        w.projectId ? "sample-preview" : "project-select",
+      ) as HTMLButtonElement | HTMLSelectElement | null;
+      if ((!target || target.disabled) && tries++ < 60) {
+        frame = requestAnimationFrame(focusNext);
+        return;
+      }
+      document
+        .getElementById("demo-setup")
+        ?.scrollIntoView({ block: "start", behavior: "smooth" });
+      target?.focus({ preventScroll: true });
+    };
+    frame = requestAnimationFrame(focusNext);
+    return () => cancelAnimationFrame(frame);
+    // Only react to new requests, not to project changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [demoRequest]);
   const listing = w.resource.status === "ready" ? w.resource.data.first : null;
   const project = w.projects.find((p) => p.id === w.projectId);
   const analyzeEnabled =
@@ -69,6 +183,11 @@ export default function MissionControl({ w }: { w: Workflow }) {
         icon="target"
         title="Mission Control"
         lead="Start from a real Jira issue that describes a change you are considering."
+      />
+      <DemoCallout
+        w={w}
+        projectKey={project?.key ?? ""}
+        onStart={onStartDemo ?? (() => setDemoOpen(true))}
       />
       <section className="ax-hero" aria-labelledby="hero-title">
         <div className="ax-hero__copy">
@@ -247,16 +366,20 @@ export default function MissionControl({ w }: { w: Workflow }) {
           </fieldset>
         </Panel>
         <div className="ax-stack">
-          <SampleProjectSetup
-            key={w.projectId}
-            client={w.client}
-            projectKey={project?.key ?? ""}
-            canPreview={w.allowed("previewSampleProject")}
-            canCreate={w.allowed("createSampleProject") && w.writesAvailable}
-            disabled={!!w.operationBusy}
-            onBusyChange={w.setSampleBusy}
-            onAnalyze={w.actions.analyzeSample}
-          />
+          <div id="demo-setup" className="ax-demo-anchor">
+            <SampleProjectSetup
+              key={w.projectId}
+              client={w.client}
+              projectKey={project?.key ?? ""}
+              canPreview={w.allowed("previewSampleProject")}
+              canCreate={w.allowed("createSampleProject") && w.writesAvailable}
+              disabled={!!w.operationBusy}
+              onBusyChange={w.setSampleBusy}
+              onAnalyze={w.actions.analyzeSample}
+              open={demoOpen}
+              onOpenChange={setDemoOpen}
+            />
+          </div>
           <Panel
             title="Recover an existing plan"
             id="recover-title"

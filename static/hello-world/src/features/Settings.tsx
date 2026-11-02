@@ -10,6 +10,8 @@ import {
 } from "../components/ui";
 import type { Workflow } from "../app/useCoreWorkflow";
 import { capabilityStateCopy } from "../app/copy";
+import { AccessibilityControls } from "../components/AccessibilityControls";
+import type { PreferencesApi } from "../app/preferences";
 
 type Key = Exclude<keyof CapabilityAvailability, "operations">;
 const rows: { key: Key; name: string; what: string; inApp: string }[] = [
@@ -66,10 +68,14 @@ const rows: { key: Key; name: string; what: string; inApp: string }[] = [
 export default function Settings({
   w,
   theme,
+  hostTheme,
+  prefs,
   hostNotice,
 }: {
   w: Workflow;
   theme: string;
+  hostTheme: string;
+  prefs: PreferencesApi;
   hostNotice: string;
 }) {
   const caps = w.capabilities;
@@ -173,18 +179,21 @@ export default function Settings({
       </Panel>
       <div className="ax-grid ax-grid--two">
         <Panel
-          title="Appearance"
+          title="Display & accessibility"
           id="theme-title"
-          description="ANTICIPATE follows the Atlassian host theme."
+          description="Choose a theme and visual preferences. They apply to every screen."
         >
           <p>
             Current theme:{" "}
             <strong>{theme === "dark" ? "Dark" : "Light"}</strong>
+            {prefs.prefs.theme === "system" &&
+              ` (following the Atlassian ${hostTheme === "dark" ? "dark" : "light"} theme)`}
           </p>
           {hostNotice && <p className="ax-muted ax-small">{hostNotice}</p>}
+          <AccessibilityControls api={prefs} />
           <p className="ax-muted ax-small">
-            Reduced motion and high-contrast preferences from your system are
-            respected.
+            System reduced-motion and high-contrast preferences are always
+            respected, even when these settings are left on System.
           </p>
         </Panel>
         <Panel title="Data and privacy" id="privacy-title">

@@ -15,6 +15,8 @@ export default function SampleProjectSetup({
   onAnalyze,
   disabled,
   onBusyChange,
+  open: openProp,
+  onOpenChange,
 }: {
   client: ForgeClient;
   projectKey: string;
@@ -23,8 +25,12 @@ export default function SampleProjectSetup({
   disabled: boolean;
   onBusyChange(busy: boolean): void;
   onAnalyze(root: string, replacement: string | null): void;
+  open?: boolean;
+  onOpenChange?(open: boolean): void;
 }) {
-  const [open, setOpen] = useState(false);
+  const [openLocal, setOpenLocal] = useState(false);
+  const open = openProp ?? openLocal;
+  const setOpen = onOpenChange ?? setOpenLocal;
   const [result, setResult] = useState<SampleProjectPlan | null>(null);
   const [busy, setBusy] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
@@ -162,7 +168,8 @@ export default function SampleProjectSetup({
               </p>
             )}
             <button
-              className="ax-btn"
+              id="sample-preview"
+              className="ax-btn ax-btn--primary"
               disabled={busy || !projectKey || !canPreview}
               onClick={() => void run(false)}
             >
