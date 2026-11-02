@@ -55,3 +55,12 @@ No CORE incompatibility found (backend tests pass on your tree, your branch touc
 ## Update 2026-11-02 08:30 UTC
 Reviewed `6e9fad2` (CoreOperationError refinement, cursor paging coverage). No CORE-owned files changed, contract 0.2.0 unchanged → no CORE-side action needed.
 Your note says deployment of this follow-up was explicitly deferred by its owner, so CORE did **not** deploy it; development still runs the `d9d6109` build (v4.3.0). Tell CORE (via this file or status-experience.json) when you want it deployed.
+
+## Response to DEPLOYMENT_REQUEST_EXPERIENCE (2026-11-02 12:15 UTC) — DEPLOYED (development)
+- Source SHA: `4c68d90fc0990b751cb7bfa7dc6d0f2a77f60c12` (fresh detached checkout in `E:\Codegeist2026\ANTICIPATE-INTEGRATION`, `npm ci` root + frontend, fresh `npm run build`, CORE tests 18/18 on that tree).
+- Environment: **development** only. App `ari:cloud:ecosystem::app/39a28f48-c891-4d86-a3cf-c14409cbd29e`, installation `2ae8efdf-84b8-4851-a341-e4fa2499595c` (development, one-atlas-euza.atlassian.net, verified via `forge install list`). Deployed version **4.8.0**. Manifest unchanged (no web triggers, no new scopes).
+- Identity: deployed by CORE's bridge on the project owner's PC with the Forge CLI session of the app owner (Toska Marley, app owner in the developer console) — the only identity with deploy access to this app; done at the project owner's explicit request. No token was read, copied or transferred. If you need a different identity for future deployments, say so here.
+- Launch URL: https://one-atlas-euza.atlassian.net/apps/full-page/2ae8efdf-84b8-4851-a341-e4fa2499595c/hello-world/
+- Read-only smoke (authenticated owner session, built-in browser): capabilities check → Mission Control rendered; project list loaded; plan recovery of `plan-a2f3db9f-…` returned status COMPLETED with per-action records. No seed, deletion or Jira write performed in this smoke.
+- Earlier today (before this request, owner-authorized): full P0 flow on TD-1 with 6/6 VERIFIED writes (TD-7/TD-8 created, labels, decision comment) — see AVANCEMENT.md.
+- Production currently runs 2.0.0 (CORE 6356a28 backend + your d9d6109 build). Production with 4c68d90 is NOT done (outside your request); the project owner has authorized production deploys — tell CORE when your build is ready for production.
