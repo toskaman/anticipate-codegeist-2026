@@ -1055,6 +1055,11 @@ body:has(.ax-app) {
   font-weight: 560;
   overflow-wrap: anywhere;
 }
+/* Issue keys in tables stay on one line ("AVT-4", never "AV / T-4"). */
+.ax-table .ax-source-link {
+  overflow-wrap: normal;
+  white-space: nowrap;
+}
 .ax-spinner {
   width: 15px;
   height: 15px;
@@ -3399,6 +3404,20 @@ body:has(.ax-app) {
     color: #3e4a57;
     overflow-wrap: anywhere;
   }
+  /* In tables the issue key is enough; the full URL squeezed the column
+     (seen in a hosted dev print). */
+  .ax-table .ax-source-link::after {
+    content: none;
+  }
+  /* Keep the closing section and footer together: no orphaned last page. */
+  .ax-report__section:last-of-type,
+  .ax-report__footer {
+    break-inside: avoid;
+  }
+  .ax-report__footer {
+    break-before: avoid;
+    page-break-before: avoid;
+  }
   .ax-app *,
   .ax-app *::before {
     animation: none !important;
@@ -3772,28 +3791,31 @@ body:has(.ax-app) {
   --ax-fs-2xl: 34px;
   --ax-fs-display: clamp(32px, 2.6vw + 12px, 44px);
 }
-/* High contrast (in addition to the system prefers-contrast rule above) */
-.ax-app[data-contrast="high"] {
-  --ax-border: var(--ax-border-strong);
-  --ax-text-2: var(--ax-text);
-  --ax-text-3: var(--ax-text-2);
-  --ax-soft: 22%;
-}
-.ax-app[data-contrast="high"][data-theme="dark"] {
-  --ax-bg: #000;
-  --ax-surface: #05080d;
-  --ax-surface-2: #0a0f17;
-  --ax-border-strong: #6b7d95;
-  --ax-text: #fff;
-}
-.ax-app[data-contrast="high"][data-theme="light"] {
-  --ax-bg: #fff;
-  --ax-border-strong: #5b6b80;
-  --ax-text: #000;
-}
-.ax-app[data-contrast="high"] .ax-node--dim,
-.ax-app[data-contrast="high"] .ax-graph .react-flow__edge.is-dim {
-  opacity: 0.55;
+/* High contrast (in addition to the system prefers-contrast rule above).
+   Screen only: print always uses the paper palette. */
+@media screen {
+  .ax-app[data-contrast="high"] {
+    --ax-border: var(--ax-border-strong);
+    --ax-text-2: var(--ax-text);
+    --ax-text-3: var(--ax-text-2);
+    --ax-soft: 22%;
+  }
+  .ax-app[data-contrast="high"][data-theme="dark"] {
+    --ax-bg: #000;
+    --ax-surface: #05080d;
+    --ax-surface-2: #0a0f17;
+    --ax-border-strong: #6b7d95;
+    --ax-text: #fff;
+  }
+  .ax-app[data-contrast="high"][data-theme="light"] {
+    --ax-bg: #fff;
+    --ax-border-strong: #5b6b80;
+    --ax-text: #000;
+  }
+  .ax-app[data-contrast="high"] .ax-node--dim,
+  .ax-app[data-contrast="high"] .ax-graph .react-flow__edge.is-dim {
+    opacity: 0.55;
+  }
 }
 /* Reduced motion */
 .ax-app[data-motion="reduce"] *,
@@ -3821,19 +3843,21 @@ body:has(.ax-app) {
   text-decoration: underline;
   text-decoration-thickness: 2px;
 }
-/* Simplified visual style: no decorative gradients, shadows or dot grids */
-.ax-app[data-layout="calm"] {
-  --ax-shadow: none;
-  --ax-shadow-lg: 0 0 0 1px var(--ax-border-strong);
-  --ax-grid-dot: transparent;
-}
-.ax-app[data-layout="calm"] .ax-hero,
-.ax-app[data-layout="calm"] .ax-demo {
-  background: var(--ax-surface);
-}
-.ax-app[data-layout="calm"] .ax-topbar {
-  backdrop-filter: none;
-  background: var(--ax-bg);
+@media screen {
+  /* Simplified visual style: no decorative gradients, shadows or dot grids */
+  .ax-app[data-layout="calm"] {
+    --ax-shadow: none;
+    --ax-shadow-lg: 0 0 0 1px var(--ax-border-strong);
+    --ax-grid-dot: transparent;
+  }
+  .ax-app[data-layout="calm"] .ax-hero,
+  .ax-app[data-layout="calm"] .ax-demo {
+    background: var(--ax-surface);
+  }
+  .ax-app[data-layout="calm"] .ax-topbar {
+    backdrop-filter: none;
+    background: var(--ax-bg);
+  }
 }
 @media (max-width: 720px) {
   .ax-topbar {
@@ -3973,4 +3997,19 @@ body:has(.ax-app) {
 .ax-coverage__detail {
   color: var(--ax-text-2);
   font-size: var(--ax-fs-xs);
+}
+
+/* 15 · PASSPORT RETENTION ---------------------------------------------------- */
+.ax-report__retention {
+  display: flex;
+  gap: var(--ax-2);
+  align-items: flex-start;
+  margin: 0;
+  font-size: var(--ax-fs-sm);
+  color: var(--ax-text-2);
+}
+.ax-report__retention .ax-icon {
+  flex: none;
+  margin-top: 3px;
+  color: var(--ax-info);
 }

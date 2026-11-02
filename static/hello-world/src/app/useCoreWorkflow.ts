@@ -92,14 +92,23 @@ export function useCoreWorkflow(client: ForgeClient) {
   }, []);
   const load = useCallback(
     async (signal?: AbortSignal) => {
+      // Both start together: each Forge invocation costs ~0.5-3.7 s on a cold
+      // start (LIVE_FORGE timings). The listing is read-only and is used only
+      // if capabilities then confirm Jira read; otherwise it is discarded.
+      const listing = client
+        .request("listProjects", { cursor: null }, signal)
+        .then(
+          (data) => ({ ok: true as const, data }),
+          (error: unknown) => ({ ok: false as const, error }),
+        );
       const capabilities = await client.request("getCapabilities", {}, signal);
       const available =
         capabilities.jiraRead === "AVAILABLE" &&
         capabilities.operations.includes("listProjects");
-      const first = available
-        ? await client.request("listProjects", { cursor: null }, signal)
-        : null;
-      return { capabilities, first };
+      if (!available) return { capabilities, first: null };
+      const result = await listing;
+      if (!result.ok) throw result.error;
+      return { capabilities, first: result.data };
     },
     [client],
   );
