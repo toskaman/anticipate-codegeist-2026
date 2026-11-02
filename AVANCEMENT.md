@@ -1,4 +1,15 @@
-# ANTICIPATE — Avancement CORE (mis à jour le 2 novembre 2026)
+# ANTICIPATE — Avancement CORE (mis à jour le 2 novembre 2026, 01:45)
+
+## 🚀 Session autonome via bridge — résultats réels (Windows)
+- ✅ Bridge v2 opérationnel (`E:\Codegeist2026\bridge`), allowlist rechargée à chaque requête, auto-redémarrage si le script change.
+- ✅ Sur ton PC : typecheck OK, tests backend 12/12, contrats 3/3, moteur 8/8 (perf 18 ms), build frontend OK, `forge lint` : aucune erreur.
+- ✅ Commits poussés sur `origin/feat/core-engine` : `fad78cb` (backend complet), `35152d7` (fix bundling), + diagnostics.
+- ✅ Déployé en **development** (v4) et installation mise à niveau sur `one-atlas-euza.atlassian.net` (id `2ae8efdf-…`) avec les nouvelles permissions.
+- ✅ **Vérifié contre le vrai Jira** (web trigger de diagnostic lecture seule, en tant qu'app) : 25 projets lus, recherche JQL `search/jql` OK, lecture ticket + liens, permissions, types de tickets, extracteur de graphe sur de vrais liens (PLAT : `Blocks` → DEPENDS_ON CONFIRMED ; `Relates`/`Deployments` → INFERRED). Format de date Jira `-0400` géré.
+- ⬜ Pas encore testé : les resolvers appelés **en tant qu'utilisateur** depuis l'UI (dépend du frontend de ta copine) et les écritures Jira réelles (aucune écriture faite).
+- URL de l'app : `https://one-atlas-euza.atlassian.net/apps/full-page/2ae8efdf-84b8-4851-a341-e4fa2499595c/hello-world/`
+- ⚠️ Le web trigger de diagnostic doit être retiré du manifest avant la version jury.
+
 
 Légende : ✅ fait et testé · 🟡 fait, pas encore vérifié sur un vrai Jira · ⛔ bloqué (action humaine) · ⬜ à faire
 
@@ -26,15 +37,15 @@ Légende : ✅ fait et testé · 🟡 fait, pas encore vérifié sur un vrai Jir
 - Pas de déploiement production via le bridge (feu vert explicite requis).
 
 ## ⛔ Bloqué — il faut toi (je ne peux pas le faire sans tes identifiants)
-1. ⛔ Révoquer l'ancien token Atlassian : https://id.atlassian.com/manage-profile/security/api-tokens
-2. ⛔ Double-cliquer `E:\Codegeist2026\bridge\start-bridge.cmd` et coller un **nouveau** token dans l'invite `forge login` (le bridge installe la CLI tout seul). Ensuite, l'agent s'occupe du commit, du push, du lint et du déploiement dev.
+1. ✅ Token : confirmé comme test par le propriétaire, conservé.
+2. ✅ (fait) Double-cliquer `E:\Codegeist2026\bridge\start-bridge.cmd` et coller un **nouveau** token dans l'invite `forge login` (le bridge installe la CLI tout seul). Ensuite, l'agent s'occupe du commit, du push, du lint et du déploiement dev.
 3. (géré par le bridge) Commit/push :
    ```powershell
    cd E:\Codegeist2026\ANTICIPATE-CORE
    git add -A; git commit -m "feat(core): contracts 0.2.0, simulation engine, Jira resolvers, verified writes, Rovo actions"
    git push origin feat/core-engine
    ```
-4. ⛔ `forge lint`, `forge deploy -e development`, `forge install -e development` sur ton site Jira de dev (accepter les nouvelles permissions).
+4. ✅ (fait) `forge lint`, `forge deploy -e development`, `forge install -e development` sur ton site Jira de dev (accepter les nouvelles permissions).
 
 ## ⬜ Reste à faire (ordre de priorité)
 ### P0 — démo de bout en bout

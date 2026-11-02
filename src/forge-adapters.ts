@@ -6,8 +6,12 @@ import type { IssueFetch, JiraIssue, JiraPort, Store } from './core/ports';
 
 const FIELDS = 'summary,status,issuetype,issuelinks,components,project,labels,updated';
 
+let actor: 'user' | 'app' = 'user';
+/** Diagnostics only: read-only checks run as the app (no end-user in a web trigger). */
+export function useAppActorForDiagnostics() { actor = 'app'; }
+
 async function call(path: ReturnType<typeof route>, init?: { method?: string; body?: unknown }): Promise<Response> {
-  const res = await api.asUser().requestJira(path, {
+  const res = await (actor === 'app' ? api.asApp() : api.asUser()).requestJira(path, {
     method: init?.method ?? 'GET',
     headers: { Accept: 'application/json', ...(init?.body ? { 'Content-Type': 'application/json' } : {}) },
     body: init?.body ? JSON.stringify(init.body) : undefined

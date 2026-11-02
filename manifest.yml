@@ -5,9 +5,14 @@ modules:
       resolver:
         function: resolver
       routePrefix: hello-world
+  webtrigger:
+    - key: anticipate-diagnostics
+      function: diagnostics
   function:
     - key: resolver
       handler: index.handler
+    - key: diagnostics
+      handler: index.diagnostics
 resources:
   - key: main
     path: static/hello-world/build

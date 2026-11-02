@@ -33,3 +33,5 @@ const rovo = createRovoActions((p) => ({ jira: createForgeJira(p.context?.siteUr
 export const rovoGetGraph = rovo.getGraph;
 export const rovoSimulateRetirement = rovo.simulateRetirement;
 export const rovoGetPassport = rovo.getPassport;
+
+export { diagnostics } from './diagnostics';
