@@ -17,8 +17,14 @@ export default function Showcase() {
             return {
               mode: "fixture",
               snapshotId: "demo-auth-v1-2026-11-02",
+              root: { id: "auth", label: "Legacy authentication API v1" },
               services: [],
+              edges: [],
             };
+          if (preview === "large") {
+            const { largeGraph } = await import("./graphFixtures");
+            return largeGraph(120);
+          }
           if (preview === "retry" && attempts++ === 0)
             throw new Error(
               "Development fixture: snapshot temporarily unavailable",
@@ -65,6 +71,7 @@ export default function Showcase() {
             <option value="empty">Empty snapshot</option>
             <option value="retry">Fail once, then retry</option>
             <option value="slow">Slow loading snapshot</option>
+            <option value="large">120 dependencies with a cycle</option>
           </select>
         </label>
       </section>

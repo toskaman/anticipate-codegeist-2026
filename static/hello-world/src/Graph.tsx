@@ -1,14 +1,26 @@
 import React, { useCallback, useMemo, useState } from "react";
-import { ReactFlow, Background, Controls, MarkerType } from "@xyflow/react";
+import {
+  ReactFlow,
+  Background,
+  Controls,
+  MarkerType,
+  Position,
+} from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { services as fixtureServices } from "./domain";
 import { fixtureClient } from "./adapters";
 import {
   type AnticipateClient,
   graphSchema,
 } from "./api/provisional-contracts";
 import { useResource } from "./useResource";
-const emptyServices: typeof fixtureServices = [];
+import { graphPage, pathToRoot, type EvidenceGraph } from "./graphModel";
+const emptyGraph: EvidenceGraph = {
+  mode: "fixture",
+  snapshotId: "",
+  root: { id: "auth", label: "Change" },
+  services: [],
+  edges: [],
+};
 export default function Graph({
   client = fixtureClient,
   snapshotId = "demo-auth-v1-2026-11-02",
@@ -23,55 +35,123 @@ export default function Graph({
       );
       if (graph.snapshotId !== snapshotId)
         throw new Error("Graph snapshot changed; refresh the evidence");
-      return graph.services;
+      return graph;
     },
     [client, snapshotId],
   );
   const resource = useResource(load);
-  const services = resource.status === "ready" ? resource.data : emptyServices;
+  const graph = resource.status === "ready" ? resource.data : emptyGraph;
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("ALL");
+  const [freshness, setFreshness] = useState("ALL");
+  const [impact, setImpact] = useState("ALL");
+  const [page, setPage] = useState(0);
   const [selectedId, setSelectedId] = useState("checkout");
+  const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null);
+  const windowed = useMemo(
+    () => graphPage(graph, query, filter, freshness, impact, page),
+    [graph, query, filter, freshness, impact, page],
+  );
   const selected =
-    services.find((service) => service.id === selectedId) ?? services[0];
-  const visible = useMemo(
-    () =>
-      services.filter(
-        (s) =>
-          s.label.toLowerCase().includes(query.toLowerCase()) &&
-          (filter === "ALL" || s.evidence === filter),
-      ),
-    [services, query, filter],
+    windowed.services.find((service) => service.id === selectedId) ??
+    windowed.services[0];
+  const path = useMemo(
+    () => (selected ? pathToRoot(graph, selected.id) : []),
+    [graph, selected],
   );
-  const nodes = useMemo(
-    () => [
-      {
-        id: "auth",
-        position: { x: 320, y: 160 },
-        data: { label: "Legacy authentication API v1" },
-        className: "root-node",
-      },
-      ...visible.map((s, i) => ({
-        id: s.id,
-        position: { x: i < 3 ? 30 : 650, y: (i < 3 ? i : i - 3) * 140 },
-        data: { label: s.label },
-        className: s.id === selected?.id ? "selected-node" : "",
-      })),
-    ],
-    [visible, selected],
+  const pathIds = new Set(path.map((edge) => edge.id));
+  const displayed = useMemo(() => {
+    const ids = new Set(windowed.services.map((service) => service.id));
+    for (const edge of path.slice(0, 20)) {
+      ids.add(edge.source);
+      ids.add(edge.target);
+    }
+    return graph.services.filter((service) => ids.has(service.id));
+  }, [graph, windowed.services, path]);
+  const nodes = [
+    {
+      id: graph.root.id,
+      position: { x: 320, y: displayed.length > 5 ? -130 : 160 },
+      data: { label: graph.root.label },
+      className: "root-node",
+    },
+    ...displayed.map((service, index) => ({
+      id: service.id,
+      position:
+        displayed.length > 5
+          ? { x: (index % 4) * 225, y: Math.floor(index / 4) * 110 }
+          : {
+              x: index < 3 ? 30 : 650,
+              y: (index < 3 ? index : index - 3) * 140,
+            },
+      data: { label: service.label },
+      className: service.id === selected?.id ? "selected-node" : "",
+    })),
+  ];
+  const positions = new Map(nodes.map((node) => [node.id, node.position]));
+  const flowNodes = nodes.map((node) => {
+    const outgoing = graph.edges.find((edge) => edge.source === node.id);
+    const incoming = graph.edges.find((edge) => edge.target === node.id);
+    const destination = outgoing ? positions.get(outgoing.target) : undefined;
+    const origin = incoming ? positions.get(incoming.source) : undefined;
+    return {
+      ...node,
+      sourcePosition:
+        destination && destination.y < node.position.y
+          ? Position.Top
+          : Position.Bottom,
+      targetPosition:
+        origin && origin.y > node.position.y ? Position.Bottom : Position.Top,
+    };
+  });
+  const nodeIds = new Set(nodes.map((node) => node.id));
+  const availableEdges = graph.edges.filter(
+    (edge) => nodeIds.has(edge.source) && nodeIds.has(edge.target),
   );
-  const edges = visible.map((s) => ({
-    id: s.id,
-    source: s.id,
-    target: "auth",
-    label: s.evidence,
+  const edgeWindow = Array.from(
+    new Map(
+      [
+        ...path.filter(
+          (edge) => nodeIds.has(edge.source) && nodeIds.has(edge.target),
+        ),
+        ...availableEdges,
+      ].map((edge) => [edge.id, edge]),
+    ).values(),
+  ).slice(0, 80);
+  const edges = edgeWindow.map((edge) => ({
+    id: edge.id,
+    source: edge.source,
+    target: edge.target,
+    label: `${edge.relation} · ${edge.evidence}`,
     style: {
-      stroke: s.evidence === "UNKNOWN" ? "#efa958" : "#54b9b2",
-      strokeWidth: s.id === selected?.id ? 3 : 1,
-      strokeDasharray: s.evidence === "CONFIRMED" ? undefined : "5 5",
+      stroke:
+        edge.evidence === "UNKNOWN"
+          ? "#efa958"
+          : edge.freshness === "STALE"
+            ? "#a5a8b8"
+            : "#54b9b2",
+      strokeWidth: pathIds.has(edge.id) ? 3 : 1,
+      strokeDasharray: edge.evidence === "CONFIRMED" ? undefined : "5 5",
     },
     markerEnd: { type: MarkerType.ArrowClosed },
   }));
+  const selectedEdge =
+    graph.edges.find(
+      (edge) => edge.id === selectedEdgeId && edge.source === selected?.id,
+    ) ?? graph.edges.find((edge) => edge.source === selected?.id);
+  function selectService(id: string, edgeId: string | null = null) {
+    const index = graph.services.findIndex((service) => service.id === id);
+    if (index < 0) return;
+    if (!windowed.services.some((service) => service.id === id)) {
+      setQuery("");
+      setFilter("ALL");
+      setFreshness("ALL");
+      setImpact("ALL");
+      setPage(Math.floor(index / 20));
+    }
+    setSelectedId(id);
+    setSelectedEdgeId(edgeId);
+  }
   if (resource.status === "loading")
     return (
       <section className="panel" role="status" aria-busy="true">
@@ -92,37 +172,75 @@ export default function Graph({
       <section className="panel">
         <div className="section-heading">
           <h2>The evidence behind the change</h2>
-          <span className="badge">{services.length} fixture relationships</span>
+          <span className="badge">
+            {graph.edges.length} {graph.mode === "fixture" ? "fixture " : ""}
+            relationships
+          </span>
         </div>
         <div className="filters">
           <label>
             Search dependencies
             <input
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={(event) => {
+                setQuery(event.target.value);
+                setPage(0);
+              }}
               placeholder="Search services…"
             />
           </label>
           <label>
             Evidence classification
-            <select value={filter} onChange={(e) => setFilter(e.target.value)}>
-              {["ALL", "CONFIRMED", "INFERRED", "UNKNOWN"].map((f) => (
-                <option key={f}>{f}</option>
+            <select
+              value={filter}
+              onChange={(event) => {
+                setFilter(event.target.value);
+                setPage(0);
+              }}
+            >
+              {["ALL", "CONFIRMED", "INFERRED", "UNKNOWN"].map((value) => (
+                <option key={value}>{value}</option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Evidence freshness
+            <select
+              value={freshness}
+              onChange={(event) => {
+                setFreshness(event.target.value);
+                setPage(0);
+              }}
+            >
+              {["ALL", "FRESH", "STALE", "UNKNOWN"].map((value) => (
+                <option key={value}>{value}</option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Impact scope
+            <select
+              value={impact}
+              onChange={(event) => {
+                setImpact(event.target.value);
+                setPage(0);
+              }}
+            >
+              {["ALL", "DIRECT", "TRANSITIVE"].map((value) => (
+                <option key={value}>{value}</option>
               ))}
             </select>
           </label>
         </div>
-        {visible.length ? (
+        {windowed.services.length ? (
           <div className="graph">
             <ReactFlow
-              nodes={nodes}
+              key={`${windowed.currentPage}-${query}-${filter}-${freshness}-${impact}`}
+              nodes={flowNodes}
               edges={edges}
               fitView
-              onNodeClick={(_, n) => {
-                const s = services.find((s) => s.id === n.id);
-                if (s) setSelectedId(s.id);
-              }}
-              onEdgeClick={(_, e) => setSelectedId(e.id)}
+              onNodeClick={(_, node) => selectService(node.id)}
+              onEdgeClick={(_, edge) => selectService(edge.source, edge.id)}
             >
               <Background gap={24} />
               <Controls />
@@ -134,35 +252,109 @@ export default function Graph({
           </p>
         )}
         <p className="muted">
-          Solid: CONFIRMED · Dashed: INFERRED or UNKNOWN · Select a node or edge
-          to highlight its path.
+          Solid: CONFIRMED · Dashed: INFERRED or UNKNOWN. CALLS, ROUTES, TESTS
+          and DEPENDS_ON describe the supplied relation. Freshness and
+          direct/transitive scope are source metadata, not inferred from an AI
+          answer.
+        </p>
+        <p>
+          Showing {windowed.services.length} of {windowed.total} matching
+          dependencies. Page {windowed.currentPage + 1} of {windowed.totalPages}
+          .
+        </p>
+        {windowed.totalPages > 1 && (
+          <div className="pagination">
+            <button
+              disabled={windowed.currentPage === 0}
+              onClick={() => setPage(windowed.currentPage - 1)}
+            >
+              Previous dependencies
+            </button>
+            <button
+              disabled={windowed.currentPage + 1 >= windowed.totalPages}
+              onClick={() => setPage(windowed.currentPage + 1)}
+            >
+              Next dependencies
+            </button>
+          </div>
+        )}
+        <p className="muted">
+          The visual window is bounded to 20 listed dependencies plus at most 20
+          path steps and 80 relationships. Relations outside this window are not
+          drawn.
         </p>
       </section>
       <div className="two-col">
         <section className="panel">
           <h2>Accessible dependency list</h2>
-          {visible.map((s) => (
+          {windowed.services.map((service) => (
             <button
               className="list-row"
-              key={s.id}
-              aria-pressed={s.id === selected?.id}
-              onClick={() => setSelectedId(s.id)}
+              key={service.id}
+              aria-pressed={service.id === selected?.id}
+              onClick={() => {
+                setSelectedId(service.id);
+                setSelectedEdgeId(null);
+              }}
             >
-              <span>{s.label}</span>
-              <span className="badge">{s.evidence}</span>
+              <span>{service.label}</span>
+              <span className="badge">{service.evidence}</span>
             </button>
           ))}
         </section>
-        {selected && visible.some((service) => service.id === selected.id) && (
+        {selected && (
           <section className="panel">
             <span className="eyebrow">SOURCE EVIDENCE</span>
             <h2>{selected.label}</h2>
             <span className="badge">{selected.evidence}</span>
             <p>{selected.detail}</p>
-            <p className="muted">{selected.source}</p>
+            {selectedEdge ? (
+              <>
+                <p>
+                  {selectedEdge.relation} · {selectedEdge.impact} ·{" "}
+                  {selectedEdge.freshness}
+                </p>
+                <p>Observed: {selectedEdge.observedAt ?? "Not supplied"}</p>
+                <p>
+                  {selectedEdge.sourceUrl ? (
+                    <a
+                      href={selectedEdge.sourceUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {selectedEdge.sourceReference}
+                    </a>
+                  ) : (
+                    selectedEdge.sourceReference
+                  )}
+                </p>
+                <h3>Supplied provenance</h3>
+                <p>{selectedEdge.provenance.join(" → ")}</p>
+              </>
+            ) : (
+              <p>No source relationship supplied for this dependency.</p>
+            )}
+            <h3>Dependency path to change</h3>
+            {path.length ? (
+              <p>
+                {path
+                  .slice(0, 20)
+                  .map((edge) => edge.source)
+                  .join(" → ")}{" "}
+                →{" "}
+                {path.length > 20
+                  ? "path continues outside this window"
+                  : graph.root.id}
+              </p>
+            ) : (
+              <p>
+                No path to this change can be verified from the supplied graph.
+              </p>
+            )}
             <small>
-              Fictional fixture reference; this is not a live repository
-              citation.
+              {graph.mode === "fixture"
+                ? "Fictional fixture references, not live repository citations."
+                : "Evidence classification and provenance supplied by the backend."}
             </small>
           </section>
         )}

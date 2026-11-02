@@ -1,8 +1,8 @@
 {
   "workstream": "EXPERIENCE",
   "branch": "feat/product-experience",
-  "revisionBase": "a3bdc8f",
-  "revisionScope": "working tree: unified client read boundary",
+  "revisionBase": "bef5978",
+  "revisionScope": "working tree: provenance-aware bounded graph",
   "contractVersion": "frontend-proposal-v2 — TEMPORARY, not CORE approved",
   "status": "VERIFIED_LOCAL",
   "screens": {
@@ -10,8 +10,8 @@
     "production": "Forge capability and access onboarding; no fixture fallback"
   },
   "tests": {
-    "unit": 34,
-    "browser": 18,
+    "unit": 41,
+    "browser": 20,
     "lint": "PASS",
     "typecheck": "PASS",
     "format": "PASS",
@@ -39,8 +39,8 @@
     "No hosted Bridge/routing/CSP/theme/authentication or Jira outcome verification"
   ],
   "next": [
-    "Expand graph provenance/freshness and bounded large-data behavior",
-    "Measure representative performance and complete product research",
-    "Integrate reviewed CORE contracts and run Forge-hosted gates"
+    "Measure browser interaction and repeated-route reliability",
+    "Complete product research, license inventory and remaining UX checks",
+    "Integrate reviewed CORE contracts and run hosted acceptance gates"
   ]
 }

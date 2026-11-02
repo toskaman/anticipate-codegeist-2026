@@ -27,3 +27,5 @@ The template's original App.jsx is preserved but unused; index.jsx loads App.tsx
 npm start serves the development-only fixture prototype on port 3000. npm run build produces the Forge production access/capability interface, which has no fixture fallback. npm run preview -- --host 127.0.0.1 --port 3001 previews that build locally; it intentionally reports PENDING_BACKEND until reviewed CORE resolver bindings are configured. npm run test:browser builds first and tests both development and production servers. Host theming is implemented but requires Forge-hosted verification. See coordination/frontend-integration-requests.md for the exact backend dependency list.
 
 
+
+Graph QA: docs/design/GRAPH_QA.md records relationship/provenance semantics, rendering bounds, limitations and the local baseline. Run npm run benchmark:graph for a separate synthetic model benchmark; this is not included in npm test and is not a browser/Forge performance claim. The benchmark and scripts are covered by formatting/lint/type checks.

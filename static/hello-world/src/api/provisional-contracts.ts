@@ -148,18 +148,66 @@ export const dependencySchema = z.object({
   source: z.string().min(1),
   detail: z.string().min(1),
 });
+export const relationshipSchema = z.object({
+  id: z.string().min(1),
+  source: z.string().min(1),
+  target: z.string().min(1),
+  relation: z.enum(["CALLS", "ROUTES", "TESTS", "DEPENDS_ON"]),
+  evidence: z.enum(["CONFIRMED", "INFERRED", "UNKNOWN"]),
+  sourceReference: z.string().min(1),
+  sourceUrl: safeSourceUrlSchema.nullable(),
+  observedAt: z.string().datetime().nullable(),
+  freshness: z.enum(["FRESH", "STALE", "UNKNOWN"]),
+  impact: z.enum(["DIRECT", "TRANSITIVE"]),
+  provenance: z.array(z.string()).min(1),
+});
+
 export const graphSchema = z
   .object({
     mode: z.enum(["fixture", "forge"]),
     snapshotId: z.string().min(1),
-    services: z.array(dependencySchema),
+    root: z.object({ id: z.string().min(1), label: z.string().min(1) }),
+    services: z.array(dependencySchema).max(10000),
+    edges: z.array(relationshipSchema).max(30000),
   })
   .refine(
     (graph) =>
       new Set(graph.services.map((service) => service.id)).size ===
       graph.services.length,
     "Duplicate evidence node IDs",
-  );
+  )
+  .refine((graph) => {
+    const ids = new Set([
+      graph.root.id,
+      ...graph.services.map((service) => service.id),
+    ]);
+    return (
+      !graph.services.some((service) => service.id === graph.root.id) &&
+      new Set(graph.edges.map((edge) => edge.id)).size === graph.edges.length &&
+      graph.edges.every(
+        (edge) =>
+          ids.has(edge.source) &&
+          ids.has(edge.target) &&
+          edge.provenance.every((id) => ids.has(id)),
+      )
+    );
+  }, "Invalid or duplicate relationship endpoints")
+  .refine((graph) => {
+    const pairs = new Set(
+      graph.edges.map((edge) => JSON.stringify([edge.source, edge.target])),
+    );
+    return graph.edges.every(
+      (edge) =>
+        edge.provenance.length >= 2 &&
+        edge.provenance[0] === edge.source &&
+        edge.provenance[1] === edge.target &&
+        edge.provenance
+          .slice(1)
+          .every((id, index) =>
+            pairs.has(JSON.stringify([edge.provenance[index], id])),
+          ),
+    );
+  }, "Provenance must follow supplied relationships");
 export const scenarioResultSchema = z.object({
   name: z.string().min(1),
   risk: z.string().min(1),

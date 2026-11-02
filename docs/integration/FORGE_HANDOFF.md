@@ -12,3 +12,5 @@ Graph, dashboard and scenario reads now cross the same AnticipateClient boundary
 
 Exact operation/input/error requirements and hosted acceptance tests are in ../coordination/frontend-integration-requests.md. Required access includes an owner-provided installation link, site, installation UUID and authorized test permissions. No Apps-menu entry, bonus integration, or successful Jira mutation should be inferred from screenshots or local tests.
 
+
+Graph contract proposal now includes root, explicit edges and metadata (relation, epistemic classification, source reference/HTTPS URL, observation time, freshness, impact scope and provenance). Graph payloads must include relationship endpoints and valid provenance steps. Renderer pagination is client-side on a bounded loaded payload; agree server paging semantics with CORE. See ../design/GRAPH_QA.md and the coordination request.

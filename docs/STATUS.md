@@ -23,3 +23,5 @@ Worktree: original C: workspace; branch feat/product-experience. CORE owns the u
 - Judge clean-site installation and distribution are CORE/owner-dependent. No installation URL or Apps-menu entry is invented.
 
 Evidence is LOCAL/MOCK only. Current coordination requirements and test details are in docs/coordination/ and evidence/experience/. Historic audits and screenshot milestones remain historical evidence, not current live-integration claims.
+
+Graph milestone: explicit relationships and supplied provenance/freshness/direct-transitive scope now render with matching filters and a bounded visual/list window. Cyclic and 120/1000-node synthetic datasets are tested. Final suite: 41 unit tests, 20 browser tests, lint/format/typecheck/build pass after fixing a connector-position import error found during verification. npm run benchmark:graph records LOCAL model-only median/p95; no browser or Forge performance claim. Details and residual limits are in docs/design/GRAPH_QA.md. Product research, browser/long-run measurements and CORE integration remain open.

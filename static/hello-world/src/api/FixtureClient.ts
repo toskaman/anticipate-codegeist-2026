@@ -73,12 +73,8 @@ export class FixtureClient implements AnticipateClient {
       });
     }
     if (operation === "getEvidenceGraph") {
-      const { services } = await import("../domain");
-      return graphSchema.parse({
-        mode: "fixture",
-        snapshotId,
-        services: structuredClone(services),
-      });
+      const { authoredGraph } = await import("../graphFixtures");
+      return graphSchema.parse(authoredGraph());
     }
     if (operation === "simulateChange") {
       const { scenarios, scenarioSchema } = await import("../domain");
