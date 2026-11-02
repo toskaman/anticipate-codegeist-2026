@@ -17,6 +17,9 @@ describe('capabilities and coverage (EXPERIENCE requests R1, R2, R4)', () => {
     const cmp = await svc.compareScenarios(ctx, { snapshotId: snap.snapshotId, change: { issueKey: 'PAY-1', targetNodeId: 'issue:PAY-1', description: 'upgrade' },
       scenarios: upgradeScenarios('issue:PAY-1', 'issue:PAY-5'), maxDepth: 6 });
     expect(cmp.results.map((r) => r.scenarioId)).toEqual(expect.arrayContaining(['A-breaking-upgrade-now', 'B-compatible-upgrade']));
+    // an unverified compatibility claim (open question) must not tie with an evidence-backed PASS
+    const c = cmp.results.find((r) => r.scenarioId === 'C-migrate-then-upgrade');
+    if (c?.verdict === 'PASS') expect(cmp.recommendedScenarioId).toBe('C-migrate-then-upgrade');
     const plan = PreventionPlan.parse(await svc.generatePreventionPlan(ctx, { snapshotId: snap.snapshotId, scenarioId: 'A-breaking-upgrade-now' }));
     expect(plan.scenarioId).toBe('A-breaking-upgrade-now');
   });

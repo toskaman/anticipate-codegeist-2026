@@ -40,7 +40,7 @@ export function createRovoActions(deps: (p: ActionPayload) => Deps) {
       const c = await svc.compareScenarios(ctx, { snapshotId: g.snapshotId, change: { issueKey: p.issueKey, targetNodeId: issueNodeId(p.issueKey), description: `Retire ${p.issueKey}` },
         scenarios: standardScenarios(issueNodeId(p.issueKey), repl), maxDepth: 6 });
       return [`Counterfactual comparison for retiring ${p.issueKey} (deterministic, snapshot ${g.snapshotId}):`,
-        ...c.results.map((r) => `- ${r.scenarioId}: ${r.verdict}; impacted ${r.summary.impacted} (${r.summary.direct} direct); blockers ${r.summary.blockers}; unknowns ${r.summary.unknowns}; rules ${r.violations.map((v) => v.ruleId).join(',') || 'none'}`),
+        ...c.results.map((r) => `- ${r.scenarioId}: ${r.verdict}; impacted ${r.summary.impacted} (${r.summary.direct} direct); blockers ${r.summary.blockers}; unknowns ${r.summary.unknowns}; open questions ${r.uncertainties.map((u) => u.reason).join(',') || 'none'}; rules ${r.violations.map((v) => v.ruleId).join(',') || 'none'}`),
         c.recommendedScenarioId ? `Lowest-risk now: ${c.recommendedScenarioId}. ${c.recommendationReason}` : c.recommendationReason,
         'No Jira changes were made. Open ANTICIPATE to review and approve a prevention plan.'].join('\n');
     }),
@@ -53,7 +53,7 @@ export function createRovoActions(deps: (p: ActionPayload) => Deps) {
       const c = await svc.compareScenarios(ctx, { snapshotId: g.snapshotId, change: { issueKey: p.issueKey, targetNodeId: issueNodeId(p.issueKey), description: `Upgrade ${p.issueKey}` },
         scenarios: upgradeScenarios(issueNodeId(p.issueKey), repl), maxDepth: 6 });
       return [`Counterfactual comparison for upgrading ${p.issueKey} (deterministic, snapshot ${g.snapshotId}):`,
-        ...c.results.map((r) => `- ${r.scenarioId}: ${r.verdict}; impacted ${r.summary.impacted} (${r.summary.direct} direct); blockers ${r.summary.blockers}; unknowns ${r.summary.unknowns}; rules ${r.violations.map((v) => v.ruleId).join(',') || 'none'}`),
+        ...c.results.map((r) => `- ${r.scenarioId}: ${r.verdict}; impacted ${r.summary.impacted} (${r.summary.direct} direct); blockers ${r.summary.blockers}; unknowns ${r.summary.unknowns}; open questions ${r.uncertainties.map((u) => u.reason).join(',') || 'none'}; rules ${r.violations.map((v) => v.ruleId).join(',') || 'none'}`),
         c.recommendedScenarioId ? `Lowest-risk now: ${c.recommendedScenarioId}. ${c.recommendationReason}` : c.recommendationReason,
         'No Jira changes were made.'].join('\n');
     }),
