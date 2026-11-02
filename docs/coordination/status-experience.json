@@ -2,7 +2,7 @@
   "workstream": "EXPERIENCE",
   "branch": "feat/product-experience",
   "revisionBase": "4c68d90fc0990b751cb7bfa7dc6d0f2a77f60c12",
-  "revisionScope": "Frontend baseline 4c68d90 unchanged; CORE Rovo caller-identity fix 1225a72 merged through 41c6c59",
+  "revisionScope": "Frontend source unchanged; scoped Bridge subtree ProseMirror view/model overrides verified locally; CORE through 41c6c59",
   "contractVersion": "0.2.0",
   "status": "VERIFIED_LOCAL_READY_FOR_HOSTED_VALIDATION",
   "tests": {
@@ -129,5 +129,25 @@
     "productionVersion": "2.2.0",
     "scope": "External MCP graph/simulation/Passport through CORE connector; not independently verified by EXPERIENCE",
     "sourceCommitReported": "1225a72 caller identity fix; full deployed tree SHA not supplied"
+  },
+  "frontendDependencyFollowup": {
+    "status": "VERIFIED_LOCAL_NOT_DEPLOYED_BY_EXPERIENCE",
+    "overrides": {
+      "prosemirror-view": "1.42.9",
+      "prosemirror-model": "1.25.12"
+    },
+    "scope": "@forge/bridge subtree only",
+    "auditFull": {
+      "moderate": 14,
+      "high": 2
+    },
+    "auditProduction": {
+      "moderate": 4,
+      "high": 2
+    },
+    "browserTests": 51,
+    "unitTests": 42,
+    "evidence": "evidence/experience/dependency-remediation/audit-LOCAL.json",
+    "hostedCompatibility": "NOT_INDEPENDENTLY_VERIFIED"
   }
 }

@@ -1,6 +1,16 @@
 # Frontend dependency follow-up — 2026-11-02
 
-This is dependency evidence, not a production security clearance. Runtime source and lockfile remain unchanged from candidate `4c68d90`.
+This is dependency evidence, not a production security clearance. The initial investigation below describes the deployed baseline; the verified frontend override follow-up supersedes its unchanged-lockfile state.
+
+## Verified frontend override follow-up
+
+The frontend now scopes npm overrides under `@forge/bridge` to `prosemirror-view@1.42.9` and `prosemirror-model@1.25.12`. The model patch satisfies the new view dependency while keeping a single model instance throughout the Forge subtree. Forge Bridge itself, backend packages, contracts and manifest are unchanged. These overrides intentionally supersede Atlaskit's exact transitive pins; they are not an Atlassian compatibility certification.
+
+After clean `npm ci --ignore-scripts`, full audit reports **16 affected dependency entries: 14 moderate / 2 high**, down from 20 (13 moderate / 7 high). Production-only audit reports **6 entries: 4 moderate / 2 high**, down from 10 (3 moderate / 7 high). ProseMirror's advisory is no longer present; Forge Bridge is still affected at moderate severity through its manifest dependencies. These are dependency-entry counts, not independent exploit counts. Shared Zod 3 and glob/minimatch advisories remain unresolved.
+
+TypeScript, lint, formatting, **42 unit tests**, **51 browser tests (39.0 s)** and build passed after clean install. Notices were regenerated for the two changed package versions and the final build passed again. Inventory remains 24 direct packages, 162 runtime paths and 11 missing root license texts. Raw audit and current inventory: `evidence/experience/dependency-remediation/`.
+
+The application does not expose a ProseMirror editor; its browser suite verifies the existing frontend journey, not every upstream editor behavior or malicious paste case. The emitted application JS/CSS filenames stayed unchanged, consistent with the editor code being excluded by the existing build; this is not a general reachability proof. Dependency installation is remediated for this advisory, without claiming a measured runtime security change. Hosted Forge compatibility has not been independently tested. No deployment was performed; CORE owns deployment decisions. Remove the overrides when the upstream Bridge tree resolves to patched compatible versions, with the same checks before publication.
 
 ## Measured audit
 

@@ -1,0 +1,335 @@
+{
+  "measuredAtUtc": "2026-11-02T13:41:50.416727+00:00",
+  "mode": "LOCAL_INSTALLED_DEPENDENCIES",
+  "scope": "frontend only; not a deployed runtime audit",
+  "full": {
+    "exitCode": 1,
+    "counts": {
+      "info": 0,
+      "low": 0,
+      "moderate": 14,
+      "high": 2,
+      "critical": 0,
+      "total": 16
+    },
+    "entries": {
+      "@anticipate/contracts": {
+        "severity": "high",
+        "via": [
+          "zod"
+        ],
+        "nodes": [
+          "node_modules/@anticipate/contracts"
+        ]
+      },
+      "@eslint-community/eslint-utils": {
+        "severity": "moderate",
+        "via": [
+          "eslint"
+        ],
+        "nodes": [
+          "node_modules/@eslint-community/eslint-utils"
+        ]
+      },
+      "@eslint/config-array": {
+        "severity": "moderate",
+        "via": [
+          "minimatch"
+        ],
+        "nodes": [
+          "node_modules/@eslint/config-array"
+        ]
+      },
+      "@eslint/js": {
+        "severity": "moderate",
+        "via": [
+          "eslint"
+        ],
+        "nodes": [
+          "node_modules/@eslint/js"
+        ]
+      },
+      "@forge/bridge": {
+        "severity": "moderate",
+        "via": [
+          "@forge/manifest"
+        ],
+        "nodes": [
+          "node_modules/@forge/bridge"
+        ]
+      },
+      "@forge/manifest": {
+        "severity": "moderate",
+        "via": [
+          "glob"
+        ],
+        "nodes": [
+          "node_modules/@forge/manifest"
+        ]
+      },
+      "@typescript-eslint/eslint-plugin": {
+        "severity": "moderate",
+        "via": [
+          "@typescript-eslint/parser",
+          "@typescript-eslint/type-utils",
+          "@typescript-eslint/utils",
+          "eslint"
+        ],
+        "nodes": [
+          "node_modules/@typescript-eslint/eslint-plugin"
+        ]
+      },
+      "@typescript-eslint/parser": {
+        "severity": "moderate",
+        "via": [
+          "@typescript-eslint/typescript-estree",
+          "eslint"
+        ],
+        "nodes": [
+          "node_modules/@typescript-eslint/parser"
+        ]
+      },
+      "@typescript-eslint/type-utils": {
+        "severity": "moderate",
+        "via": [
+          "@typescript-eslint/typescript-estree",
+          "@typescript-eslint/utils",
+          "eslint"
+        ],
+        "nodes": [
+          "node_modules/@typescript-eslint/type-utils"
+        ]
+      },
+      "@typescript-eslint/typescript-estree": {
+        "severity": "moderate",
+        "via": [
+          "minimatch"
+        ],
+        "nodes": [
+          "node_modules/@typescript-eslint/typescript-estree"
+        ]
+      },
+      "@typescript-eslint/utils": {
+        "severity": "moderate",
+        "via": [
+          "@eslint-community/eslint-utils",
+          "@typescript-eslint/typescript-estree",
+          "eslint"
+        ],
+        "nodes": [
+          "node_modules/@typescript-eslint/utils"
+        ]
+      },
+      "eslint": {
+        "severity": "moderate",
+        "via": [
+          "@eslint-community/eslint-utils",
+          "@eslint/config-array",
+          "minimatch"
+        ],
+        "nodes": [
+          "node_modules/eslint"
+        ]
+      },
+      "glob": {
+        "severity": "moderate",
+        "via": [
+          {
+            "source": 1244013,
+            "name": "glob",
+            "dependency": "glob",
+            "title": "Glob: AbortSignal cancellation bypass allows post-timeout filesystem traversal",
+            "url": "https://github.com/advisories/GHSA-3g3m-2fjr-6pw4",
+            "severity": "moderate",
+            "cwe": [
+              "CWE-400"
+            ],
+            "cvss": {
+              "score": 0,
+              "vectorString": null
+            },
+            "range": ">=9.0.0 <=14.0.1"
+          },
+          "minimatch"
+        ],
+        "nodes": [
+          "node_modules/glob"
+        ]
+      },
+      "minimatch": {
+        "severity": "moderate",
+        "via": [
+          {
+            "source": 1244012,
+            "name": "minimatch",
+            "dependency": "minimatch",
+            "title": "minimatch has potential denial of service via globparts amplification",
+            "url": "https://github.com/advisories/GHSA-g3hv-75wg-m249",
+            "severity": "moderate",
+            "cwe": [
+              "CWE-405"
+            ],
+            "cvss": {
+              "score": 0,
+              "vectorString": null
+            },
+            "range": "<11.0.1"
+          }
+        ],
+        "nodes": [
+          "node_modules/minimatch"
+        ]
+      },
+      "typescript-eslint": {
+        "severity": "moderate",
+        "via": [
+          "@typescript-eslint/eslint-plugin",
+          "@typescript-eslint/parser",
+          "@typescript-eslint/typescript-estree",
+          "@typescript-eslint/utils",
+          "eslint"
+        ],
+        "nodes": [
+          "node_modules/typescript-eslint"
+        ]
+      },
+      "zod": {
+        "severity": "high",
+        "via": [
+          {
+            "source": 1243066,
+            "name": "zod",
+            "dependency": "zod",
+            "title": "Zod can exhaust memory while validating oversized constrained collections",
+            "url": "https://github.com/advisories/GHSA-mrhx-c7xc-m3w5",
+            "severity": "high",
+            "cwe": [
+              "CWE-770"
+            ],
+            "cvss": {
+              "score": 7.5,
+              "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+            },
+            "range": "<4.6.6"
+          }
+        ],
+        "nodes": [
+          "node_modules/@anticipate/contracts/node_modules/zod"
+        ]
+      }
+    }
+  },
+  "production": {
+    "exitCode": 1,
+    "counts": {
+      "info": 0,
+      "low": 0,
+      "moderate": 4,
+      "high": 2,
+      "critical": 0,
+      "total": 6
+    },
+    "entries": {
+      "@anticipate/contracts": {
+        "severity": "high",
+        "via": [
+          "zod"
+        ],
+        "nodes": [
+          "node_modules/@anticipate/contracts"
+        ]
+      },
+      "@forge/bridge": {
+        "severity": "moderate",
+        "via": [
+          "@forge/manifest"
+        ],
+        "nodes": [
+          "node_modules/@forge/bridge"
+        ]
+      },
+      "@forge/manifest": {
+        "severity": "moderate",
+        "via": [
+          "glob"
+        ],
+        "nodes": [
+          "node_modules/@forge/manifest"
+        ]
+      },
+      "glob": {
+        "severity": "moderate",
+        "via": [
+          {
+            "source": 1244013,
+            "name": "glob",
+            "dependency": "glob",
+            "title": "Glob: AbortSignal cancellation bypass allows post-timeout filesystem traversal",
+            "url": "https://github.com/advisories/GHSA-3g3m-2fjr-6pw4",
+            "severity": "moderate",
+            "cwe": [
+              "CWE-400"
+            ],
+            "cvss": {
+              "score": 0,
+              "vectorString": null
+            },
+            "range": ">=9.0.0 <=14.0.1"
+          },
+          "minimatch"
+        ],
+        "nodes": [
+          "node_modules/glob"
+        ]
+      },
+      "minimatch": {
+        "severity": "moderate",
+        "via": [
+          {
+            "source": 1244012,
+            "name": "minimatch",
+            "dependency": "minimatch",
+            "title": "minimatch has potential denial of service via globparts amplification",
+            "url": "https://github.com/advisories/GHSA-g3hv-75wg-m249",
+            "severity": "moderate",
+            "cwe": [
+              "CWE-405"
+            ],
+            "cvss": {
+              "score": 0,
+              "vectorString": null
+            },
+            "range": "<11.0.1"
+          }
+        ],
+        "nodes": [
+          "node_modules/minimatch"
+        ]
+      },
+      "zod": {
+        "severity": "high",
+        "via": [
+          {
+            "source": 1243066,
+            "name": "zod",
+            "dependency": "zod",
+            "title": "Zod can exhaust memory while validating oversized constrained collections",
+            "url": "https://github.com/advisories/GHSA-mrhx-c7xc-m3w5",
+            "severity": "high",
+            "cwe": [
+              "CWE-770"
+            ],
+            "cvss": {
+              "score": 7.5,
+              "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+            },
+            "range": "<4.6.6"
+          }
+        ],
+        "nodes": [
+          "node_modules/@anticipate/contracts/node_modules/zod"
+        ]
+      }
+    }
+  }
+}
