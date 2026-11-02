@@ -98,71 +98,7 @@ export const actions = [
   "Run gateway and pipeline contract tests",
   "Approve staged rollout and rollback",
 ];
-export type Workflow = {
-  approved: boolean;
-  executed: boolean;
-  timeline: { event: string; at: string }[];
-};
-export const initialWorkflow = (): Workflow => ({
-  approved: false,
-  executed: false,
-  timeline: [],
-});
-export function transition(
-  state: Workflow,
-  event: "approve" | "execute",
-  at = new Date().toISOString(),
-): Workflow {
-  if (event === "execute" && !state.approved)
-    throw new Error("Local approval is required.");
-  if (
-    (event === "approve" && state.approved) ||
-    (event === "execute" && state.executed)
-  )
-    return state;
-  return {
-    approved: true,
-    executed: event === "execute" || state.executed,
-    timeline: [
-      ...state.timeline,
-      {
-        event:
-          event === "approve"
-            ? "Local demo approval"
-            : "Simulated execution complete",
-        at,
-      },
-    ],
-  };
-}
-export interface DataAdapter {
-  getCapabilities(): Promise<{ mode: "demo" | "forge"; execution: boolean }>;
-  getEvidenceGraph(): Promise<typeof services>;
-  simulateChange(id: ScenarioId): Promise<(typeof scenarios)[ScenarioId]>;
-}
-export const demoAdapter: DataAdapter = {
-  async getCapabilities() {
-    return { mode: "demo", execution: false };
-  },
-  async getEvidenceGraph() {
-    return structuredClone(services);
-  },
-  async simulateChange(id) {
-    return structuredClone(scenarios[scenarioSchema.parse(id)]);
-  },
-};
-export const forgeAdapter: DataAdapter = {
-  async getCapabilities() {
-    return { mode: "forge", execution: false };
-  },
-  async getEvidenceGraph() {
-    throw new Error("PENDING_BACKEND: evidence contract unavailable");
-  },
-  async simulateChange() {
-    throw new Error("PENDING_BACKEND: simulation contract unavailable");
-  },
-};
-export function passport(id: ScenarioId, workflow: Workflow) {
+export function fixturePassport(id: ScenarioId) {
   return {
     disclosure: "DEMO DATA — fictional local simulation. No Jira changes made.",
     change: "AUTH-142",
@@ -174,8 +110,8 @@ export function passport(id: ScenarioId, workflow: Workflow) {
     mitigations: scenarios[id].mitigations,
     violatedPolicies: scenarios[id].violations,
     uncertainty: scenarios[id].blockers,
-    approvalTimeline: workflow.timeline,
-    execution: workflow.executed ? "Simulated complete" : "Not executed",
+    approvalTimeline: [],
+    execution: "Requires live authenticated backend",
   };
 }
 

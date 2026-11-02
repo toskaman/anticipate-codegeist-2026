@@ -1,8 +1,8 @@
 {
   "workstream": "EXPERIENCE",
   "branch": "feat/product-experience",
-  "revisionBase": "a1bdb38",
-  "revisionScope": "working tree: main Plan/Passport v2 migration",
+  "revisionBase": "a3bdc8f",
+  "revisionScope": "working tree: unified client read boundary",
   "contractVersion": "frontend-proposal-v2 — TEMPORARY, not CORE approved",
   "status": "VERIFIED_LOCAL",
   "screens": {
@@ -10,7 +10,7 @@
     "production": "Forge capability and access onboarding; no fixture fallback"
   },
   "tests": {
-    "unit": 31,
+    "unit": 34,
     "browser": 18,
     "lint": "PASS",
     "typecheck": "PASS",
@@ -34,14 +34,13 @@
   ],
   "evidenceMode": "LOCAL/MOCK only; no VERIFIED_FORGE evidence",
   "limitations": [
-    "Legacy development graph/dashboard/scenario read projections still use ExperienceAdapter; shared-client consolidation remains incomplete",
-    "CORE schemas and resolver bindings remain unpublished",
-    "Hosted routing, CSP, host theming and authenticated Jira actions remain unverified",
-    "Fixture comparisons remain authored results, not CORE simulator output"
+    "Authoritative shared schemas and resolver bindings remain unpublished by CORE",
+    "Scenario results are explicitly authored fixtures, not simulator output",
+    "No hosted Bridge/routing/CSP/theme/authentication or Jira outcome verification"
   ],
   "next": [
-    "Consolidate legacy read adapters behind AnticipateClient",
-    "Integrate published shared contracts and actual per-action outcomes when CORE is ready",
-    "Complete representative graph/performance/research and jury evidence"
+    "Expand graph provenance/freshness and bounded large-data behavior",
+    "Measure representative performance and complete product research",
+    "Integrate reviewed CORE contracts and run Forge-hosted gates"
   ]
 }

@@ -2,6 +2,10 @@ import {
   capabilitiesSchema,
   planSchema,
   passportSchema,
+  snapshotSchema,
+  graphSchema,
+  simulationSchema,
+  comparisonsSchema,
   executionSchema,
   mutationInputSchema,
   projectSchema,
@@ -143,7 +147,15 @@ export class ForgeClient implements AnticipateClient {
           ? executionSchema
           : operation === "getPreventionPassport"
             ? passportSchema
-            : null;
+            : operation === "getProjectSnapshot"
+              ? snapshotSchema
+              : operation === "getEvidenceGraph"
+                ? graphSchema
+                : operation === "simulateChange"
+                  ? simulationSchema
+                  : operation === "compareScenarios"
+                    ? comparisonsSchema
+                    : null;
     if (schema) {
       const validated = schema.safeParse(payload);
       if (!validated.success)
@@ -155,6 +167,11 @@ export class ForgeClient implements AnticipateClient {
         throw new ClientError(
           "INVALID_RESPONSE",
           "Fixture plan returned by Forge backend",
+        );
+      if ("source" in validated.data && validated.data.source !== "simulator")
+        throw new ClientError(
+          "INVALID_RESPONSE",
+          "Fixture result returned by Forge backend",
         );
       return validated.data;
     }

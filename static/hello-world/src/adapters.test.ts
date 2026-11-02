@@ -1,50 +1,49 @@
-import { describe, it, expect } from "vitest";
-import { localAdapter, unavailableForgeAdapter } from "./adapters";
-describe("frontend integration boundary", () => {
-  it("returns deterministic project, snapshot and comparisons", async () => {
-    const projects = await localAdapter.getProjects();
-    expect((await localAdapter.getProjectSnapshot(projects[0].id)).change).toBe(
-      "AUTH-142",
-    );
-    expect(
-      (await localAdapter.compareScenarios(["A", "C"])).map(
-        (x) => x.result.violations,
-      ),
-    ).toEqual([3, 0]);
-    await expect(localAdapter.getProjectSnapshot("missing")).rejects.toThrow(
-      "NOT_FOUND",
-    );
+import { describe, it, expect, vi } from "vitest";
+import { loadExperience, fixtureClient } from "./adapters";
+import { ForgeClient } from "./api/ForgeClient";
+import { planSchema, comparisonsSchema } from "./api/provisional-contracts";
+describe("single client integration boundary", () => {
+  it("loads deterministic reads through the same snapshot", async () => {
+    const data = await loadExperience();
+    expect(data.kind).toBe("ready");
+    if (data.kind !== "ready") throw new Error("Missing fixture");
+    expect(data.snapshot.change).toBe("AUTH-142");
+    expect(Object.values(data.scenarios).map((s) => s.violations)).toEqual([
+      3, 1, 0,
+    ]);
+    expect(data.source).toBe("authored-fixture");
   });
-  it("blocks unsupported approval and premature execution", async () => {
-    await expect(
-      localAdapter.approvePreventionPlan(
-        await localAdapter.generatePreventionPlan("A"),
-      ),
-    ).rejects.toThrow("DEMO_BLOCKED");
-    await expect(
-      localAdapter.executeApprovedPlan(
-        await localAdapter.generatePreventionPlan("C"),
-      ),
-    ).rejects.toThrow("approval");
-  });
-  it("exports actual local timeline after execution", async () => {
-    const plan = await localAdapter.executeApprovedPlan(
-      await localAdapter.approvePreventionPlan(
-        await localAdapter.generatePreventionPlan("C"),
-      ),
-    );
-    const report = await localAdapter.getPreventionPassport(plan);
-    expect(report.approvalTimeline).toHaveLength(2);
-    expect(report.disclosure).toContain("fictional");
-  });
-  it("all unconfigured Forge operations fail explicitly", async () => {
-    await expect(unavailableForgeAdapter.getProjects()).rejects.toThrow(
-      "PENDING_BACKEND",
+  it("refuses fixture mutation and missing project lookups", async () => {
+    const plan = planSchema.parse(
+      await fixtureClient.request("generatePreventionPlan", {
+        snapshotId: "demo-auth-v1-2026-11-02",
+      }),
     );
     await expect(
-      unavailableForgeAdapter.getPreventionPassport(
-        await localAdapter.generatePreventionPlan("C"),
-      ),
-    ).rejects.toThrow("PENDING_BACKEND");
+      fixtureClient.request("approvePreventionPlan", {
+        planId: plan.planId,
+        version: plan.version,
+        actionIds: [plan.actions[0].actionId],
+      }),
+    ).rejects.toMatchObject({ code: "REQUIRES_LIVE_BACKEND" });
+    await expect(
+      fixtureClient.request("getProjectSnapshot", { projectId: "missing" }),
+    ).rejects.toThrow("not found");
+  });
+  it("keeps comparisons explicitly authored fixtures", async () => {
+    const result = comparisonsSchema.parse(
+      await fixtureClient.request("compareScenarios", {
+        snapshotId: "demo-auth-v1-2026-11-02",
+      }),
+    );
+    expect(result.source).toBe("authored-fixture");
+    expect(result.results).toHaveLength(3);
+  });
+  it("unconfigured Forge reads never call guessed resolver names", async () => {
+    const transport = vi.fn();
+    await expect(
+      loadExperience(new ForgeClient(transport)),
+    ).rejects.toMatchObject({ code: "UNSUPPORTED" });
+    expect(transport).not.toHaveBeenCalled();
   });
 });

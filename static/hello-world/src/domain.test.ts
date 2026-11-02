@@ -1,38 +1,29 @@
 import { describe, it, expect } from "vitest";
 import {
-  transition,
-  initialWorkflow,
-  demoAdapter,
-  forgeAdapter,
-  passport,
+  scenarioSchema,
   scenarios,
-  type ScenarioId,
+  fixturePassport,
+  actionDetails,
+  services,
 } from "./domain";
-describe("demo decision workflow", () => {
-  it("blocks execution before approval", () =>
-    expect(() => transition(initialWorkflow(), "execute")).toThrow());
-  it("records approval before simulated execution and exports demo disclosure", () => {
-    const state = transition(
-      transition(initialWorkflow(), "approve", "2026-11-02T10:00:00Z"),
-      "execute",
-      "2026-11-02T10:01:00Z",
-    );
-    expect(state.timeline).toHaveLength(2);
-    expect(passport("C", state).disclosure).toContain("fictional");
-    expect(passport("C", state).execution).toBe("Simulated complete");
-  });
-  it("does not remove unknown blockers from the safest fixture", () => {
+describe("authored fixture integrity", () => {
+  it("rejects unknown alternatives", () =>
+    expect(() => scenarioSchema.parse("D")).toThrow());
+  it("keeps unknown blockers even for the safest fixture", () => {
     expect(scenarios.C.violations).toBe(0);
     expect(scenarios.C.blockers).toContain("Support usage unknown");
   });
-  it("rejects unsupported scenario parameters", async () => {
-    await expect(
-      demoAdapter.simulateChange("D" as ScenarioId),
-    ).rejects.toThrow();
+  it("cannot manufacture approval or verified execution in a fixture report", () => {
+    const report = fixturePassport("C");
+    expect(report.approvalTimeline).toEqual([]);
+    expect(report.execution).toContain("Requires live");
+    expect(report.disclosure).toContain("fictional");
   });
-  it("does not silently substitute fixtures for Forge", async () => {
-    await expect(forgeAdapter.getEvidenceGraph()).rejects.toThrow(
-      "PENDING_BACKEND",
-    );
+  it("every action cites existing evidence", () => {
+    for (const action of actionDetails) {
+      expect(action.evidenceIds.length).toBeGreaterThan(0);
+      for (const id of action.evidenceIds)
+        expect(services.some((service) => service.id === id)).toBe(true);
+    }
   });
 });

@@ -1,16 +1,33 @@
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { ReactFlow, Background, Controls, MarkerType } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { services as fixtureServices } from "./domain";
-import { localAdapter, type ExperienceAdapter } from "./adapters";
+import { fixtureClient } from "./adapters";
+import {
+  type AnticipateClient,
+  graphSchema,
+} from "./api/provisional-contracts";
 import { useResource } from "./useResource";
 const emptyServices: typeof fixtureServices = [];
 export default function Graph({
-  adapter = localAdapter,
+  client = fixtureClient,
+  snapshotId = "demo-auth-v1-2026-11-02",
 }: {
-  adapter?: ExperienceAdapter;
+  client?: AnticipateClient;
+  snapshotId?: string;
 }) {
-  const resource = useResource(adapter.getEvidenceGraph);
+  const load = useCallback(
+    async (signal?: AbortSignal) => {
+      const graph = graphSchema.parse(
+        await client.request("getEvidenceGraph", { snapshotId }, signal),
+      );
+      if (graph.snapshotId !== snapshotId)
+        throw new Error("Graph snapshot changed; refresh the evidence");
+      return graph.services;
+    },
+    [client, snapshotId],
+  );
+  const resource = useResource(load);
   const services = resource.status === "ready" ? resource.data : emptyServices;
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("ALL");

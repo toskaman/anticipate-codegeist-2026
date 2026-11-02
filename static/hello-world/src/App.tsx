@@ -17,13 +17,12 @@ import { type ScenarioId } from "./domain";
 import "./style.css";
 import ConfirmDialog from "./ConfirmDialog";
 import { usePage } from "./usePage";
-import { loadExperience } from "./adapters";
+import { loadExperience, fixtureClient } from "./adapters";
 import ActionReview from "./ActionReview";
 import PassportView from "./PassportView";
-import { FixtureClient } from "./api/FixtureClient";
-const fixtureClient = new FixtureClient();
 import { useResource } from "./useResource";
-const loadLocalExperience = () => loadExperience();
+const loadLocalExperience = (signal?: AbortSignal) =>
+  loadExperience(fixtureClient, signal);
 const Graph = lazy(() => import("./Graph"));
 const Showcase = lazy(() => import("./Showcase"));
 const pages = [
@@ -77,6 +76,19 @@ export default function App() {
               <button onClick={resource.retry}>Retry snapshot</button>
             </>
           )}
+        </main>
+      </div>
+    );
+  if (resource.data.kind === "empty")
+    return (
+      <div className="app" data-theme={theme}>
+        <main>
+          <h1>No accessible projects</h1>
+          <p>
+            No sample project has been inserted. Check your Jira project
+            permissions or ask the app owner to configure project access.
+          </p>
+          <button onClick={resource.retry}>Refresh projects</button>
         </main>
       </div>
     );
@@ -214,21 +226,30 @@ export default function App() {
                       </button>
                     </div>
                     <div className="hero-stat">
-                      <strong>05</strong>
+                      <strong>
+                        {String(resource.data.services.length).padStart(2, "0")}
+                      </strong>
                       <span>connected services</span>
-                      <small>1 unresolved evidence gap</small>
+                      <small>
+                        {
+                          resource.data.services.filter(
+                            (service) => service.evidence === "UNKNOWN",
+                          ).length
+                        }{" "}
+                        unresolved evidence gap(s)
+                      </small>
                     </div>
                   </section>
                   <div className="stats">
                     {[
                       [
                         "Dependency coverage",
-                        "3 / 5 confirmed",
+                        `${resource.data.services.filter((service) => service.evidence === "CONFIRMED").length} / ${resource.data.services.length} confirmed`,
                         "Evidence Graph",
                       ],
                       [
                         "Immediate removal",
-                        "3 policy violations",
+                        `${scenarios.A.violations} policy violations`,
                         "Decision Firewall",
                       ],
                       [
@@ -252,7 +273,10 @@ export default function App() {
                     <div className="section-heading">
                       <h2>Proposed changes</h2>
                       <span className="muted">
-                        Fixture snapshot · 02 Nov 2026
+                        Fixture snapshot ·{" "}
+                        {new Date(
+                          resource.data.snapshot.capturedAt,
+                        ).toLocaleDateString("en-GB")}
                       </span>
                     </div>
                     <button
@@ -262,7 +286,10 @@ export default function App() {
                       <span className="ticket">AUTH-142</span>
                       <span>
                         Remove legacy authentication API v1
-                        <small>Platform Engineering · 5 dependencies</small>
+                        <small>
+                          Platform Engineering · {resource.data.services.length}{" "}
+                          dependencies
+                        </small>
                       </span>
                       <span className="badge warning">Needs review</span>
                       <ArrowUpRight size={18} />
@@ -308,7 +335,10 @@ export default function App() {
               )}
               {page === "Evidence Graph" && (
                 <Suspense fallback={<p role="status">Loading graph…</p>}>
-                  <Graph />
+                  <Graph
+                    client={fixtureClient}
+                    snapshotId={resource.data.snapshot.id}
+                  />
                 </Suspense>
               )}
               {page === "Scenario Lab" && (

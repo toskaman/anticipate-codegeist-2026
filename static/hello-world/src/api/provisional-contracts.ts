@@ -131,3 +131,60 @@ export const passportSchema = z.object({
   ),
   execution: z.string(),
 });
+
+// TEMPORARY read payloads shared by both client implementations.
+export const snapshotSchema = z.object({
+  mode: z.enum(["fixture", "forge"]),
+  id: z.string().min(1),
+  projectId: z.string().min(1),
+  change: z.string().min(1),
+  capturedAt: z.string().datetime(),
+  disclosure: z.string(),
+});
+export const dependencySchema = z.object({
+  id: z.string().min(1),
+  label: z.string().min(1),
+  evidence: z.enum(["CONFIRMED", "INFERRED", "UNKNOWN"]),
+  source: z.string().min(1),
+  detail: z.string().min(1),
+});
+export const graphSchema = z
+  .object({
+    mode: z.enum(["fixture", "forge"]),
+    snapshotId: z.string().min(1),
+    services: z.array(dependencySchema),
+  })
+  .refine(
+    (graph) =>
+      new Set(graph.services.map((service) => service.id)).size ===
+      graph.services.length,
+    "Duplicate evidence node IDs",
+  );
+export const scenarioResultSchema = z.object({
+  name: z.string().min(1),
+  risk: z.string().min(1),
+  violations: z.number().int().nonnegative(),
+  blockers: z.array(z.string()),
+  summary: z.string(),
+  mitigations: z.array(z.string()),
+});
+export const simulationSchema = z.object({
+  snapshotId: z.string().min(1),
+  scenarioId: z.enum(["A", "B", "C"]),
+  result: scenarioResultSchema,
+  source: z.enum(["authored-fixture", "simulator"]),
+});
+export const comparisonsSchema = z
+  .object({
+    snapshotId: z.string().min(1),
+    source: z.enum(["authored-fixture", "simulator"]),
+    results: z.array(
+      z.object({ id: z.enum(["A", "B", "C"]), result: scenarioResultSchema }),
+    ),
+  })
+  .refine(
+    (comparison) =>
+      comparison.results.length === 3 &&
+      new Set(comparison.results.map((result) => result.id)).size === 3,
+    "Complete A/B/C comparison required",
+  );

@@ -3,22 +3,30 @@ import Graph from "./Graph";
 import ActionReview from "./ActionReview";
 import { FixtureClient } from "./api/FixtureClient";
 const fixtureClient = new FixtureClient();
-import { localAdapter } from "./adapters";
+import { type AnticipateClient } from "./api/provisional-contracts";
 export default function Showcase() {
   const [preview, setPreview] = useState("ready");
-  const adapter = useMemo(() => {
+  const client = useMemo<AnticipateClient>(() => {
     let attempts = 0;
     return {
-      ...localAdapter,
-      async getEvidenceGraph() {
-        if (preview === "empty") return [];
-        if (preview === "retry" && attempts++ === 0)
-          throw new Error(
-            "Development fixture: snapshot temporarily unavailable",
-          );
-        if (preview === "slow")
-          await new Promise((resolve) => setTimeout(resolve, 1500));
-        return localAdapter.getEvidenceGraph();
+      getCapabilities: () => fixtureClient.getCapabilities(),
+      getProjects: () => fixtureClient.getProjects(),
+      async request(operation, input, signal) {
+        if (operation === "getEvidenceGraph") {
+          if (preview === "empty")
+            return {
+              mode: "fixture",
+              snapshotId: "demo-auth-v1-2026-11-02",
+              services: [],
+            };
+          if (preview === "retry" && attempts++ === 0)
+            throw new Error(
+              "Development fixture: snapshot temporarily unavailable",
+            );
+          if (preview === "slow")
+            await new Promise((resolve) => setTimeout(resolve, 1500));
+        }
+        return fixtureClient.request(operation, input, signal);
       },
     };
   }, [preview]);
@@ -60,7 +68,7 @@ export default function Showcase() {
           </select>
         </label>
       </section>
-      <Graph adapter={adapter} />
+      <Graph client={client} />
       <ActionReview
         client={fixtureClient}
         snapshotId="demo-auth-v1-2026-11-02"

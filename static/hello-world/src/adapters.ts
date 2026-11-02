@@ -1,126 +1,61 @@
+// View-data composition only. All I/O crosses the single AnticipateClient interface.
+import { FixtureClient } from "./api/FixtureClient";
 import {
-  evidenceSchema,
-  comparisonSchema,
-  projectsSchema,
-  capabilitiesSchema,
-} from "./schemas";
-import {
-  actions,
-  demoAdapter,
-  forgeAdapter,
-  initialWorkflow,
-  passport,
-  scenarioSchema,
-  scenarios,
-  services,
-  transition,
-  type ScenarioId,
-  type Workflow,
-} from "./domain";
-export const project = { id: "platform", name: "Platform Engineering" };
-export const snapshot = {
-  id: "demo-auth-v1-2026-11-02",
-  projectId: project.id,
-  change: "AUTH-142",
-  disclosure: "DEMO DATA — fictional snapshot",
-};
-export type Plan = {
-  scenario: ScenarioId;
-  actions: typeof actions;
-  workflow: Workflow;
-};
-export interface ExperienceAdapter {
-  getCapabilities(): ReturnType<typeof demoAdapter.getCapabilities>;
-  getProjects(): Promise<(typeof project)[]>;
-  getProjectSnapshot(projectId: string): Promise<typeof snapshot>;
-  getEvidenceGraph(): Promise<typeof services>;
-  simulateChange(id: ScenarioId): Promise<(typeof scenarios)[ScenarioId]>;
-  compareScenarios(
-    ids: ScenarioId[],
-  ): Promise<{ id: ScenarioId; result: (typeof scenarios)[ScenarioId] }[]>;
-  generatePreventionPlan(id: ScenarioId): Promise<Plan>;
-  approvePreventionPlan(plan: Plan): Promise<Plan>;
-  executeApprovedPlan(plan: Plan): Promise<Plan>;
-  getPreventionPassport(plan: Plan): Promise<ReturnType<typeof passport>>;
-}
-export const localAdapter: ExperienceAdapter = {
-  ...demoAdapter,
-  async getProjects() {
-    return structuredClone([project]);
-  },
-  async getProjectSnapshot(id) {
-    if (id !== project.id) throw new Error("NOT_FOUND: project");
-    return { ...snapshot };
-  },
-  async compareScenarios(ids) {
-    return Promise.all(
-      ids.map(async (id) => ({
-        id: scenarioSchema.parse(id),
-        result: await demoAdapter.simulateChange(id),
-      })),
-    );
-  },
-  async generatePreventionPlan(id) {
-    return {
-      scenario: scenarioSchema.parse(id),
-      actions: [...actions],
-      workflow: initialWorkflow(),
-    };
-  },
-  async approvePreventionPlan(plan) {
-    if (scenarioSchema.parse(plan.scenario) !== "C")
-      throw new Error("DEMO_BLOCKED: choose guarded scenario C");
-    return { ...plan, workflow: transition(plan.workflow, "approve") };
-  },
-  async executeApprovedPlan(plan) {
-    if (scenarioSchema.parse(plan.scenario) !== "C")
-      throw new Error("DEMO_BLOCKED: guarded scenario required");
-    return { ...plan, workflow: transition(plan.workflow, "execute") };
-  },
-  async getPreventionPassport(plan) {
-    return passport(scenarioSchema.parse(plan.scenario), plan.workflow);
-  },
-};
-async function unavailable(): Promise<never> {
-  throw new Error("PENDING_BACKEND: integration contract unavailable");
-}
-export const unavailableForgeAdapter: ExperienceAdapter = {
-  ...forgeAdapter,
-  getProjects: unavailable,
-  getProjectSnapshot: unavailable,
-  compareScenarios: unavailable,
-  generatePreventionPlan: unavailable,
-  approvePreventionPlan: unavailable,
-  executeApprovedPlan: unavailable,
-  getPreventionPassport: unavailable,
-};
-
+  type AnticipateClient,
+  snapshotSchema,
+  graphSchema,
+  comparisonsSchema,
+} from "./api/provisional-contracts";
+export const fixtureClient = new FixtureClient();
 export async function loadExperience(
-  adapter: ExperienceAdapter = localAdapter,
+  client: AnticipateClient = fixtureClient,
+  signal?: AbortSignal,
 ) {
-  const [projects, capabilities, evidence, comparisons, plan] =
-    await Promise.all([
-      adapter.getProjects(),
-      adapter.getCapabilities(),
-      adapter.getEvidenceGraph(),
-      adapter.compareScenarios(["A", "B", "C"]),
-      adapter.generatePreventionPlan("C"),
-    ]);
-  evidenceSchema.parse(evidence);
-  comparisonSchema.parse(comparisons);
-  projectsSchema.parse(projects);
-  capabilitiesSchema.parse(capabilities);
-  if (!projects.length)
-    throw new Error("EMPTY_PROJECTS: no project snapshot is available");
-  const projectSnapshot = await adapter.getProjectSnapshot(projects[0].id);
+  const capabilities = await client.getCapabilities(signal);
+  const projects = await client.getProjects(signal);
+  if (projects.length === 0)
+    return { kind: "empty" as const, capabilities, projects };
+  const snapshot = snapshotSchema.parse(
+    await client.request(
+      "getProjectSnapshot",
+      { projectId: projects[0].id },
+      signal,
+    ),
+  );
+  const [graphPayload, comparisonPayload] = await Promise.all([
+    client.request("getEvidenceGraph", { snapshotId: snapshot.id }, signal),
+    client.request("compareScenarios", { snapshotId: snapshot.id }, signal),
+  ]);
+  const graph = graphSchema.parse(graphPayload);
+  const comparisons = comparisonsSchema.parse(comparisonPayload);
+  if (snapshot.mode !== capabilities.mode || graph.mode !== capabilities.mode)
+    throw new Error(
+      "Data mode mismatch: no fixture/live substitution is permitted",
+    );
+  if (
+    graph.snapshotId !== snapshot.id ||
+    comparisons.snapshotId !== snapshot.id
+  )
+    throw new Error(
+      "Snapshot mismatch: evidence and comparisons must use the same snapshot",
+    );
+  const expectedSource =
+    capabilities.mode === "fixture" ? "authored-fixture" : "simulator";
+  if (comparisons.source !== expectedSource)
+    throw new Error(
+      "Comparison provenance does not match the active data mode",
+    );
   return {
+    kind: "ready" as const,
     projects,
     capabilities,
-    services: evidence,
-    scenarios: Object.fromEntries(
-      comparisons.map((item) => [item.id, item.result]),
-    ) as Record<ScenarioId, (typeof scenarios)[ScenarioId]>,
-    actions: plan.actions,
-    snapshot: projectSnapshot,
+    services: graph.services,
+    scenarios: {
+      A: comparisons.results.find((result) => result.id === "A")!.result,
+      B: comparisons.results.find((result) => result.id === "B")!.result,
+      C: comparisons.results.find((result) => result.id === "C")!.result,
+    },
+    source: comparisons.source,
+    snapshot,
   };
 }

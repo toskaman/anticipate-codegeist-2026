@@ -1,0 +1,30 @@
+{
+  "timestampUTC": "2026-11-02T00:14:25.0552312Z",
+  "revisionBase": "a3bdc8f",
+  "revisionScope": "working tree before unified client commit",
+  "mode": "LOCAL/MOCK",
+  "checks": [
+    {
+      "tests": 34,
+      "command": "npm test",
+      "result": "PASS"
+    },
+    {
+      "tests": 18,
+      "command": "npm run test:browser",
+      "result": "PASS"
+    },
+    {
+      "result": "PASS",
+      "command": "npm run lint / format:check / typecheck / build"
+    }
+  ],
+  "invariants": [
+    "Single AnticipateClient interface",
+    "No legacy simulated mutation provider",
+    "No cross-snapshot or cross-mode read substitution",
+    "Authored fixture result never claimed as simulator output",
+    "Empty projects not seeded with fake success"
+  ],
+  "forgeHosted": "NOT_VERIFIED"
+}

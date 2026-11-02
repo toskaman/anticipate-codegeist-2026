@@ -8,6 +8,7 @@ The TEMPORARY AnticipateClient proposal is in src/api/provisional-contracts.ts. 
 
 ActionReview is now in the main Plan screen: selected action IDs and plan version are confirmed before approval; execution is separate, requires approved actions, and uses a request key. A delayed response triggers status inspection rather than automatic resubmission. PARTIAL/FAILED outcomes are rendered without inventing success. FixtureClient supplies an authored review plan but rejects real approvals and execution. PassportView validates snapshot/scenario and exports the same data it displays; fixture timelines remain empty.
 
-Graph/dashboard/scenario projections still use the legacy development view adapter. Consolidation into the shared client remains open. Scenario results are authored fixtures, not a simulator. Replace provisional schemas with packages/contracts after CORE review rather than assuming our proposed fields are authoritative.
+Graph, dashboard and scenario reads now cross the same AnticipateClient boundary. The old DataAdapter/ExperienceAdapter providers and simulated mutation helpers are removed; adapters.ts is only a view-data composer. Both clients validate the same TEMPORARY schemas. Scenario results are authored fixtures, not a simulator. Replace provisional schemas with packages/contracts after CORE review rather than assuming our proposed fields are authoritative.
 
 Exact operation/input/error requirements and hosted acceptance tests are in ../coordination/frontend-integration-requests.md. Required access includes an owner-provided installation link, site, installation UUID and authorized test permissions. No Apps-menu entry, bonus integration, or successful Jira mutation should be inferred from screenshots or local tests.
+
