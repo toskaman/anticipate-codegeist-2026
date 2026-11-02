@@ -131,3 +131,74 @@ for (const theme of ["light", "dark"] as const)
       description: `${theme}: ${pages} A4 pages`,
     });
   });
+
+test("historical Passport shows its retention state and recorded counts", async ({
+  page,
+}) => {
+  const historical = {
+    ...report,
+    disclaimer: "HISTORICAL RECORD. TEST TRANSPORT ONLY.",
+    evidence: {
+      state: "ARCHIVED" as const,
+      capturedAt: meta.generatedAt,
+      expiresAt: "2026-11-03T00:00:00Z",
+      nodeCount: 11,
+      edgeCount: 10,
+      causalEdgeCount: 7,
+      snapshotDigest: "sha256-test-digest",
+    },
+  };
+  await page.route("**/__core_test", async (route) => {
+    const call = route.request().postDataJSON() as { operation: string };
+    if (call.operation === "getEvidenceGraph") {
+      await route.fulfill({
+        json: {
+          ok: false,
+          meta,
+          error: {
+            code: "SNAPSHOT_EXPIRED",
+            message: "Snapshot expired.",
+            requestId: meta.requestId,
+            retryable: false,
+          },
+        },
+      });
+      return;
+    }
+    const data =
+      call.operation === "getCapabilities"
+        ? capabilities
+        : call.operation === "listProjects"
+          ? { items: [], page: { nextCursor: null, totalKnown: 0 } }
+          : call.operation === "getPreventionPassport"
+            ? historical
+            : executions;
+    await route.fulfill({ json: response(data) });
+  });
+  await page.goto("/tests/core-harness.html");
+  await page.getByLabel("Recovery plan ID").fill(longPlan.planId);
+  await page
+    .getByRole("button", { name: "Recover plan and execution status" })
+    .click();
+  await page
+    .getByRole("navigation")
+    .getByRole("button", { name: /^Prevention Passport/ })
+    .click();
+  const article = page.locator("article.ax-report");
+  await expect(article).toContainText("Historical record");
+  await expect(page.getByTestId("passport-retention")).toContainText(
+    "Evidence as reviewed on",
+  );
+  await expect(page.getByTestId("passport-retention")).toContainText(
+    "does not reflect Jira today",
+  );
+  await expect(article).toContainText(
+    "11 records, 10 relationships (7 causal)",
+  );
+  await expect(page.getByTestId("passport-refs")).toContainText(
+    "evidence digest sha256-test-digest",
+  );
+  await article.screenshot({
+    path: "../../evidence/experience/v4-ux/passport-historical-light-1280-MOCK_TRANSPORT.png",
+  });
+});

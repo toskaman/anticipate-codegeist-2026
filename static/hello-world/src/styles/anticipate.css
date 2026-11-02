@@ -3974,3 +3974,18 @@ body:has(.ax-app) {
   color: var(--ax-text-2);
   font-size: var(--ax-fs-xs);
 }
+
+/* 15 · PASSPORT RETENTION ---------------------------------------------------- */
+.ax-report__retention {
+  display: flex;
+  gap: var(--ax-2);
+  align-items: flex-start;
+  margin: 0;
+  font-size: var(--ax-fs-sm);
+  color: var(--ax-text-2);
+}
+.ax-report__retention .ax-icon {
+  flex: none;
+  margin-top: 3px;
+  color: var(--ax-info);
+}
