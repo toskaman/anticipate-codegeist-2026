@@ -2,7 +2,7 @@
   "workstream": "EXPERIENCE",
   "branch": "feat/product-experience",
   "revisionBase": "4c68d90fc0990b751cb7bfa7dc6d0f2a77f60c12",
-  "revisionScope": "CI-verified reflow plus latest CORE issueLink hotfix; development deployment requested from CORE",
+  "revisionScope": "Runtime candidate unchanged; CORE documentation merged through 36203cd; owner approved Toska Marley identity and delegated public publisher/support details to CORE",
   "contractVersion": "0.2.0",
   "status": "VERIFIED_LOCAL_READY_FOR_HOSTED_VALIDATION",
   "tests": {
@@ -18,16 +18,16 @@
     "format": "PASS",
     "build": "PASS"
   },
-  "forgeVerification": "CORE_REPORTED_DEV_4.8.0_SMOKE_OK; CURRENT_CANDIDATE_PRODUCTION_REQUESTED; IDENTITY_POLICY_FULFILMENT_NOT_CONFIRMED",
+  "forgeVerification": "CORE_REPORTED_PRODUCTION_2.1.0; TOSKA_MARLEY_AUTHORIZED_BY_REQUESTER; PRODUCTION_INSTALLATION_NOT_VERIFIED_BY_EXPERIENCE",
   "evidenceMode": "MOCK_TRANSPORT/LOCAL only; no real Jira action performed",
   "next": [
-    "CORE production deployment of pinned candidate, subject to existing identity constraint, or report blocker",
-    "Record actual production version/install/URL and read-only smoke results",
+    "CORE owns public publisher name, support contact and privacy policy publication, as explicitly delegated by requester",
+    "CORE confirms actual production installation and authenticated read-only smoke; distribution link is reported available",
     "Keep dependency/license release findings visible"
   ],
   "coreRef": "6356a28",
   "deploymentRequest": {
-    "status": "REQUESTED_OWNER_PRODUCTION_GO",
+    "status": "DEPLOYED_REPORTED_BY_CORE",
     "executor": "CORE",
     "environment": "production",
     "sourceCommit": "4c68d90fc0990b751cb7bfa7dc6d0f2a77f60c12",
@@ -50,7 +50,7 @@
       "reportCommit": "37de9c4",
       "readOnlySmoke": "CORE reported capabilities, project listing and completed-plan recovery OK"
     },
-    "credentialPolicy": "Prior owner instruction remains: requester-approved Forge identity only, never colleague token. Production approval does not waive this requirement. Earlier Toska Marley use is not independently confirmed as approved by requester. If only colleague/unapproved credentials are available, STOP and report BLOCKED_IDENTITY; no secrets in repo.",
+    "credentialPolicy": "Requester explicitly authorized Toska Marley in this chat on 2026-11-02. CORE may use that existing authorized Forge session for this app. No token is supplied, copied or stored; EXPERIENCE does not deploy.",
     "constraints": [
       "Existing app and verified existing production installation only",
       "No app creation, registration, sharing/distribution or scope changes",
@@ -65,7 +65,11 @@
       "production launch URL",
       "read-only smoke result",
       "confirmation owner-approved Forge identity policy was met without disclosing secrets"
-    ]
+    ],
+    "reportedVersion": "2.1.0",
+    "reportCommit": "10d75bb",
+    "identityPolicyFulfilment": "REQUESTER_APPROVED_TOSKA_MARLEY; CORE reports using that identity",
+    "productionInstallation": "CORE reported none at 12:50 UTC; later distribution availability does not establish an installed production site"
   },
   "developmentDeployment": {
     "status": "DEPLOYED_REPORTED_BY_CORE",
@@ -109,6 +113,13 @@
     ],
     "reportedVersion": "4.8.0",
     "reportCommit": "37de9c4",
-    "identityPolicyFulfilment": "NOT_CONFIRMED_BY_EXPERIENCE; CORE reported the Toska Marley CLI session"
+    "identityPolicyFulfilment": "REQUESTER_NOW_EXPLICITLY_APPROVED_TOSKA_MARLEY"
+  },
+  "publicDistribution": {
+    "status": "SHARING_AND_INSTALL_LINK_REPORTED_BY_CORE",
+    "reportCommit": "36203cd",
+    "documentation": "docs/submission/INSTALL_LINK.md",
+    "publisherSupportPrivacyOwner": "CORE (explicit requester delegation)",
+    "independentlyVerifiedByExperience": false
   }
 }

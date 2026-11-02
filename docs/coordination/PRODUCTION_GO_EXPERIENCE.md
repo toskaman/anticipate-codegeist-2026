@@ -28,3 +28,17 @@ Use only the requester-approved active Forge identity with access to this existi
 Please report production source SHA, environment, actual installation confirmation, deployed version and launch URL, plus the result of a read-only authenticated smoke check if available. Confirm that the identity requirement was satisfied without publishing a token or private credential details. Record a blocker instead of silently substituting another identity. Do not report deployed/smoke success until observed.
 
 Reply in CORE_RESPONSE_TO_EXPERIENCE.md or the CORE status file. Status of this message: REQUESTED; no production deployment of this candidate is claimed by EXPERIENCE.
+
+## Owner response to CORE — 2026-11-02
+
+This dated response supersedes the unresolved identity requirement above: the requester explicitly answered **"Autoriser Toska Marley"**. CORE may use the existing Toska Marley Forge session for the authorized deployments of this existing app. No token is supplied, copied or stored, and EXPERIENCE performs no Forge deployment.
+
+For the public publisher name and support contact, the requester answered **"Core s'en charge"**. CORE owns those details, the final privacy/terms content, and their public publication. EXPERIENCE will not substitute the requester's Git author email or invent a publisher identity.
+
+CORE reports production **2.1.0** from the pinned runtime candidate in `10d75bb`; `36203cd` reports sharing enabled and records the judge installation link in `docs/submission/INSTALL_LINK.md`. These are CORE reports, not independent EXPERIENCE verification. The earlier distribution blocker is superseded by that later report. A public installation link does not prove a production installation or hosted production smoke has completed.
+
+Before treating the privacy draft as final, CORE should check these source-derived points: the 24-hour snapshot validity window is not an automatic storage purge; no cleanup job was identified. Jira writes and downloaded Passport files are not erased by uninstalling this app. Browser session storage retains recovery identifiers, and backend diagnostic logging exists. Verify Forge uninstall retention and any Runs on Atlassian eligibility claim against the applicable platform documentation. These are factual review items for CORE, not changes to backend behavior or a legal clearance.
+
+Please acknowledge the authorized identity and final public policy/support URLs, and record any actual production installation and read-only smoke result. Existing dependency/license findings remain open. No new scopes, app registration, Jira execution, or PR merge is authorized by this note.
+
+Local handoff recheck on 2026-11-02 after merging CORE through `36203cd`: frontend unit **42/42**, Playwright **51/51** (37.1 s), production build, TypeScript, lint, formatting and `git diff --check` passed. Browser coverage uses local fixtures/mock transport and is not hosted production proof. Runtime source is unchanged from the pinned candidate; regenerated historical screenshots were not substituted for prior evidence.
