@@ -176,7 +176,48 @@ export const scenarioCopy: Record<
     title: "Migrate first",
     does: "Moves uses and depends-on links to the replacement you chose, then removes the target.",
   },
+  "A-breaking-upgrade-now": {
+    letter: "A",
+    title: "Breaking upgrade now",
+    does: "Ships the incompatible new version immediately. Every consumer is affected.",
+  },
+  "B-compatible-upgrade": {
+    letter: "B",
+    title: "Compatible upgrade",
+    does: "Ships the new version behind a backward-compatible shim, so existing contracts keep working.",
+  },
+  "C-migrate-then-upgrade": {
+    letter: "C",
+    title: "Move consumers first",
+    does: "Moves uses and depends-on links to the new version you chose, then ships the breaking upgrade.",
+  },
 };
+export const scenarioOrder = [
+  "A-remove-now",
+  "B-retain-temporarily",
+  "C-migrate-then-retire",
+  "A-breaking-upgrade-now",
+  "B-compatible-upgrade",
+  "C-migrate-then-upgrade",
+];
+export const changeKindCopy = {
+  retire: {
+    title: "Retire or decommission",
+    text: "Remove an API, component or service that others may still use.",
+    replacementLabel: "Replacement for option C",
+    noReplacement: "No replacement — compare A and B only",
+    setup:
+      "A removes the change target now. B deprecates it and keeps it for now. C migrates its users to a replacement you choose, then removes it.",
+  },
+  upgrade: {
+    title: "Upgrade a dependency",
+    text: "Ship a new version of a library, API or service that others consume.",
+    replacementLabel: "New version for option C",
+    noReplacement: "No new-version record — compare A and B only",
+    setup:
+      "A ships a breaking upgrade now. B ships it behind a backward-compatible shim. C moves consumers to the new version you choose, then upgrades.",
+  },
+} as const;
 export function scenarioName(id: string) {
   return scenarioCopy[id]?.title ?? id;
 }

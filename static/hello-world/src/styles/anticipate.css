@@ -3361,12 +3361,20 @@ body:has(.ax-app) {
   .ax-report__header {
     border-bottom-color: #000;
   }
+  /* Long sections (tables, timelines) flow across pages instead of being
+     pushed whole to the next page; headings, rows and items stay intact. */
   .ax-report__section {
-    break-inside: avoid;
-    page-break-inside: avoid;
+    break-inside: auto;
   }
-  .ax-report__section h2 {
+  .ax-report__section h2,
+  .ax-report__section > :first-child {
     break-after: avoid;
+    page-break-after: avoid;
+  }
+  .ax-report__list > li,
+  .ax-report__facts > div,
+  .ax-timeline > li {
+    break-inside: avoid;
   }
   .ax-table-wrap {
     overflow: visible;
@@ -3843,4 +3851,126 @@ body:has(.ax-app) {
     width: auto;
     max-height: calc(100vh - 32px);
   }
+}
+
+/* 13 · CHANGE KIND PICKER & OPEN QUESTIONS -------------------------------- */
+.ax-app .ax-kind {
+  margin: 0 0 var(--ax-4);
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+.ax-kind legend {
+  padding: 0;
+  margin-bottom: var(--ax-2);
+  font-weight: 650;
+  font-size: var(--ax-fs-sm);
+}
+.ax-kind__options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  gap: var(--ax-2);
+}
+.ax-app .ax-kind__option {
+  position: relative;
+  display: flex;
+  gap: var(--ax-3);
+  align-items: flex-start;
+  margin: 0;
+  padding: var(--ax-3) var(--ax-4);
+  border-radius: var(--ax-r);
+  border: 1px solid var(--ax-border-strong);
+  background: var(--ax-surface-2);
+  cursor: pointer;
+}
+.ax-kind__option input {
+  margin-top: 3px;
+  accent-color: var(--ax-accent);
+}
+.ax-kind__option.is-selected {
+  border-color: var(--ax-accent);
+  box-shadow: inset 0 0 0 1px var(--ax-accent);
+}
+.ax-kind__option.is-unavailable {
+  cursor: not-allowed;
+  border-style: dashed;
+}
+.ax-kind__body {
+  display: grid;
+  gap: 2px;
+  font-size: var(--ax-fs-xs);
+  color: var(--ax-text-2);
+}
+.ax-kind__body strong {
+  font-size: var(--ax-fs-sm);
+  color: var(--ax-text);
+}
+.ax-open-questions {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+  font-size: var(--ax-fs-sm);
+}
+.ax-open-questions li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.ax-rovo {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  gap: var(--ax-4) var(--ax-6);
+}
+.ax-app .ax-rovo h3 {
+  margin: 0 0 var(--ax-1);
+}
+.ax-rovo__tools {
+  margin: 0;
+  padding-left: 1.2em;
+}
+
+/* 14 · EVIDENCE COVERAGE ---------------------------------------------------- */
+.ax-coverage {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--ax-2) var(--ax-6);
+  margin-bottom: var(--ax-4);
+  padding: var(--ax-3) var(--ax-5);
+  border-radius: var(--ax-r);
+  border: 1px solid var(--ax-border);
+  background: var(--ax-surface);
+}
+.ax-app .ax-coverage__title {
+  margin: 0;
+  font-size: var(--ax-fs-xs);
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ax-text-3);
+}
+.ax-coverage__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ax-2) var(--ax-6);
+}
+.ax-coverage__list li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px var(--ax-2);
+  font-size: var(--ax-fs-sm);
+}
+.ax-coverage__name {
+  font-weight: 600;
+}
+.ax-coverage__detail {
+  color: var(--ax-text-2);
+  font-size: var(--ax-fs-xs);
 }

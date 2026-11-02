@@ -79,3 +79,14 @@ Evidence list is the equivalent non-graph control. Status never relies on colour
 `prefers-contrast: more` and `forced-colors: active` are handled.
 
 Integration follow-up: page/card entry uses transform motion without fading text opacity, so text remains readable during transitions. Evidence-change notices and sample previews/confirmations use the same semantic primitives. Mobile graph starts at readable zoom instead of fitting every lane into unreadable labels.
+
+## v4 additions (Nov 2026)
+
+Display preferences live on `.ax-app` as data attributes (`data-theme`, `data-text-size`, `data-contrast`, `data-motion`, `data-focus`, `data-links`, `data-layout`), set from `app/preferences.ts` and stored per browser only. Defaults (`theme: system`, others standard) keep following the Atlassian host theme and OS preferences; the explicit attributes add to, never replace, the `prefers-*` media rules. Text size overrides the `--ax-fs-*` tokens; component font sizes must use those tokens, not raw px.
+
+New patterns:
+
+- **Guided demo callout** (`.ax-demo`): the single accent-bordered block on Mission Control; one primary CTA, three numbered steps with `aria-current="step"`. Top bar repeats it as a compact "Start demo" button. Use once per screen at most.
+- **Display & accessibility menu** (`.ax-prefs-menu`): non-modal disclosure (`aria-expanded`/`aria-controls`, `role="dialog"`), Escape and outside click close, focus returns to the trigger. Controls are native radios styled as segmented buttons (`.ax-segmented`). Same component renders inline in Settings.
+- **Change-kind picker** (`.ax-kind`): native radio cards in a `fieldset`. An option the backend does not advertise is disabled *and* explained in text; never hidden silently, never faked.
+- **Open questions list** (`.ax-open-questions`): warning badge with the uncertainty reason + record name. Name the record; do not only count.

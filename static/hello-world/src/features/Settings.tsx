@@ -12,6 +12,7 @@ import type { Workflow } from "../app/useCoreWorkflow";
 import { capabilityStateCopy } from "../app/copy";
 import { AccessibilityControls } from "../components/AccessibilityControls";
 import type { PreferencesApi } from "../app/preferences";
+import PerformancePanel from "../components/PerformancePanel";
 
 type Key = Exclude<keyof CapabilityAvailability, "operations">;
 const rows: { key: Key; name: string; what: string; inApp: string }[] = [
@@ -177,6 +178,40 @@ export default function Settings({
           </table>
         </div>
       </Panel>
+      <Panel
+        title="Use ANTICIPATE from Rovo"
+        id="rovo-title"
+        description="Optional. Depends on your site's Rovo access and administrator settings; the states above show what the backend reports."
+      >
+        <div className="ax-rovo">
+          <div>
+            <h3 className="ax-h4">Decision Reviewer agent</h3>
+            <p className="ax-small">
+              In Rovo Chat, choose <strong>ANTICIPATE Decision Reviewer</strong>{" "}
+              and ask about a Jira change, for example “What depends on
+              PAY-412?”. It reads the same evidence and simulations as this app.
+            </p>
+          </div>
+          <div>
+            <h3 className="ax-h4">Five read-only tools</h3>
+            <ul className="ax-small ax-rovo__tools">
+              <li>Get evidence graph</li>
+              <li>Simulate retirement</li>
+              <li>Simulate dependency upgrade</li>
+              <li>Get prevention passport</li>
+              <li>Check plan freshness</li>
+            </ul>
+          </div>
+          <div>
+            <h3 className="ax-h4">What stays here</h3>
+            <p className="ax-small">
+              Rovo never approves or executes. Jira changes need your approval
+              and a separate execution step in this app, so a person is
+              accountable for every write.
+            </p>
+          </div>
+        </div>
+      </Panel>
       <div className="ax-grid ax-grid--two">
         <Panel
           title="Display & accessibility"
@@ -219,6 +254,7 @@ export default function Settings({
           </ul>
         </Panel>
       </div>
+      <PerformancePanel />
       <TechDetails label="Enabled backend operations">
         <p className="ax-small">
           Enabled operations: {caps?.operations.join(", ") || "none reported"}

@@ -32,3 +32,9 @@ submission video, record the same sequence on the real installation at 1920 × 1
 7. **2:45 The proof** — Verify results, then *Open Prevention Passport*; show print/PDF.
 
 Only claim on camera what the real installation shows in that run.
+
+## v4 additions (MOCK_TRANSPORT captures)
+
+- Scenario Lab, change-kind picker with the dependency-upgrade comparison: `evidence/experience/v4-ux/scenario-lab-upgrade-light-1440-MOCK_TRANSPORT.png`, `…-dark-390-…`. On hosted sites the upgrade option stays disabled until CORE advertises it.
+- Settings, "Use ANTICIPATE from Rovo": `evidence/experience/v4-ux/settings-rovo-*-MOCK_TRANSPORT.png`.
+- Mission Control guided demo and display menu: `evidence/experience/v3-redesign/visual/01-mission-control-first-run-*` (regenerated after PR #17).

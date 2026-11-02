@@ -13,10 +13,19 @@ export const pages = [
   "Settings",
 ];
 
+/**
+ * Kind of change the user is assessing. Upgrade scenarios mirror CORE's
+ * `upgradeScenarios` (src/engine/scenarios.ts) exactly; they are only offered
+ * when the backend advertises UPGRADE_CAPABILITY in `capabilities.operations`.
+ */
+export type ChangeKind = "retire" | "upgrade";
+export const UPGRADE_CAPABILITY = "scenario:UPGRADE_NODE";
+
 export function simulationRequest(
   graph: GraphSnapshot,
   rootIssueKey: string,
   replacement: string,
+  kind: ChangeKind = "retire",
 ): SimulationRequest {
   const target = `issue:${rootIssueKey}`;
   if (!graph.nodes.some((n) => n.id === target))
@@ -32,45 +41,84 @@ export function simulationRequest(
       "VALIDATION",
       "Choose a distinct replacement node from this snapshot.",
     );
+  const migrate = (
+    then: SimulationRequest["scenarios"][number]["operations"][number],
+  ) => [
+    {
+      op: "MIGRATE_DEPENDENTS" as const,
+      fromNodeId: target,
+      toNodeId: replacement,
+      edgeKinds: ["USES" as const, "DEPENDS_ON" as const],
+    },
+    then,
+  ];
+  const scenarios: SimulationRequest["scenarios"] =
+    kind === "upgrade"
+      ? [
+          {
+            scenarioId: "A-breaking-upgrade-now",
+            label: "Ship the breaking upgrade now",
+            operations: [
+              { op: "UPGRADE_NODE", nodeId: target, breaking: true },
+            ],
+          },
+          {
+            scenarioId: "B-compatible-upgrade",
+            label: "Ship behind a backward-compatible shim",
+            operations: [
+              { op: "UPGRADE_NODE", nodeId: target, breaking: false },
+            ],
+          },
+          ...(replacement
+            ? [
+                {
+                  scenarioId: "C-migrate-then-upgrade",
+                  label:
+                    "Move consumers to the new version first, then upgrade",
+                  operations: migrate({
+                    op: "UPGRADE_NODE",
+                    nodeId: target,
+                    breaking: true,
+                  }),
+                },
+              ]
+            : []),
+        ]
+      : [
+          {
+            scenarioId: "A-remove-now",
+            label: "Remove now",
+            operations: [{ op: "REMOVE_NODE", nodeId: target }],
+          },
+          {
+            scenarioId: "B-retain-temporarily",
+            label: "Retain temporarily",
+            operations: [
+              { op: "DEPRECATE_NODE", nodeId: target, retainUntil: null },
+            ],
+          },
+          ...(replacement
+            ? [
+                {
+                  scenarioId: "C-migrate-then-retire",
+                  label: "Migrate then retire",
+                  operations: migrate({ op: "REMOVE_NODE", nodeId: target }),
+                },
+              ]
+            : []),
+        ];
   return {
     snapshotId: graph.snapshotId,
     change: {
       issueKey: rootIssueKey,
       targetNodeId: target,
-      description: `Review retirement of ${rootIssueKey}`,
+      description:
+        kind === "upgrade"
+          ? `Review dependency upgrade of ${rootIssueKey}`
+          : `Review retirement of ${rootIssueKey}`,
     },
     maxDepth: Math.min(10, Math.max(1, graph.limits.maxDepth)),
-    scenarios: [
-      {
-        scenarioId: "A-remove-now",
-        label: "Remove now",
-        operations: [{ op: "REMOVE_NODE", nodeId: target }],
-      },
-      {
-        scenarioId: "B-retain-temporarily",
-        label: "Retain temporarily",
-        operations: [
-          { op: "DEPRECATE_NODE", nodeId: target, retainUntil: null },
-        ],
-      },
-      ...(replacement
-        ? [
-            {
-              scenarioId: "C-migrate-then-retire",
-              label: "Migrate then retire",
-              operations: [
-                {
-                  op: "MIGRATE_DEPENDENTS" as const,
-                  fromNodeId: target,
-                  toNodeId: replacement,
-                  edgeKinds: ["USES" as const, "DEPENDS_ON" as const],
-                },
-                { op: "REMOVE_NODE" as const, nodeId: target },
-              ],
-            },
-          ]
-        : []),
-    ],
+    scenarios,
   };
 }
 

@@ -150,8 +150,11 @@ export function createService(d: Deps) {
 
     async getCapabilities(): Promise<CapabilityAvailability> {
       return {
-        jiraRead: 'AVAILABLE', jiraWrite: 'AVAILABLE', confluenceRead: 'NOT_CONFIGURED', workflowValidator: 'NOT_CONFIGURED',
-        rovoAgent: 'NOT_CONFIGURED', rovoMcp: 'NOT_CONFIGURED', teamworkGraph: 'NOT_CONFIGURED', llm: 'DISABLED_BY_BUDGET',
+        // Shipped modules: the validator is available for a Jira admin to add to a workflow; the Rovo agent is available on
+        // sites with Rovo (verified in Rovo chat on the dev site); MCP tools additionally need an org admin to enable
+        // "Expose tools to MCP-compatible apps", which the app cannot detect, hence PERMISSION_REQUIRED.
+        jiraRead: 'AVAILABLE', jiraWrite: 'AVAILABLE', confluenceRead: 'NOT_CONFIGURED', workflowValidator: 'AVAILABLE',
+        rovoAgent: 'AVAILABLE', rovoMcp: 'PERMISSION_REQUIRED', teamworkGraph: 'NOT_CONFIGURED', llm: 'DISABLED_BY_BUDGET',
         operations: OPERATION_NAMES
       };
     },
@@ -404,5 +407,7 @@ export function normalizeDate(s: string): string {
 }
 
 export const OPERATION_NAMES = ['getCapabilities', 'getPolicies', 'listProjects', 'getChangeCandidates', 'getGraphSnapshot', 'getEvidenceGraph', 'simulateChange',
-  'compareScenarios', 'generatePreventionPlan', 'approvePlan', 'executeApprovedPlan', 'getExecutionStatus', 'getPreventionPassport', 'checkPlanFreshness', 'previewSampleProject', 'createSampleProject'];
+  'compareScenarios', 'generatePreventionPlan', 'approvePlan', 'executeApprovedPlan', 'getExecutionStatus', 'getPreventionPassport', 'checkPlanFreshness', 'previewSampleProject', 'createSampleProject',
+  // capability signals (not resolvers): scenario operations accepted by compareScenarios / generatePreventionPlan
+  'scenario:UPGRADE_NODE'];
 export { issueNodeId };

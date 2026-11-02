@@ -25,6 +25,8 @@ import {
   rememberExecution,
   rememberPlan,
   download,
+  UPGRADE_CAPABILITY,
+  type ChangeKind,
 } from "./workflow";
 
 /**
@@ -56,6 +58,7 @@ export function useCoreWorkflow(client: ForgeClient) {
   const [rootIssueKey, setRootIssueKey] = useState("");
   const [snapshot, setSnapshot] = useState<GraphSnapshot | null>(null);
   const [replacement, setReplacement] = useState("");
+  const [requestedKind, setRequestedKind] = useState<ChangeKind>("retire");
   const [comparison, setComparison] = useState<ScenarioComparison | null>(null);
   const [scenarioId, setScenarioId] = useState("");
   const [plan, setPlan] = useState<PreventionPlan | null>(null);
@@ -112,6 +115,11 @@ export function useCoreWorkflow(client: ForgeClient) {
     resource.status === "ready" ? resource.data.capabilities : null;
   const allowed = (op: OperationName) =>
     capabilities?.operations.includes(op) ?? false;
+  // Upgrade comparisons are offered only when the backend says it supports them.
+  const upgradeSupported =
+    capabilities?.operations.includes(UPGRADE_CAPABILITY) ?? false;
+  const changeKind: ChangeKind =
+    requestedKind === "upgrade" && !upgradeSupported ? "retire" : requestedKind;
   const expired = useExpired(snapshot?.expiresAt);
   function fresh() {
     if (!snapshot || Date.parse(snapshot.expiresAt) <= Date.now())
@@ -561,6 +569,12 @@ export function useCoreWorkflow(client: ForgeClient) {
         go("Prevention Plan");
       });
     },
+    chooseChangeKind(kind: ChangeKind) {
+      if (kind === changeKind || (kind === "upgrade" && !upgradeSupported))
+        return;
+      setRequestedKind(kind);
+      clearComparison();
+    },
     chooseReplacement(id: string) {
       setReplacement(id);
       clearComparison();
@@ -573,7 +587,7 @@ export function useCoreWorkflow(client: ForgeClient) {
         clearComparison();
         const next = await client.request(
           "compareScenarios",
-          simulationRequest(snapshot, rootIssueKey, replacement),
+          simulationRequest(snapshot, rootIssueKey, replacement, changeKind),
           signal,
         );
         setComparison(next);
@@ -663,6 +677,8 @@ export function useCoreWorkflow(client: ForgeClient) {
     rootIssueKey,
     snapshot,
     replacement,
+    changeKind,
+    upgradeSupported,
     comparison,
     scenarioId,
     currentResult,
