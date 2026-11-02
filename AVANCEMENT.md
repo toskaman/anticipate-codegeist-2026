@@ -7,6 +7,10 @@
 - ✅ Déployé en **development** (v4) et installation mise à niveau sur `one-atlas-euza.atlassian.net` (id `2ae8efdf-…`) avec les nouvelles permissions.
 - ✅ **Vérifié contre le vrai Jira** (web trigger de diagnostic lecture seule, en tant qu'app) : 25 projets lus, recherche JQL `search/jql` OK, lecture ticket + liens, permissions, types de tickets, extracteur de graphe sur de vrais liens (PLAT : `Blocks` → DEPENDS_ON CONFIRMED ; `Relates`/`Deployments` → INFERRED). Format de date Jira `-0400` géré.
 - ⬜ Pas encore testé : les resolvers appelés **en tant qu'utilisateur** depuis l'UI (dépend du frontend de ta copine) et les écritures Jira réelles (aucune écriture faite).
+- ✅ Module **Rovo MCP** (`anticipate-mcp`, 3 outils lecture seule) déployé en dev v4.2.0 → candidat bonus « Best app with Atlassian MCP » (activation externe = admin du site).
+- ✅ CI GitHub Actions (`.github/workflows/ci.yml`) : typecheck + tests CORE + build frontend.
+- ✅ Branche de ta copine récupérée (10 commits, `aa0e740`) : elle attendait les contrats CORE. Réponse complète : `docs/coordination/CORE_RESPONSE_TO_EXPERIENCE.md` (mapping de ses opérations → resolvers, enveloppe, erreurs, URL de lancement). Elle doit `git merge origin/feat/core-engine` puis brancher son ForgeClient.
+- 🔁 Surveillance automatique : vérification de GitHub programmée (nouveaux push EXPERIENCE + CI), reprise automatique après le reset de 5 h.
 - URL de l'app : `https://one-atlas-euza.atlassian.net/apps/full-page/2ae8efdf-84b8-4851-a341-e4fa2499595c/hello-world/`
 - ⚠️ Le web trigger de diagnostic doit être retiré du manifest avant la version jury.
 
