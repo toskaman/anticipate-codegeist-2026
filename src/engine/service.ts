@@ -49,6 +49,7 @@ export function createService(d: Deps) {
 
   async function loadSnap(ctx: Ctx, snapshotId: string): Promise<SnapRec> {
     if (snapshotId === FIXTURE_SNAPSHOT.snapshotId) return { snapshot: FIXTURE_SNAPSHOT, owner: null, rootIssueKey: 'PAY-412', projectKey: 'DEMO' };
+    if (!ctx.accountId) fail('PERMISSION_DENIED', 'An authenticated Atlassian user is required.');
     const r = await d.store.get<SnapRec>(K.snap(snapshotId));
     if (!r) fail('NOT_FOUND', `Snapshot ${snapshotId} not found.`);
     if (r!.owner !== ctx.accountId) fail('PERMISSION_DENIED', 'Snapshots are private to the user who created them.');
@@ -57,6 +58,7 @@ export function createService(d: Deps) {
   const isExpired = (s: GraphSnapshot) => s.mode === 'LIVE' && new Date(s.expiresAt).getTime() < d.now().getTime();
 
   async function loadPlan(ctx: Ctx, planId: string): Promise<PlanRec> {
+    if (!ctx.accountId) fail('PERMISSION_DENIED', 'An authenticated Atlassian user is required.');
     const r = await d.store.get<PlanRec>(K.plan(planId));
     if (!r) fail('NOT_FOUND', `Plan ${planId} not found.`);
     if (r!.owner !== ctx.accountId) fail('PERMISSION_DENIED', 'Plans are private to the user who created them.');
@@ -70,8 +72,12 @@ export function createService(d: Deps) {
 
   /** Latest decision state per changed issue — read by the Jira workflow validator (no crawl at transition time). */
   async function recordDecision(rec: PlanRec) {
-    const r: DecisionRecord = { schema: 2, planId: rec.plan.planId, scenarioId: rec.plan.scenarioId, status: rec.plan.status, at: iso(),
-      issueKey: rec.rootIssueKey, planHash: rec.plan.planHash, snapshotId: rec.plan.snapshotId, linksDigest: null, validUntil: null };
+    const cmp = await d.store.get<CmpRec>(K.cmp(`plan:${rec.plan.planId}`));
+    const chosen = cmp?.comparison.results.find((x) => x.scenarioId === rec.plan.scenarioId);
+    const r: DecisionRecord = { schema: 3, planId: rec.plan.planId, scenarioId: rec.plan.scenarioId, status: rec.plan.status, at: iso(),
+      issueKey: rec.rootIssueKey, planHash: rec.plan.planHash, snapshotId: rec.plan.snapshotId, linksDigest: null, validUntil: null,
+      verdict: chosen?.verdict ?? 'UNKNOWN', blockers: chosen?.summary.blockers ?? null,
+      allActionsVerified: rec.plan.status === 'COMPLETED' };
     if (rec.plan.status === 'COMPLETED') {
       // Attest the links as they are AFTER verified execution (the plan's own new links included). Unreadable => no attestation.
       const f = await d.jira.getIssue(rec.rootIssueKey).catch(() => null);
@@ -89,6 +95,7 @@ export function createService(d: Deps) {
     const snap = await d.store.get<SnapRec>(K.snap(rec.plan.snapshotId));
     const prov = await d.store.get<ProvRec>(K.prov(rec.plan.planId));
     const owner = snap?.owner ?? prov?.owner;
+    if (!ctx.accountId) fail('PERMISSION_DENIED', 'An authenticated Atlassian user is required.');
     if (!snap && !prov) fail('NOT_FOUND', 'The evidence for this plan is no longer retained.');
     if (owner !== ctx.accountId) fail('PERMISSION_DENIED', 'Decision records are private to the user who created them.');
     if (snap) return { mode: snap.snapshot.mode, state: isExpired(snap.snapshot) ? 'EXPIRED_SNAPSHOT' as const : 'LIVE' as const, prov };
@@ -181,6 +188,7 @@ export function createService(d: Deps) {
 
     async getGraphSnapshot(ctx: Ctx, input: { projectId: string; rootIssueKey: string; source: 'JIRA' | 'DEMO_FIXTURE'; maxDepth: number }): Promise<GraphSnapshot> {
       if (input.source === 'DEMO_FIXTURE') return FIXTURE_SNAPSHOT;
+      if (!ctx.accountId) fail('PERMISSION_DENIED', 'An authenticated Atlassian user is required.');
       if (!/^[A-Z][A-Z0-9_]+-[0-9]+$/.test(input.rootIssueKey)) fail('VALIDATION', 'rootIssueKey must look like ABC-123.');
       const root = await d.jira.getIssue(input.rootIssueKey);
       if (root.kind === 'forbidden') fail('PERMISSION_DENIED', `You cannot browse ${input.rootIssueKey}.`);
@@ -236,8 +244,10 @@ export function createService(d: Deps) {
 
     async approvePlan(ctx: Ctx, req: ApprovalRequest): Promise<PreventionPlan> {
       if (!ctx.accountId) fail('PERMISSION_DENIED', 'Approval requires an authenticated Atlassian user.');
+      if (!req.approvedActionIds.length) fail('VALIDATION', 'Select at least one action to approve.');
+      const fingerprint = `${req.planId}|${stableHash([...new Set(req.approvedActionIds)].sort())}`;
       const prior = await d.store.get<string>(K.idem(`approve:${req.idempotencyKey}`));
-      if (prior) { if (prior !== req.planId) fail('CONFLICT', 'Idempotency key reused for another plan.'); return (await loadPlan(ctx, req.planId)).plan; }
+      if (prior) { if (prior !== fingerprint && prior !== req.planId) fail('CONFLICT', 'Idempotency key reused with a different approval.'); return (await loadPlan(ctx, req.planId)).plan; }
       const rec = await loadPlan(ctx, req.planId);
       if (rec.plan.planHash !== req.planHash) fail('STALE_APPROVAL', 'The plan changed since you reviewed it. Review it again.');
       if (!['PENDING_APPROVAL', 'APPROVED', 'PARTIAL', 'FAILED'].includes(rec.plan.status)) fail('CONFLICT', `Plan is ${rec.plan.status}.`);
@@ -247,7 +257,10 @@ export function createService(d: Deps) {
       const known = new Set(rec.plan.actions.map((a) => a.actionId));
       const bad = req.approvedActionIds.filter((id) => !known.has(id));
       if (bad.length) fail('VALIDATION', `Unknown actions: ${bad.join(', ')}`);
-      if (!(await d.store.setIfAbsent(K.idem(`approve:${req.idempotencyKey}`), req.planId))) return (await loadPlan(ctx, req.planId)).plan;
+      if (!(await d.store.setIfAbsent(K.idem(`approve:${req.idempotencyKey}`), fingerprint))) {
+        if ((await d.store.get<string>(K.idem(`approve:${req.idempotencyKey}`))) !== fingerprint) fail('CONFLICT', 'Idempotency key reused with a different approval.');
+        return (await loadPlan(ctx, req.planId)).plan;
+      }
       rec.approvedActionIds = [...new Set([...rec.approvedActionIds, ...req.approvedActionIds])];
       rec.approvals.push({ accountId: ctx.accountId, at: iso(), actionIds: req.approvedActionIds, planHash: req.planHash });
       rec.plan = { ...rec.plan, status: 'APPROVED' };
@@ -294,7 +307,10 @@ export function createService(d: Deps) {
           out.push(await executeOne(rec, action, perms, input.idempotencyKey));
         }
         const verified = out.filter((r) => r.status === 'VERIFIED').length;
-        rec.plan = { ...rec.plan, status: verified === out.length ? 'COMPLETED' : verified === 0 ? 'FAILED' : 'PARTIAL' };
+        // COMPLETED means EVERY action of the plan was approved and verified. Verifying a subset (e.g. only the
+        // decision comment) is PARTIAL and can never produce an attestation that opens the workflow gate.
+        const allApproved = rec.plan.actions.every((a) => rec.approvedActionIds.includes(a.actionId));
+        rec.plan = { ...rec.plan, status: verified === out.length && out.length > 0 ? (allApproved ? 'COMPLETED' : 'PARTIAL') : verified === 0 ? 'FAILED' : 'PARTIAL' };
         rec.timeline.push({ at: iso(), event: `Execution finished: ${verified}/${out.length} verified` });
         await d.store.set(K.plan(input.planId), rec);
         await recordDecision(rec);
