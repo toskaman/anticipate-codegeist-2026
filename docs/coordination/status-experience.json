@@ -18,17 +18,57 @@
     "format": "PASS",
     "build": "PASS"
   },
-  "forgeVerification": "CURRENT_CANDIDATE_NOT_HOSTED_VERIFIED; CORE development deployment requested with owner-approved identity only",
+  "forgeVerification": "CORE_REPORTED_DEV_4.8.0_SMOKE_OK; CURRENT_CANDIDATE_PRODUCTION_REQUESTED; IDENTITY_POLICY_FULFILMENT_NOT_CONFIRMED",
   "evidenceMode": "MOCK_TRANSPORT/LOCAL only; no real Jira action performed",
   "next": [
-    "CORE deploy pinned candidate to development or report approved-identity/access blocker",
-    "Owner-approved authenticated read-only smoke validation",
-    "Review any real Jira action targets before execution",
-    "Existing dependency/security/license release review"
+    "CORE production deployment of pinned candidate, subject to existing identity constraint, or report blocker",
+    "Record actual production version/install/URL and read-only smoke results",
+    "Keep dependency/license release findings visible"
   ],
   "coreRef": "6356a28",
   "deploymentRequest": {
-    "status": "REQUESTED",
+    "status": "REQUESTED_OWNER_PRODUCTION_GO",
+    "executor": "CORE",
+    "environment": "production",
+    "sourceCommit": "4c68d90fc0990b751cb7bfa7dc6d0f2a77f60c12",
+    "sourceBranch": "feat/product-experience",
+    "requestedAtUtc": "2026-11-02T12:29:30Z",
+    "authorization": "Owner explicitly instructed EXPERIENCE to give the production go-ahead in this chat. This supersedes the previous development-only environment restriction for this exact candidate.",
+    "appId": "ari:cloud:ecosystem::app/39a28f48-c891-4d86-a3cf-c14409cbd29e",
+    "site": "one-atlas-euza.atlassian.net",
+    "routePrefix": "hello-world",
+    "installationPolicy": "Verify the existing PRODUCTION installation; do not reuse the development installation UUID by assumption.",
+    "ci": {
+      "status": "success",
+      "runId": 41441118597,
+      "url": "https://github.com/toskaman/anticipate-codegeist-2026/actions/runs/41441118597"
+    },
+    "developmentEvidence": {
+      "reportedBy": "CORE",
+      "sourceCommit": "4c68d90fc0990b751cb7bfa7dc6d0f2a77f60c12",
+      "version": "4.8.0",
+      "reportCommit": "37de9c4",
+      "readOnlySmoke": "CORE reported capabilities, project listing and completed-plan recovery OK"
+    },
+    "credentialPolicy": "Prior owner instruction remains: requester-approved Forge identity only, never colleague token. Production approval does not waive this requirement. Earlier Toska Marley use is not independently confirmed as approved by requester. If only colleague/unapproved credentials are available, STOP and report BLOCKED_IDENTITY; no secrets in repo.",
+    "constraints": [
+      "Existing app and verified existing production installation only",
+      "No app creation, registration, sharing/distribution or scope changes",
+      "No PR merge or new runtime code beyond pinned source",
+      "No seed, deletion or unreviewed Jira execution",
+      "Known dependency/license findings remain open; this is owner deployment authorization, not a security/compliance clearance"
+    ],
+    "responseRequested": [
+      "sourceCommit",
+      "production environment and installation confirmation",
+      "deployed version or blocker",
+      "production launch URL",
+      "read-only smoke result",
+      "confirmation owner-approved Forge identity policy was met without disclosing secrets"
+    ]
+  },
+  "developmentDeployment": {
+    "status": "DEPLOYED_REPORTED_BY_CORE",
     "executor": "CORE",
     "environment": "development",
     "sourceCommit": "4c68d90fc0990b751cb7bfa7dc6d0f2a77f60c12",
@@ -66,6 +106,9 @@
       "installation confirmation",
       "launch URL",
       "read-only smoke check result using an owner-approved session"
-    ]
+    ],
+    "reportedVersion": "4.8.0",
+    "reportCommit": "37de9c4",
+    "identityPolicyFulfilment": "NOT_CONFIRMED_BY_EXPERIENCE; CORE reported the Toska Marley CLI session"
   }
 }

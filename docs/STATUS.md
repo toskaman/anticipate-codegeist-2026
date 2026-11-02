@@ -20,3 +20,6 @@ Reflow follow-up: long-label overflow/node overlap fixed; full payloads scroll a
 
 
 CORE development deployment is now explicitly requested for pinned candidate 4c68d90 after green CI, using only the owner-approved Forge identity. See [request](coordination/DEPLOYMENT_REQUEST_EXPERIENCE.md). REQUESTED is not a deployment or hosted-verification claim.
+
+
+Owner has now explicitly authorized requesting CORE to deploy pinned candidate 4c68d90 to production. See [production go-ahead](coordination/PRODUCTION_GO_EXPERIENCE.md). CORE reports development v4.8.0 smoke OK; production remains REQUESTED, and the prior Forge identity requirement remains unresolved/mandatory. No EXPERIENCE deploy or PR merge.

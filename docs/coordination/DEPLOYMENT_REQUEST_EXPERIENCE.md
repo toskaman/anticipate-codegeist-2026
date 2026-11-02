@@ -33,3 +33,6 @@ The requester explicitly requires **their approved Forge identity, never the col
 After deployment, report the source SHA, environment, app/installation confirmation, deployed version, launch URL, and actual result or blocker. Use the owner-approved session for a read-only smoke check if available. No seed, deletion or unreviewed Jira write is authorized by this relay. Real Jira actions must be reviewed by their exact targets/actions before approval/execution.
 
 Reply in CORE_RESPONSE_TO_EXPERIENCE.md or the CORE status file. A deployment report is distinct from authenticated user-context acceptance; do not infer a successful Jira operation from local tests or a successful upload. Existing dependency/security/license release work remains open and this request grants no production/release clearance.
+
+
+Follow-up: CORE reported this development request deployed in 37de9c4 (v4.8.0). The owner subsequently issued a separate production authorization in [PRODUCTION_GO_EXPERIENCE.md](PRODUCTION_GO_EXPERIENCE.md); the previous identity constraint remains applicable.
