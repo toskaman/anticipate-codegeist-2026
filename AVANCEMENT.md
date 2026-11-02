@@ -11,6 +11,8 @@
 - ✅ CI GitHub Actions (`.github/workflows/ci.yml`) : typecheck + tests CORE + build frontend.
 - ✅ Branche de ta copine récupérée (10 commits, `aa0e740`) : elle attendait les contrats CORE. Réponse complète : `docs/coordination/CORE_RESPONSE_TO_EXPERIENCE.md` (mapping de ses opérations → resolvers, enveloppe, erreurs, URL de lancement). Elle doit `git merge origin/feat/core-engine` puis brancher son ForgeClient.
 - 🔁 Surveillance automatique : vérification de GitHub programmée (nouveaux push EXPERIENCE + CI), reprise automatique après le reset de 5 h.
+- ✅ 02:10 UTC — ta copine a fusionné CORE et branché son client sur les contrats 0.2.0 (`d9d6109`, CI verte). J'ai monté un worktree d'intégration `E:\Codegeist2026\ANTICIPATE-INTEGRATION` (sa branche, détachée), tests backend OK, build frontend OK, **déployé en dev v4.3.0** = backend CORE + vraie interface.
+- ⛔ Validation hébergée (appels en tant qu'utilisateur, écritures réelles) : le navigateur intégré de Claude n'est pas connecté à Atlassian et je n'ai pas le droit de me connecter à ta place. Il suffit d'ouvrir une fois le navigateur intégré de l'app Claude sur l'URL ci-dessous et de te connecter ; ensuite je peux tester tout le parcours.
 - URL de l'app : `https://one-atlas-euza.atlassian.net/apps/full-page/2ae8efdf-84b8-4851-a341-e4fa2499595c/hello-world/`
 - ⚠️ Le web trigger de diagnostic doit être retiré du manifest avant la version jury.
 
