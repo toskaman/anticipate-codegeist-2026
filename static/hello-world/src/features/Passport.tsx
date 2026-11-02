@@ -458,10 +458,12 @@ export default function Passport({ w }: { w: Workflow }) {
               <li>
                 <strong>
                   {plural(status.gap, "proposed action")}{" "}
-                  {status.gap === 1 ? "has" : "have"} no verified execution
+                  {status.gap === 1 ? "has" : "have"} no verified execution.
                 </strong>{" "}
-                although the backend recorded this plan as Completed. Treat
-                {status.gap === 1 ? " it" : " them"} as not done.
+                {status.note ??
+                  (plan?.status === "COMPLETED"
+                    ? `The backend recorded this plan as Completed; treat ${status.gap === 1 ? "it" : "them"} as not done.`
+                    : `Treat ${status.gap === 1 ? "it" : "them"} as not done.`)}
               </li>
             )}
             <li>

@@ -35,6 +35,19 @@ describe("plan status display", () => {
       gap: 1,
     });
   });
+  it("explains a PARTIAL plan whose remaining actions were never approved (CORE P0 fix)", () => {
+    const partial = { ...two, status: "PARTIAL" as const };
+    const shown = planStatusDisplay(partial, [verified("record:ABC-1")]);
+    expect(shown.label).toBe("Approved actions verified · 1 not approved");
+    expect(shown.note).toContain("does not authorize the Jira transition");
+    // A failed attempt stays a plain partial outcome.
+    expect(
+      planStatusDisplay(partial, [
+        verified("record:ABC-1"),
+        { ...verified("record:ABC-2"), status: "FAILED" as const },
+      ]).label,
+    ).toBe("Partially completed");
+  });
   it("leaves other statuses and unknown records unchanged", () => {
     expect(planStatusDisplay({ ...two, status: "PARTIAL" }, []).label).toBe(
       "Partially completed",

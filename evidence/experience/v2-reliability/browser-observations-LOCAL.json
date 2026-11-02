@@ -1,17 +1,17 @@
 {
-  "timestampUTC": "2026-11-02T22:37:17.703Z",
+  "timestampUTC": "2026-11-02T22:42:30.286Z",
   "mode": "LOCAL development fixture",
   "scope": "5 Playwright fill-to-visible samples at 120 synthetic dependencies; includes automation overhead; 30 warmed graph/dashboard round trips; not a long soak or Forge proof",
   "browser": "153.0.8010.12",
   "searchSamplesMs": [
-    85.36259699999937,
-    68.60810099999071,
-    48.882446000003256,
-    36.24378699998488,
-    45.662426000024425
+    44.703581999987364,
+    52.68753900000593,
+    33.93297500000335,
+    29.409513999999035,
+    34.530494000006
   ],
-  "medianMs": 48.882446000003256,
-  "maxMs": 85.36259699999937,
+  "medianMs": 34.530494000006,
+  "maxMs": 52.68753900000593,
   "hashListenerCounts": [
     1,
     1,
@@ -51,9 +51,9 @@
       "jsEventListeners": 174
     },
     "heap": {
-      "usedSize": 20310700,
-      "totalSize": 21590016,
-      "embedderHeapUsedSize": 1650664,
+      "usedSize": 20320024,
+      "totalSize": 21327872,
+      "embedderHeapUsedSize": 1667424,
       "backingStorageSize": 13021593
     }
   },
@@ -66,10 +66,10 @@
         "jsEventListeners": 174
       },
       "heap": {
-        "usedSize": 20590536,
+        "usedSize": 20583452,
         "totalSize": 21327872,
-        "embedderHeapUsedSize": 1653576,
-        "backingStorageSize": 13021593
+        "embedderHeapUsedSize": 1562816,
+        "backingStorageSize": 13021600
       }
     },
     {
@@ -80,10 +80,10 @@
         "jsEventListeners": 174
       },
       "heap": {
-        "usedSize": 20782616,
-        "totalSize": 21852160,
-        "embedderHeapUsedSize": 1723000,
-        "backingStorageSize": 13021593
+        "usedSize": 20818532,
+        "totalSize": 22114304,
+        "embedderHeapUsedSize": 1728944,
+        "backingStorageSize": 13021600
       }
     },
     {
@@ -94,10 +94,10 @@
         "jsEventListeners": 174
       },
       "heap": {
-        "usedSize": 20916196,
-        "totalSize": 21852160,
-        "embedderHeapUsedSize": 1805200,
-        "backingStorageSize": 13021593
+        "usedSize": 20911976,
+        "totalSize": 22376448,
+        "embedderHeapUsedSize": 1882976,
+        "backingStorageSize": 13021600
       }
     }
   ],
@@ -108,10 +108,10 @@
       "jsEventListeners": 174
     },
     "heap": {
-      "usedSize": 20916188,
+      "usedSize": 20911968,
       "totalSize": 21590016,
-      "embedderHeapUsedSize": 1386120,
-      "backingStorageSize": 13021593
+      "embedderHeapUsedSize": 1418368,
+      "backingStorageSize": 13021600
     }
   },
   "errors": []

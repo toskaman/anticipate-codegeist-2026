@@ -226,6 +226,11 @@ export default function PreventionPlan({ w }: { w: Workflow }) {
           </span>
         </div>
         <Stepper steps={steps} />
+        {status.note && (
+          <p className="ax-plan-summary__note" role="note">
+            {status.note}
+          </p>
+        )}
       </section>
       <EvidenceChangeNotice w={w} />
       {w.allowed("checkPlanFreshness") && (

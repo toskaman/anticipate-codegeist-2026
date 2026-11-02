@@ -4070,3 +4070,9 @@ body:has(.ax-app) {
   flex-wrap: wrap;
   gap: var(--ax-2);
 }
+.ax-app .ax-plan-summary__note {
+  flex-basis: 100%;
+  margin: 0;
+  font-size: var(--ax-fs-sm);
+  color: var(--ax-text-2);
+}
