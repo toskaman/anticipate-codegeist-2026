@@ -12,3 +12,11 @@
 | Benchmark | feat/core-engine | local | synthetic 200 graphs | 2026-11-02 | npm test | P=R=1 vs oracle | see BENCHMARK.md | synthetic |
 | Rovo agent | dev 4.13.0+ | one-atlas-euza | — | 2026-11-02 | Jira issue → Agents → search | agent listed | NOT FOUND yet ("check the agent is enabled in Studio") | needs Rovo Studio enablement by admin |
 | Teamwork Graph | — | — | — | — | — | — | BLOCKED: allowlist request sent 2026-11-02 | merge layer + tests ready (context.test.ts) |
+
+## Hosted verification, 2 Nov 2026 (main fda93de + CORE fixes)
+
+- Production 2.7.0 deployed from main (includes EXPERIENCE PR #9). Judges' clean site loads Mission Control with the "Sample Jira data" panel.
+- Rovo agent "ANTICIPATE Decision Reviewer" answered in Rovo chat on the dev site with grounded, tool-backed output.
+- Sample data flow on dev, project MP (company-managed software): preview (read-only) -> confirm -> 6 labelled issues MP-5..MP-10 and 4 Blocks links created and re-read from Jira (MP-5 blocks MP-6, MP-7, MP-9; MP-6 blocks MP-8). Re-preview shows every item EXISTS (idempotent). "Analyze MP-5" builds a CONFIRMED evidence graph.
+- Bug found and fixed: on a service-desk project (HAM) the preview promised creation but every write was rejected. Issue types now come from createmeta (types the user can actually create), so such projects are refused up front. Jira 400 details are now logged.
+- Known UI issue for EXPERIENCE: the create call can exceed the frontend timeout (TIMEOUT shown although all writes succeeded). Re-preview recovers correctly.

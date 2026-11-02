@@ -57,14 +57,14 @@ export async function createSample(jira: JiraPort, projectKey: string): Promise<
         description: 'Sample data created on request by ANTICIPATE for a demonstration. Safe to delete.',
         labels: ['anticipate-sample', label(r.role), ...('change' in r && r.change ? ['anticipate-change'] : [])] })).key;
       status[r.role] = 'CREATED';
-    } catch { status[r.role] = 'FAILED'; }
+    } catch (e) { status[r.role] = 'FAILED'; console.warn(JSON.stringify({ app: 'anticipate', op: 'sampleCreateIssue', role: r.role, error: String((e as Error)?.message ?? e).slice(0, 500) })); }
   }
   const linkStatus: ('EXISTS' | 'CREATED' | 'FAILED')[] = [];
   for (const [i, [a, b]] of LINKS.entries()) {
     if (before.links[i]!.status === 'EXISTS') { linkStatus.push('EXISTS'); continue; }
     if (!keys[a] || !keys[b]) { linkStatus.push('FAILED'); continue; }
     try { await jira.createLink({ typeName: a === 'api' && b === 'v2' ? 'Relates' : 'Blocks', outwardKey: keys[a]!, inwardKey: keys[b]! }); linkStatus.push('CREATED'); }
-    catch { linkStatus.push('FAILED'); }
+    catch (e) { linkStatus.push('FAILED'); console.warn(JSON.stringify({ app: 'anticipate', op: 'sampleCreateLink', error: String((e as Error)?.message ?? e).slice(0, 500) })); }
   }
   // Verify by re-reading Jira; report what is actually there.
   const { keys: _after, ...after } = await inspect(jira, projectKey);
