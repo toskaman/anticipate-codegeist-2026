@@ -201,7 +201,7 @@ test("historical Passport shows its retention state and recorded counts", async 
             : executions;
     await route.fulfill({ json: response(data) });
   });
-  await page.goto("/tests/core-harness.html");
+  await page.goto("/tests/core-harness.html?theme=light");
   await page.getByLabel("Recovery plan ID").fill(longPlan.planId);
   await page
     .getByRole("button", { name: "Recover plan and execution status" })

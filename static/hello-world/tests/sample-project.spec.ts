@@ -367,7 +367,8 @@ test("display and accessibility menu applies theme and preferences everywhere an
   await page.setViewportSize({ width: 390, height: 844 });
   await sampleCore(page, "success", { openPanel: false });
   const app = page.locator(".ax-app");
-  await expect(app).toHaveAttribute("data-theme", "light");
+  // Product default since PR #25: Dark, whatever the host theme.
+  await expect(app).toHaveAttribute("data-theme", "dark");
   const menu = page.getByRole("button", {
     name: "Display & accessibility",
     exact: true,
@@ -377,7 +378,7 @@ test("display and accessibility menu applies theme and preferences everywhere an
   const dialog = page.getByRole("dialog", {
     name: "Display and accessibility",
   });
-  await dialog.getByRole("radio", { name: "Dark", exact: true }).check();
+  await dialog.getByRole("radio", { name: "Light", exact: true }).check();
   await dialog
     .getByRole("group", { name: "Text size" })
     .getByRole("radio", { name: "Larger", exact: true })
@@ -391,7 +392,7 @@ test("display and accessibility menu applies theme and preferences everywhere an
     .getByRole("radio", { name: "Reduce", exact: true })
     .check();
   await dialog.getByRole("radio", { name: "Simplified", exact: true }).check();
-  await expect(app).toHaveAttribute("data-theme", "dark");
+  await expect(app).toHaveAttribute("data-theme", "light");
   await expect(app).toHaveAttribute("data-text-size", "larger");
   await expect(app).toHaveAttribute("data-contrast", "high");
   await expect(app).toHaveAttribute("data-motion", "reduce");
@@ -418,7 +419,7 @@ test("display and accessibility menu applies theme and preferences everywhere an
   const settings = page.getByRole("region", {
     name: "Display & accessibility",
   });
-  await expect(settings).toContainText("Current theme: Dark");
+  await expect(settings).toContainText("Current theme: Light");
   await expect(
     settings.getByRole("radio", { name: "Larger", exact: true }),
   ).toBeChecked();
@@ -431,7 +432,7 @@ test("display and accessibility menu applies theme and preferences everywhere an
   ).toEqual([]);
   // Persisted in this browser.
   await page.reload();
-  await expect(page.locator(".ax-app")).toHaveAttribute("data-theme", "dark");
+  await expect(page.locator(".ax-app")).toHaveAttribute("data-theme", "light");
   await expect(page.locator(".ax-app")).toHaveAttribute(
     "data-text-size",
     "larger",
@@ -441,7 +442,7 @@ test("display and accessibility menu applies theme and preferences everywhere an
     .getByRole("dialog", { name: "Display and accessibility" })
     .getByRole("button", { name: "Reset display settings", exact: true })
     .click();
-  await expect(page.locator(".ax-app")).toHaveAttribute("data-theme", "light");
+  await expect(page.locator(".ax-app")).toHaveAttribute("data-theme", "dark");
   await expect(page.locator(".ax-app")).toHaveAttribute(
     "data-contrast",
     "system",
