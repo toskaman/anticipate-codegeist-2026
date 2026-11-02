@@ -91,3 +91,4 @@ Légende : ✅ fait et testé · 🟡 fait, pas encore vérifié sur un vrai Jir
 
 ## 2 Nov 2026 (suite)
 - Prod 2.7.0 = main fda93de (UI PR #9). Rovo agent verifie dans Rovo chat. Donnees de demo verifiees sur le site dev (projet MP). Correctif: types de tickets via createmeta. Demande a EXPERIENCE: timeout plus long pour la creation de demo.
+- Validateur de workflow verifie en heberge: projet isole AVT, AVT-1 bloque (HTTP 400, message Decision Firewall), AVT-2 passe.

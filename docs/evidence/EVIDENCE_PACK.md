@@ -20,3 +20,11 @@
 - Sample data flow on dev, project MP (company-managed software): preview (read-only) -> confirm -> 6 labelled issues MP-5..MP-10 and 4 Blocks links created and re-read from Jira (MP-5 blocks MP-6, MP-7, MP-9; MP-6 blocks MP-8). Re-preview shows every item EXISTS (idempotent). "Analyze MP-5" builds a CONFIRMED evidence graph.
 - Bug found and fixed: on a service-desk project (HAM) the preview promised creation but every write was rejected. Issue types now come from createmeta (types the user can actually create), so such projects are refused up front. Jira 400 details are now logged.
 - Known UI issue for EXPERIENCE: the create call can exceed the frontend timeout (TIMEOUT shown although all writes succeeded). Re-preview recovers correctly.
+
+## Jira workflow validator, verified hosted (2 Nov 2026)
+
+- Isolated company-managed project AVT ("ANTICIPATE Validator Test") on the dev site, with its own workflow "Software Simplified Workflow for Project AVT" (used by 1 space only). No existing workflow touched.
+- Validator "ANTICIPATE Decision Firewall" added to the transition into "En cours" and published.
+- AVT-1 (label anticipate-change, no decision): transition refused by Jira, HTTP 400: "ANTICIPATE Decision Firewall: AVT-1 cannot move forward because no ANTICIPATE decision has been recorded..." Status stays Backlog.
+- AVT-2 (no label): transition accepted (HTTP 204), status En cours.
+- The COMPLETED-decision pass path is covered by unit tests (validator.test).
