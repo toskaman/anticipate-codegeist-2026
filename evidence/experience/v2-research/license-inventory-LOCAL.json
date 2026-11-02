@@ -1,0 +1,260 @@
+{
+  "timestampUTC": "2026-11-02T01:44:20.022Z",
+  "lockSha256": "bf037e43effa8ee2eebb7caaf83150bdbe3592537bad3d5515dd5c0ae561cbc3",
+  "scope": "Installed direct dependencies and available non-dev package license files. Inventory only; not a legal/compliance certification. Custom Forge terms require owner review.",
+  "direct": [
+    {
+      "name": "@anticipate/contracts",
+      "version": "0.1.0",
+      "license": "NOT_DECLARED",
+      "path": "node_modules/@anticipate/contracts",
+      "licenseFiles": [],
+      "runtime": true
+    },
+    {
+      "name": "@axe-core/playwright",
+      "version": "4.14.0",
+      "license": "MPL-2.0",
+      "path": "node_modules/@axe-core/playwright",
+      "licenseFiles": [
+        "LICENSE"
+      ],
+      "runtime": false
+    },
+    {
+      "name": "@eslint/js",
+      "version": "10.0.1",
+      "license": "MIT",
+      "path": "node_modules/@eslint/js",
+      "licenseFiles": [
+        "LICENSE"
+      ],
+      "runtime": false
+    },
+    {
+      "name": "@forge/bridge",
+      "version": "7.2.1-next.13",
+      "license": "SEE LICENSE IN LICENSE.txt",
+      "path": "node_modules/@forge/bridge",
+      "licenseFiles": [
+        "LICENSE.txt"
+      ],
+      "runtime": true
+    },
+    {
+      "name": "@playwright/test",
+      "version": "1.64.1",
+      "license": "Apache-2.0",
+      "path": "node_modules/@playwright/test",
+      "licenseFiles": [
+        "LICENSE",
+        "NOTICE"
+      ],
+      "runtime": false
+    },
+    {
+      "name": "@testing-library/jest-dom",
+      "version": "7.0.1",
+      "license": "MIT",
+      "path": "node_modules/@testing-library/jest-dom",
+      "licenseFiles": [
+        "LICENSE"
+      ],
+      "runtime": false
+    },
+    {
+      "name": "@testing-library/react",
+      "version": "16.3.3",
+      "license": "MIT",
+      "path": "node_modules/@testing-library/react",
+      "licenseFiles": [
+        "LICENSE"
+      ],
+      "runtime": false
+    },
+    {
+      "name": "@types/node",
+      "version": "24.19.2",
+      "license": "MIT",
+      "path": "node_modules/@types/node",
+      "licenseFiles": [
+        "LICENSE"
+      ],
+      "runtime": false
+    },
+    {
+      "name": "@types/react",
+      "version": "18.3.31",
+      "license": "MIT",
+      "path": "node_modules/@types/react",
+      "licenseFiles": [
+        "LICENSE"
+      ],
+      "runtime": true
+    },
+    {
+      "name": "@types/react-dom",
+      "version": "18.3.7",
+      "license": "MIT",
+      "path": "node_modules/@types/react-dom",
+      "licenseFiles": [
+        "LICENSE"
+      ],
+      "runtime": true
+    },
+    {
+      "name": "@vitejs/plugin-react",
+      "version": "6.1.2",
+      "license": "MIT",
+      "path": "node_modules/@vitejs/plugin-react",
+      "licenseFiles": [
+        "LICENSE"
+      ],
+      "runtime": false
+    },
+    {
+      "name": "@xyflow/react",
+      "version": "12.12.0",
+      "license": "MIT",
+      "path": "node_modules/@xyflow/react",
+      "licenseFiles": [
+        "LICENSE"
+      ],
+      "runtime": true
+    },
+    {
+      "name": "eslint",
+      "version": "10.14.0",
+      "license": "MIT",
+      "path": "node_modules/eslint",
+      "licenseFiles": [
+        "LICENSE"
+      ],
+      "runtime": false
+    },
+    {
+      "name": "eslint-plugin-react-hooks",
+      "version": "7.1.1",
+      "license": "MIT",
+      "path": "node_modules/eslint-plugin-react-hooks",
+      "licenseFiles": [
+        "LICENSE"
+      ],
+      "runtime": false
+    },
+    {
+      "name": "jsdom",
+      "version": "30.1.3",
+      "license": "MIT",
+      "path": "node_modules/jsdom",
+      "licenseFiles": [
+        "LICENSE.txt"
+      ],
+      "runtime": false
+    },
+    {
+      "name": "lucide-react",
+      "version": "1.66.0",
+      "license": "ISC",
+      "path": "node_modules/lucide-react",
+      "licenseFiles": [
+        "LICENSE"
+      ],
+      "runtime": true
+    },
+    {
+      "name": "prettier",
+      "version": "3.9.10",
+      "license": "MIT",
+      "path": "node_modules/prettier",
+      "licenseFiles": [
+        "LICENSE"
+      ],
+      "runtime": false
+    },
+    {
+      "name": "react",
+      "version": "18.3.1",
+      "license": "MIT",
+      "path": "node_modules/react",
+      "licenseFiles": [
+        "LICENSE"
+      ],
+      "runtime": true
+    },
+    {
+      "name": "react-dom",
+      "version": "18.3.1",
+      "license": "MIT",
+      "path": "node_modules/react-dom",
+      "licenseFiles": [
+        "LICENSE"
+      ],
+      "runtime": true
+    },
+    {
+      "name": "typescript",
+      "version": "6.0.3",
+      "license": "Apache-2.0",
+      "path": "node_modules/typescript",
+      "licenseFiles": [
+        "LICENSE.txt"
+      ],
+      "runtime": true
+    },
+    {
+      "name": "typescript-eslint",
+      "version": "8.72.1",
+      "license": "MIT",
+      "path": "node_modules/typescript-eslint",
+      "licenseFiles": [
+        "LICENSE"
+      ],
+      "runtime": false
+    },
+    {
+      "name": "vite",
+      "version": "8.3.5",
+      "license": "MIT",
+      "path": "node_modules/vite",
+      "licenseFiles": [
+        "LICENSE.md"
+      ],
+      "runtime": false
+    },
+    {
+      "name": "vitest",
+      "version": "5.0.5",
+      "license": "MIT",
+      "path": "node_modules/vitest",
+      "licenseFiles": [
+        "LICENSE.md"
+      ],
+      "runtime": false
+    },
+    {
+      "name": "zod",
+      "version": "4.6.7",
+      "license": "MIT",
+      "path": "node_modules/zod",
+      "licenseFiles": [
+        "LICENSE"
+      ],
+      "runtime": true
+    }
+  ],
+  "runtimePackageCount": 162,
+  "missingRuntimeLicenseText": [
+    "@anticipate/contracts",
+    "@atlaskit/adf-schema-generator",
+    "@atlaskit/platform-feature-flags",
+    "@statsig/client-core",
+    "@statsig/client-core",
+    "@atlaskit/platform-feature-flags",
+    "boolbase",
+    "css-color-names",
+    "iframe-resizer",
+    "jsesc",
+    "punycode.js"
+  ]
+}

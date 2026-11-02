@@ -1,0 +1,39 @@
+{
+  "scope": "LOCAL synthetic Chromium development fixture; 5 rendering/search/selection samples per dataset; automation included; not Forge or production performance",
+  "environment": "Windows-10-10.0.19045-SP0",
+  "results": [
+    {
+      "nodes": 100,
+      "renderMedianMs": 66.96990000000005,
+      "renderMaxMs": 86.77189999999973,
+      "searchMedianMs": 16.097799999999552,
+      "selectionMedianMs": 33.8051000000014,
+      "nextPageMs": 57.97569999999905,
+      "heapAfterGcMiB": 20.848392486572266,
+      "heapDeltaMiB": 2.4482345581054688,
+      "errors": []
+    },
+    {
+      "nodes": 500,
+      "renderMedianMs": 84.9882000000016,
+      "renderMaxMs": 99.1797000000006,
+      "searchMedianMs": 16.030899999999747,
+      "selectionMedianMs": 34.4364000000005,
+      "nextPageMs": 82.84990000000107,
+      "heapAfterGcMiB": 21.017688751220703,
+      "heapDeltaMiB": 2.618541717529297,
+      "errors": []
+    },
+    {
+      "nodes": 1000,
+      "renderMedianMs": 68.11719999999877,
+      "renderMaxMs": 87.93629999999939,
+      "searchMedianMs": 16.03639999999905,
+      "selectionMedianMs": 36.39130000000114,
+      "nextPageMs": 68.75720000000001,
+      "heapAfterGcMiB": 21.202190399169922,
+      "heapDeltaMiB": 2.8050765991210938,
+      "errors": []
+    }
+  ]
+}

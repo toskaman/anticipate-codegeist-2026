@@ -1,0 +1,125 @@
+{
+  "workstream": "EXPERIENCE",
+  "branch": "feat/product-experience",
+  "revisionBase": "4c68d90fc0990b751cb7bfa7dc6d0f2a77f60c12",
+  "revisionScope": "Runtime candidate unchanged; CORE documentation merged through 36203cd; owner approved Toska Marley identity and delegated public publisher/support details to CORE",
+  "contractVersion": "0.2.0",
+  "status": "VERIFIED_LOCAL_READY_FOR_HOSTED_VALIDATION",
+  "tests": {
+    "unit": 42,
+    "browser": 51,
+    "coreScreenThemeViewportCases": 42,
+    "prototypeScreenThemeViewportCases": 42,
+    "core": 18,
+    "contracts": 3,
+    "simulation": 8,
+    "typecheck": "PASS",
+    "lint": "PASS",
+    "format": "PASS",
+    "build": "PASS"
+  },
+  "forgeVerification": "CORE_REPORTED_PRODUCTION_2.1.0; TOSKA_MARLEY_AUTHORIZED_BY_REQUESTER; PRODUCTION_INSTALLATION_NOT_VERIFIED_BY_EXPERIENCE",
+  "evidenceMode": "MOCK_TRANSPORT/LOCAL only; no real Jira action performed",
+  "next": [
+    "CORE owns public publisher name, support contact and privacy policy publication, as explicitly delegated by requester",
+    "CORE confirms actual production installation and authenticated read-only smoke; distribution link is reported available",
+    "Keep dependency/license release findings visible"
+  ],
+  "coreRef": "6356a28",
+  "deploymentRequest": {
+    "status": "DEPLOYED_REPORTED_BY_CORE",
+    "executor": "CORE",
+    "environment": "production",
+    "sourceCommit": "4c68d90fc0990b751cb7bfa7dc6d0f2a77f60c12",
+    "sourceBranch": "feat/product-experience",
+    "requestedAtUtc": "2026-11-02T12:29:30Z",
+    "authorization": "Owner explicitly instructed EXPERIENCE to give the production go-ahead in this chat. This supersedes the previous development-only environment restriction for this exact candidate.",
+    "appId": "ari:cloud:ecosystem::app/39a28f48-c891-4d86-a3cf-c14409cbd29e",
+    "site": "one-atlas-euza.atlassian.net",
+    "routePrefix": "hello-world",
+    "installationPolicy": "Verify the existing PRODUCTION installation; do not reuse the development installation UUID by assumption.",
+    "ci": {
+      "status": "success",
+      "runId": 41441118597,
+      "url": "https://github.com/toskaman/anticipate-codegeist-2026/actions/runs/41441118597"
+    },
+    "developmentEvidence": {
+      "reportedBy": "CORE",
+      "sourceCommit": "4c68d90fc0990b751cb7bfa7dc6d0f2a77f60c12",
+      "version": "4.8.0",
+      "reportCommit": "37de9c4",
+      "readOnlySmoke": "CORE reported capabilities, project listing and completed-plan recovery OK"
+    },
+    "credentialPolicy": "Requester explicitly authorized Toska Marley in this chat on 2026-11-02. CORE may use that existing authorized Forge session for this app. No token is supplied, copied or stored; EXPERIENCE does not deploy.",
+    "constraints": [
+      "Existing app and verified existing production installation only",
+      "No app creation, registration, sharing/distribution or scope changes",
+      "No PR merge or new runtime code beyond pinned source",
+      "No seed, deletion or unreviewed Jira execution",
+      "Known dependency/license findings remain open; this is owner deployment authorization, not a security/compliance clearance"
+    ],
+    "responseRequested": [
+      "sourceCommit",
+      "production environment and installation confirmation",
+      "deployed version or blocker",
+      "production launch URL",
+      "read-only smoke result",
+      "confirmation owner-approved Forge identity policy was met without disclosing secrets"
+    ],
+    "reportedVersion": "2.1.0",
+    "reportCommit": "10d75bb",
+    "identityPolicyFulfilment": "REQUESTER_APPROVED_TOSKA_MARLEY; CORE reports using that identity",
+    "productionInstallation": "CORE reported none at 12:50 UTC; later distribution availability does not establish an installed production site"
+  },
+  "developmentDeployment": {
+    "status": "DEPLOYED_REPORTED_BY_CORE",
+    "executor": "CORE",
+    "environment": "development",
+    "sourceCommit": "4c68d90fc0990b751cb7bfa7dc6d0f2a77f60c12",
+    "sourceBranch": "feat/product-experience",
+    "requestedAtUtc": "2026-11-02T12:02:07Z",
+    "authorization": "Owner explicitly approved both frontend follow-up and asking CORE for a development deployment in this chat; previous deferral superseded for this candidate only.",
+    "appId": "ari:cloud:ecosystem::app/39a28f48-c891-4d86-a3cf-c14409cbd29e",
+    "installationId": "2ae8efdf-84b8-4851-a341-e4fa2499595c",
+    "site": "one-atlas-euza.atlassian.net",
+    "routePrefix": "hello-world",
+    "ci": {
+      "status": "success",
+      "runId": 41441118597,
+      "url": "https://github.com/toskaman/anticipate-codegeist-2026/actions/runs/41441118597"
+    },
+    "tests": {
+      "frontendUnit": 42,
+      "browser": 51,
+      "core": 18,
+      "contracts": 3,
+      "simulation": 8
+    },
+    "credentialPolicy": "Use only the requester-approved Forge identity. Never use the colleague token. Do not copy chat/repository tokens; no secret is provided here. If approved credentials or app permission are unavailable, report a blocker.",
+    "constraints": [
+      "Existing app and existing development installation only",
+      "No registration, app creation, production deployment, sharing/distribution or scope change",
+      "Build fresh from the pinned source in an existing repository/worktree",
+      "No demo seed, deletion or unreviewed real Jira execution as part of this relay"
+    ],
+    "responseRequested": [
+      "sourceCommit",
+      "environment",
+      "deployment status or blocker",
+      "deployed version",
+      "installation confirmation",
+      "launch URL",
+      "read-only smoke check result using an owner-approved session"
+    ],
+    "reportedVersion": "4.8.0",
+    "reportCommit": "37de9c4",
+    "identityPolicyFulfilment": "REQUESTER_NOW_EXPLICITLY_APPROVED_TOSKA_MARLEY"
+  },
+  "publicDistribution": {
+    "status": "SHARING_AND_INSTALL_LINK_REPORTED_BY_CORE",
+    "reportCommit": "36203cd",
+    "documentation": "docs/submission/INSTALL_LINK.md",
+    "publisherSupportPrivacyOwner": "CORE (explicit requester delegation)",
+    "independentlyVerifiedByExperience": false
+  }
+}

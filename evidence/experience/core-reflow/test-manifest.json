@@ -1,0 +1,22 @@
+{
+  "mode": "VERIFIED_LOCAL / MOCK_TRANSPORT",
+  "frontendUnitTests": 42,
+  "browserTests": 51,
+  "coreViewCases": 42,
+  "prototypeViewCases": 42,
+  "newCases": [
+    "500-character labels at 320px without document overflow or node overlap",
+    "200 percent CSS root zoom at 1280px without document overflow",
+    "200-character action IDs, 1000-character reasons, 500-character verification text and 29914-character payload text remain reviewable",
+    "keyboard End scrolls the bounded payload region",
+    "selected graph node remains selected through 20-to-6-to-20 responsive paging"
+  ],
+  "zoomLimit": "CSS zoom emulation, not certification of native browser zoom or assistive technology behavior",
+  "genuineScreenshots": "Viewport PNGs plus full-page MOCK transport screens; no real Jira/Forge outcome claimed",
+  "deployment": "Owner authorized requesting CORE development deployment after candidate CI; no EXPERIENCE deploy",
+  "knownLimits": [
+    "Authenticated hosted validation pending",
+    "Existing dependency advisories and license review remain open",
+    "Earlier full run emitted legacy ReactFlow #004 dimension warnings; final reruns passed"
+  ]
+}

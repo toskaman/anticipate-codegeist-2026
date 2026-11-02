@@ -1,0 +1,19 @@
+{
+  "mode": "VERIFIED_LOCAL only",
+  "tests": {
+    "unit": 41,
+    "browser": 26,
+    "screenThemeViewportCases": 42,
+    "modelBenchmark": 1
+  },
+  "checks": [
+    "format:check",
+    "lint",
+    "typecheck",
+    "test",
+    "benchmark:graph",
+    "test:browser (includes production build)"
+  ],
+  "screenshots": "screens/*.png are native browser captures; contact-*.jpg are derived sheets",
+  "limitations": "See docs/design/PERFORMANCE_VISUAL_CORE.md and docs/integration/CORE_INTEGRATION_REQUIREMENTS.md"
+}
