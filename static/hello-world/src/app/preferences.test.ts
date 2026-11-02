@@ -7,11 +7,14 @@ import {
 } from "./preferences";
 
 describe("display preferences", () => {
-  it("defaults to following the host theme and system settings", () => {
+  it("defaults to the dark theme; Automatic still follows the host when chosen", () => {
     expect(parsePreferences(null)).toEqual(defaultPreferences);
-    expect(resolveTheme(defaultPreferences, "dark")).toBe("dark");
-    expect(resolveTheme(defaultPreferences, "light")).toBe("light");
-    expect(resolveTheme(defaultPreferences, "unexpected")).toBe("light");
+    expect(defaultPreferences.theme).toBe("dark");
+    expect(resolveTheme(defaultPreferences, "light")).toBe("dark");
+    const auto = { ...defaultPreferences, theme: "system" as const };
+    expect(resolveTheme(auto, "dark")).toBe("dark");
+    expect(resolveTheme(auto, "light")).toBe("light");
+    expect(resolveTheme(auto, "unexpected")).toBe("light");
   });
   it("lets an explicit theme override the host", () => {
     expect(

@@ -17,7 +17,7 @@ export interface Preferences {
 }
 
 export const defaultPreferences: Preferences = {
-  theme: "system",
+  theme: "dark",
   textSize: "default",
   contrast: "system",
   motion: "system",
