@@ -82,6 +82,50 @@ export const planStatusCopy: Record<
   EXPIRED: { label: "Expired", tone: "neutral" },
 };
 
+/**
+ * Plan status as shown to people. A backend COMPLETED plan in which not every
+ * proposed action has a VERIFIED execution record is shown with the gap, so
+ * "Completed" never reads as "everything proposed was done". Display only:
+ * the backend status is unchanged and still decides what is allowed.
+ */
+export function planStatusDisplay(
+  plan: PreventionPlan,
+  records: readonly ExecutionRecord[] | null | undefined,
+): { label: string; tone: Tone; gap: number; note?: string } {
+  const base = planStatusCopy[plan.status];
+  if (!records || !["COMPLETED", "PARTIAL"].includes(plan.status))
+    return { ...base, gap: 0 };
+  const verified = new Set(
+    records.filter((r) => r.status === "VERIFIED").map((r) => r.actionId),
+  );
+  const attempted = new Set(records.map((r) => r.actionId));
+  const total = plan.actions.length;
+  const done = plan.actions.filter((a) => verified.has(a.actionId)).length;
+  if (done >= total) return { ...base, gap: 0 };
+  if (plan.status === "PARTIAL") {
+    // CORE (P0 fix): approving only some actions ends in PARTIAL. When every
+    // executed action is verified, the rest were simply never approved.
+    const allExecutedVerified =
+      records.length > 0 && records.every((r) => r.status === "VERIFIED");
+    const notApproved = plan.actions.filter(
+      (a) => !attempted.has(a.actionId),
+    ).length;
+    if (allExecutedVerified && notApproved > 0)
+      return {
+        label: `Approved actions verified · ${notApproved} not approved`,
+        tone: "warning",
+        gap: total - done,
+        note: "Approved actions verified. Remaining actions are not approved, so this decision does not authorize the Jira transition.",
+      };
+    return { ...base, gap: total - done };
+  }
+  return {
+    label: `Completed · ${done} of ${total} actions verified`,
+    tone: "warning",
+    gap: total - done,
+  };
+}
+
 export const executionCopy: Record<
   ExecutionRecord["status"],
   { label: string; tone: Tone; detail: string }

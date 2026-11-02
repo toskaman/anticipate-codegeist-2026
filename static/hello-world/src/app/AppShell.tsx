@@ -3,7 +3,7 @@ import Icon from "../components/Icon";
 import { Badge } from "../components/ui";
 import { stages, stageState, stageStateText, stageFor } from "./journey";
 import type { Workflow } from "./useCoreWorkflow";
-import { planStatusCopy, scenarioName } from "./copy";
+import { planStatusDisplay, scenarioName } from "./copy";
 import { AccessibilityMenu } from "../components/AccessibilityControls";
 import { preferenceAttributes, type PreferencesApi } from "./preferences";
 
@@ -230,7 +230,7 @@ export default function AppShell({
             {w.plan && (
               <span className="ax-context__item">
                 <span className="ax-context__k">Plan</span>
-                <span>{planStatusCopy[w.plan.status].label}</span>
+                <span>{planStatusDisplay(w.plan, w.records).label}</span>
               </span>
             )}
           </div>

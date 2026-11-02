@@ -14,7 +14,7 @@ import {
   evidenceCopy,
   executionCopy,
   formatTime,
-  planStatusCopy,
+  planStatusDisplay,
   plural,
   scenarioName,
   uncertaintyCopy,
@@ -122,7 +122,7 @@ export default function Passport({ w }: { w: Workflow }) {
     );
   const plan = p.plan;
   const historical = !!p.evidence && p.evidence.state !== "LIVE";
-  const status = plan ? planStatusCopy[plan.status] : null;
+  const status = plan ? planStatusDisplay(plan, p.executions) : null;
   const selected = p.comparison.results.find(
     (r) => r.scenarioId === plan?.scenarioId,
   );
@@ -454,9 +454,26 @@ export default function Passport({ w }: { w: Workflow }) {
                 ? `${plural(p.openUnknowns.length, "open question")} ${p.openUnknowns.length === 1 ? "was" : "were"} recorded and remain${p.openUnknowns.length === 1 ? "s" : ""} unresolved here.`
                 : "No open questions were recorded; unread evidence may still exist."}
             </li>
+            {!!status?.gap && (
+              <li>
+                <strong>
+                  {plural(status.gap, "proposed action")}{" "}
+                  {status.gap === 1 ? "has" : "have"} no verified execution.
+                </strong>{" "}
+                {status.note ??
+                  (plan?.status === "COMPLETED"
+                    ? `The backend recorded this plan as Completed; treat ${status.gap === 1 ? "it" : "them"} as not done.`
+                    : `Treat ${status.gap === 1 ? "it" : "them"} as not done.`)}
+              </li>
+            )}
             <li>
               Only actions marked Verified were read back from Jira by the
               backend.
+            </li>
+            <li>
+              A completed decision means the approved Jira actions were applied
+              and verified. Engineering work they track (for example a created
+              issue or a migration) may still be open in Jira.
             </li>
             <li>
               This is an audit-style decision record — not a legal, compliance

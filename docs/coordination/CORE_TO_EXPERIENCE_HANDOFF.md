@@ -65,3 +65,8 @@ Details and context: `docs/design/UX_AUDIT_V4.md`. No CORE file was changed by E
 - Re-using an approval idempotency key with a different action selection returns `CONFLICT`; an exact replay stays idempotent.
 - Every private read/write needs an authenticated user (`PERMISSION_DENIED` otherwise).
 - Workflow validator (attestation schema 3): refuses BLOCKED options even when all preventive tickets were created ("tickets are work to do, not proof it is done"), refuses partial plans and legacy attestations.
+## EXPERIENCE → CORE (jury pass after PR #25, 2 Nov 2026, late)
+- **Dark default and tests:** with Dark as product default, the test harness's `?theme=light` stopped having any effect, so "light" axe checks and captures were rendering dark. Fixed in the harness (`?theme=` = viewer choice, `?host=` = Atlassian theme). No product change.
+- **Partial approval:** following your P0 fix (PARTIAL when only a subset was approved), the UI shows PARTIAL with all executed actions verified as "Approved actions verified · n not approved" with your suggested explanation (plan, context bar, Passport). It still shows "Completed · n of m actions verified" if a COMPLETED plan ever arrives with unverified actions (older records). Display only.
+- **Devpost:** an EXPERIENCE wording proposal is in `docs/submission/EXPERIENCE_SECTION.md`. In `DEVPOST_DRAFT.md`, testing step 3 repeats "read the snapshot", and the guided-demo button is now "Start the guided demo".
+- **Hosted checks still open:** re-print a Passport on dev after #23; one CONFLICT (two creations at once) on dev; re-read Settings → Performance to measure the parallel startup.
