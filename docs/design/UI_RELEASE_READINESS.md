@@ -12,7 +12,7 @@ The bundle author's esbuild/React 19 run is historical only. Results here use th
 | Frontend TypeScript, ESLint, formatting | PASS |
 | Frontend `npm test` | 47/47 passed, real vitest; includes 3 graph layout tests |
 | Vite production build | PASS; graph remains lazy-loaded |
-| Full Chromium Playwright suite | 72/72 passed, --workers=1 (227.3 s). Earlier 6-worker run had one 250 ms harness response timing failure; all 13 visual cases also passed separately with one worker. |
+| Full Chromium Playwright suite | 72/72 passed, --workers=1 (234.6 s, final synchronized main and mobile-table correction). Earlier 6-worker run had one 250 ms harness response timing failure; all 13 visual cases also passed separately with one worker. |
 | Firefox critical suites | 32 cases covered: 31 passed initially; the one cold-start candidate read timed out with the 250 ms harness transport, then passed with `--workers=1` (12.5 s targeted run). No assertion or transport timeout was weakened. |
 | WebKit critical suites | 32/32 passed (2.4 min) |
 | Final mobile graph reflow adjustment | 3/3 Firefox (12.3 s) and 3/3 WebKit reflow cases passed after the final zoom/padding adjustment. |
@@ -30,7 +30,7 @@ Firefox/WebKit coverage is limited to core-integration, core-pagination, core-re
 
 Sample preparation uses the v3 Panel/DecisionDialog styles but still previews before explicitly confirming real Jira creation. It cannot create a Jira project. Opening, previewing, cancelling and navigation never execute Jira writes. The local fixture prototype stays isolated.
 
-Settings' static capability column reflects four read-only MCP tools and the Rovo agent declaration in the current manifest. Backend availability remains separate; declarations do not become verification claims.
+Settings' static capability column reflects five read-only MCP tools and the Rovo agent declaration in the current manifest. Backend availability remains separate; declarations do not become verification claims.
 
 ## Defects corrected during real verification
 
@@ -48,8 +48,10 @@ No new dependency, backend, shared-contract, manifest, Forge identity, permissio
 
 The UI merge was committed, the imported handoff folder was removed with targeted file cleanup, and the temporary import branch was deleted. Main had advanced through CORE 02d6104 while UI verification ran, so its existing commits were merged without EXPERIENCE-authored backend changes. Clean installs, root/frontend TypeScript, lint, 47 frontend unit tests, 43 CORE tests, 3 contract and 8 simulation tests, and build passed again. The six screen/theme/viewport accessibility matrix cases plus the eight drift/sample cases passed again (14/14, 1.2 min), and all 13 visual cases were regenerated and passed again (1.0 min).
 
-The Settings declarations now reflect the optional Jira workflow validator in that manifest as well as the Rovo agent and four MCP tools; backend-reported availability and verification remain separate. Teamwork Graph is reported by the backend rather than incorrectly described as absent. These policy explanations are distinct from administrator-configured transition enforcement.
+The Settings declarations now reflect the optional Jira workflow validator in that manifest as well as the Rovo agent and five MCP tools; backend-reported availability and verification remain separate. Teamwork Graph is reported by the backend rather than incorrectly described as absent. These policy explanations are distinct from administrator-configured transition enforcement.
 
-Native mobile Passport review found overly narrow table cells splitting status words into letters. Tables now retain a readable minimum width within their already-labelled, keyboard-focusable horizontal scroll regions, with a print-specific reset. This is a deliberate two-dimensional scroll region, not page overflow. Final mobile matrix cases passed 2/2 and visual journeys passed 2/2 (dark rerun after a Windows screenshot file-open error). Adding a positioned scroll container also prevents positioned table content from propagating overflow to the page. Assertions were not weakened. The complete 72-case Chromium result predates the main sync and this CSS correction; the focused follow-up results above cover the later changes.
+Native mobile Passport review found overly narrow table cells splitting status words into letters. Tables now retain a readable minimum width within their already-labelled, keyboard-focusable horizontal scroll regions, with a print-specific reset. This is a deliberate two-dimensional scroll region, not page overflow. Final mobile matrix cases passed 2/2 and visual journeys passed 2/2 (dark rerun after a Windows screenshot file-open error). Adding a positioned scroll container also prevents positioned table content from propagating overflow to the page. Assertions were not weakened. After the latest main sync and all corrections, the complete Chromium suite passed again: 72/72, 234.6 s, zero unexpected/flaky/skipped cases.
 
-Measured final Vite output: main Forge application JS 165.79 kB (42.80 kB gzip), lazy graph JS 193.81 kB (62.37 kB gzip); main CSS 61.53 kB (11.39 kB gzip), graph CSS 15.41 kB (2.56 kB gzip). These are build sizes, not loading-time or interaction-speed claims. Asset hashes are in the verification folder.
+Measured final Vite output: main Forge application JS 165.93 kB (42.86 kB gzip), lazy graph JS 193.81 kB (62.37 kB gzip); main CSS 61.53 kB (11.39 kB gzip), graph CSS 15.41 kB (2.56 kB gzip). These are build sizes, not loading-time or interaction-speed claims. Asset hashes are in the verification folder.
+
+Latest main compatibility: merged main `6641e43` (CORE `7a6c80b`); fresh installs, root/frontend TypeScript, lint, 47 frontend tests, 43 CORE tests, 3 contract tests and 10 simulation tests passed. The additive UPGRADE_NODE contract is accepted; the frontend still presents the existing retirement journey. Settings reflects the fifth read-only MCP tool. CORE reported earlier sample creation successful on hosted development; that report applies to PR #9, not this UI v3. The sample error guidance now explicitly says a timed-out creation may still be running and directs re-preview rather than automatic retries.

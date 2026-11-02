@@ -12,7 +12,7 @@
     "prototypeScreenThemeViewportCases": 42,
     "core": 43,
     "contracts": 3,
-    "simulation": 8,
+    "simulation": 10,
     "typecheck": "PASS",
     "lint": "PASS",
     "format": "PASS",
@@ -22,10 +22,9 @@
   "evidenceMode": "MOCK_TRANSPORT/LOCAL only; no real Jira action performed",
   "next": [
     "CORE validates the new frontend in an authenticated development installation; no deployment performed here",
-    "Review the sample relation label mismatch noted in EXPERIENCE_CONTINUOUS_SAFETY.md",
-    "Keep unrelated newer CORE fc89faa work and external UI redesign output separate until reviewed"
+    "Review the sample relation label mismatch noted in EXPERIENCE_CONTINUOUS_SAFETY.md"
   ],
-  "coreRef": "02d6104",
+  "coreRef": "7a6c80b",
   "deploymentRequest": {
     "status": "DEPLOYED_REPORTED_BY_CORE",
     "executor": "CORE",
@@ -165,9 +164,9 @@
     "report": "docs/design/UI_RELEASE_READINESS.md",
     "evidenceMode": "MOCK_TRANSPORT",
     "forgeDeploymentPerformedByExperience": false,
-    "chromiumSeconds": 227.3,
+    "chromiumSeconds": 234.6,
     "firefoxCriticalCases": 32,
     "webkitCriticalCases": 32,
-    "mainCompatibility": "main fda93de merged; 47 frontend / 43 CORE / 3 contracts / 8 simulation; 14 critical/matrix and 13 visual rerun pass"
+    "mainCompatibility": "main 6641e43 merged; 47 frontend / 43 CORE / 3 contracts / 10 simulation pass; final full Chromium 72/72 (234.6 s)"
   }
 }

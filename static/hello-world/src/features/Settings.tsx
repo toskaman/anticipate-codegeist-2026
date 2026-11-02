@@ -28,7 +28,7 @@ const rows: { key: Key; name: string; what: string; inApp: string }[] = [
   {
     key: "rovoMcp",
     name: "Rovo MCP tools",
-    what: "Four read-only tools: get evidence graph, simulate retirement, get Prevention Passport and check evidence freshness.",
+    what: "Five read-only tools: get evidence graph, simulate retirement, simulate upgrade, get Prevention Passport and check evidence freshness.",
     inApp: "Declared by the app",
   },
   {

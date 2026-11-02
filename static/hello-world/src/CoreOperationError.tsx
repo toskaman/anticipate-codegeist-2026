@@ -13,7 +13,7 @@ export function guidanceFor(failure: OperationFailure) {
   return failure.code === "EVIDENCE_CHANGED"
     ? "Evidence changed since this plan was built. Rebuild the snapshot, re-run comparison and review a new plan. Do not retry or re-approve this plan."
     : failure.context === "sample"
-      ? "Check project permissions and preview the sample data again to inspect Jira before confirming any further creation. No automatic retry was made."
+      ? "Sample creation may still be running after a timeout. Check project permissions and preview the sample data again to inspect Jira before confirming any further creation. No automatic retry was made."
       : failure.mutation
         ? "Read current plan status and audit before another write. No automatic resubmission was made."
         : failure.code === "INVALID_RESPONSE"
