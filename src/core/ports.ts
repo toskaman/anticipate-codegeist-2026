@@ -13,7 +13,9 @@ export interface JiraPort {
   getIssue(key: string): Promise<IssueFetch>;
   myPermissions(projectKey: string, permissions: string[]): Promise<Record<string, boolean>>;
   createIssue(input: { projectKey: string; summary: string; description: string; issueType: string; labels: string[] }): Promise<{ key: string }>;
+  /** Creates "<outwardKey> <outward phrase> <inwardKey>", e.g. outwardKey blocks inwardKey. */
   createLink(input: { typeName: string; inwardKey: string; outwardKey: string }): Promise<void>;
+  deleteLink?(linkId: string): Promise<void>;
   addComment(issueKey: string, text: string): Promise<void>;
   getCommentsText(issueKey: string): Promise<string[]>;
   addLabel(issueKey: string, label: string): Promise<void>;
