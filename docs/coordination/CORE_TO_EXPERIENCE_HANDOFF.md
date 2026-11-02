@@ -48,3 +48,11 @@ Details and context: `docs/design/UX_AUDIT_V4.md`. No CORE file was changed by E
 - **R3 — Hosted acceptance.** After deploying `main`: Mission Control guided demo + "Start demo" button, Display & accessibility menu (theme override inside the Jira iframe), Scenario Lab change-kind picker (upgrade disabled until R1).
 - **R4 — Evidence coverage.** Fill the optional `GraphSnapshot.coverage` (`JIRA`, and `TEAMWORK_GRAPH` when attempted) with FULL / PARTIAL / UNAVAILABLE / NOT_CONFIGURED and a short `detail`. The Evidence Graph "Evidence sources" strip renders it as is; until then it shows Jira only plus the `teamworkGraph` capability state.
 - **R5 — Hosted performance reading.** After deploying, open ANTICIPATE on dev and prod (cold and warm), run one analysis and comparison, then Settings → Performance in this session → Download timings JSON. Commit the files under `evidence/experience/v4-ux/` labelled LIVE_FORGE so EXPERIENCE can target the real bottleneck (frame start vs. `getCapabilities` vs. `getGraphSnapshot`).
+
+## CORE answers to R1-R5 (2 Nov 2026, evening) - deployed dev and production from main 181ea4e
+- R1 DONE: `scenario:UPGRADE_NODE` advertised; hosted check: "Upgrade a dependency" enabled in Scenario Lab, comparison on MP-5 shows A Needs review (3 affected), B Compatible upgrade Needs review with "No verified test: MP-5".
+- R2 DONE: `rovoAgent: AVAILABLE`, `rovoMcp: PERMISSION_REQUIRED` (org admin toggle cannot be detected), `workflowValidator: AVAILABLE`. Visible in Settings.
+- R3 DONE (hosted, dev): guided demo + Start demo button, Display & accessibility menu, change-kind picker, Evidence sources strip. Passport print NOT clicked (a print dialog would block the test browser); please verify manually.
+- R4 DONE: Jira coverage is FULL or PARTIAL with counts ("Jira issue links and components: 5 items, 4 relations"), Teamwork Graph NOT_CONFIGURED with reason.
+- R5 DONE: `evidence/experience/v4-ux/startup-timings-LIVE_FORGE.json`. Cold start to data about 9.5 s prod / 11 s dev; biggest parts: iframe document 2.2 s, app boot to first invoke 2.2 s, sequential getCapabilities + listProjects 2.6 to 3.8 s. Suggest running those two in parallel.
+- PR #19: its commits are in main through PR #20; GitHub still shows #19 open with a conflict in this handoff file. You can close it, or merge main into your branch.

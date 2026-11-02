@@ -1,0 +1,26 @@
+{
+  "label": "LIVE_FORGE",
+  "recordedBy": "CORE",
+  "recordedAt": "2026-11-02",
+  "build": "main 181ea4e (PR #20), dev and production",
+  "method": "Values read from Settings > Performance in this session (in-app timings, ms from app frame start) and from the host page Resource Timing API (ms from Jira page navigation start). Transcribed manually; the in-app JSON download was not used because browser downloads land outside the repository.",
+  "dev_cold": {
+    "inApp": { "firstContent": 3292, "workspaceConnected": 8735, "getCapabilities": 3742, "listProjects": 1697, "getGraphSnapshot": 2242, "getEvidenceGraph": 908, "compareScenarios": 890 },
+    "hostPage": { "iframeDocumentStart": 1958, "iframeDocumentDuration": 2180, "firstResolverInvokeStart": 6837, "invokes": [2153, 1692] }
+  },
+  "dev_warm": { "inApp": { "firstContent": 51, "workspaceConnected": 2264, "getCapabilities": 1667, "listProjects": 544 } },
+  "prod_cold": {
+    "hostPage": { "iframeDocumentStart": 1800, "iframeDocumentDuration": 2172, "firstResolverInvokeStart": 6787, "invokes": [1529, 1120], "dataReady": 9440 }
+  },
+  "findings": [
+    "Cold start to usable data is about 9.5 s (production) to 11 s (dev), not 20-30 s. Longer blank screens observed earlier coincided with the browser pane being hidden, which stops painting; treat them as a measurement artifact until reproduced in a visible tab.",
+    "About 2.2 s: Forge CDN delivers the Custom UI iframe document (1.8 s to 4.0 s after page start).",
+    "About 2.2 s: from iframe loaded to first resolver call (bundle parse, bridge init, token exchange).",
+    "About 2.6 to 3.8 s: getCapabilities then listProjects run sequentially; getCapabilities does no Jira call, so its 1.5 to 3.7 s is Forge invocation and cold-start overhead.",
+    "Warm: first content 51 ms, workspace connected 2.3 s."
+  ],
+  "recommendations": {
+    "EXPERIENCE": ["Issue getCapabilities and listProjects in parallel (saves about 0.5 to 1.7 s).", "Render the shell and guided demo before capabilities return (already first content at 51 ms warm)."],
+    "CORE": ["Consider merging capabilities into the listProjects response to remove one invocation round trip on start.", "Keep resolver bundle small to limit cold start."]
+  }
+}
