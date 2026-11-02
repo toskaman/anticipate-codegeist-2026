@@ -1,8 +1,8 @@
 {
   "workstream": "EXPERIENCE",
   "branch": "feat/product-experience",
-  "revisionBase": "bef5978",
-  "revisionScope": "working tree: provenance-aware bounded graph",
+  "revisionBase": "4365b83",
+  "revisionScope": "working tree: browser reliability, product research, license inventory",
   "contractVersion": "frontend-proposal-v2 — TEMPORARY, not CORE approved",
   "status": "VERIFIED_LOCAL",
   "screens": {
@@ -11,7 +11,7 @@
   },
   "tests": {
     "unit": 41,
-    "browser": 20,
+    "browser": 21,
     "lint": "PASS",
     "typecheck": "PASS",
     "format": "PASS",
@@ -39,8 +39,8 @@
     "No hosted Bridge/routing/CSP/theme/authentication or Jira outcome verification"
   ],
   "next": [
-    "Measure browser interaction and repeated-route reliability",
-    "Complete product research, license inventory and remaining UX checks",
-    "Integrate reviewed CORE contracts and run hosted acceptance gates"
+    "Complete remaining reflow/long-text and screenshot QA",
+    "Prepare accurate Marketplace/jury assets without public submission",
+    "Integrate CORE contracts and verified installation access when provided"
   ]
 }

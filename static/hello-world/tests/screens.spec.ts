@@ -45,7 +45,7 @@ for (const width of [1440, 1024, 390])
             (element as HTMLElement).focus({ preventScroll: true }),
           );
         await page.screenshot({
-          path: `../../evidence/${name.toLowerCase().replaceAll(" ", "-")}-${theme}-${width}.png`,
+          path: `../../evidence/${name.toLowerCase().replace(/ /g, "-")}-${theme}-${width}.png`,
           fullPage: true,
         });
       }

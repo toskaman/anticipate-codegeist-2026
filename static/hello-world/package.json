@@ -43,7 +43,8 @@
     "format:check": "prettier --check src tests benchmarks scripts *.ts *.js index.html package.json",
     "lint": "eslint src/**/*.ts src/**/*.tsx tests/**/*.ts benchmarks/**/*.ts",
     "preview": "vite preview",
-    "benchmark:graph": "vitest run benchmarks/graph.test.ts"
+    "benchmark:graph": "vitest run benchmarks/graph.test.ts",
+    "licenses:inventory": "node scripts/license-inventory.mjs"
   },
   "browserslist": {
     "production": [
