@@ -1,8 +1,8 @@
 {
   "workstream": "EXPERIENCE",
   "branch": "feat/product-experience",
-  "revisionBase": "46f2b81",
-  "revisionScope": "reflow and preserved graph selection; preparing pinned candidate for CORE development deployment",
+  "revisionBase": "4c68d90fc0990b751cb7bfa7dc6d0f2a77f60c12",
+  "revisionScope": "CI-verified reflow plus latest CORE issueLink hotfix; development deployment requested from CORE",
   "contractVersion": "0.2.0",
   "status": "VERIFIED_LOCAL_READY_FOR_HOSTED_VALIDATION",
   "tests": {
@@ -10,7 +10,7 @@
     "browser": 51,
     "coreScreenThemeViewportCases": 42,
     "prototypeScreenThemeViewportCases": 42,
-    "core": 16,
+    "core": 18,
     "contracts": 3,
     "simulation": 8,
     "typecheck": "PASS",
@@ -18,19 +18,54 @@
     "format": "PASS",
     "build": "PASS"
   },
-  "forgeVerification": "USER_CONTEXT_NOT_VERIFIED; owner approved CORE development deployment relay after candidate CI",
+  "forgeVerification": "CURRENT_CANDIDATE_NOT_HOSTED_VERIFIED; CORE development deployment requested with owner-approved identity only",
   "evidenceMode": "MOCK_TRANSPORT/LOCAL only; no real Jira action performed",
   "next": [
-    "CORE/owner deploy reviewed build to development",
-    "Authorized user-context read/write and recovery acceptance",
-    "CORE dependency advisory remediation/release review"
+    "CORE deploy pinned candidate to development or report approved-identity/access blocker",
+    "Owner-approved authenticated read-only smoke validation",
+    "Review any real Jira action targets before execution",
+    "Existing dependency/security/license release review"
   ],
-  "coreRef": "2fb9628",
-  "deploymentIntent": {
-    "state": "PREPARING_CANDIDATE_NOT_YET_REQUESTED",
-    "environment": "development",
+  "coreRef": "6356a28",
+  "deploymentRequest": {
+    "status": "REQUESTED",
     "executor": "CORE",
-    "productionAuthorized": false,
-    "identityPolicy": "Only owner-approved Forge identity; never colleague token; no secrets in coordination files"
+    "environment": "development",
+    "sourceCommit": "4c68d90fc0990b751cb7bfa7dc6d0f2a77f60c12",
+    "sourceBranch": "feat/product-experience",
+    "requestedAtUtc": "2026-11-02T12:02:07Z",
+    "authorization": "Owner explicitly approved both frontend follow-up and asking CORE for a development deployment in this chat; previous deferral superseded for this candidate only.",
+    "appId": "ari:cloud:ecosystem::app/39a28f48-c891-4d86-a3cf-c14409cbd29e",
+    "installationId": "2ae8efdf-84b8-4851-a341-e4fa2499595c",
+    "site": "one-atlas-euza.atlassian.net",
+    "routePrefix": "hello-world",
+    "ci": {
+      "status": "success",
+      "runId": 41441118597,
+      "url": "https://github.com/toskaman/anticipate-codegeist-2026/actions/runs/41441118597"
+    },
+    "tests": {
+      "frontendUnit": 42,
+      "browser": 51,
+      "core": 18,
+      "contracts": 3,
+      "simulation": 8
+    },
+    "credentialPolicy": "Use only the requester-approved Forge identity. Never use the colleague token. Do not copy chat/repository tokens; no secret is provided here. If approved credentials or app permission are unavailable, report a blocker.",
+    "constraints": [
+      "Existing app and existing development installation only",
+      "No registration, app creation, production deployment, sharing/distribution or scope change",
+      "Build fresh from the pinned source in an existing repository/worktree",
+      "No demo seed, deletion or unreviewed real Jira execution as part of this relay"
+    ],
+    "responseRequested": [
+      "sourceCommit",
+      "environment",
+      "deployment status or blocker",
+      "deployed version",
+      "installation confirmation",
+      "launch URL",
+      "read-only smoke check result using an owner-approved session"
+    ]
   }
 }

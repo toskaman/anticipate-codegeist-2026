@@ -23,3 +23,6 @@ An earlier full run logged two ReactFlow #004 dimension warnings in the legacy p
 The exact source candidate and development request will be recorded in docs/coordination/DEPLOYMENT_REQUEST_EXPERIENCE.md and status-experience.json after publication and green candidate CI. CORE must use the existing app/installation and only the owner's approved Forge identity, never a colleague's token. No secret is included in repository coordination files. If access is unavailable, CORE must report the blocker instead of registering an app or changing identity.
 
 Hosted user-context acceptance remains separate. Native browser control in this session still fails during startup with CryptUnprotectData; no authenticated browser or Jira outcome is inferred from local tests. Deployment is a CORE action; real Jira writes require review of their exact targets and actions.
+
+
+Final integration candidate: 4c68d90, including CORE 6356a28 issueLink direction/empty-201 correction and manifest trigger cleanup. Revalidated: 18 CORE, 3 contracts, 8 simulation, 42 frontend unit and 51 browser tests. Candidate CI run 41441118597 passed. Owner-authorized CORE development request: ../coordination/DEPLOYMENT_REQUEST_EXPERIENCE.md. No EXPERIENCE deployment.
