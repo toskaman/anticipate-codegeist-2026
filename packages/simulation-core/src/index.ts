@@ -158,14 +158,15 @@ export function compareScenarios(snapshot: GraphSnapshot, scenarios: ScenarioDef
     return { scenarioId: r.scenarioId, onlyImpacted: r.impacts.map((i) => i.nodeId).filter((n) => !otherImpacted.has(n)), onlyViolatedRules: r.violations.map((v) => v.ruleId).filter((x) => !otherRules.has(x)) };
   });
   // Rank only scenarios that accomplish the change (contain a removal) ahead of those that defer it? No: rank purely on risk, report reason.
-  const score = (r: SimulationResult) => [r.summary.blockers, r.violations.filter((v) => v.severity === 'HIGH').length, r.summary.unknowns, r.violations.length, r.summary.impacted];
+  // Open questions (e.g. compatibility declared but not verified by a test) rank after violations: evidence-backed beats claimed.
+  const score = (r: SimulationResult) => [r.summary.blockers, r.violations.filter((v) => v.severity === 'HIGH').length, r.summary.unknowns, r.violations.length, r.uncertainties.length, r.summary.impacted];
   const ranked = [...results].sort((a, b) => { const sa = score(a), sb = score(b); for (let i = 0; i < sa.length; i++) if (sa[i] !== sb[i]) return sa[i]! - sb[i]!; return 0; });
   const best = ranked[0];
   const tie = ranked[1] && score(ranked[1]).every((v, i) => v === score(best!)[i]);
   return {
     snapshotId: snapshot.snapshotId, results, diff,
     recommendedScenarioId: best && !tie ? best.scenarioId : null,
-    recommendationReason: !best ? 'No scenarios.' : tie ? 'Scenarios are tied on blockers, high-severity violations, unknowns and impact; human judgement required.'
-      : `Lowest risk ordering (blockers, high violations, unknowns, total violations, impacted nodes): ${best.summary.blockers} blockers, ${best.summary.unknowns} unknowns, ${best.violations.length} violations.`
+    recommendationReason: !best ? 'No scenarios.' : tie ? 'Scenarios are tied on blockers, high-severity violations, unknowns, open questions and impact; human judgement required.'
+      : `Lowest risk ordering (blockers, high violations, unknowns, total violations, open questions, impacted nodes): ${best.summary.blockers} blockers, ${best.summary.unknowns} unknowns, ${best.violations.length} violations, ${best.uncertainties.length} open questions.`
   };
 }
