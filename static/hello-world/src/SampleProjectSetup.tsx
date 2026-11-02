@@ -30,6 +30,8 @@ export default function SampleProjectSetup({
   const [confirmed, setConfirmed] = useState(false);
   const [previewed, setPreviewed] = useState(false);
   const [failure, setFailure] = useState<OperationFailure | null>(null);
+  const [creating, setCreating] = useState(false);
+  const [recheckNote, setRecheckNote] = useState("");
   const pending = useRef(false);
   const request = useRef<AbortController | null>(null);
   useEffect(
@@ -46,6 +48,8 @@ export default function SampleProjectSetup({
     setBusy(true);
     onBusyChange(true);
     setFailure(null);
+    setRecheckNote("");
+    setCreating(create);
     setPreviewed(false);
     const abort = new AbortController();
     request.current = abort;
@@ -65,22 +69,63 @@ export default function SampleProjectSetup({
       setResult(data);
       setPreviewed(!create);
     } catch (error) {
-      if (!abort.signal.aborted)
-        setFailure({
-          code: error instanceof CoreClientError ? error.code : "UNEXPECTED",
-          message:
-            error instanceof Error
-              ? error.message
-              : "Sample preparation failed. No success is assumed.",
-          details: error instanceof CoreClientError ? error.details : undefined,
-          mutation: create,
-          retryable: false,
-          context: "sample",
-        });
+      if (abort.signal.aborted) return;
+      // First-time creation can outlast the response window (12 sequential
+      // Jira writes). The write may still finish server side, so instead of
+      // surfacing TIMEOUT, re-read current Jira state with the read-only
+      // preview. The write itself is never retried.
+      if (
+        create &&
+        error instanceof CoreClientError &&
+        ["TIMEOUT", "NETWORK_ERROR"].includes(error.code)
+      ) {
+        try {
+          const current = await client.request(
+            "previewSampleProject",
+            { projectKey },
+            abort.signal,
+          );
+          if (abort.signal.aborted) return;
+          setResult(current);
+          setPreviewed(true);
+          setRecheckNote(
+            current.items.some((item) => item.status === "TO_CREATE") ||
+              current.links.some((link) => link.status === "TO_CREATE")
+              ? "Sample creation is taking longer than usual and may still be running in Jira. Current Jira state is shown below; preview again in a few seconds before creating anything else."
+              : "Sample creation took longer than usual. Jira was checked again and the sample data shown below is in place.",
+          );
+          return;
+        } catch {
+          if (abort.signal.aborted) return;
+          setFailure({
+            code: "STILL_RUNNING",
+            message:
+              "Sample creation is taking longer than usual and may still be running in Jira. Preview the sample data again in a few seconds. No result is assumed.",
+            mutation: true,
+            retryable: false,
+            context: "sample",
+          });
+          return;
+        }
+      }
+      setFailure({
+        code: error instanceof CoreClientError ? error.code : "UNEXPECTED",
+        message:
+          error instanceof Error
+            ? error.message
+            : "Sample preparation failed. No success is assumed.",
+        details: error instanceof CoreClientError ? error.details : undefined,
+        mutation: create,
+        retryable: false,
+        context: "sample",
+      });
     } finally {
       pending.current = false;
       onBusyChange(false);
-      if (!abort.signal.aborted) setBusy(false);
+      if (!abort.signal.aborted) {
+        setBusy(false);
+        setCreating(false);
+      }
     }
   }
   return (
@@ -125,9 +170,12 @@ export default function SampleProjectSetup({
             </button>
             {busy && (
               <p role="status">
-                Checking Jira sample data… This can take a few seconds.
+                {creating
+                  ? "Creating sample data in Jira… First-time creation can take 15 to 20 seconds. Keep this panel open."
+                  : "Checking Jira sample data… This can take a few seconds."}
               </p>
             )}
+            {!busy && recheckNote && <p role="status">{recheckNote}</p>}
             {failure && (
               <CoreOperationError
                 failure={failure}

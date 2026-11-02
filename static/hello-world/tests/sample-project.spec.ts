@@ -241,15 +241,13 @@ for (const mode of ["denied", "partial", "timeout", "empty"] as const)
           "Some sample items or relations failed",
         );
       else {
-        await expect(page.getByRole("alert")).toContainText("TIMEOUT");
-        await expect(page.getByRole("alert")).toContainText(
-          "may still be running",
-        );
-        await expect(page.getByRole("alert")).toContainText(
-          "preview the sample data again",
-        );
+        await expect(
+          page.getByText("Jira was checked again", { exact: false }),
+        ).toBeVisible();
+        await expect(page.getByText("TIMEOUT")).toHaveCount(0);
+        await expect(page.getByRole("alert")).toHaveCount(0);
       }
-      await expect(create).toBeDisabled();
+      if (mode !== "timeout") await expect(create).toBeDisabled();
       expect(
         calls.filter((call) => call.operation === "createSampleProject"),
       ).toHaveLength(1);
@@ -259,9 +257,7 @@ for (const mode of ["denied", "partial", "timeout", "empty"] as const)
         ),
       ).toHaveLength(0);
       if (mode === "timeout") {
-        await page
-          .getByRole("button", { name: "Preview sample data", exact: true })
-          .click();
+        // Automatic read-only recheck; the write is not retried.
         await expect(
           page.getByRole("button", { name: "Analyze ABC-1", exact: true }),
         ).toBeVisible();
