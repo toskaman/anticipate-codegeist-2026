@@ -18,6 +18,7 @@
 - ✅ Données de démo créées dans le projet **TD** (Tally Dev) : TD-1…TD-6 (label `anticipate-demo-seed`).
 - ✅ **Production déployée** (v2.0.0) avec ton autorisation. Web triggers de diagnostic/seed retirés du manifest.
 - ⛔ Lien d'installation pour les juges : l'activation du partage public (« Sharing with anyone ») a été bloquée par une protection de sécurité de mon côté. À faire par toi dans la console : Distribution → Edit → *Sharing with anyone*, puis remplir contact support, politique de confidentialité, et **déclarer « Yes » pour les données personnelles** (l'app stocke l'accountId de l'auteur des plans dans le stockage Forge).
+- ✅ 13:00 UTC — Production **2.1.0** = build `4c68d90` (frontend copine + backend corrigé). Dépôt GitHub passé en **public** (scan secrets : 0). **Partage activé (« Sharing with anyone »)** : support info@lepcpro.fr, politique de confidentialité + CGU sur GitHub, données personnelles = Yes. **Lien d'installation juges : `docs/submission/INSTALL_LINK.md`.**
 - URL de l'app : `https://one-atlas-euza.atlassian.net/apps/full-page/2ae8efdf-84b8-4851-a341-e4fa2499595c/hello-world/`
 - ⚠️ Le web trigger de diagnostic doit être retiré du manifest avant la version jury.
 
