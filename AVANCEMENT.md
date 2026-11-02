@@ -2,7 +2,7 @@
 
 ## 🚀 Session autonome via bridge — résultats réels (Windows)
 - ✅ Bridge v2 opérationnel (`E:\Codegeist2026\bridge`), allowlist rechargée à chaque requête, auto-redémarrage si le script change.
-- ✅ Sur ton PC : typecheck OK, tests backend 12/12, contrats 3/3, moteur 8/8 (perf 18 ms), build frontend OK, `forge lint` : aucune erreur.
+- ✅ Sur ton PC : typecheck OK, tests backend 16/16 (+ adapter pagination, 429/403/5xx mapping, route encoding, ADF safety, atomic KVS claim), contrats 3/3, moteur 8/8 (perf 18 ms), build frontend OK, `forge lint` : aucune erreur.
 - ✅ Commits poussés sur `origin/feat/core-engine` : `fad78cb` (backend complet), `35152d7` (fix bundling), + diagnostics.
 - ✅ Déployé en **development** (v4) et installation mise à niveau sur `one-atlas-euza.atlassian.net` (id `2ae8efdf-…`) avec les nouvelles permissions.
 - ✅ **Vérifié contre le vrai Jira** (web trigger de diagnostic lecture seule, en tant qu'app) : 25 projets lus, recherche JQL `search/jql` OK, lecture ticket + liens, permissions, types de tickets, extracteur de graphe sur de vrais liens (PLAT : `Blocks` → DEPENDS_ON CONFIRMED ; `Relates`/`Deployments` → INFERRED). Format de date Jira `-0400` géré.
@@ -11,6 +11,8 @@
 - ✅ CI GitHub Actions (`.github/workflows/ci.yml`) : typecheck + tests CORE + build frontend.
 - ✅ Branche de ta copine récupérée (10 commits, `aa0e740`) : elle attendait les contrats CORE. Réponse complète : `docs/coordination/CORE_RESPONSE_TO_EXPERIENCE.md` (mapping de ses opérations → resolvers, enveloppe, erreurs, URL de lancement). Elle doit `git merge origin/feat/core-engine` puis brancher son ForgeClient.
 - 🔁 Surveillance automatique : vérification de GitHub programmée (nouveaux push EXPERIENCE + CI), reprise automatique après le reset de 5 h.
+- ✅ 02:10 UTC — ta copine a fusionné CORE et branché son client sur les contrats 0.2.0 (`d9d6109`, CI verte). J'ai monté un worktree d'intégration `E:\Codegeist2026\ANTICIPATE-INTEGRATION` (sa branche, détachée), tests backend OK, build frontend OK, **déployé en dev v4.3.0** = backend CORE + vraie interface.
+- ⛔ Validation hébergée (appels en tant qu'utilisateur, écritures réelles) : le navigateur intégré de Claude n'est pas connecté à Atlassian et je n'ai pas le droit de me connecter à ta place. Il suffit d'ouvrir une fois le navigateur intégré de l'app Claude sur l'URL ci-dessous et de te connecter ; ensuite je peux tester tout le parcours.
 - URL de l'app : `https://one-atlas-euza.atlassian.net/apps/full-page/2ae8efdf-84b8-4851-a341-e4fa2499595c/hello-world/`
 - ⚠️ Le web trigger de diagnostic doit être retiré du manifest avant la version jury.
 
@@ -32,7 +34,7 @@ Légende : ✅ fait et testé · 🟡 fait, pas encore vérifié sur un vrai Jir
 - ✅ Garde-fous : snapshot expiré après 24 h, plans privés à leur auteur, mode DEMO_FIXTURE toujours étiqueté et jamais exécutable, aucune IA payante.
 - ✅ `src/rovo.ts` : 3 actions Rovo/MCP **lecture seule** (graphe, simulation, passport) ; config manifest prête dans `docs/integrations/manifest-rovo.yml` (pas encore fusionnée).
 - 🟡 `manifest.yml` : seules les permissions ont été ajoutées (`read:jira-work`, `write:jira-work`, `read:jira-user`, `storage:app`). App ID, module et routePrefix inchangés.
-- ✅ Tests : backend 12/12, contrats 3/3, moteur 8/8 ; bundle esbuild OK et resolvers invoqués directement avec succès.
+- ✅ Tests : backend 16/16 (+ adapter pagination, 429/403/5xx mapping, route encoding, ADF safety, atomic KVS claim), contrats 3/3, moteur 8/8 ; bundle esbuild OK et resolvers invoqués directement avec succès.
 - ✅ Docs : `docs/coordination/STATUS_CORE.md` (+ json), `docs/deployment/BOOTSTRAP.md`, `docs/demo/JIRA_DEMO_SETUP.md`, `docs/security/THREAT_MODEL.md`, `docs/research/VERIFIED_RULES_AND_APIS.md`.
 
 ## 🔌 Bridge Windows (créé)

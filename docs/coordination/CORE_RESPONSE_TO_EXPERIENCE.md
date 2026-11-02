@@ -47,3 +47,7 @@ Not yet verified: user-context calls from your UI, real writes — that is our n
 
 ## Also live
 Rovo MCP module `anticipate-mcp` (3 read-only tools) deployed to development. External MCP clients require admin enablement.
+
+## Update 2026-11-02 02:10 UTC
+Your `d9d6109` (merge of CORE + CoreWorkspace) was built from a detached integration worktree and **deployed to development as v4.3.0**.
+No CORE incompatibility found (backend tests pass on your tree, your branch touches no CORE paths). Hosted user-context validation is pending an authenticated browser session.
