@@ -28,3 +28,9 @@
 - AVT-1 (label anticipate-change, no decision): transition refused by Jira, HTTP 400: "ANTICIPATE Decision Firewall: AVT-1 cannot move forward because no ANTICIPATE decision has been recorded..." Status stays Backlog.
 - AVT-2 (no label): transition accepted (HTTP 204), status En cours.
 - The COMPLETED-decision pass path is covered by unit tests (validator.test).
+
+## Dependency upgrade use case (2 Nov 2026)
+
+- New engine operation UPGRADE_NODE (breaking or compatible). Scenarios: A breaking upgrade now, B backward-compatible shim, C migrate consumers first then upgrade. New read-only action and MCP tool `anticipate-simulate-upgrade`, wired to the Rovo agent.
+- Unit tests: breaking upgrade reaches the same consumers as removal but triggers no removal-only rules; compatible upgrade has zero impact.
+- Hosted (dev 4.19.0), Rovo chat with the ANTICIPATE Decision Reviewer: "breaking upgrade of MP-5, MP-9 as new version" returned A NEEDS_REVIEW (3 impacted, 2 direct, rule P3), B PASS (0 impacted).
