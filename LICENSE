@@ -1,6 +1,8 @@
 ANTICIPATE - Proprietary License (source available)
 
-Copyright (c) 2026 the ANTICIPATE team (GitHub: toskaman). All rights reserved.
+Copyright (c) 2026 toskaman and Orphee. All rights reserved.
+The copyright holders own this project jointly, in equal shares (50% each).
+Any license, sale or transfer of the project requires the written agreement of both.
 
 This repository is published so that it can be viewed and evaluated, including by
 the judges and organizers of Atlassian Codegeist 2026 and Devpost. It is NOT open
@@ -14,7 +16,7 @@ Permitted without further permission:
      (use for judging and promotion of the submission). Nothing in this license
      limits those rights.
 
-Not permitted without prior written permission from the copyright holders:
+Not permitted without prior written permission from both copyright holders:
   copying, modifying, merging, publishing, distributing, sublicensing, selling,
   hosting as a service, or creating derivative works of this code, in whole or
   in part.
