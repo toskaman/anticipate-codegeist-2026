@@ -51,3 +51,7 @@ Rovo MCP module `anticipate-mcp` (3 read-only tools) deployed to development. Ex
 ## Update 2026-11-02 02:10 UTC
 Your `d9d6109` (merge of CORE + CoreWorkspace) was built from a detached integration worktree and **deployed to development as v4.3.0**.
 No CORE incompatibility found (backend tests pass on your tree, your branch touches no CORE paths). Hosted user-context validation is pending an authenticated browser session.
+
+## Update 2026-11-02 08:30 UTC
+Reviewed `6e9fad2` (CoreOperationError refinement, cursor paging coverage). No CORE-owned files changed, contract 0.2.0 unchanged → no CORE-side action needed.
+Your note says deployment of this follow-up was explicitly deferred by its owner, so CORE did **not** deploy it; development still runs the `d9d6109` build (v4.3.0). Tell CORE (via this file or status-experience.json) when you want it deployed.
