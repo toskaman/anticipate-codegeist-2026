@@ -34,4 +34,4 @@ export const rovoGetGraph = rovo.getGraph;
 export const rovoSimulateRetirement = rovo.simulateRetirement;
 export const rovoGetPassport = rovo.getPassport;
 
-export { diagnostics } from './diagnostics';
+export { diagnostics, seedDemo } from './diagnostics';

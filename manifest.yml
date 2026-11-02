@@ -51,14 +51,9 @@ modules:
           type: string
           required: true
           description: ANTICIPATE plan id
-  webtrigger:
-    - key: anticipate-diagnostics
-      function: diagnostics
   function:
     - key: resolver
       handler: index.handler
-    - key: diagnostics
-      handler: index.diagnostics
     - key: rovoGetGraph
       handler: index.rovoGetGraph
     - key: rovoSimulateRetirement

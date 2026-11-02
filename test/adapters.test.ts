@@ -5,7 +5,7 @@ let responder: (path: string, init: { method?: string; body?: string }) => { sta
 vi.mock('@forge/api', () => {
   const requestJira = async (path: string, init: { method?: string; body?: string }) => {
     calls.push({ path, init }); const r = responder(path, init);
-    return { status: r.status, ok: r.status >= 200 && r.status < 300, json: async () => r.body };
+    return { status: r.status, ok: r.status >= 200 && r.status < 300, json: async () => r.body, text: async () => (r.body === undefined ? '' : JSON.stringify(r.body)) };
   };
   return { default: { asUser: () => ({ requestJira }), asApp: () => ({ requestJira }) }, route: (s: TemplateStringsArray, ...v: unknown[]) => s.reduce((a, p, i) => a + p + (i < v.length ? encodeURIComponent(String(v[i])) : ''), '') };
 });
@@ -46,6 +46,16 @@ describe('Forge Jira adapter (mocked transport)', () => {
     await createForgeJira(null).addComment('A-1', '<script>x</script>\n**bold**');
     const body = JSON.parse(calls[0]!.init.body!);
     expect(body.body.content[0].content[0]).toEqual({ type: 'text', text: '<script>x</script>' });
+  });
+  it('accepts empty 201 bodies (issueLink create)', async () => {
+    responder = () => ({ status: 201 });
+    await expect(createForgeJira(null).createLink({ typeName: 'Blocks', inwardKey: 'A-1', outwardKey: 'A-2' })).resolves.toBeUndefined();
+  });
+  it('maps createLink subject to inwardIssue (verified Jira POST semantics)', async () => {
+    responder = () => ({ status: 201 });
+    await createForgeJira(null).createLink({ typeName: 'Blocks', outwardKey: 'NEW-1', inwardKey: 'ROOT-1' });
+    const b = JSON.parse(calls.at(-1)!.init.body!);
+    expect(b.inwardIssue.key).toBe('NEW-1'); expect(b.outwardIssue.key).toBe('ROOT-1');
   });
   it('setIfAbsent is atomic via FAIL_IF_EXISTS', async () => {
     expect(await forgeStore.setIfAbsent('k', 1)).toBe(true);

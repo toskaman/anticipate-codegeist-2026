@@ -24,7 +24,8 @@ async function json<T>(res: Response, what: string): Promise<T> {
   if (res.status === 403) throw new AppError('PERMISSION_DENIED', `Jira denied: ${what}.`);
   if (res.status === 404) throw new AppError('NOT_FOUND', `Jira: ${what} not found.`);
   if (!res.ok) throw new AppError('UPSTREAM_UNAVAILABLE', `Jira ${what} failed (HTTP ${res.status}).`, res.status >= 500);
-  return (res.status === 204 ? undefined : await res.json()) as T;
+  const text = res.status === 204 ? '' : await res.text();
+  return (text ? JSON.parse(text) : undefined) as T;
 }
 
 interface RawIssue { id: string; key: string; fields: {
@@ -78,7 +79,13 @@ export function createForgeJira(siteUrl: string | null): JiraPort {
         project: { key: i.projectKey }, summary: i.summary, issuetype: { name: i.issueType }, labels: i.labels, description: adf(i.description) } } }), 'create issue');
     },
     async createLink(i) {
-      await json(await call(route`/rest/api/3/issueLink`, { method: 'POST', body: { type: { name: i.typeName }, inwardIssue: { key: i.inwardKey }, outwardIssue: { key: i.outwardKey } } }), 'create link');
+      await json(await call(route`/rest/api/3/issueLink`, { method: 'POST', body: { type: { name: i.typeName },
+        // Verified on a real site (2026-11-02): POST /issueLink reads as "<inwardIssue> <outward phrase> <outwardIssue>",
+        // e.g. inwardIssue A + outwardIssue B with type Blocks ⇒ "A blocks B". Our port's `outwardKey` is the subject.
+        inwardIssue: { key: i.outwardKey }, outwardIssue: { key: i.inwardKey } } }), 'create link');
+    },
+    async deleteLink(linkId) {
+      await json(await call(route`/rest/api/3/issueLink/${linkId}`, { method: 'DELETE' }), 'delete link');
     },
     async addComment(key, text) { await json(await call(route`/rest/api/3/issue/${key}/comment`, { method: 'POST', body: { body: adf(text) } }), 'add comment'); },
     async getCommentsText(key) {
