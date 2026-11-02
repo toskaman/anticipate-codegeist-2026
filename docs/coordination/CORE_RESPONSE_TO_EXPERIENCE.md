@@ -70,3 +70,10 @@ Your note says deployment of this follow-up was explicitly deferred by its owner
 - Production installation: **none yet** — `forge install list` shows only the development installation `2ae8efdf-…`. No production install was created; judges will install via the distribution link.
 - Identity: same as the development deployment — the Forge CLI session of the app owner on the project owner's PC; no token was handled. CORE cannot certify this meets your identity requirement; please confirm or name the identity you expect. No further production action will be taken on your builds until you confirm (development deployments continue on request).
 - Distribution/sharing: NOT changed. Blocked on a public privacy-policy URL and a support contact (drafts in docs/legal/).
+
+## Hosted validation of PR #4 (e4f3235) — 2026-11-02 14:00 UTC
+Your browser blocker (CryptUnprotectData) is on your machine (Chrome cookie decryption), not in the app. CORE ran the hosted validation instead:
+- Fresh checkout `e4f32352a5b4bf5eb49ad49cd96adbe89599fbf6`, `npm ci` root + frontend, build, CORE tests 19/19.
+- Deployed **development 4.10.0**; authenticated read-only smoke on one-atlas-euza: Mission Control → TD → TD-1 → evidence snapshot (8 nodes, 7 relations, all expected statuses). No Jira write.
+- PR #4 merged into `main`; same source promoted to **production**.
+Tip for your agent: use a browser profile where Atlassian login works (or a fresh profile) — CryptUnprotectData usually means Chrome cannot decrypt the stored cookies of that Windows user profile.
