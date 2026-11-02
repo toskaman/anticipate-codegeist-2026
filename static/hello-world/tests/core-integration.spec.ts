@@ -16,6 +16,10 @@ async function mockedCore(
   page: Page,
   lostExecution = false,
   outcome: "VERIFIED" | "FAILED" = "VERIFIED",
+  safety?: {
+    refusalAt?: "approvePlan" | "executeApprovedPlan";
+    changedCheck?: boolean;
+  },
 ) {
   const calls: { operation: string; input: Record<string, unknown> }[] = [];
   let current = structuredClone(plan);
@@ -23,10 +27,66 @@ async function mockedCore(
   await page.route("**/__core_test", async (route) => {
     const call = route.request().postDataJSON() as (typeof calls)[number];
     calls.push(call);
+    if (safety?.refusalAt === call.operation) {
+      current = { ...current, status: "EVIDENCE_CHANGED" };
+      await route.fulfill({
+        json: {
+          ok: false,
+          meta,
+          error: {
+            code: "EVIDENCE_CHANGED",
+            message:
+              "Evidence changed: one new dependency and lost readability.",
+            requestId: meta.requestId,
+            retryable: false,
+            details: {
+              addedEdges: [
+                {
+                  from: "issue:ABC-2",
+                  to: "issue:ABC-1",
+                  kind: "DEPENDS_ON",
+                  status: "CONFIRMED",
+                },
+              ],
+              removedEdges: [
+                {
+                  from: "issue:ABC-1",
+                  to: "issue:ABC-3",
+                  kind: "USES",
+                  status: "INFERRED",
+                },
+              ],
+              becameUnknown: ["issue:ABC-3"],
+            },
+          },
+        },
+      });
+      return;
+    }
     let data: unknown;
     switch (call.operation) {
       case "getCapabilities":
-        data = capabilities;
+        data = safety
+          ? {
+              ...capabilities,
+              operations: [...capabilities.operations, "checkPlanFreshness"],
+            }
+          : capabilities;
+        break;
+      case "checkPlanFreshness":
+        data = {
+          planId: plan.planId,
+          snapshotId: plan.snapshotId,
+          checkedAt: meta.generatedAt,
+          fresh: !safety?.changedCheck,
+          addedEdges: [],
+          removedEdges: [],
+          becameUnknown: safety?.changedCheck ? ["issue:ABC-3"] : [],
+          ignoredPlanArtifacts: [],
+          reason: safety?.changedCheck
+            ? "Evidence is no longer readable."
+            : "No causal evidence changes found.",
+        };
         break;
       case "listProjects":
         data = {
@@ -173,6 +233,174 @@ async function reachPlan(page: Page, theme: "light" | "dark" = "light") {
     page.getByText("Plan hash: test-plan-hash · status PENDING_APPROVAL"),
   ).toBeVisible();
 }
+for (const refusalAt of ["approvePlan", "executeApprovedPlan"] as const) {
+  test(`CORE evidence change refusal at ${refusalAt} remains blocked after dismiss, refresh and reload`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({
+      width: refusalAt === "approvePlan" ? 320 : 1440,
+      height: 900,
+    });
+    const calls = await mockedCore(page, false, "VERIFIED", { refusalAt });
+    await reachPlan(page);
+    await page
+      .getByRole("checkbox", { name: "Approve record:ABC-1", exact: true })
+      .check();
+    await page
+      .getByRole("button", { name: "Approve selected actions", exact: true })
+      .click();
+    await page.getByRole("button", { name: "Confirm", exact: true }).click();
+    if (refusalAt === "executeApprovedPlan") {
+      await expect(
+        page.getByText(
+          "Backend approval recorded. No execution was requested.",
+        ),
+      ).toBeVisible();
+      await page
+        .getByRole("button", {
+          name: "Execute backend-approved Jira actions",
+          exact: true,
+        })
+        .click();
+      await page.getByRole("button", { name: "Confirm", exact: true }).click();
+    }
+    await expect(
+      page.getByRole("heading", {
+        name: "Evidence changed — this plan cannot execute",
+      }),
+    ).toBeVisible();
+    await expect(
+      page.getByText("issue:ABC-2 DEPENDS_ON issue:ABC-1 [CONFIRMED]").first(),
+    ).toBeVisible();
+    await expect(
+      page.getByText("issue:ABC-1 USES issue:ABC-3 [INFERRED]").first(),
+    ).toBeVisible();
+    await expect(
+      page
+        .getByText(
+          "Evidence changed: one new dependency and lost readability.",
+          { exact: false },
+        )
+        .first(),
+    ).toBeVisible();
+    await page
+      .getByRole("button", { name: "Dismiss error", exact: true })
+      .click();
+    await page
+      .getByRole("button", {
+        name: "Refresh plan status and audit",
+        exact: true,
+      })
+      .click();
+    await expect(
+      page.getByText("Plan hash: test-plan-hash · status EVIDENCE_CHANGED"),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", {
+        name: "Approve selected actions",
+        exact: true,
+      }),
+    ).toBeDisabled();
+    await expect(
+      page.getByRole("button", {
+        name: "Execute backend-approved Jira actions",
+        exact: true,
+      }),
+    ).toBeDisabled();
+    await expect(
+      page.getByText("A mutation was requested.", { exact: false }),
+    ).toHaveCount(0);
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth + 1,
+      ),
+    ).toBe(true);
+    const axe = await new AxeBuilder({ page })
+      .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
+      .analyze();
+    expect(axe.violations).toEqual([]);
+    await page.screenshot({
+      path: `../../evidence/experience/continuous-safety/${refusalAt}-MOCK.png`,
+      fullPage: true,
+    });
+    await page.reload();
+    await page
+      .getByRole("button", { name: "Mission Control", exact: true })
+      .click();
+    await page
+      .getByRole("button", {
+        name: "Recover plan and execution status",
+        exact: true,
+      })
+      .click();
+    await expect(
+      page.getByText("Plan hash: test-plan-hash · status EVIDENCE_CHANGED"),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", {
+        name: "Approve selected actions",
+        exact: true,
+      }),
+    ).toBeDisabled();
+    await expect(
+      page.getByRole("button", {
+        name: "Execute backend-approved Jira actions",
+        exact: true,
+      }),
+    ).toBeDisabled();
+    expect(calls.filter((c) => c.operation === refusalAt)).toHaveLength(1);
+    await page
+      .getByRole("button", {
+        name: "Open CORE Prevention Passport",
+        exact: true,
+      })
+      .click();
+    await expect(
+      page.getByText("Plan status: EVIDENCE_CHANGED", { exact: true }),
+    ).toBeVisible();
+    const downloaded = page.waitForEvent("download");
+    await page
+      .getByRole("button", { name: "Export CORE Passport JSON", exact: true })
+      .click();
+    const downloadPath = await (await downloaded).path();
+    expect(JSON.parse(await readFile(downloadPath!, "utf-8")).plan.status).toBe(
+      "EVIDENCE_CHANGED",
+    );
+    await page
+      .getByRole("button", { name: "Prevention Plan", exact: true })
+      .click();
+    await page
+      .getByRole("button", { name: "Rebuild snapshot", exact: true })
+      .click();
+    await expect(
+      page.getByRole("heading", { name: "Choose a Jira change", exact: true }),
+    ).toBeVisible();
+  });
+}
+test("CORE read-only freshness check explains changed evidence without approval or execution", async ({
+  page,
+}) => {
+  const calls = await mockedCore(page, false, "VERIFIED", {
+    changedCheck: true,
+  });
+  await reachPlan(page);
+  await page
+    .getByRole("button", { name: "Check evidence freshness", exact: true })
+    .click();
+  await expect(
+    page.getByRole("heading", {
+      name: "Evidence changed — this plan cannot execute",
+    }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("Evidence is no longer readable.", { exact: true }),
+  ).toBeVisible();
+  expect(
+    calls.filter((c) =>
+      ["approvePlan", "executeApprovedPlan"].includes(c.operation),
+    ),
+  ).toHaveLength(0);
+});
 for (const lost of [false, true])
   test(`CORE transport journey and lost-response recovery=${lost}`, async ({
     page,

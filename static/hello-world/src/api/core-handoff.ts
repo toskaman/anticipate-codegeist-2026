@@ -15,6 +15,8 @@ export {
   type ExecutionRecord,
   type PreventionPassport,
   type ApiError,
+  type EvidenceDrift,
+  type SampleProjectPlan,
   type OperationName,
 } from "@anticipate/contracts";
 import type { OperationName } from "@anticipate/contracts";

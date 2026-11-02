@@ -21,6 +21,7 @@ export class CoreClientError extends Error {
     message: string,
     public requestId: string | null = null,
     public retryable = false,
+    public details?: Record<string, unknown>,
   ) {
     super(`${code}: ${message}${requestId ? ` (request ${requestId})` : ""}`);
     this.name = "CoreClientError";
@@ -97,7 +98,13 @@ export class ForgeClient {
               reject(
                 new CoreClientError(
                   "TIMEOUT",
-                  "Response not received. Recover execution status by planId before another write.",
+                  operation === "createSampleProject"
+                    ? "Response not received. Preview sample data in the selected Jira project before any further creation. No result is assumed."
+                    : operation === "previewSampleProject"
+                      ? "Sample preview response not received. No Jira creation was requested."
+                      : operation === "checkPlanFreshness"
+                        ? "Evidence freshness response not received. No freshness is assumed."
+                        : "Response not received. Recover execution status by planId before another write.",
                 ),
               ),
             this.timeoutMs,
@@ -129,6 +136,7 @@ export class ForgeClient {
           result.error.message,
           result.error.requestId,
           result.error.retryable,
+          result.error.details,
         );
       }
       // Runtime schema validation precedes this generic type assertion.
@@ -150,6 +158,8 @@ export class ForgeClient {
           return invalid("Plan mismatch.");
         if (operation === "approvePlan" && obj.planHash !== args.planHash)
           return invalid("Approval changed the reviewed plan hash.");
+        if (args.projectKey && obj.projectKey !== args.projectKey)
+          return invalid("Sample data belongs to another project.");
       }
       if (
         operation === "getGraphSnapshot" ||

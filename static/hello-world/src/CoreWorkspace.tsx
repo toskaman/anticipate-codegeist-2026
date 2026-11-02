@@ -19,6 +19,8 @@ import CoreOperationError, {
   type OperationFailure,
 } from "./CoreOperationError";
 import CoreEvidenceGraph, { SourceLink } from "./CoreEvidenceGraph";
+import SampleProjectSetup from "./SampleProjectSetup";
+import EvidenceChangeDetails from "./EvidenceChangeDetails";
 
 const pages = [
   "Mission Control",
@@ -155,8 +157,14 @@ export default function CoreWorkspace({
   const [confirmation, setConfirmation] = useState<
     "approve" | "execute" | null
   >(null);
-  const [busy, setBusy] = useState("");
+  const [operationBusy, setBusy] = useState("");
+  const [sampleBusy, setSampleBusy] = useState(false);
+  const busy =
+    operationBusy || (sampleBusy ? "Preparing Jira sample data…" : "");
   const [error, setError] = useState<OperationFailure | null>(null);
+  const [evidenceFailure, setEvidenceFailure] =
+    useState<OperationFailure | null>(null);
+  const [sampleReplacement, setSampleReplacement] = useState("");
   const [notice, setNotice] = useState("");
   const [now, setNow] = useState(Date.now());
   const pending = useRef(false);
@@ -217,6 +225,7 @@ export default function CoreWorkspace({
     document.getElementById("main")?.focus();
   }
   function clearPlan() {
+    setEvidenceFailure(null);
     setPlan(null);
     setPassport(null);
     setSelected([]);
@@ -240,7 +249,7 @@ export default function CoreWorkspace({
     task: (signal: AbortSignal) => Promise<void>,
     mutation = false,
   ) {
-    if (pending.current) return;
+    if (pending.current || sampleBusy) return;
     pending.current = true;
     setBusy(label);
     setError(null);
@@ -250,8 +259,8 @@ export default function CoreWorkspace({
     try {
       await task(abort.signal);
     } catch (e) {
-      if (active.current && !abort.signal.aborted)
-        setError({
+      if (active.current && !abort.signal.aborted) {
+        const failure: OperationFailure = {
           message:
             e instanceof Error
               ? e.message
@@ -259,13 +268,69 @@ export default function CoreWorkspace({
           code: e instanceof CoreClientError ? e.code : "UNEXPECTED",
           retryable: e instanceof CoreClientError && e.retryable,
           mutation,
-        });
+          details: e instanceof CoreClientError ? e.details : undefined,
+        };
+        setError(failure);
+        if (e instanceof CoreClientError && e.code === "EVIDENCE_CHANGED") {
+          setEvidenceFailure(failure);
+          setPlan((current) =>
+            current ? { ...current, status: "EVIDENCE_CHANGED" } : current,
+          );
+          setSelected([]);
+          setConfirmation(null);
+        }
+      }
     } finally {
       if (active.current && !abort.signal.aborted) {
         pending.current = false;
         setBusy("");
       }
     }
+  }
+  async function readSnapshot(
+    signal: AbortSignal,
+    rootKey = rootIssueKey,
+    preferredReplacement = sampleReplacement,
+  ) {
+    requireOperation("getGraphSnapshot");
+    requireOperation("getEvidenceGraph");
+    clearSnapshot();
+    const selectedProject = projects.find(
+      (project) => project.id === projectId,
+    );
+    if (!selectedProject || !rootKey.startsWith(`${selectedProject.key}-`))
+      throw new CoreClientError(
+        "VALIDATION",
+        "Choose an issue from the selected Jira project, or select its project first.",
+      );
+    const created = await client.request(
+      "getGraphSnapshot",
+      {
+        projectId,
+        rootIssueKey: rootKey,
+        source: "JIRA",
+        maxDepth: 3,
+      },
+      signal,
+    );
+    const graph = await client.request(
+      "getEvidenceGraph",
+      { snapshotId: created.snapshotId },
+      signal,
+    );
+    if (!graph.nodes.some((n) => n.id === `issue:${rootKey}`))
+      throw new CoreClientError(
+        "INVALID_RESPONSE",
+        "Root issue is absent from the graph.",
+      );
+    setSnapshot(graph);
+    setReplacement(
+      preferredReplacement &&
+        graph.nodes.some((n) => n.id === `issue:${preferredReplacement}`)
+        ? `issue:${preferredReplacement}`
+        : "",
+    );
+    go("Evidence Graph");
   }
   async function readPassport(
     currentPlan: PreventionPlan,
@@ -309,13 +374,14 @@ export default function CoreWorkspace({
     !expired &&
     !attempted &&
     !approvalUncertain &&
+    !evidenceFailure &&
     writesAvailable &&
     allowed("executeApprovedPlan") &&
     allowed("getExecutionStatus") &&
     allowed("getPreventionPassport");
   async function confirmMutation(kind: "approve" | "execute") {
     setConfirmation(null);
-    if (!plan) return;
+    if (!plan || plan.status === "EVIDENCE_CHANGED" || evidenceFailure) return;
     await run(
       kind === "approve"
         ? "Requesting approval…"
@@ -501,6 +567,7 @@ export default function CoreWorkspace({
                           value={projectId}
                           onChange={(e) => {
                             setProjectId(e.target.value);
+                            setSampleReplacement("");
                             setCandidates(null);
                             setCandidateCursor(null);
                             setRootIssueKey("");
@@ -579,6 +646,7 @@ export default function CoreWorkspace({
                             }
                             onChange={(e) => {
                               setRootIssueKey(e.target.value);
+                              setSampleReplacement("");
                               clearSnapshot();
                             }}
                           >
@@ -626,6 +694,7 @@ export default function CoreWorkspace({
                           value={rootIssueKey}
                           placeholder="ABC-123"
                           onChange={(e) => {
+                            setSampleReplacement("");
                             setRootIssueKey(
                               e.target.value.toUpperCase().trim(),
                             );
@@ -642,56 +711,35 @@ export default function CoreWorkspace({
                           !allowed("getEvidenceGraph")
                         }
                         onClick={() =>
-                          run("Reading Jira snapshot…", async (signal) => {
-                            requireOperation("getGraphSnapshot");
-                            requireOperation("getEvidenceGraph");
-                            clearSnapshot();
-                            const selectedProject = projects.find(
-                              (project) => project.id === projectId,
-                            );
-                            if (
-                              !selectedProject ||
-                              !rootIssueKey.startsWith(
-                                `${selectedProject.key}-`,
-                              )
-                            )
-                              throw new CoreClientError(
-                                "VALIDATION",
-                                "Choose an issue from the selected Jira project, or select its project first.",
-                              );
-                            const created = await client.request(
-                              "getGraphSnapshot",
-                              {
-                                projectId,
-                                rootIssueKey,
-                                source: "JIRA",
-                                maxDepth: 3,
-                              },
-                              signal,
-                            );
-                            const graph = await client.request(
-                              "getEvidenceGraph",
-                              { snapshotId: created.snapshotId },
-                              signal,
-                            );
-                            if (
-                              !graph.nodes.some(
-                                (n) => n.id === `issue:${rootIssueKey}`,
-                              )
-                            )
-                              throw new CoreClientError(
-                                "INVALID_RESPONSE",
-                                "Root issue is absent from the graph.",
-                              );
-                            setSnapshot(graph);
-                            go("Evidence Graph");
-                          })
+                          run("Reading Jira snapshot…", (signal) =>
+                            readSnapshot(signal),
+                          )
                         }
                       >
                         Read evidence snapshot
                       </button>
                     </fieldset>
                   </section>
+                  <SampleProjectSetup
+                    key={projectId}
+                    client={client}
+                    projectKey={
+                      projects.find((p) => p.id === projectId)?.key ?? ""
+                    }
+                    canPreview={allowed("previewSampleProject")}
+                    canCreate={
+                      allowed("createSampleProject") && writesAvailable
+                    }
+                    disabled={!!operationBusy}
+                    onBusyChange={setSampleBusy}
+                    onAnalyze={(root, replacementKey) => {
+                      setRootIssueKey(root);
+                      setSampleReplacement(replacementKey ?? "");
+                      void run("Reading Jira sample snapshot…", (signal) =>
+                        readSnapshot(signal, root, replacementKey ?? ""),
+                      );
+                    }}
+                  />
                   <section className="panel">
                     <h2>Recover an existing plan</h2>
                     <p>
@@ -750,6 +798,7 @@ export default function CoreWorkspace({
                             );
                           }
                           setRootIssueKey(report.change.issueKey ?? "");
+                          setSampleReplacement("");
                           setComparison(report.comparison);
                           setScenarioId(report.plan.scenarioId);
                           setReplacement("");
@@ -1007,11 +1056,89 @@ export default function CoreWorkspace({
                       <p>
                         Plan hash: {plan.planHash} · status {plan.status}
                       </p>
+                      {(plan.status === "EVIDENCE_CHANGED" ||
+                        evidenceFailure) && (
+                        <section role="alert" className="panel">
+                          <h3>Evidence changed — this plan cannot execute</h3>
+                          <p>
+                            {evidenceFailure?.message ??
+                              passport?.timeline
+                                .filter((entry) =>
+                                  entry.event.startsWith("Evidence changed"),
+                                )
+                                .slice(-1)[0]?.event ??
+                              "The backend marked this plan EVIDENCE_CHANGED. Rebuild the snapshot, compare again and review a new plan. Re-approval and retry of this plan are unavailable."}
+                          </p>
+                          {evidenceFailure && (
+                            <EvidenceChangeDetails
+                              details={evidenceFailure.details}
+                            />
+                          )}
+                          <button
+                            disabled={!!busy}
+                            onClick={() => {
+                              clearSnapshot();
+                              go("Mission Control");
+                            }}
+                          >
+                            Rebuild snapshot
+                          </button>
+                        </section>
+                      )}
                       <p>
                         Execution applies all actions recorded in backend
                         approvals, including prior approved selections. No
                         action executes on navigation or approval.
                       </p>
+                      {allowed("checkPlanFreshness") && (
+                        <>
+                          <button
+                            disabled={
+                              !!busy ||
+                              expired ||
+                              plan.status === "EVIDENCE_CHANGED" ||
+                              !!evidenceFailure
+                            }
+                            onClick={() =>
+                              void run(
+                                "Checking live Jira evidence…",
+                                async (signal) => {
+                                  const drift = await client.request(
+                                    "checkPlanFreshness",
+                                    { planId: plan.planId },
+                                    signal,
+                                  );
+                                  if (drift.snapshotId !== plan.snapshotId)
+                                    throw new CoreClientError(
+                                      "INVALID_RESPONSE",
+                                      "Freshness result belongs to another snapshot.",
+                                    );
+                                  if (!drift.fresh) {
+                                    setEvidenceFailure({
+                                      code: "EVIDENCE_CHANGED",
+                                      message: drift.reason,
+                                      details: drift,
+                                      retryable: false,
+                                      mutation: false,
+                                    });
+                                    setSelected([]);
+                                  }
+                                  setNotice(
+                                    `${drift.fresh ? "FRESH" : "CHANGED"} at ${drift.checkedAt}. ${drift.reason} Approval and execution revalidate on the server.`,
+                                  );
+                                },
+                              )
+                            }
+                          >
+                            Check evidence freshness
+                          </button>
+                          <p>
+                            Read-only check within the snapshot crawl limits. It
+                            does not approve this plan or guarantee later
+                            execution.
+                          </p>
+                        </>
+                      )}
                       {plan.actions.map((a) => (
                         <article className="action" key={a.actionId}>
                           <input
@@ -1078,6 +1205,8 @@ export default function CoreWorkspace({
                           !selected.length ||
                           approvalUncertain ||
                           attempted ||
+                          plan.status === "EVIDENCE_CHANGED" ||
+                          !!evidenceFailure ||
                           !writesAvailable ||
                           !allowed("approvePlan") ||
                           !allowed("getExecutionStatus") ||
@@ -1097,12 +1226,14 @@ export default function CoreWorkspace({
                         Backend-approved action IDs:{" "}
                         {[...approvedIds].join(", ") || "None verified"}
                       </p>
-                      {(approvalUncertain || attempted) && (
-                        <p role="status">
-                          A mutation was requested. Refresh status and audit
-                          before further decisions. No automatic resubmission.
-                        </p>
-                      )}
+                      {(approvalUncertain || attempted) &&
+                        plan.status !== "EVIDENCE_CHANGED" &&
+                        !evidenceFailure && (
+                          <p role="status">
+                            A mutation was requested. Refresh status and audit
+                            before further decisions. No automatic resubmission.
+                          </p>
+                        )}
                       <button
                         disabled={
                           !!busy ||
@@ -1135,9 +1266,10 @@ export default function CoreWorkspace({
                           <h3>Execution records</h3>
                           {!records.length && (
                             <p>
-                              No execution records returned. Absence is not
-                              proof that an outstanding request has stopped; no
-                              automatic retry is offered.
+                              {plan.status === "EVIDENCE_CHANGED" ||
+                              evidenceFailure
+                                ? "No execution records returned. Evidence changed; this plan is blocked. Rebuild the snapshot and review a new plan."
+                                : "No execution records returned. Absence is not proof that an outstanding request has stopped; no automatic retry is offered."}
                             </p>
                           )}
                           {records.map((r) => (
@@ -1195,6 +1327,17 @@ export default function CoreWorkspace({
                         {passport.plan?.scenarioId}
                       </p>
                       <p>{passport.change.description}</p>
+                      <p>
+                        Plan status:{" "}
+                        {passport.plan?.status ?? "No plan supplied"}
+                      </p>
+                      {passport.plan?.status === "EVIDENCE_CHANGED" && (
+                        <p role="alert">
+                          Evidence changed since this plan was built. Prior
+                          approvals do not authorize execution; rebuild the
+                          snapshot and review a new plan.
+                        </p>
+                      )}
                       <h3>Comparisons</h3>
                       {passport.comparison.results.map((r) => (
                         <p key={r.scenarioId}>
@@ -1270,8 +1413,10 @@ export default function CoreWorkspace({
                   </p>
                   <p>
                     Host theme follows Atlassian. Production accepts LIVE
-                    envelopes only; demo data and manual credentials are
-                    unavailable.
+                    envelopes only. Local fixtures and manual credentials are
+                    unavailable. Labelled sample tickets can be created in Jira
+                    only after preview and explicit confirmation, when supported
+                    by CORE.
                   </p>
                   <button disabled={!!busy} onClick={resource.retry}>
                     Refresh capabilities
