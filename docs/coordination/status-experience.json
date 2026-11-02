@@ -2,7 +2,7 @@
   "workstream": "EXPERIENCE",
   "branch": "feat/product-experience",
   "revisionBase": "4c68d90fc0990b751cb7bfa7dc6d0f2a77f60c12",
-  "revisionScope": "Runtime unchanged from 4c68d90; CORE reports merged through 745fe69, including clean-site production installation",
+  "revisionScope": "Frontend baseline 4c68d90 unchanged; CORE Rovo caller-identity fix 1225a72 merged through 41c6c59",
   "contractVersion": "0.2.0",
   "status": "VERIFIED_LOCAL_READY_FOR_HOSTED_VALIDATION",
   "tests": {
@@ -10,7 +10,7 @@
     "browser": 51,
     "coreScreenThemeViewportCases": 42,
     "prototypeScreenThemeViewportCases": 42,
-    "core": 18,
+    "core": 19,
     "contracts": 3,
     "simulation": 8,
     "typecheck": "PASS",
@@ -21,11 +21,11 @@
   "forgeVerification": "CORE_REPORTED_PRODUCTION_2.1.0_CLEAN_SITE_INSTALL_AND_EMPTY_STATE; NOT_INDEPENDENTLY_VERIFIED_BY_EXPERIENCE",
   "evidenceMode": "MOCK_TRANSPORT/LOCAL only; no real Jira action performed",
   "next": [
-    "Authenticated hosted journey beyond empty state remains outside independent EXPERIENCE evidence",
-    "CORE owns final public policy accuracy and dependency risk decisions; frontend triage documents unresolved advisory and pinned transitive version",
-    "External Rovo MCP client verification remains pending; workflow validator remains deferred"
+    "Independent hosted frontend journey still requires working authenticated browser control",
+    "CORE owns policy accuracy and dependency release decisions; advisory remediation remains open",
+    "Workflow validator remains deferred"
   ],
-  "coreRef": "6356a28",
+  "coreRef": "1225a72",
   "deploymentRequest": {
     "status": "DEPLOYED_REPORTED_BY_CORE",
     "executor": "CORE",
@@ -122,5 +122,12 @@
     "documentation": "docs/submission/INSTALL_LINK.md",
     "publisherSupportPrivacyOwner": "CORE (explicit requester delegation)",
     "independentlyVerifiedByExperience": false
+  },
+  "latestCoreReport": {
+    "commit": "41c6c59",
+    "developmentVersion": "4.9.0",
+    "productionVersion": "2.2.0",
+    "scope": "External MCP graph/simulation/Passport through CORE connector; not independently verified by EXPERIENCE",
+    "sourceCommitReported": "1225a72 caller identity fix; full deployed tree SHA not supplied"
   }
 }
