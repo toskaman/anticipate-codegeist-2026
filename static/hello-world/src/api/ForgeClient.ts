@@ -1,6 +1,7 @@
 import {
   capabilitiesSchema,
   planSchema,
+  passportSchema,
   executionSchema,
   mutationInputSchema,
   projectSchema,
@@ -140,7 +141,9 @@ export class ForgeClient implements AnticipateClient {
         : operation === "executeApprovedPlan" ||
             operation === "getExecutionStatus"
           ? executionSchema
-          : null;
+          : operation === "getPreventionPassport"
+            ? passportSchema
+            : null;
     if (schema) {
       const validated = schema.safeParse(payload);
       if (!validated.success)

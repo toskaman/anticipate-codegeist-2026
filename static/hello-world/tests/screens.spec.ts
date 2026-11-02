@@ -39,6 +39,11 @@ for (const width of [1440, 1024, 390])
           results.violations,
           `${theme} ${name}: ${JSON.stringify(results.violations.map((v) => ({ id: v.id, nodes: v.nodes.map((n) => n.target) })))}`,
         ).toEqual([]);
+        await page
+          .locator("#main")
+          .evaluate((element) =>
+            (element as HTMLElement).focus({ preventScroll: true }),
+          );
         await page.screenshot({
           path: `../../evidence/${name.toLowerCase().replaceAll(" ", "-")}-${theme}-${width}.png`,
           fullPage: true,

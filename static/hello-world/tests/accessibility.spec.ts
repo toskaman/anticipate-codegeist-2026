@@ -35,7 +35,7 @@ test("history, keyboard dialog and reset on plan page", async ({ page }) => {
     page.getByRole("button", { name: "Reset demo", exact: true }),
   ).toBeFocused();
   await expect(
-    page.getByRole("button", { name: "Simulate execution" }),
+    page.getByRole("button", { name: "Execute backend-approved actions" }),
   ).toBeDisabled();
 });
 test("malformed URL recovers and Forge mode reports unavailable", async ({

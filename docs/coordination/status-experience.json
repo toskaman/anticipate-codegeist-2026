@@ -1,8 +1,8 @@
 {
   "workstream": "EXPERIENCE",
   "branch": "feat/product-experience",
-  "revisionBase": "c508eca",
-  "revisionScope": "working tree: action-level review and official requirements log",
+  "revisionBase": "a1bdb38",
+  "revisionScope": "working tree: main Plan/Passport v2 migration",
   "contractVersion": "frontend-proposal-v2 — TEMPORARY, not CORE approved",
   "status": "VERIFIED_LOCAL",
   "screens": {
@@ -10,7 +10,7 @@
     "production": "Forge capability and access onboarding; no fixture fallback"
   },
   "tests": {
-    "unit": 28,
+    "unit": 31,
     "browser": 18,
     "lint": "PASS",
     "typecheck": "PASS",
@@ -34,15 +34,14 @@
   ],
   "evidenceMode": "LOCAL/MOCK only; no VERIFIED_FORGE evidence",
   "limitations": [
-    "Legacy development harness still uses ExperienceAdapter and authored scenario results; not the completed v2 FixtureClient mapping",
-    "Live action approval/execution UI awaits shared schemas",
-    "Transport cancellation stops observation, not server-side writes",
-    "Production full-page routing, CSP, host theming and authentication are not verified in Forge",
-    "ActionReview is development-showcase tested and not yet replacing the legacy Plan page; shared client migration is incomplete"
+    "Legacy development graph/dashboard/scenario read projections still use ExperienceAdapter; shared-client consolidation remains incomplete",
+    "CORE schemas and resolver bindings remain unpublished",
+    "Hosted routing, CSP, host theming and authenticated Jira actions remain unverified",
+    "Fixture comparisons remain authored results, not CORE simulator output"
   ],
   "next": [
-    "Migrate main Plan screen from legacy workflow to ActionReview without simulated live success",
-    "Complete shared client mapping and reviewed CORE schemas",
-    "Research product positioning and measure representative graphs"
+    "Consolidate legacy read adapters behind AnticipateClient",
+    "Integrate published shared contracts and actual per-action outcomes when CORE is ready",
+    "Complete representative graph/performance/research and jury evidence"
   ]
 }

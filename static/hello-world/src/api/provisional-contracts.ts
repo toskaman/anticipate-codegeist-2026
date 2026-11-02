@@ -105,3 +105,29 @@ export const mutationInputSchema = z.object({
   version: z.number().int().positive(),
   actionIds: z.array(z.string().min(1)).min(1),
 });
+
+export const passportSchema = z.object({
+  mode: z.enum(["fixture", "forge"]),
+  disclosure: z.string().min(1),
+  change: z.string().min(1),
+  snapshot: z.string().min(1),
+  createdAt: z.string().datetime(),
+  selectedScenario: z.enum(["A", "B", "C"]),
+  comparedScenarios: z.unknown(),
+  affectedDependencies: z.array(
+    z.object({
+      id: z.string(),
+      label: z.string(),
+      evidence: z.enum(["CONFIRMED", "INFERRED", "UNKNOWN"]),
+      source: z.string(),
+      detail: z.string(),
+    }),
+  ),
+  mitigations: z.array(z.string()),
+  violatedPolicies: z.number().int().nonnegative(),
+  uncertainty: z.array(z.string()),
+  approvalTimeline: z.array(
+    z.object({ event: z.string(), at: z.string().datetime() }),
+  ),
+  execution: z.string(),
+});

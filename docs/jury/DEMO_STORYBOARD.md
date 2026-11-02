@@ -1,9 +1,11 @@
-# Three-minute demonstration
+# Current truthful three-minute demonstration
 
-0:00–0:20: ANTICIPATE is the decision firewall for software teams. Test consequences before shipping a breaking change.
-0:20–1:00: Open AUTH-142 evidence. Show checkout and mobile dependencies, then explicitly UNKNOWN support ownership.
-1:00–1:45: Compare immediate API removal with gradual migration. Zero fixture violations does not remove uncertainty or approval requirements.
-1:45–2:30: Review the plan, record local approval and simulate execution. State that no Jira changes occur.
-2:30–3:00: Export the Prevention Passport showing evidence, uncertainty and a local timeline.
+Mode: LOCAL/MOCK. Not a Forge-hosted or jury-installation proof.
 
-Implemented locally: seven screens, graph, deterministic scenario comparison, local workflow and JSON export. Awaiting backend: live Jira/Confluence, Forge capability contracts, AI, enforcement and execution. No functionality has been verified against live services. Further presentation copy, full screenshots and roadmap remain to be completed.
+0:00–0:20: Explain the risk of removing authentication API v1 and introduce AUTH-142 as fictional.
+0:20–1:00: Explore fixture dependency evidence, confirmed consumers and UNKNOWN support ownership.
+1:00–1:45: Compare the three authored alternatives. Explain that results are fixture-driven, not outputs of the future CORE simulator.
+1:45–2:25: Open Prevention Plan, review individual action requirements, select one and request approval. Show the explicit requires-live-backend outcome. No approval or execution success is fabricated.
+2:25–3:00: Open and export Passport. Show remaining unknowns and the absence of authenticated approval/verified execution.
+
+For a final live jury video, replace the local segments only after CORE provides verified Forge/Jira operations, a judge installation link and a tested launch path. Record actual approval and verified outcomes, including failure if that is the observed result. Do not publish or submit without authorization. See PRESENTATION.md and ../ux/verified-requirements.md for copy and official constraints.

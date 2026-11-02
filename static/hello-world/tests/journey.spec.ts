@@ -38,9 +38,22 @@ test("complete local demo journey without external mutations", async ({
     .getByRole("navigation")
     .getByRole("button", { name: "Prevention Plan", exact: true })
     .click();
-  await page.getByRole("button", { name: "Approve local demo plan" }).click();
+  await page
+    .getByRole("checkbox", { name: "Select Verify support consumer inventory" })
+    .check();
+  await page
+    .getByRole("button", {
+      name: "Request approval for selected actions",
+      exact: true,
+    })
+    .click();
   await page.getByRole("button", { name: "Confirm", exact: true }).click();
-  await page.getByRole("button", { name: "Simulate execution" }).click();
+  await expect(page.getByRole("status")).toContainText(
+    "Requires live authenticated backend",
+  );
+  await expect(
+    page.getByRole("button", { name: "Execute backend-approved actions" }),
+  ).toBeDisabled();
   await page.getByRole("button", { name: "Open Prevention Passport" }).click();
   await expect(
     page.getByRole("heading", { name: "AUTH-142", exact: true }),
@@ -57,10 +70,10 @@ test("complete local demo journey without external mutations", async ({
   expect(report.selectedScenario).toBe("C");
   expect(report.affectedDependencies).toHaveLength(5);
   expect(report.uncertainty).toContain("Support usage unknown");
-  expect(report.execution).toBe("Simulated complete");
+  expect(report.execution).toBe("Requires live authenticated backend");
   expect(
     report.approvalTimeline.map((item: { event: string }) => item.event),
-  ).toEqual(["Local demo approval", "Simulated execution complete"]);
+  ).toEqual([]);
   expect(mutations).toEqual([]);
 });
 for (const width of [1440, 1024, 390])

@@ -10,9 +10,9 @@ Run npm run typecheck, npm run lint, npm run format:check, npm test, npm run tes
 
 ## Architecture and trust
 
-App.tsx composes screens and local state. domain.ts holds temporary frontend types, deterministic fixtures and the pure workflow transition. adapters.ts defines provisional async operations and unavailable Forge operations. schemas.ts validates evidence, scenario comparisons, projects and capability payloads. useResource.ts ignores obsolete responses after dependency changes/unmount. Graph.tsx lazily loads React Flow and offers a keyboard-accessible list alternative. ConfirmDialog.tsx handles modal keyboard focus and restoration. ErrorBoundary.tsx provides reload/navigation recovery for render failures.
+App.tsx composes screens and local state. domain.ts holds temporary frontend types and authored fixtures; legacy pure workflow helpers remain pending consolidation, but main screens do not call their simulated mutations. adapters.ts defines provisional async operations and unavailable Forge operations. schemas.ts validates evidence, scenario comparisons, projects and capability payloads. useResource.ts ignores obsolete responses after dependency changes/unmount. Graph.tsx lazily loads React Flow and offers a keyboard-accessible list alternative. ActionReview.tsx handles selected actions and explicit backend confirmations. PassportView.tsx validates reports and exports the displayed client payload. ConfirmDialog.tsx handles modal keyboard focus and restoration. ErrorBoundary.tsx provides reload/navigation recovery for render failures.
 
-The local workflow lives in memory and resets on page reload. Theme preference alone persists in localStorage. Fictional evidence references describe authored fixtures, not verified source files. A local approval is not server authorization. Unknown support usage remains unknown after simulated execution. All render text uses React escaping; no raw HTML rendering is used. Demo mode never calls Jira/Confluence and requires no secrets.
+The local workflow lives in memory and resets on page reload. Theme preference alone persists in localStorage. Fictional evidence references describe authored fixtures, not verified source files. Fixture approval requests are rejected as requiring a live backend. No simulated approval/execution success remains in the main UI; unknown support usage remains unknown. All render text uses React escaping; no raw HTML rendering is used. Demo mode never calls Jira/Confluence and requires no secrets.
 
 ## Integration and ownership
 
@@ -20,8 +20,9 @@ EXPERIENCE owns static/hello-world and frontend documentation; CORE owns backend
 
 ## Limitations and source preservation
 
-The template's original App.jsx is preserved but unused; index.jsx explicitly imports App.tsx. Do not restore the template's automatic bridge call into demo startup. No AI inference or backend simulation runs. Scenarios are authored fixtures, and custom parameters are unavailable. Dependency audits include the retained bridge; review actual reports before integration. The current work has no remote push or PR. See STATUS.md for remaining verification and known limitations.
+The template's original App.jsx is preserved but unused; index.jsx loads App.tsx only in development and ForgeApp.tsx for production. Do not restore the template's automatic bridge call into demo startup. No AI inference or backend simulation runs. Scenarios are authored fixtures, and custom parameters are unavailable. Dependency audits include the retained bridge; review actual reports before integration. The current work has no remote push or PR. See STATUS.md for remaining verification and known limitations.
 
 ## V2 production boundary
 
 npm start serves the development-only fixture prototype on port 3000. npm run build produces the Forge production access/capability interface, which has no fixture fallback. npm run preview -- --host 127.0.0.1 --port 3001 previews that build locally; it intentionally reports PENDING_BACKEND until reviewed CORE resolver bindings are configured. npm run test:browser builds first and tests both development and production servers. Host theming is implemented but requires Forge-hosted verification. See coordination/frontend-integration-requests.md for the exact backend dependency list.
+

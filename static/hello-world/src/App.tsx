@@ -13,16 +13,15 @@ import {
   Moon,
   RotateCcw,
 } from "lucide-react";
-import {
-  actionDetails,
-  initialWorkflow,
-  passport,
-  type ScenarioId,
-} from "./domain";
+import { type ScenarioId } from "./domain";
 import "./style.css";
 import ConfirmDialog from "./ConfirmDialog";
 import { usePage } from "./usePage";
-import { localAdapter, loadExperience } from "./adapters";
+import { loadExperience } from "./adapters";
+import ActionReview from "./ActionReview";
+import PassportView from "./PassportView";
+import { FixtureClient } from "./api/FixtureClient";
+const fixtureClient = new FixtureClient();
 import { useResource } from "./useResource";
 const loadLocalExperience = () => loadExperience();
 const Graph = lazy(() => import("./Graph"));
@@ -53,9 +52,9 @@ export default function App() {
     localStorage.getItem("anticipate-theme") || "dark",
   );
   const [scenario, setScenario] = useState<ScenarioId>("C");
-  const [workflow, setWorkflow] = useState(initialWorkflow);
+  const [resetVersion, setResetVersion] = useState(0);
   const [compare, setCompare] = useState(true);
-  const [confirm, setConfirm] = useState<"reset" | "approve" | null>(null);
+  const [confirm, setConfirm] = useState<"reset" | null>(null);
   const [mode, setMode] = useState("demo");
   const [notice, setNotice] = useState("");
   const resource = useResource(loadLocalExperience);
@@ -81,24 +80,12 @@ export default function App() {
         </main>
       </div>
     );
-  const { services, scenarios, actions } = resource.data;
+  const { scenarios } = resource.data;
   const result = scenarios[scenario];
   function go(next: string) {
     setPage(next);
     location.hash = encodeURIComponent(next);
     document.getElementById("main")?.focus();
-  }
-  function exportReport() {
-    const url = URL.createObjectURL(
-      new Blob([JSON.stringify(passport(scenario, workflow), null, 2)], {
-        type: "application/json",
-      }),
-    );
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "ANTICIPATE-DEMO-passport.json";
-    a.click();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
   return (
     <div className="app" data-theme={theme}>
@@ -289,12 +276,7 @@ export default function App() {
                           className="list-row"
                           key={id}
                           onClick={() => {
-                            if (!workflow.approved)
-                              setScenario(id as ScenarioId);
-                            else
-                              setNotice(
-                                "Reset the demo before changing an approved scenario.",
-                              );
+                            setScenario(id as ScenarioId);
                             go("Scenario Lab");
                           }}
                         >
@@ -307,13 +289,7 @@ export default function App() {
                     </section>
                     <section className="panel">
                       <h2>Prevention readiness</h2>
-                      <p>
-                        {workflow.executed
-                          ? "Local simulated execution complete"
-                          : workflow.approved
-                            ? "Local demo approval recorded"
-                            : "Awaiting local review"}
-                      </p>
+                      <p>Requires live authenticated backend</p>
                       <p className="muted">
                         Jira, Confluence, Forge and AI: pending backend
                         integration.
@@ -363,12 +339,6 @@ export default function App() {
                             aria-pressed={scenario === id}
                             key={id}
                             onClick={() => {
-                              if (workflow.approved) {
-                                setNotice(
-                                  "Reset the demo before changing an approved scenario.",
-                                );
-                                return;
-                              }
                               setScenario(id as ScenarioId);
                             }}
                           >
@@ -391,7 +361,6 @@ export default function App() {
                       Selected scenario{" "}
                       <select
                         value={scenario}
-                        disabled={workflow.approved}
                         onChange={(e) =>
                           setScenario(e.target.value as ScenarioId)
                         }
@@ -471,7 +440,7 @@ export default function App() {
                     ],
                     [
                       "Required approval",
-                      workflow.approved ? "LOCAL DEMO APPROVED" : "REQUIRED",
+                      "REQUIRED",
                       "Service owner review; no real approval implied",
                     ],
                   ].map(([title, status, why]) => (
@@ -492,140 +461,46 @@ export default function App() {
                 </section>
               )}
               {page === "Prevention Plan" && (
-                <section className="panel">
-                  <h2>Safeguards before rollout</h2>
-                  <p>
-                    Scenario {scenario} · {result.name}. Demo approval does not
-                    resolve real evidence gaps.
-                  </p>
-                  {actionDetails.map((a, i) => (
-                    <article className="action" key={a.title}>
-                      <span className="step">0{i + 1}</span>
-                      <div>
-                        <h3>{a.title}</h3>
-                        <p>{a.description}</p>
-                        <p>Reason: {a.reason}</p>
-                        <small>
-                          Target: {a.target} · Priority: {a.priority} ·
-                          Approval: owner required
-                        </small>
-                        <p className="muted">
-                          Evidence:{" "}
-                          {a.evidenceIds
-                            .map(
-                              (id) =>
-                                services.find((service) => service.id === id)
-                                  ?.source,
-                            )
-                            .join("; ")}{" "}
-                          · Expected: {a.outcome} · Verification:{" "}
-                          {workflow.executed ? "simulated only" : "pending"}
-                        </p>
-                      </div>
-                    </article>
-                  ))}
-                  <p className="warning-text">
-                    Demo simulation — no Jira changes will be made.
-                  </p>
-                  <button
-                    className="primary"
-                    disabled={workflow.approved || scenario !== "C"}
-                    onClick={() => setConfirm("approve")}
-                  >
-                    Approve local demo plan
-                  </button>
-                  <button
-                    disabled={!workflow.approved || workflow.executed}
-                    onClick={() => {
-                      localAdapter
-                        .executeApprovedPlan({ scenario, actions, workflow })
-                        .then((plan) => {
-                          setWorkflow(plan.workflow);
-                          setNotice(
-                            "Simulated execution complete. No external actions were performed.",
-                          );
-                        })
-                        .catch((error) => setNotice(error.message));
-                    }}
-                  >
-                    Simulate execution
-                  </button>
-                  <button onClick={() => go("Prevention Passport")}>
-                    Open Prevention Passport ↗
-                  </button>
-                  {scenario !== "C" && (
+                <>
+                  <section className="panel">
+                    <h2>Safeguards before rollout</h2>
                     <p>
-                      Select guarded scenario C before approving this fixture
-                      plan.
+                      Scenario {scenario} · {result.name}. Authenticated
+                      approval and verified execution require the live backend.
                     </p>
+                    <button onClick={() => go("Prevention Passport")}>
+                      Open Prevention Passport ↗
+                    </button>
+                  </section>
+                  {scenario === "C" ? (
+                    <ActionReview
+                      key={resetVersion}
+                      client={fixtureClient}
+                      snapshotId={resource.data.snapshot.id}
+                    />
+                  ) : (
+                    <section className="panel">
+                      <h2>No authored plan for this alternative</h2>
+                      <p>
+                        Review blockers and select guarded scenario C to inspect
+                        its fixture prevention plan. No plan is fabricated for
+                        unsupported alternatives.
+                      </p>
+                      <button onClick={() => go("Scenario Lab")}>
+                        Compare alternatives
+                      </button>
+                    </section>
                   )}
-                </section>
+                </>
               )}
               {page === "Prevention Passport" && (
-                <section className="panel passport">
-                  <div className="section-heading">
-                    <div>
-                      <span className="eyebrow">
-                        PREVENTION PASSPORT / DEMO
-                      </span>
-                      <h2>AUTH-142</h2>
-                    </div>
-                    <ShieldCheck size={48} />
-                  </div>
-                  <p>Remove legacy authentication API v1</p>
-                  <p>
-                    Snapshot: demo-auth-v1-2026-11-02 · Created:{" "}
-                    {new Date().toLocaleDateString()}
-                  </p>
-                  <h3>Decision record</h3>
-                  <p>
-                    Selected scenario {scenario}: {result.name}. Compared A, B
-                    and C.
-                  </p>
-                  <p>
-                    {result.violations} fixture policy violations.{" "}
-                    {workflow.executed
-                      ? "Simulated execution complete."
-                      : "Execution not performed."}
-                  </p>
-                  <h3>Dependencies & evidence</h3>
-                  {services.map((s) => (
-                    <p key={s.id}>
-                      {s.label} · {s.evidence} · {s.source}
-                    </p>
-                  ))}
-                  <h3>Mitigations</h3>
-                  {result.mitigations.map((m) => (
-                    <p key={m}>→ {m}</p>
-                  ))}
-                  <h3>Remaining uncertainty</h3>
-                  {result.blockers.map((b) => (
-                    <p key={b}>{b}</p>
-                  ))}
-                  <h3>Approval timeline</h3>
-                  {workflow.timeline.length ? (
-                    workflow.timeline.map((t) => (
-                      <p key={t.event}>
-                        {t.event} · {t.at}
-                      </p>
-                    ))
-                  ) : (
-                    <p>No local approval recorded.</p>
-                  )}
-                  <p>
-                    <strong>
-                      Fictional demo report. No certification, signature, or
-                      real-world verification.
-                    </strong>
-                  </p>
-                  <button className="primary" onClick={exportReport}>
-                    Export demo JSON
-                  </button>
-                  <button onClick={() => window.print()}>
-                    Print report / PDF
-                  </button>
-                </section>
-              )}
+                <PassportView
+                  key={resetVersion}
+                  client={fixtureClient}
+                  snapshotId={resource.data.snapshot.id}
+                  scenarioId={scenario}
+                />
+              )}{" "}
               {page === "Settings" && (
                 <>
                   <section className="panel">
@@ -682,23 +557,13 @@ export default function App() {
       </div>
       {confirm && (
         <ConfirmDialog
-          title={
-            confirm === "approve"
-              ? "Approve this local simulation?"
-              : "Reset the demo session?"
-          }
+          title="Reset the demo session?"
           onCancel={() => setConfirm(null)}
           onConfirm={() => {
-            if (confirm === "approve")
-              localAdapter
-                .approvePreventionPlan({ scenario, actions, workflow })
-                .then((plan) => setWorkflow(plan.workflow))
-                .catch((error) => setNotice(error.message));
-            else {
-              setWorkflow(initialWorkflow());
-              setScenario("C");
-              setMode("demo");
-            }
+            setResetVersion((version) => version + 1);
+            setScenario("C");
+            setMode("demo");
+            setNotice("");
             setConfirm(null);
           }}
         />

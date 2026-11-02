@@ -1,6 +1,7 @@
 import {
   ClientError,
   planSchema,
+  passportSchema,
   type AnticipateClient,
   type Operation,
 } from "./provisional-contracts";
@@ -21,6 +22,7 @@ export class FixtureClient implements AnticipateClient {
         "getCapabilities",
         "getProjects",
         "generatePreventionPlan",
+        "getPreventionPassport",
       ] as Operation[],
       integrations: [],
       launchUrl: null,
@@ -34,9 +36,25 @@ export class FixtureClient implements AnticipateClient {
   }
   async request(
     operation: Exclude<Operation, "getCapabilities" | "getProjects">,
-    _input: Record<string, unknown>,
+    input: Record<string, unknown>,
   ) {
     this.check();
+    if (input.snapshotId && input.snapshotId !== "demo-auth-v1-2026-11-02")
+      throw new ClientError(
+        "SNAPSHOT_EXPIRED",
+        "Fixture snapshot does not match the active evidence",
+      );
+    if (operation === "getPreventionPassport") {
+      const { passport, initialWorkflow, scenarioSchema } =
+        await import("../domain");
+      const scenario = scenarioSchema.parse(input.scenarioId);
+      return passportSchema.parse({
+        ...passport(scenario, initialWorkflow()),
+        mode: "fixture",
+        execution: "Requires live authenticated backend",
+        approvalTimeline: [],
+      });
+    }
     if (operation === "generatePreventionPlan") {
       const { actionDetails, services } = await import("../domain");
       return planSchema.parse({
