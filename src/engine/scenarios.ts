@@ -12,3 +12,16 @@ export function standardScenarios(targetNodeId: string, replacementNodeId?: stri
   ] });
   return s;
 }
+
+/** Dependency upgrade counterfactuals: breaking upgrade now, compatible upgrade (shim), or migrate consumers first. */
+export function upgradeScenarios(targetNodeId: string, replacementNodeId?: string | null): ScenarioDefinition[] {
+  const s: ScenarioDefinition[] = [
+    { scenarioId: 'A-breaking-upgrade-now', label: 'Ship the breaking upgrade now', operations: [{ op: 'UPGRADE_NODE', nodeId: targetNodeId, breaking: true }] },
+    { scenarioId: 'B-compatible-upgrade', label: 'Ship behind a backward-compatible shim', operations: [{ op: 'UPGRADE_NODE', nodeId: targetNodeId, breaking: false }] }
+  ];
+  if (replacementNodeId) s.push({ scenarioId: 'C-migrate-then-upgrade', label: 'Move consumers to the new version first, then upgrade', operations: [
+    { op: 'MIGRATE_DEPENDENTS', fromNodeId: targetNodeId, toNodeId: replacementNodeId, edgeKinds: ['USES', 'DEPENDS_ON'] },
+    { op: 'UPGRADE_NODE', nodeId: targetNodeId, breaking: true }
+  ] });
+  return s;
+}

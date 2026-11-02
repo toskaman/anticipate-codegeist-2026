@@ -4,7 +4,7 @@
  * only after the base app deploys successfully (Rovo MCP is Preview).
  */
 import { createService } from './engine/service';
-import { standardScenarios } from './engine/scenarios';
+import { standardScenarios, upgradeScenarios } from './engine/scenarios';
 import { issueNodeId } from './jira/extractor';
 import type { Deps } from './core/ports';
 import { AppError } from './core/errors';
@@ -43,6 +43,19 @@ export function createRovoActions(deps: (p: ActionPayload) => Deps) {
         ...c.results.map((r) => `- ${r.scenarioId}: ${r.verdict}; impacted ${r.summary.impacted} (${r.summary.direct} direct); blockers ${r.summary.blockers}; unknowns ${r.summary.unknowns}; rules ${r.violations.map((v) => v.ruleId).join(',') || 'none'}`),
         c.recommendedScenarioId ? `Lowest-risk now: ${c.recommendedScenarioId}. ${c.recommendationReason}` : c.recommendationReason,
         'No Jira changes were made. Open ANTICIPATE to review and approve a prevention plan.'].join('\n');
+    }),
+    simulateUpgrade: safe(async (p, actx) => {
+      if (!p.issueKey || !KEY.test(p.issueKey)) throw new AppError('VALIDATION', 'issueKey must look like ABC-123');
+      const svc = createService(deps(p));
+      const ctx = ctxOf(p, actx);
+      const g = await svc.getGraphSnapshot(ctx, { projectId: p.issueKey.split('-')[0]!, rootIssueKey: p.issueKey, source: 'JIRA', maxDepth: 3 });
+      const repl = p.replacementIssueKey && KEY.test(p.replacementIssueKey) && g.nodes.some((n) => n.id === issueNodeId(p.replacementIssueKey!)) ? issueNodeId(p.replacementIssueKey) : null;
+      const c = await svc.compareScenarios(ctx, { snapshotId: g.snapshotId, change: { issueKey: p.issueKey, targetNodeId: issueNodeId(p.issueKey), description: `Upgrade ${p.issueKey}` },
+        scenarios: upgradeScenarios(issueNodeId(p.issueKey), repl), maxDepth: 6 });
+      return [`Counterfactual comparison for upgrading ${p.issueKey} (deterministic, snapshot ${g.snapshotId}):`,
+        ...c.results.map((r) => `- ${r.scenarioId}: ${r.verdict}; impacted ${r.summary.impacted} (${r.summary.direct} direct); blockers ${r.summary.blockers}; unknowns ${r.summary.unknowns}; rules ${r.violations.map((v) => v.ruleId).join(',') || 'none'}`),
+        c.recommendedScenarioId ? `Lowest-risk now: ${c.recommendedScenarioId}. ${c.recommendationReason}` : c.recommendationReason,
+        'No Jira changes were made.'].join('\n');
     }),
     checkFreshness: safe(async (p, c) => {
       if (!p.planId) throw new AppError('VALIDATION', 'planId is required');

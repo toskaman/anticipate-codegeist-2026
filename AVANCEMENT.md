@@ -88,3 +88,8 @@ Légende : ✅ fait et testé · 🟡 fait, pas encore vérifié sur un vrai Jir
 - Les politiques sont appliquées dans ANTICIPATE seulement (pas encore de validateur de workflow Jira).
 - Le verrou d'exécution n'est pas une transaction distribuée ; la réconciliation par label/commentaire marqueur évite les doublons.
 - `global:fullPage` est en Preview : l'app s'ouvre par URL, pas forcément depuis le menu Apps.
+
+## 2 Nov 2026 (suite)
+- Prod 2.7.0 = main fda93de (UI PR #9). Rovo agent verifie dans Rovo chat. Donnees de demo verifiees sur le site dev (projet MP). Correctif: types de tickets via createmeta. Demande a EXPERIENCE: timeout plus long pour la creation de demo.
+- Validateur de workflow verifie en heberge: projet isole AVT, AVT-1 bloque (HTTP 400, message Decision Firewall), AVT-2 passe.
+- Cas d'usage montee de version (UPGRADE_NODE) + outil MCP/Rovo simulate-upgrade, verifie dans Rovo chat. Brouillon Devpost mis a jour.

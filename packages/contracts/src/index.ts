@@ -114,6 +114,7 @@ export type GraphSnapshot = z.infer<typeof GraphSnapshot>;
 export const ChangeOperation = z.discriminatedUnion('op', [
   z.object({ op: z.literal('REMOVE_NODE'), nodeId: Id }),
   z.object({ op: z.literal('DEPRECATE_NODE'), nodeId: Id, retainUntil: IsoDate.nullable() }),
+  z.object({ op: z.literal('UPGRADE_NODE'), nodeId: Id, breaking: z.boolean() }),
   z.object({ op: z.literal('MIGRATE_DEPENDENTS'), fromNodeId: Id, toNodeId: Id, edgeKinds: z.array(EdgeKind).min(1) })
 ]);
 export type ChangeOperation = z.infer<typeof ChangeOperation>;

@@ -13,7 +13,7 @@ const RANK: Record<EvidenceStatus, number> = { CONFIRMED: 2, INFERRED: 1, UNKNOW
 const weakest = (a: EvidenceStatus, b: EvidenceStatus): EvidenceStatus => (RANK[a] <= RANK[b] ? a : b);
 const SEV_ORDER = { BLOCKER: 0, HIGH: 1, MEDIUM: 2, LOW: 3 } as const;
 
-interface WorkingGraph { attrs: ReadonlyMap<string, Record<string, unknown>>; nodes: ReadonlySet<string>; edges: readonly EvidenceEdge[]; removed: Set<string>; deprecated: Set<string>; }
+interface WorkingGraph { attrs: ReadonlyMap<string, Record<string, unknown>>; nodes: ReadonlySet<string>; edges: readonly EvidenceEdge[]; removed: Set<string>; deprecated: Set<string>; upgraded: Set<string>; }
 
 /** Apply operations to an isolated functional copy of the snapshot. */
 export function applyScenario(snapshot: GraphSnapshot, scenario: ScenarioDefinition): WorkingGraph {
@@ -21,11 +21,14 @@ export function applyScenario(snapshot: GraphSnapshot, scenario: ScenarioDefinit
   let edges: EvidenceEdge[] = snapshot.edges.map((e) => ({ ...e }));
   const removed = new Set<string>();
   const deprecated = new Set<string>();
+  const upgraded = new Set<string>();
   for (const op of scenario.operations) {
     assertNode(nodeIds, op);
     switch (op.op) {
       case 'REMOVE_NODE': removed.add(op.nodeId); break;
       case 'DEPRECATE_NODE': deprecated.add(op.nodeId); break;
+      // Dependency upgrade: only a breaking upgrade propagates to consumers; a compatible one changes no contract.
+      case 'UPGRADE_NODE': if (op.breaking) upgraded.add(op.nodeId); break;
       case 'MIGRATE_DEPENDENTS': {
         const kinds = new Set<string>(op.edgeKinds);
         // Only known (CONFIRMED/INFERRED) dependencies can be migrated; UNKNOWN ones stay attached.
@@ -35,7 +38,7 @@ export function applyScenario(snapshot: GraphSnapshot, scenario: ScenarioDefinit
       }
     }
   }
-  return { attrs: new Map(snapshot.nodes.map((n) => [n.id, { ...n.attributes, __status: n.status, __kind: n.kind }])), nodes: nodeIds, edges, removed, deprecated };
+  return { attrs: new Map(snapshot.nodes.map((n) => [n.id, { ...n.attributes, __status: n.status, __kind: n.kind }])), nodes: nodeIds, edges, removed, deprecated, upgraded };
 }
 
 function assertNode(ids: Set<string>, op: ChangeOperation) {
@@ -124,7 +127,7 @@ export function stableHash(value: unknown): string {
 
 export function simulate(snapshot: GraphSnapshot, scenario: ScenarioDefinition, rules: PolicyRule[], maxDepth = 6): SimulationResult {
   const g = applyScenario(snapshot, scenario);
-  const changed = [...new Set([...g.removed, ...g.deprecated])];
+  const changed = [...new Set([...g.removed, ...g.deprecated, ...g.upgraded])];
   const { impacts, truncated } = computeImpacts(g, changed, maxDepth);
   const violations = evaluatePolicies(g, impacts, rules);
   const unc = uncertainties(g, impacts, truncated);

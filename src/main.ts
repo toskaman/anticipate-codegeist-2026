@@ -32,6 +32,7 @@ import { createRovoActions } from './rovo';
 const rovo = createRovoActions((p) => ({ jira: createForgeJira(p.context?.siteUrl ?? null), store: forgeStore, now, newId }));
 export const rovoGetGraph = rovo.getGraph;
 export const rovoSimulateRetirement = rovo.simulateRetirement;
+export const rovoSimulateUpgrade = rovo.simulateUpgrade;
 export const rovoGetPassport = rovo.getPassport;
 export const rovoCheckFreshness = rovo.checkFreshness;
 
