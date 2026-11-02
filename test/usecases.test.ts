@@ -1,7 +1,7 @@
 import { simulate } from '../packages/simulation-core/src/index';
 import type { GraphSnapshot } from '../packages/contracts/src/index';
 import { DEFAULT_POLICIES } from '../src/engine/policies';
-import { decideTransition } from '../src/validator';
+import { decideTransition, linksDigest, type DecisionRecord } from '../src/validator';
 import { createService } from '../src/engine/service';
 import { demoJira, memoryStore } from './fakes';
 
@@ -38,26 +38,49 @@ describe('use case 2: service / component decommission', () => {
   });
 });
 
-describe('Jira workflow validator (Decision Firewall)', () => {
-  it('ungated issues always pass; gated issues need a COMPLETED plan', () => {
-    expect(decideTransition(['other'], undefined, 'X-1').result).toBe(true);
-    expect(decideTransition(['anticipate-change'], undefined, 'X-1')).toMatchObject({ result: false });
-    expect(decideTransition(['anticipate-change'], { planId: 'p', scenarioId: 'A', status: 'PARTIAL', at: '' }, 'X-1').errorMessage).toMatch(/PARTIAL/);
-    expect(decideTransition(['anticipate-change'], { planId: 'p', scenarioId: 'A', status: 'EVIDENCE_CHANGED', at: '' }, 'X-1').errorMessage).toMatch(/evidence changed/);
-    expect(decideTransition(['anticipate-change'], { planId: 'p', scenarioId: 'A', status: 'COMPLETED', at: '' }, 'X-1').result).toBe(true);
-    expect(decideTransition(null, undefined, 'X-1').result).toBe(true); // unreadable issue → not gated
+describe('Jira workflow validator (Decision Firewall, attestation schema 2)', () => {
+  const gated = (links: { typeName: string; direction: string; otherKey: string }[] = []) => ({ labels: ['anticipate-change'], links });
+  const now = new Date('2026-11-10T00:00:00Z');
+  const att = (o: Record<string, unknown> = {}) => ({ schema: 2 as const, planId: 'p', scenarioId: 'A', status: 'COMPLETED', at: '', issueKey: 'X-1',
+    linksDigest: linksDigest([]), validUntil: '2026-11-20T00:00:00Z', ...o });
+  it('ungated or unreadable issues always pass; gated issues need a valid attestation', () => {
+    expect(decideTransition({ labels: ['other'], links: [] }, undefined, 'X-1', now).result).toBe(true);
+    expect(decideTransition(null, undefined, 'X-1', now).result).toBe(true);
+    expect(decideTransition(gated(), undefined, 'X-1', now)).toMatchObject({ result: false });
+    expect(decideTransition(gated(), att({ status: 'PARTIAL' }), 'X-1', now).errorMessage).toMatch(/PARTIAL/);
+    expect(decideTransition(gated(), att({ status: 'EVIDENCE_CHANGED' }), 'X-1', now).errorMessage).toMatch(/evidence changed/);
+    expect(decideTransition(gated(), att(), 'X-1', now).result).toBe(true);
   });
-  it('a verified execution records the decision the validator reads', async () => {
-    const jira = demoJira(); const store = memoryStore(); let n = 0;
-    const svc = createService({ jira, store, now: () => new Date('2026-11-02T09:00:00Z'), newId: () => `v${++n}` });
+  it('a COMPLETED plan is not permanent authorization', () => {
+    // legacy record without attestation
+    expect(decideTransition(gated(), { planId: 'p', scenarioId: 'A', status: 'COMPLETED', at: '' }, 'X-1', now).errorMessage).toMatch(/before decision attestations/);
+    // expired
+    expect(decideTransition(gated(), att(), 'X-1', new Date('2026-11-21T00:00:00Z')).errorMessage).toMatch(/expired/);
+    // wrong issue
+    expect(decideTransition(gated(), att({ issueKey: 'X-2' }), 'X-1', now).errorMessage).toMatch(/another issue/);
+    // dependency links changed after verification
+    expect(decideTransition(gated([{ typeName: 'Blocks', direction: 'outward', otherKey: 'X-9' }]), att(), 'X-1', now).errorMessage).toMatch(/links changed/);
+    // link order is irrelevant
+    const two = [{ typeName: 'Blocks', direction: 'outward', otherKey: 'A-1' }, { typeName: 'Relates', direction: 'inward', otherKey: 'B-1' }];
+    expect(decideTransition(gated([...two].reverse()), att({ linksDigest: linksDigest(two) }), 'X-1', now).result).toBe(true);
+  });
+  it('verified execution writes an attestation bound to the issue, plan and post-execution links', async () => {
+    const jira = demoJira(); const store = memoryStore(); let n = 0; let t = new Date('2026-11-02T09:00:00Z');
+    const svc = createService({ jira, store, now: () => t, newId: () => `v${++n}` });
     const ctx = { requestId: 'r', accountId: 'u', installationId: 'i' };
     const s = await svc.getGraphSnapshot(ctx, { projectId: 'PAY', rootIssueKey: 'PAY-1', source: 'JIRA', maxDepth: 3 });
     await svc.compareScenarios(ctx, { snapshotId: s.snapshotId, change: { issueKey: 'PAY-1', targetNodeId: 'issue:PAY-1', description: 'x' }, scenarios: [{ scenarioId: 'A', label: 'A', operations: [{ op: 'REMOVE_NODE', nodeId: 'issue:PAY-1' }] }], maxDepth: 6 });
     const plan = await svc.generatePreventionPlan(ctx, { snapshotId: s.snapshotId, scenarioId: 'A' });
     await svc.approvePlan(ctx, { planId: plan.planId, planHash: plan.planHash, approvedActionIds: plan.actions.map((a) => a.actionId), idempotencyKey: 'approve-val-000001' });
     await svc.executeApprovedPlan(ctx, { planId: plan.planId, idempotencyKey: 'exec-val-00000001' });
-    const decision = await store.get<{ status: string }>('decision:PAY-1');
-    expect(decision?.status).toBe('COMPLETED');
-    expect(decideTransition(['anticipate-change'], decision as never, 'PAY-1').result).toBe(true);
+    const decision = await store.get<DecisionRecord>('decision:PAY-1');
+    expect(decision).toMatchObject({ schema: 2, status: 'COMPLETED', issueKey: 'PAY-1', planId: plan.planId, planHash: plan.planHash });
+    const live = await jira.getIssue('PAY-1');
+    const issue = live.kind === 'ok' ? live.issue : null;
+    expect(decideTransition(issue, decision!, 'PAY-1', t).result).toBe(true);
+    // a new dependency appears afterwards -> the old decision no longer authorizes the transition
+    await jira.createLink({ typeName: 'Blocks', outwardKey: 'PAY-1', inwardKey: 'PAY-4' });
+    const after = await jira.getIssue('PAY-1');
+    expect(decideTransition(after.kind === 'ok' ? after.issue : null, decision!, 'PAY-1', t).errorMessage).toMatch(/links changed/);
   });
 });

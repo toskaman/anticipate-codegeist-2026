@@ -18,6 +18,8 @@ import { diffEvidence } from './drift';
 import { previewSample, createSample } from './sample';
 import { mergeSource, notConfiguredTwg } from '../context/sources';
 import type { EvidenceDrift } from '../../packages/contracts/src/index';
+import { stableHash } from '../../packages/simulation-core/src/index';
+import { ATTESTATION_VALID_DAYS, linksDigest, type DecisionRecord } from '../validator';
 
 export const CHANGE_LABEL = 'anticipate-change';
 const SNAPSHOT_TTL_HOURS = 24;
@@ -29,7 +31,15 @@ interface CmpRec { request: SimulationRequest; comparison: ScenarioComparison; }
 interface PlanRec { plan: PreventionPlan; owner: string | null; rootIssueKey: string; projectKey: string; approvedActionIds: string[];
   approvals: { accountId: string | null; at: string; actionIds: string[]; planHash: string }[]; timeline: { at: string; event: string }[]; }
 
+/**
+ * Minimized provenance kept for the plan's retention period (90 days) so a Prevention Passport stays reviewable after the
+ * full snapshot (2 days) is gone. It holds only identifiers, counts and the causal edges reviewed; no issue text.
+ */
+interface ProvRec { owner: string | null; snapshotId: string; mode: GraphSnapshot['mode']; capturedAt: string; expiresAt: string;
+  nodeCount: number; edgeCount: number; causalEdges: { from: string; to: string; kind: string; status: string }[]; snapshotDigest: string; }
+
 const K = {
+  prov: (planId: string) => `prov:${planId}`,
   snap: (id: string) => `snap:${id}`, cmp: (id: string) => `cmp:${id}`, plan: (id: string) => `plan:${id}`,
   exec: (p: string, a: string) => `exec:${p}:${a}`, lock: (p: string) => `lock:${p}`, idem: (k: string) => `idem:${k}`
 };
@@ -60,7 +70,29 @@ export function createService(d: Deps) {
 
   /** Latest decision state per changed issue — read by the Jira workflow validator (no crawl at transition time). */
   async function recordDecision(rec: PlanRec) {
-    await d.store.set(`decision:${rec.rootIssueKey}`, { planId: rec.plan.planId, scenarioId: rec.plan.scenarioId, status: rec.plan.status, at: iso() });
+    const r: DecisionRecord = { schema: 2, planId: rec.plan.planId, scenarioId: rec.plan.scenarioId, status: rec.plan.status, at: iso(),
+      issueKey: rec.rootIssueKey, planHash: rec.plan.planHash, snapshotId: rec.plan.snapshotId, linksDigest: null, validUntil: null };
+    if (rec.plan.status === 'COMPLETED') {
+      // Attest the links as they are AFTER verified execution (the plan's own new links included). Unreadable => no attestation.
+      const f = await d.jira.getIssue(rec.rootIssueKey).catch(() => null);
+      if (f?.kind === 'ok') {
+        r.linksDigest = linksDigest(f.issue.links);
+        r.validUntil = new Date(d.now().getTime() + ATTESTATION_VALID_DAYS * 86_400_000).toISOString();
+      }
+    }
+    await d.store.set(`decision:${rec.rootIssueKey}`, r);
+  }
+
+  /** Evidence behind a plan: the live snapshot if still retained, otherwise the minimized provenance record. */
+  async function loadEvidence(ctx: Ctx, rec: PlanRec) {
+    if (rec.plan.snapshotId === FIXTURE_SNAPSHOT.snapshotId) { const s = await loadSnap(ctx, rec.plan.snapshotId); return { mode: s.snapshot.mode, state: 'LIVE' as const, prov: null }; }
+    const snap = await d.store.get<SnapRec>(K.snap(rec.plan.snapshotId));
+    const prov = await d.store.get<ProvRec>(K.prov(rec.plan.planId));
+    const owner = snap?.owner ?? prov?.owner;
+    if (!snap && !prov) fail('NOT_FOUND', 'The evidence for this plan is no longer retained.');
+    if (owner !== ctx.accountId) fail('PERMISSION_DENIED', 'Decision records are private to the user who created them.');
+    if (snap) return { mode: snap.snapshot.mode, state: isExpired(snap.snapshot) ? 'EXPIRED_SNAPSHOT' as const : 'LIVE' as const, prov };
+    return { mode: prov!.mode, state: 'ARCHIVED' as const, prov };
   }
 
   /** Re-extract the plan's evidence neighbourhood live and diff it (Continuous Decision Safety). */
@@ -97,7 +129,17 @@ export function createService(d: Deps) {
 
     async createSampleProject(ctx: Ctx, input: { projectKey: string; confirm: true }) {
       if (!ctx.accountId) fail('PERMISSION_DENIED', 'Creating sample data requires an authenticated Atlassian user.');
-      return createSample(d.jira, input.projectKey);
+      // One creator per project at a time: concurrent clicks / retried requests must not create duplicate sample issues.
+      const lockKey = `lock:sample:${input.projectKey}`;
+      const lease = { until: d.now().getTime() + LEASE_MS, token: d.newId() };
+      if (!(await d.store.setIfAbsent(lockKey, lease))) {
+        const cur = await d.store.get<typeof lease>(lockKey);
+        if (cur && cur.until > d.now().getTime()) fail('CONFLICT', 'Sample data is already being created for this project. Preview again in a few seconds to see progress.');
+        if (!(await d.store.setIfAbsent(`lock-takeover:sample:${input.projectKey}:${cur?.token ?? 'missing'}`, lease.token))) fail('CONFLICT', 'Another request is creating sample data.');
+        await d.store.set(lockKey, lease);
+      }
+      try { return await createSample(d.jira, input.projectKey); }
+      finally { const held = await d.store.get<typeof lease>(lockKey); if (held?.token === lease.token) await d.store.delete(lockKey); }
     },
 
     async checkPlanFreshness(ctx: Ctx, input: { planId: string }): Promise<EvidenceDrift> {
@@ -182,6 +224,10 @@ export function createService(d: Deps) {
       await d.store.set<PlanRec>(K.plan(planId), { plan, owner: ctx.accountId, rootIssueKey: s.rootIssueKey, projectKey: s.projectKey, approvedActionIds: [], approvals: [],
         timeline: [{ at: s.snapshot.createdAt, event: `Snapshot ${s.snapshot.snapshotId} captured` }, { at: iso(), event: `Plan generated for scenario ${input.scenarioId}` }] });
       await d.store.set(K.cmp(`plan:${planId}`), c);
+      const causal = s.snapshot.edges.filter((e) => ['DEPENDS_ON', 'USES', 'BLOCKS', 'AFFECTS', 'VERIFIED_BY'].includes(e.kind));
+      await d.store.set<ProvRec>(K.prov(planId), { owner: ctx.accountId, snapshotId: s.snapshot.snapshotId, mode: s.snapshot.mode,
+        capturedAt: s.snapshot.createdAt, expiresAt: s.snapshot.expiresAt, nodeCount: s.snapshot.nodes.length, edgeCount: s.snapshot.edges.length,
+        causalEdges: causal.slice(0, 300).map((e) => ({ from: e.from, to: e.to, kind: e.kind, status: e.status })), snapshotDigest: stableHash(s.snapshot) });
       return plan;
     },
 
@@ -264,19 +310,21 @@ export function createService(d: Deps) {
 
     async getPreventionPassport(ctx: Ctx, input: { planId: string }): Promise<PreventionPassport> {
       const rec = await loadPlan(ctx, input.planId);
-      const snap = await loadSnap(ctx, rec.plan.snapshotId);
+      const ev = await loadEvidence(ctx, rec);
       const cmp = await d.store.get<CmpRec>(K.cmp(`plan:${input.planId}`));
       if (!cmp) fail('NOT_FOUND', 'Comparison for this plan is missing.');
       const executions = await this.getExecutionStatus(ctx, input);
       const chosen = cmp!.comparison.results.find((r) => r.scenarioId === rec.plan.scenarioId);
       return {
-        passportId: `passport-${input.planId}`, mode: snap.snapshot.mode, snapshotId: snap.snapshot.snapshotId,
+        passportId: `passport-${input.planId}`, mode: ev.mode, snapshotId: rec.plan.snapshotId,
+        evidence: ev.prov ? { state: ev.state, capturedAt: ev.prov.capturedAt, expiresAt: ev.prov.expiresAt, nodeCount: ev.prov.nodeCount,
+          edgeCount: ev.prov.edgeCount, causalEdgeCount: ev.prov.causalEdges.length, snapshotDigest: ev.prov.snapshotDigest } : undefined,
         change: cmp!.request.change, comparison: cmp!.comparison, plan: rec.plan,
         approvals: rec.approvals.map((a) => ({ accountId: a.accountId, at: a.at, actionIds: a.actionIds })),
         executions, openUnknowns: chosen?.uncertainties ?? [], timeline: [...rec.timeline].sort((a, b) => a.at.localeCompare(b.at)),
-        disclaimer: snap.snapshot.mode === 'DEMO_FIXTURE'
+        disclaimer: ev.mode === 'DEMO_FIXTURE'
           ? 'DEMO FIXTURE — fictional data; no Jira data was read or written.'
-          : 'Generated by ANTICIPATE from a Jira snapshot readable by the requesting user. Not a legal, compliance or cryptographic attestation.'
+          : `${ev.state === 'LIVE' ? '' : 'HISTORICAL RECORD — evidence as reviewed when the plan was created, not current live evidence. '}Generated by ANTICIPATE from a Jira snapshot readable by the requesting user. Not a legal, compliance or cryptographic attestation.`
       };
     }
   };

@@ -3,6 +3,9 @@ import { CONTRACT_VERSION, OPERATIONS, type OperationName } from '../../packages
 import { AppError } from './errors';
 import type { Ctx } from './ports';
 
+/** Hard input bound applied BEFORE schema validation (mitigates GHSA-mrhx-c7xc-m3w5 in zod 3: oversized collections). */
+export const MAX_PAYLOAD_CHARS = 64_000;
+
 export interface ResolverRequest { payload?: unknown; context?: { accountId?: string; installContext?: string; localId?: string; siteUrl?: string } }
 
 export function makeHandler<N extends OperationName>(
@@ -15,6 +18,9 @@ export function makeHandler<N extends OperationName>(
     const meta = () => ({ contractVersion: CONTRACT_VERSION, requestId, mode: dataMode ?? mode(), generatedAt: now().toISOString() });
     const started = Date.now();
     try {
+      let size = Infinity;
+      try { size = JSON.stringify(req.payload ?? {}).length; } catch { /* cyclic or unserializable => rejected */ }
+      if (size > MAX_PAYLOAD_CHARS) throw new AppError('VALIDATION', `Request payload too large (limit ${MAX_PAYLOAD_CHARS} characters).`);
       const parsed = OPERATIONS[name].input.safeParse(req.payload ?? {});
       if (!parsed.success) throw new AppError('VALIDATION', parsed.error.issues.slice(0, 3).map((i) => `${i.path.join('.')}: ${i.message}`).join('; '));
       const ctx: Ctx = { requestId, accountId: req.context?.accountId ?? null, installationId: req.context?.installContext ?? 'unknown' };
