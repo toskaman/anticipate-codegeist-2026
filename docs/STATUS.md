@@ -2,6 +2,10 @@
 
 Current frontend implements the CORE handoff at **f2c19f1**: changed-evidence refusal reasons and relation diffs, persistent blocking of the refused plan, accepted EVIDENCE_CHANGED plan/Passport status, optional read-only freshness, and preview/confirmed Jira sample preparation in Mission Control. The backend/manifest/contracts are merged from CORE without EXPERIENCE-authored modifications. [Current delivery report and screenshots](coordination/EXPERIENCE_CONTINUOUS_SAFETY.md).
 
+## UI v3 integration
+
+The hosted workspace was redesigned ("Precision Intelligence", design system v3): journey navigation with backend-derived stage state, layered evidence graph with simulated causal paths, scenario radio cards, decision chain, separated approve/execute/verify, report-style Passport and a capability status centre. Workflow logic, including the newer evidence-drift and sample setup guards, now lives in `src/app/useCoreWorkflow.ts`; no EXPERIENCE-authored backend, contract, manifest or Forge identity change. Real npm/Vite/vitest/ESLint/Prettier/axe verification is recorded, with local screenshots still MOCK_TRANSPORT only — see [release readiness](design/UI_RELEASE_READINESS.md), [audit](design/UI_REDESIGN_AUDIT.md), [visual QA](design/UI_VISUAL_QA.md), [design system](design/DESIGN_SYSTEM_V3.md), [jury showcase](jury/JURY_UI_SHOWCASE.md). No hosted verification is claimed.
+
 ## Deployment and distribution
 
 CORE reports development **4.8.0** with an authenticated read-only smoke, and production **2.1.0** from the runtime candidate. In `745fe69`, CORE reports successful production installation through the judge link on a second clean site and the honest empty-project state. This supersedes earlier deployment-request/deferral notes. These are CORE reports, not independent EXPERIENCE hosted verification.
@@ -14,7 +18,7 @@ GitHub reports PR #2 merged into main as `1c77eea` at 2026-11-02 13:04:58 UTC. E
 
 All seven hosted screens use the CORE client: project/change pagination, explicit snapshot capture, bounded accessible evidence graph, scenario-linked plans, planHash approval, separate execution confirmation, lost-response recovery and matching Passport export. Local fixtures and mock transport remain labeled and isolated; there is no production fixture fallback.
 
-Latest full local run: **44 frontend unit / 59 browser tests**, build, TypeScript, lint and formatting passed. Candidate verification also passed **31 CORE / 3 contract / 8 simulation tests** after merging the safety/sample handoff. CI for `d518dbe` passed frontend clean install/build and CORE checks in run `41450610699`. Browser tests remain local/mock evidence; CI does not run that browser suite.
+Latest UI v3 unit run: **47 frontend tests**. Final browser results are in UI_RELEASE_READINESS.md; the earlier safety/sample baseline had **44 unit / 59 browser tests**, build, TypeScript, lint and formatting passed. Candidate verification also passed **31 CORE / 3 contract / 8 simulation tests** after merging the safety/sample handoff. CI for `d518dbe` passed frontend clean install/build and CORE checks in run `41450610699`. Browser tests remain local/mock evidence; CI does not run that browser suite.
 
 [Integration handoff](integration/CORE_CLIENT_INTEGRATION.md) · [reflow evidence](integration/CORE_REFLOW_READINESS.md) · [historical performance measurements](design/PERFORMANCE_VISUAL_CORE.md). No hosted performance SLA or speedup is claimed.
 

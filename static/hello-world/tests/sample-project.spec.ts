@@ -156,7 +156,9 @@ test("sample preparation requires preview and confirmation, then analyzes real J
       exact: true,
     })
     .click();
-  await page.getByRole("button", { name: "Confirm", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Create sample data", exact: true })
+    .click();
   await expect(
     page.getByText("api sample ticket · ABC-1 · CREATED"),
   ).toBeVisible();
@@ -176,7 +178,7 @@ test("sample preparation requires preview and confirmation, then analyzes real J
     ).violations,
   ).toEqual([]);
   await page.screenshot({
-    path: "../../evidence/experience/continuous-safety/sample-result-MOCK-390.png",
+    path: "../../evidence/experience/v3-redesign/visual/31-sample-result-MOCK-390.png",
     fullPage: true,
   });
   await page
@@ -186,11 +188,11 @@ test("sample preparation requires preview and confirmation, then analyzes real J
     page.getByRole("heading", { name: "Evidence Graph", exact: true }),
   ).toBeVisible();
   await page
-    .getByRole("button", { name: "Compare change scenarios", exact: true })
+    .getByRole("button", { name: "Compare options", exact: true })
     .click();
   await expect(
     page.getByRole("combobox", {
-      name: "Replacement node for scenario C",
+      name: "Replacement for option C",
       exact: true,
     }),
   ).toHaveValue("issue:ABC-3");
@@ -231,7 +233,9 @@ for (const mode of ["denied", "partial", "timeout", "empty"] as const)
       await expect(create).toBeDisabled();
     } else {
       await create.click();
-      await page.getByRole("button", { name: "Confirm", exact: true }).click();
+      await page
+        .getByRole("button", { name: "Create sample data", exact: true })
+        .click();
       if (mode === "partial")
         await expect(page.getByRole("alert")).toContainText(
           "Some sample items or relations failed",

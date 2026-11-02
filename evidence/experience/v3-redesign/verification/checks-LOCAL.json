@@ -1,0 +1,31 @@
+{
+  "provenance": "LOCAL_AND_MOCK_TRANSPORT",
+  "chromiumFullSuite": {
+    "startTime": "2026-11-02T15:57:52.958Z",
+    "duration": 227255.296,
+    "expected": 72,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "frontendUnit": 47,
+  "coreBaselineTests": 31,
+  "contractTests": 3,
+  "simulationTests": 8,
+  "firefox": {
+    "cases": 32,
+    "initialPassed": 31,
+    "targetedRetryPassed": 1,
+    "finalReflowPassed": 3
+  },
+  "webkit": {
+    "criticalPassed": 32,
+    "finalReflowPassed": 3
+  },
+  "typescript": "PASS",
+  "lint": "PASS",
+  "format": "PASS",
+  "build": "PASS",
+  "hostedForge": "NOT_RUN",
+  "noRealJiraWrites": true
+}

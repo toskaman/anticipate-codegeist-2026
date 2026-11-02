@@ -2,12 +2,12 @@
   "workstream": "EXPERIENCE",
   "branch": "feat/product-experience",
   "revisionBase": "f2c19f1ce13dc731b3f35d34bb961c6cd061f959",
-  "revisionScope": "CORE handoff: evidence refusal reason/diff, EVIDENCE_CHANGED status, read-only freshness and preview/confirmed Jira sample preparation",
+  "revisionScope": "UI v3 bundle integration over 7fefdbc; evidence drift/sample setup ported without weakening mutation guards",
   "contractVersion": "0.2.0",
   "status": "VERIFIED_LOCAL_READY_FOR_HOSTED_VALIDATION",
   "tests": {
-    "unit": 44,
-    "browser": 59,
+    "unit": 47,
+    "browser": 72,
     "coreScreenThemeViewportCases": 42,
     "prototypeScreenThemeViewportCases": 42,
     "core": 31,
@@ -157,5 +157,16 @@
     "browserSeconds": 44.8,
     "realJiraWritesPerformedByExperience": false,
     "forgeDeploymentPerformedByExperience": false
+  },
+  "uiV3": {
+    "status": "VERIFIED_LOCAL_READY_FOR_CORE_HOSTED_VALIDATION",
+    "importedCommit": "499522d8a735c56070f128de9570c57fb3d62003",
+    "safetyBaseline": "7fefdbc",
+    "report": "docs/design/UI_RELEASE_READINESS.md",
+    "evidenceMode": "MOCK_TRANSPORT",
+    "forgeDeploymentPerformedByExperience": false,
+    "chromiumSeconds": 227.3,
+    "firefoxCriticalCases": 32,
+    "webkitCriticalCases": 32
   }
 }
