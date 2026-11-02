@@ -17,7 +17,7 @@ import { stableHash } from '../packages/simulation-core/src/index';
  */
 export interface DecisionRecord {
   planId: string; scenarioId: string; status: string; at: string;
-  schema?: 2; issueKey?: string; planHash?: string; snapshotId?: string; linksDigest?: string | null; validUntil?: string | null;
+  schema?: 2 | 3; issueKey?: string; verdict?: string; blockers?: number | null; allActionsVerified?: boolean; planHash?: string; snapshotId?: string; linksDigest?: string | null; validUntil?: string | null;
 }
 export const ATTESTATION_VALID_DAYS = 14;
 
@@ -34,7 +34,10 @@ export function decideTransition(issue: { labels: string[]; links: Link[] } | nu
   if (decision.issueKey && decision.issueKey !== issueKey) return block('the stored decision belongs to another issue');
   if (decision.status === 'EVIDENCE_CHANGED') return block(`the dependency evidence changed after plan ${decision.planId} was approved`);
   if (decision.status !== 'COMPLETED') return block(`the latest prevention plan ${decision.planId} is ${decision.status}, not COMPLETED`);
-  if (decision.schema !== 2 || !decision.linksDigest || !decision.validUntil) return block(`plan ${decision.planId} was completed before decision attestations existed; re-run it to attest the current evidence`);
+  if (decision.schema !== 3 || !decision.linksDigest || !decision.validUntil || decision.allActionsVerified !== true) return block(`plan ${decision.planId} was completed before the current decision attestations existed; re-run it to attest the current evidence`);
+  // Preventive tickets created for a BLOCKED option are work to do, not proof that the dependency was migrated.
+  if (decision.verdict === 'BLOCKED' || (decision.blockers ?? 0) > 0) return block(`the option chosen in plan ${decision.planId} is BLOCKED by a safety rule; the preventive tickets record the work, they do not prove it is done. Re-analyse once the dependents have migrated`);
+  if (decision.verdict !== 'PASS' && decision.verdict !== 'NEEDS_REVIEW') return block(`the verdict of plan ${decision.planId} is unknown`);
   if (now.getTime() > new Date(decision.validUntil).getTime()) return block(`the decision attested by plan ${decision.planId} expired on ${decision.validUntil.slice(0, 10)}`);
   if (linksDigest(issue.links) !== decision.linksDigest) return block(`its dependency links changed after plan ${decision.planId} was verified`);
   return { result: true };

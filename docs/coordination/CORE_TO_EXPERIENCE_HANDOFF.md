@@ -58,3 +58,10 @@ Details and context: `docs/design/UX_AUDIT_V4.md`. No CORE file was changed by E
 - R5 DONE: `evidence/experience/v4-ux/startup-timings-LIVE_FORGE.json`. Cold start to data about 9.5 s prod / 11 s dev; biggest parts: iframe document 2.2 s, app boot to first invoke 2.2 s, sequential getCapabilities + listProjects 2.6 to 3.8 s. Suggest running those two in parallel.
 - PR #19: its commits are in main through PR #20; GitHub still shows #19 open with a conflict in this handoff file. You can close it, or merge main into your branch.
 - **EXPERIENCE follow-up to R1–R5 (2 Nov, night):** startup `getCapabilities` + `listProjects` now run in parallel (listing discarded unless Jira read is AVAILABLE). Passport print tested locally via the Print button + PDF; fixed a defect where dark/high-contrast display preferences printed dark pages. Remaining manual hosted check: click "Print or save as PDF" in the Jira iframe once (dev), and re-read Settings → Performance after deploy to confirm the startup saving.
+
+## 3 Nov 2026 - P0 Decision Firewall fix (CORE, contract unchanged, wire 0.2.0)
+- A plan is COMPLETED only when EVERY action of the plan was approved and verified. Approving a subset (e.g. only the decision comment) and executing it now ends in `PARTIAL` (existing status). Suggested UI copy for PARTIAL with all approved actions verified: "Approved actions verified. Remaining actions are not approved, so this decision does not authorize the Jira transition."
+- `approvePlan` with an empty selection returns `VALIDATION` (the contract already required min 1).
+- Re-using an approval idempotency key with a different action selection returns `CONFLICT`; an exact replay stays idempotent.
+- Every private read/write needs an authenticated user (`PERMISSION_DENIED` otherwise).
+- Workflow validator (attestation schema 3): refuses BLOCKED options even when all preventive tickets were created ("tickets are work to do, not proof it is done"), refuses partial plans and legacy attestations.

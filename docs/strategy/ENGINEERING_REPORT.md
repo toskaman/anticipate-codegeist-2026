@@ -93,3 +93,15 @@ Dangerous distractions: many more scenario types; a policy UI without server enf
 ## 11. Known blockers
 
 Teamwork Graph API allowlisting (request sent by the team). Production smoke depends on Forge cold start.
+
+## 3 Nov 2026 - P0 audit of the Decision Firewall
+
+| # | Sev | Finding | Status |
+|---|---|---|---|
+| R11 | CRITICAL | Partial-approval bypass: approving and verifying only the decision comment made the plan COMPLETED and wrote an attestation that opened the workflow gate. Also an execution with zero approved actions counted as COMPLETED. | CONFIRMED by RED test (`test/firewall.test.ts`), FIXED: COMPLETED requires every plan action approved and verified; otherwise PARTIAL. |
+| R12 | CRITICAL | Completing all preventive actions of a BLOCKED option (creating migration tickets) authorized the transition, i.e. tickets were treated as a resolved migration. | CONFIRMED, FIXED: attestation schema 3 records the chosen option verdict and blocker count; validator refuses BLOCKED. |
+| R13 | HIGH | Missing identity could match a record whose owner is null. | FIXED: private reads/writes require an authenticated account. |
+| R14 | MEDIUM | Approval idempotency key reused with another selection was silently accepted as a replay. | FIXED: key bound to plan + selection fingerprint; CONFLICT on mismatch. |
+| R15 | MEDIUM | Empty approval relied only on the resolver contract. | FIXED: service-level VALIDATION. |
+
+Tests: backend 63 (8 new adversarial tests: partial approval, BLOCKED completion, failed-after-verified, empty approval, cross-user read/approve/execute with zero Jira writes, anonymous caller, idempotency payload mismatch). Validator outage policy is still fail-open (documented, unchanged).
