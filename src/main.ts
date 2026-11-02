@@ -36,3 +36,20 @@ export const rovoGetPassport = rovo.getPassport;
 export const rovoCheckFreshness = rovo.checkFreshness;
 
 export { diagnostics, seedDemo } from './diagnostics';
+
+// ---- Jira workflow validator (opt-in per workflow transition) ----
+import { decideTransition, type DecisionRecord } from './validator';
+export async function validateTransition(args: { issue?: { key?: string } }) {
+  const key = args?.issue?.key;
+  if (!key) return { result: true };
+  try {
+    const jira = createForgeJira(null, 'app');
+    const issue = await jira.getIssue(key);
+    const labels = issue.kind === 'ok' ? issue.issue.labels : null;
+    const decision = await forgeStore.get<DecisionRecord>(`decision:${key}`);
+    return decideTransition(labels, decision, key);
+  } catch (e) {
+    console.warn(JSON.stringify({ app: 'anticipate', op: 'validateTransition', failOpen: true, detail: e instanceof Error ? e.message.slice(0, 200) : 'error' }));
+    return { result: true };
+  }
+}

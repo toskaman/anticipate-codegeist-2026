@@ -5,6 +5,11 @@ modules:
       resolver:
         function: resolver
       routePrefix: hello-world
+  jira:workflowValidator:
+    - key: anticipate-decision-firewall
+      name: ANTICIPATE Decision Firewall
+      description: Blocks the transition of issues labelled anticipate-change until their latest ANTICIPATE prevention plan is COMPLETED (verified). Other issues always pass.
+      function: validateTransition
   rovo:agent:
     - key: anticipate-decision-reviewer
       name: ANTICIPATE Decision Reviewer
@@ -97,6 +102,8 @@ modules:
       handler: index.rovoGetPassport
     - key: rovoCheckFreshness
       handler: index.rovoCheckFreshness
+    - key: validateTransition
+      handler: index.validateTransition
 resources:
   - key: main
     path: static/hello-world/build

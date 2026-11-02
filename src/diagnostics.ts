@@ -2,12 +2,11 @@
  * Development-only, READ-ONLY diagnostics web trigger. Verifies the real Jira response shapes the adapters rely on.
  * Never writes. Returns counts/shapes only (no issue text). Remove from the manifest before the jury release.
  */
-import { createForgeJira, useAppActorForDiagnostics } from './forge-adapters';
+import { createForgeJira } from './forge-adapters';
 import { extractGraph } from './jira/extractor';
 
 export async function diagnostics(req?: { queryParameters?: Record<string, string[]> }): Promise<{ statusCode: number; headers: Record<string, string[]>; body: string }> {
-  useAppActorForDiagnostics();
-  const jira = createForgeJira(null);
+  const jira = createForgeJira(null, 'app');
   const out: Record<string, unknown> = { at: new Date().toISOString() };
   const step = async (name: string, fn: () => Promise<unknown>) => {
     try { out[name] = { ok: true, value: await fn() }; } catch (e) { out[name] = { ok: false, error: e instanceof Error ? e.message.slice(0, 300) : String(e) }; }
@@ -34,8 +33,7 @@ export async function diagnostics(req?: { queryParameters?: Record<string, strin
  * `anticipate-demo-seed` label + a per-role label. Remove from the manifest before the jury release.
  */
 export async function seedDemo(req?: { queryParameters?: Record<string, string[]> }): Promise<{ statusCode: number; headers: Record<string, string[]>; body: string }> {
-  useAppActorForDiagnostics();
-  const jira = createForgeJira(null);
+  const jira = createForgeJira(null, 'app');
   const project = req?.queryParameters?.project?.[0];
   const json = (statusCode: number, o: unknown) => ({ statusCode, headers: { 'Content-Type': ['application/json'] }, body: JSON.stringify(o, null, 2) });
   if (!project || !/^[A-Z][A-Z0-9_]+$/.test(project)) return json(400, { error: 'project=KEY required' });

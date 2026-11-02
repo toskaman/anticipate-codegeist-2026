@@ -13,7 +13,7 @@ const RANK: Record<EvidenceStatus, number> = { CONFIRMED: 2, INFERRED: 1, UNKNOW
 const weakest = (a: EvidenceStatus, b: EvidenceStatus): EvidenceStatus => (RANK[a] <= RANK[b] ? a : b);
 const SEV_ORDER = { BLOCKER: 0, HIGH: 1, MEDIUM: 2, LOW: 3 } as const;
 
-interface WorkingGraph { nodes: ReadonlySet<string>; edges: readonly EvidenceEdge[]; removed: Set<string>; deprecated: Set<string>; }
+interface WorkingGraph { attrs: ReadonlyMap<string, Record<string, unknown>>; nodes: ReadonlySet<string>; edges: readonly EvidenceEdge[]; removed: Set<string>; deprecated: Set<string>; }
 
 /** Apply operations to an isolated functional copy of the snapshot. */
 export function applyScenario(snapshot: GraphSnapshot, scenario: ScenarioDefinition): WorkingGraph {
@@ -35,7 +35,7 @@ export function applyScenario(snapshot: GraphSnapshot, scenario: ScenarioDefinit
       }
     }
   }
-  return { nodes: nodeIds, edges, removed, deprecated };
+  return { attrs: new Map(snapshot.nodes.map((n) => [n.id, { ...n.attributes, __status: n.status, __kind: n.kind }])), nodes: nodeIds, edges, removed, deprecated };
 }
 
 function assertNode(ids: Set<string>, op: ChangeOperation) {
@@ -82,6 +82,13 @@ export function evaluatePolicies(g: WorkingGraph, impacts: ImpactRecord[], rules
     if (r.type === 'NO_REMOVAL_WITH_ACTIVE_DEPENDENTS' && isRemoval) hit = impacts.filter((i) => i.direct && i.weakestStatus !== 'UNKNOWN');
     if (r.type === 'NO_UNKNOWN_IMPACTS_ON_REMOVAL' && isRemoval) hit = impacts.filter((i) => i.weakestStatus === 'UNKNOWN');
     if (r.type === 'REQUIRE_VERIFIED_TEST_FOR_IMPACTED') hit = impacts.filter((i) => !verified.has(i.nodeId));
+    if (r.type === 'NO_DECOMMISSION_WITH_OPEN_WORK' && isRemoval) {
+      // Service/component decommission: open work items that reference (AFFECTS) a removed component/service.
+      const open = g.edges.filter((e) => e.kind === 'AFFECTS' && g.removed.has(e.to) && e.status === 'CONFIRMED')
+        .filter((e) => { const a = g.attrs.get(e.from); return a && a.__status === 'CONFIRMED' && a.statusCategory !== 'done' && a.statusCategory !== undefined && a.statusCategory !== null; })
+        .sort((x, y) => x.from.localeCompare(y.from));
+      hit = [...new Map(open.map((e) => [e.from, { nodeId: e.from, depth: 1, direct: true, pathEdgeIds: [e.id], weakestStatus: 'CONFIRMED' as const }])).values()];
+    }
     if (hit.length) out.push({
       ruleId: r.ruleId, severity: r.severity, nodeIds: hit.map((h) => h.nodeId),
       pathEdgeIds: [...new Set(hit.flatMap((h) => h.pathEdgeIds))].sort(),

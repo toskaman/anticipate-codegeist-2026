@@ -1,6 +1,6 @@
 /** Ports keep business logic testable without Forge. Implementations: src/forge-adapters.ts (live), test/fakes.ts. */
 export interface JiraIssue {
-  id: string; key: string; summary: string; status: string; issueType: string; projectId: string; projectKey: string;
+  id: string; key: string; summary: string; status: string; statusCategory?: string | null; issueType: string; projectId: string; projectKey: string;
   updated: string; labels: string[]; components: { id: string; name: string }[];
   links: { id: string; typeName: string; outward: string; inward: string; direction: 'outward' | 'inward'; otherKey: string }[];
 }
@@ -30,6 +30,6 @@ export interface Store {
   delete(key: string): Promise<void>;
 }
 
-export interface Deps { jira: JiraPort; store: Store; now: () => Date; newId: () => string; }
+export interface Deps { jira: JiraPort; store: Store; now: () => Date; newId: () => string; context?: import('../context/sources').ContextSource; }
 
 export interface Ctx { requestId: string; accountId: string | null; installationId: string; }
