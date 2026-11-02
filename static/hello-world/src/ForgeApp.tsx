@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { ForgeClient } from "./api/ForgeClient";
 import CoreWorkspace from "./CoreWorkspace";
-import "./style.css";
+import "./styles/anticipate.css";
 const client = new ForgeClient(async (resolver, input) =>
   (await import("@forge/bridge")).invoke(resolver, input),
 );

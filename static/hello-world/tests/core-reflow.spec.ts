@@ -102,13 +102,13 @@ async function setup(page: Page) {
     .getByRole("combobox", { name: "Jira project", exact: true })
     .selectOption("100");
   await page
-    .getByRole("textbox", { name: "Root Jira issue key", exact: true })
+    .getByRole("textbox", { name: "Jira issue key", exact: true })
     .fill("ABC-1");
   await page
-    .getByRole("button", { name: "Read evidence snapshot", exact: true })
+    .getByRole("button", { name: "Analyze dependencies", exact: true })
     .click();
   await expect(
-    page.getByRole("heading", { name: "Snapshot evidence", exact: true }),
+    page.getByRole("heading", { name: "Dependency map", exact: true }),
   ).toBeVisible();
   return calls;
 }
@@ -162,25 +162,25 @@ for (const width of [320, 1280])
       ),
     ).toBe(false);
     await page.screenshot({
-      path: `../../evidence/experience/core-reflow/graph-labels-MOCK-${width}.png`,
+      path: `../../evidence/experience/v3-redesign/reflow/graph-labels-MOCK-${width}.png`,
     });
     await page
-      .getByRole("button", { name: "Compare change scenarios", exact: true })
+      .getByRole("button", { name: "Compare options", exact: true })
       .click();
     await page
-      .getByRole("button", { name: "Run CORE comparison", exact: true })
+      .getByRole("button", { name: "Compare options", exact: true })
       .click();
     await page
-      .getByRole("button", { name: "Review CORE policy checks", exact: true })
+      .getByRole("button", { name: "Check safeguards", exact: true })
       .click();
     await page
       .getByRole("button", {
-        name: "Generate selected scenario plan",
+        name: "Generate prevention plan",
         exact: true,
       })
       .click();
     await page
-      .getByText("Review exact action payload", { exact: true })
+      .getByText("Evidence (1) and exact payload", { exact: true })
       .click();
     const payload = page.getByRole("region", {
       name: `Payload for ${longPlan.actions[0].actionId}`,
@@ -197,7 +197,7 @@ for (const width of [320, 1280])
       .toBeGreaterThan(0);
     await noOverflow(page);
     await page.screenshot({
-      path: `../../evidence/experience/core-reflow/action-payload-MOCK-${width}.png`,
+      path: `../../evidence/experience/v3-redesign/reflow/action-payload-MOCK-${width}.png`,
     });
     expect(
       calls.some((op) => ["approvePlan", "executeApprovedPlan"].includes(op)),
@@ -208,19 +208,19 @@ test("CORE graph preserves the selected node across responsive page sizes", asyn
 }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
   await setup(page);
-  await page.locator(".core-evidence-item").nth(18).click();
+  await page.locator(".ax-evidence-item").nth(18).click();
   const heading = page.getByRole("heading", {
     name: longGraph.nodes[18].label,
     exact: true,
   });
   await expect(heading).toBeVisible();
   await page.setViewportSize({ width: 390, height: 1000 });
-  await expect(page.locator(".react-flow__node")).toHaveCount(6);
+  await expect(page.locator(".react-flow__node")).toHaveCount(8);
   await expect(heading).toBeVisible();
   await expect(
-    page.locator(".core-evidence-item[aria-pressed=true]"),
-  ).toHaveText(`${longGraph.nodes[18].label} · CONFIRMED`);
+    page.locator(".ax-evidence-item[aria-pressed=true]"),
+  ).toContainText(longGraph.nodes[18].label);
   await page.setViewportSize({ width: 1440, height: 1000 });
-  await expect(page.locator(".react-flow__node")).toHaveCount(20);
+  await expect(page.locator(".react-flow__node")).toHaveCount(35);
   await expect(heading).toBeVisible();
 });

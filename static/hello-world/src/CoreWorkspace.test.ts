@@ -1,5 +1,5 @@
 import { expect, it } from "vitest";
-import { simulationRequest } from "./CoreWorkspace";
+import { simulationRequest } from "./app/workflow";
 import { graph } from "../tests/core-test-data";
 it("compares A/B without inventing a replacement and creates C only for a selected snapshot node", () => {
   const two = simulationRequest(graph, "ABC-1", "");

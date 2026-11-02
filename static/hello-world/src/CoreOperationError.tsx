@@ -1,18 +1,13 @@
 import React from "react";
+import Icon from "./components/Icon";
 export interface OperationFailure {
   message: string;
   code: string;
   retryable: boolean;
   mutation: boolean;
 }
-export default function CoreOperationError({
-  failure,
-  onDismiss,
-}: {
-  failure: OperationFailure;
-  onDismiss(): void;
-}) {
-  const guidance = failure.mutation
+export function guidanceFor(failure: OperationFailure) {
+  return failure.mutation
     ? "Read current plan status and audit before another write. No automatic resubmission was made."
     : failure.code === "INVALID_RESPONSE"
       ? "The service response could not be verified. Read it again before using its results."
@@ -28,12 +23,35 @@ export default function CoreOperationError({
                 )
               ? "Try this read again when the service is available. No automatic retry was made."
               : "Check the selected project and request inputs before trying again.";
+}
+export default function CoreOperationError({
+  failure,
+  onDismiss,
+}: {
+  failure: OperationFailure;
+  onDismiss(): void;
+}) {
   return (
-    <section className="panel" role="alert">
-      <h2>{failure.mutation ? "Review action outcome" : "Request failed"}</h2>
-      <p>{failure.message}</p>
-      <p>{guidance}</p>
-      <button onClick={onDismiss}>Dismiss error</button>
+    <section
+      className={`ax-error ${failure.mutation ? "ax-error--mutation" : ""}`}
+      role="alert"
+    >
+      <span className="ax-error__icon" aria-hidden="true">
+        <Icon name={failure.mutation ? "alert" : "octagon"} size={20} />
+      </span>
+      <div className="ax-error__body">
+        <h2>{failure.mutation ? "Review action outcome" : "Request failed"}</h2>
+        <p className="ax-error__guidance">{guidanceFor(failure)}</p>
+        <p className="ax-error__message">
+          {!failure.message.startsWith(failure.code) && (
+            <span className="ax-error__code">{failure.code}</span>
+          )}
+          <span>{failure.message}</span>
+        </p>
+      </div>
+      <button className="ax-btn ax-btn--ghost" onClick={onDismiss}>
+        Dismiss error
+      </button>
     </section>
   );
 }

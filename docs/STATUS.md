@@ -2,6 +2,10 @@
 
 Frontend baseline: **4c68d90fc0990b751cb7bfa7dc6d0f2a77f60c12**, CORE contracts 0.2.0. CORE follow-up `1225a72` changes Rovo caller identity resolution and adds a regression test; merged through report `41c6c59`. Frontend application source remains unchanged; the later frontend ProseMirror dependency override is recorded below. EXPERIENCE has not authored changes to the merged backend, shared contracts, manifest or Forge identity.
 
+## UI v3 redesign (in review)
+
+The hosted workspace was redesigned ("Precision Intelligence", design system v3): journey navigation with backend-derived stage state, layered evidence graph with simulated causal paths, scenario radio cards, decision chain, separated approve/execute/verify, report-style Passport and a capability status centre. Workflow logic moved unchanged into `src/app/useCoreWorkflow.ts`; no backend, contract, manifest or Forge identity change. Verification so far is limited and MOCK_TRANSPORT only — see [release readiness](design/UI_RELEASE_READINESS.md), [audit](design/UI_REDESIGN_AUDIT.md), [visual QA](design/UI_VISUAL_QA.md), [design system](design/DESIGN_SYSTEM_V3.md), [jury showcase](jury/JURY_UI_SHOWCASE.md). No hosted verification is claimed.
+
 ## Deployment and distribution
 
 CORE reports development **4.8.0** with an authenticated read-only smoke, and production **2.1.0** from the runtime candidate. In `745fe69`, CORE reports successful production installation through the judge link on a second clean site and the honest empty-project state. This supersedes earlier deployment-request/deferral notes. These are CORE reports, not independent EXPERIENCE hosted verification.
