@@ -4,7 +4,7 @@ This is dependency evidence, not a production security clearance. The initial in
 
 ## Verified frontend override follow-up
 
-The frontend now scopes npm overrides under `@forge/bridge` to `prosemirror-view@1.42.9` and `prosemirror-model@1.25.12`. The model patch satisfies the new view dependency while keeping a single model instance throughout the Forge subtree. Forge Bridge itself, backend packages, contracts and manifest are unchanged. These overrides intentionally supersede Atlaskit's exact transitive pins; they are not an Atlassian compatibility certification.
+The frontend package now uses npm overrides for `prosemirror-view@1.42.9` and `prosemirror-model@1.25.12`. The model patch satisfies the new view dependency while keeping a single model instance throughout the installed frontend tree. Forge Bridge itself, backend packages, contracts and manifest are unchanged. The affected packages currently originate in the Forge subtree. These overrides intentionally supersede Atlaskit's exact transitive pins; they are not an Atlassian compatibility certification.
 
 After clean `npm ci --ignore-scripts`, full audit reports **16 affected dependency entries: 14 moderate / 2 high**, down from 20 (13 moderate / 7 high). Production-only audit reports **6 entries: 4 moderate / 2 high**, down from 10 (3 moderate / 7 high). ProseMirror's advisory is no longer present; Forge Bridge is still affected at moderate severity through its manifest dependencies. These are dependency-entry counts, not independent exploit counts. Shared Zod 3 and glob/minimatch advisories remain unresolved.
 
@@ -33,3 +33,8 @@ Other affected runtime entries include `glob@13.0.6` / `minimatch@10.2.6` throug
 CORE should assess the shared Zod remediation and bridge compatibility alongside the existing release findings. EXPERIENCE can test an agreed bridge/override candidate locally. Keep the pinned deployment candidate until that candidate has actual verification; do not use `npm audit fix --force` as a deployment decision. No Forge deployment, scope change, Jira mutation or credential access was performed for this audit.
 
 CORE follow-up `745fe69` records hackathon risk acceptance and defers the shared Zod 4 migration. Its reference to schema `.max()` bounds must not be interpreted as a demonstrated fix: this advisory specifically concerns oversized constrained collections. Frontend preflight bounds and Forge transport limits are distinct controls; backend mitigation effectiveness has not been established by EXPERIENCE. The advisory remains open despite that recorded release decision.
+
+
+### CI installer compatibility correction
+
+The first nested-under-Bridge override passed local npm 11.19.0 clean install but failed GitHub CI npm 10.9.9 with missing original pinned versions in the lockfile. The final configuration uses frontend package-level overrides for the same two versions; it does not affect the repository root or CORE installation. No lockfile dependency version changed for this correction. Verification includes a clean install using npm 10.9.9, the CI installer version. A successful local install alone was insufficient evidence for CI compatibility.

@@ -61,9 +61,7 @@
   },
   "type": "module",
   "overrides": {
-    "@forge/bridge": {
-      "prosemirror-view": "1.42.9",
-      "prosemirror-model": "1.25.12"
-    }
+    "prosemirror-view": "1.42.9",
+    "prosemirror-model": "1.25.12"
   }
 }

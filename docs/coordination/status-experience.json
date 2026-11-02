@@ -2,7 +2,7 @@
   "workstream": "EXPERIENCE",
   "branch": "feat/product-experience",
   "revisionBase": "4c68d90fc0990b751cb7bfa7dc6d0f2a77f60c12",
-  "revisionScope": "Frontend source unchanged; scoped Bridge subtree ProseMirror view/model overrides verified locally; CORE through 41c6c59",
+  "revisionScope": "Frontend source unchanged; frontend-only ProseMirror view/model overrides verified locally; CORE through 41c6c59",
   "contractVersion": "0.2.0",
   "status": "VERIFIED_LOCAL_READY_FOR_HOSTED_VALIDATION",
   "tests": {
@@ -136,7 +136,7 @@
       "prosemirror-view": "1.42.9",
       "prosemirror-model": "1.25.12"
     },
-    "scope": "@forge/bridge subtree only",
+    "scope": "frontend package only; installed ProseMirror tree currently originates through Forge Bridge",
     "auditFull": {
       "moderate": 14,
       "high": 2
