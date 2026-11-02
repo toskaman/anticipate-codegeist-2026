@@ -1,6 +1,6 @@
 # ANTICIPATE EXPERIENCE — current status
 
-Frontend baseline: **4c68d90fc0990b751cb7bfa7dc6d0f2a77f60c12**, CORE contracts 0.2.0. CORE follow-up `1225a72` changes Rovo caller identity resolution and adds a regression test; merged through report `41c6c59`. Frontend application source remains unchanged; the later frontend ProseMirror dependency override is recorded below. EXPERIENCE has not authored changes to the merged backend, shared contracts, manifest or Forge identity.
+Current frontend implements the CORE handoff at **f2c19f1**: changed-evidence refusal reasons and relation diffs, persistent blocking of the refused plan, accepted EVIDENCE_CHANGED plan/Passport status, optional read-only freshness, and preview/confirmed Jira sample preparation in Mission Control. The backend/manifest/contracts are merged from CORE without EXPERIENCE-authored modifications. [Current delivery report and screenshots](coordination/EXPERIENCE_CONTINUOUS_SAFETY.md).
 
 ## Deployment and distribution
 
@@ -14,7 +14,7 @@ GitHub reports PR #2 merged into main as `1c77eea` at 2026-11-02 13:04:58 UTC. E
 
 All seven hosted screens use the CORE client: project/change pagination, explicit snapshot capture, bounded accessible evidence graph, scenario-linked plans, planHash approval, separate execution confirmation, lost-response recovery and matching Passport export. Local fixtures and mock transport remain labeled and isolated; there is no production fixture fallback.
 
-Latest full local run: **42 frontend unit / 51 browser tests**, build, TypeScript, lint and formatting passed. Candidate verification also passed **19 CORE / 3 contract / 8 simulation tests** after merging the Rovo follow-up. CI for `d518dbe` passed frontend clean install/build and CORE checks in run `41450610699`. Browser tests remain local/mock evidence; CI does not run that browser suite.
+Latest full local run: **44 frontend unit / 59 browser tests**, build, TypeScript, lint and formatting passed. Candidate verification also passed **31 CORE / 3 contract / 8 simulation tests** after merging the safety/sample handoff. CI for `d518dbe` passed frontend clean install/build and CORE checks in run `41450610699`. Browser tests remain local/mock evidence; CI does not run that browser suite.
 
 [Integration handoff](integration/CORE_CLIENT_INTEGRATION.md) · [reflow evidence](integration/CORE_REFLOW_READINESS.md) · [historical performance measurements](design/PERFORMANCE_VISUAL_CORE.md). No hosted performance SLA or speedup is claimed.
 
@@ -25,3 +25,6 @@ Independent hosted journey, host permissions, real Jira outcomes and lost-respon
 Latest frontend dependency follow-up: frontend ProseMirror view/model overrides passed clean install and the frontend checks (42 unit / 51 browser, 39.0 s). Full frontend audit is now **14 moderate / 2 high**; production-only **4 moderate / 2 high**. This is an installed dependency change, not a Forge deployment; previous root audit **15 moderate / 2 high / 2 critical**. [Dependency triage](integration/DEPENDENCY_TRIAGE.md) explains pinned transitive versions. CORE records Zod risk acceptance for the hackathon; this is not remediation or independently verified mitigation. Eleven missing root license texts/custom terms still require review. No security/legal clearance is claimed.
 
 Follow-up check after merging `41c6c59` on 2026-11-02: 19 CORE, 3 contract, 8 simulation, 42 frontend unit and 51 browser tests passed (browser run 39.7 s). Root/frontend TypeScript, frontend lint, formatting and build passed. No authored backend change or deployment was performed by EXPERIENCE; the Rovo change is merged from CORE. Historical browser captures were preserved rather than overwritten by this verification run.
+
+
+The new safety/sample frontend is verified locally and not deployed by EXPERIENCE. CORE reports backend development 4.12.0/4.13.0 in its handoff; older hosted reports below concern earlier frontend candidates. Creation previews and navigation never mutate Jira; confirmation invokes the real sample resolver only on an accessible existing project. Local fixture behavior stays isolated.

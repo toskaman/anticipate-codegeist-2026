@@ -1,16 +1,16 @@
 {
   "workstream": "EXPERIENCE",
   "branch": "feat/product-experience",
-  "revisionBase": "4c68d90fc0990b751cb7bfa7dc6d0f2a77f60c12",
-  "revisionScope": "Frontend source unchanged; frontend-only ProseMirror view/model overrides verified locally; CORE through 41c6c59",
+  "revisionBase": "f2c19f1ce13dc731b3f35d34bb961c6cd061f959",
+  "revisionScope": "CORE handoff: evidence refusal reason/diff, EVIDENCE_CHANGED status, read-only freshness and preview/confirmed Jira sample preparation",
   "contractVersion": "0.2.0",
   "status": "VERIFIED_LOCAL_READY_FOR_HOSTED_VALIDATION",
   "tests": {
-    "unit": 42,
-    "browser": 51,
+    "unit": 44,
+    "browser": 59,
     "coreScreenThemeViewportCases": 42,
     "prototypeScreenThemeViewportCases": 42,
-    "core": 19,
+    "core": 31,
     "contracts": 3,
     "simulation": 8,
     "typecheck": "PASS",
@@ -21,11 +21,11 @@
   "forgeVerification": "CORE_REPORTED_PRODUCTION_2.1.0_CLEAN_SITE_INSTALL_AND_EMPTY_STATE; NOT_INDEPENDENTLY_VERIFIED_BY_EXPERIENCE",
   "evidenceMode": "MOCK_TRANSPORT/LOCAL only; no real Jira action performed",
   "next": [
-    "Independent hosted frontend journey still requires working authenticated browser control",
-    "CORE owns policy accuracy and dependency release decisions; advisory remediation remains open",
-    "Workflow validator remains deferred"
+    "CORE validates the new frontend in an authenticated development installation; no deployment performed here",
+    "Review the sample relation label mismatch noted in EXPERIENCE_CONTINUOUS_SAFETY.md",
+    "Keep unrelated newer CORE fc89faa work and external UI redesign output separate until reviewed"
   ],
-  "coreRef": "1225a72",
+  "coreRef": "f2c19f1",
   "deploymentRequest": {
     "status": "DEPLOYED_REPORTED_BY_CORE",
     "executor": "CORE",
@@ -149,5 +149,13 @@
     "unitTests": 42,
     "evidence": "evidence/experience/dependency-remediation/audit-LOCAL.json",
     "hostedCompatibility": "NOT_INDEPENDENTLY_VERIFIED"
+  },
+  "currentFrontendHandoff": {
+    "status": "VERIFIED_LOCAL_READY_FOR_CORE_HOSTED_VALIDATION",
+    "report": "docs/coordination/EXPERIENCE_CONTINUOUS_SAFETY.md",
+    "coreBaseline": "f2c19f1",
+    "browserSeconds": 44.8,
+    "realJiraWritesPerformedByExperience": false,
+    "forgeDeploymentPerformedByExperience": false
   }
 }

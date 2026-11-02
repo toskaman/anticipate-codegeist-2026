@@ -12,6 +12,60 @@ import {
 } from "../../tests/core-test-data";
 
 describe("CORE 0.2.0 Forge boundary", () => {
+  it("retains evidence refusal details and accepts a blocked Passport", async () => {
+    const details = {
+      addedEdges: [
+        {
+          from: "issue:ABC-2",
+          to: "issue:ABC-1",
+          kind: "DEPENDS_ON",
+          status: "CONFIRMED",
+        },
+      ],
+      removedEdges: [],
+      becameUnknown: ["issue:ABC-3"],
+    };
+    await expect(
+      new ForgeClient(async () => ({
+        ok: false,
+        meta,
+        error: {
+          code: "EVIDENCE_CHANGED",
+          message: "New dependency found",
+          details,
+          requestId: meta.requestId,
+          retryable: false,
+        },
+      })).request("executeApprovedPlan", {
+        planId: plan.planId,
+        idempotencyKey: "execution-key-0001",
+      }),
+    ).rejects.toMatchObject({ code: "EVIDENCE_CHANGED", details });
+    const blocked = { ...plan, status: "EVIDENCE_CHANGED" as const };
+    await expect(
+      new ForgeClient(async () => response(passport(blocked))).request(
+        "getPreventionPassport",
+        { planId: plan.planId },
+      ),
+    ).resolves.toMatchObject({ plan: { status: "EVIDENCE_CHANGED" } });
+  });
+  it("refuses sample data for another project before UI consumption", async () => {
+    await expect(
+      new ForgeClient(async () =>
+        response({
+          projectKey: "OTHER",
+          issueType: "Task",
+          canCreate: true,
+          missingPermissions: [],
+          items: [],
+          links: [],
+          rootIssueKey: null,
+          replacementIssueKey: null,
+          note: "preview",
+        }),
+      ).request("previewSampleProject", { projectKey: "ABC" }),
+    ).rejects.toMatchObject({ code: "INVALID_RESPONSE" });
+  });
   it("uses exact resolver keys, validates input and parses a LIVE envelope", async () => {
     const transport = vi.fn(async () => response(capabilities));
     const client = new ForgeClient(transport);
