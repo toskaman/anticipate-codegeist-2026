@@ -1,0 +1,105 @@
+{
+  "timestampUTC": "2026-11-02T19:54:42.916Z",
+  "mode": "LOCAL development synthetic fixture",
+  "browser": "153.0.8010.12",
+  "nodes": 500,
+  "dependencyNodes": 499,
+  "edges": 501,
+  "viewport": {
+    "width": 1440,
+    "height": 1000
+  },
+  "scope": "Warm dataset switch to 21 visible DOM nodes plus two animation frames; 5 samples; interactions include Playwright overhead. Heap samples are observations, not peak allocation or leak certification.",
+  "initialFixtureLoadMs": 1207.2405140000046,
+  "renderSamplesMs": [
+    156.5048839999945,
+    167.69163299998036,
+    149.05681900001946,
+    94.426781999995,
+    103.47806500000297
+  ],
+  "interactions": [
+    {
+      "operation": "search 498",
+      "ms": 39.17336200000136
+    },
+    {
+      "operation": "select 498",
+      "ms": 63.91142499999842
+    },
+    {
+      "operation": "search 249",
+      "ms": 55.34907699999167
+    },
+    {
+      "operation": "select 249",
+      "ms": 60.621638999989955
+    },
+    {
+      "operation": "search 124",
+      "ms": 31.388956999988295
+    },
+    {
+      "operation": "select 124",
+      "ms": 73.55202899998403
+    },
+    {
+      "operation": "search 497",
+      "ms": 38.49479599998449
+    },
+    {
+      "operation": "select 497",
+      "ms": 51.064643999998225
+    },
+    {
+      "operation": "search 0",
+      "ms": 38.088512000016635
+    },
+    {
+      "operation": "select 0",
+      "ms": 61.81598099999246
+    },
+    {
+      "operation": "next page",
+      "ms": 90.53538700001081
+    }
+  ],
+  "before": {
+    "heap": {
+      "usedSize": 19473560,
+      "totalSize": 20279296,
+      "embedderHeapUsedSize": 1489128,
+      "backingStorageSize": 13020425
+    },
+    "dom": {
+      "documents": 1,
+      "nodes": 659,
+      "jsEventListeners": 241
+    }
+  },
+  "renderHeap": {
+    "usedSize": 30369452,
+    "totalSize": 44920832,
+    "embedderHeapUsedSize": 12030848,
+    "backingStorageSize": 13028945
+  },
+  "renderDom": {
+    "documents": 1,
+    "nodes": 3882,
+    "jsEventListeners": 1951
+  },
+  "after": {
+    "heap": {
+      "usedSize": 22107620,
+      "totalSize": 23425024,
+      "embedderHeapUsedSize": 2848992,
+      "backingStorageSize": 13022242
+    },
+    "dom": {
+      "documents": 1,
+      "nodes": 924,
+      "jsEventListeners": 333
+    }
+  },
+  "errors": []
+}

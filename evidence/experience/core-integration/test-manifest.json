@@ -1,0 +1,24 @@
+{
+  "status": "VERIFIED_LOCAL only",
+  "coreRef": "39b59df",
+  "mergeCommit": "9763165",
+  "frontendUnitTests": 42,
+  "browserTests": 41,
+  "coreViewCases": 42,
+  "prototypeViewCases": 42,
+  "coreTests": 12,
+  "contractTests": 3,
+  "simulationTests": 8,
+  "checks": [
+    "clean frontend npm ci --ignore-scripts",
+    "typecheck (root and frontend)",
+    "lint",
+    "format:check",
+    "test (root and frontend)",
+    "contracts and simulation tests",
+    "test:browser (includes production build)"
+  ],
+  "hosted": false,
+  "realJiraMutations": 0,
+  "notes": "Native browser captures use controlled MOCK TRANSPORT; no real Forge/Jira verification. See CORE_CLIENT_INTEGRATION.md."
+}

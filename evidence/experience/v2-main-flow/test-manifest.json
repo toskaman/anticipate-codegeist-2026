@@ -1,0 +1,36 @@
+{
+  "timestampUTC": "2026-11-02T00:09:26.7807236Z",
+  "revisionBase": "a1bdb38",
+  "revisionScope": "working tree before main Plan/Passport migration commit",
+  "mode": "LOCAL/MOCK",
+  "checks": [
+    {
+      "command": "npm test",
+      "tests": 31,
+      "result": "PASS"
+    },
+    {
+      "command": "npm run test:browser",
+      "tests": 18,
+      "result": "PASS"
+    },
+    {
+      "command": "npm run test:browser -- --grep screen accessibility.*390",
+      "tests": 2,
+      "result": "PASS"
+    },
+    {
+      "command": "npm run lint / format:check / typecheck / build",
+      "result": "PASS"
+    }
+  ],
+  "report": "output/pdf/anticipate-demo-passport.pdf",
+  "render": "evidence/passport-final-1.png",
+  "invariants": [
+    "No simulated approval/execution controls in main flow",
+    "Fixture approval requires live backend",
+    "Passport timeline has no invented approval or verified execution",
+    "Snapshot/scenario mismatch blocks export"
+  ],
+  "forgeHosted": "NOT_VERIFIED"
+}

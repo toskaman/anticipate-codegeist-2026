@@ -1,0 +1,35 @@
+{
+  "timestampUTC": "2026-11-02T00:28:57.4852092Z",
+  "revisionBase": "4365b83",
+  "revisionScope": "working tree before reliability/research commit",
+  "mode": "LOCAL/MOCK",
+  "checks": [
+    {
+      "tests": 41,
+      "result": "PASS",
+      "command": "npm test"
+    },
+    {
+      "tests": 21,
+      "result": "PASS",
+      "command": "npm run test:browser"
+    },
+    {
+      "result": "PASS",
+      "command": "npm run lint / format:check / typecheck / build"
+    },
+    {
+      "result": "INVENTORY_GENERATED_WITH_REVIEW_ITEMS",
+      "command": "npm run licenses:inventory"
+    }
+  ],
+  "observations": "evidence/experience/v2-reliability/browser-observations-LOCAL.json",
+  "licenses": "evidence/experience/v2-research/license-inventory-LOCAL.json",
+  "limits": [
+    "30 cycles are not a long soak; heap growth remains an observation, not cleared as leak-free",
+    "Five browser search samples include automation overhead",
+    "Vendor-documented competitor capabilities were not trial-tested",
+    "License inventory is not legal certification; ten runtime paths need root-text review"
+  ],
+  "forgeHosted": "NOT_VERIFIED"
+}

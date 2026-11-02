@@ -1,0 +1,37 @@
+{
+  "timestampUTC": "2026-11-02T00:23:09.3962994Z",
+  "revisionBase": "bef5978",
+  "revisionScope": "working tree before graph milestone commit",
+  "mode": "LOCAL/MOCK",
+  "checks": [
+    {
+      "tests": 41,
+      "result": "PASS",
+      "command": "npm test"
+    },
+    {
+      "tests": 20,
+      "result": "PASS",
+      "command": "npm run test:browser"
+    },
+    {
+      "tests": 1,
+      "result": "PASS",
+      "command": "npm run benchmark:graph"
+    },
+    {
+      "command": "npm run lint / format:check / typecheck / build",
+      "result": "PASS"
+    }
+  ],
+  "evidence": [
+    "evidence/experience/v2-graph/model-performance-LOCAL.json",
+    "evidence/experience/v2-graph/large-filtered-MOCK-1280.png",
+    "evidence/evidence-graph-dark-1440.png"
+  ],
+  "limits": [
+    "Synthetic model benchmark excludes browser, network and Forge",
+    "Renderer omits relationships outside the disclosed bounded window",
+    "Shared schemas and live provenance await CORE"
+  ]
+}

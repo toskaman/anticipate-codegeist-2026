@@ -1,0 +1,42 @@
+{
+  "timestampUTC": "2026-11-02T00:01:08.6006768Z",
+  "revisionBase": "c508eca",
+  "revisionScope": "working tree before action-review milestone commit",
+  "mode": "LOCAL/MOCK",
+  "checks": [
+    {
+      "command": "npm test",
+      "result": "PASS",
+      "tests": 28
+    },
+    {
+      "command": "npm run test:browser",
+      "result": "PASS",
+      "tests": 18
+    },
+    {
+      "result": "PASS",
+      "command": "npm run lint"
+    },
+    {
+      "result": "PASS",
+      "command": "npm run typecheck"
+    },
+    {
+      "result": "PASS",
+      "command": "npm run format:check"
+    },
+    {
+      "result": "PASS",
+      "command": "npm run build (via browser suite)"
+    }
+  ],
+  "screenshots": [
+    "evidence/experience/v2-action-review/approval-requires-backend-MOCK-1280.png"
+  ],
+  "forgeHosted": "NOT_VERIFIED",
+  "limitations": [
+    "MOCK backend response tests do not prove real Jira writes",
+    "Legacy development plan and adapters remain to migrate"
+  ]
+}
