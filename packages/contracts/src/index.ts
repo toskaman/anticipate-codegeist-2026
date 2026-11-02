@@ -7,7 +7,7 @@ import { z } from 'zod';
 
 /** Wire version stays 0.2.0: the EXPERIENCE client pins it exactly. 0.3 additions are additive and listed in CONTRACT_FEATURES. */
 export const CONTRACT_VERSION = '0.2.0';
-export const CONTRACT_FEATURES = ['continuous-decision-safety', 'sample-project', 'evidence-coverage'] as const;
+export const CONTRACT_FEATURES = ['continuous-decision-safety', 'sample-project', 'evidence-coverage', 'service-decommission', 'workflow-validator'] as const;
 
 // ---------- primitives ----------
 export const Id = z.string().min(1).max(200);
@@ -128,7 +128,7 @@ export type ScenarioDefinition = z.infer<typeof ScenarioDefinition>;
 
 export const PolicyRule = z.object({
   ruleId: Id, description: z.string().max(500), severity: z.enum(['BLOCKER', 'HIGH', 'MEDIUM', 'LOW']),
-  type: z.enum(['NO_REMOVAL_WITH_ACTIVE_DEPENDENTS', 'REQUIRE_VERIFIED_TEST_FOR_IMPACTED', 'NO_UNKNOWN_IMPACTS_ON_REMOVAL'])
+  type: z.enum(['NO_REMOVAL_WITH_ACTIVE_DEPENDENTS', 'REQUIRE_VERIFIED_TEST_FOR_IMPACTED', 'NO_UNKNOWN_IMPACTS_ON_REMOVAL', 'NO_DECOMMISSION_WITH_OPEN_WORK'])
 });
 export type PolicyRule = z.infer<typeof PolicyRule>;
 

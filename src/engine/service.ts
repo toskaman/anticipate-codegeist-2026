@@ -58,6 +58,11 @@ export function createService(d: Deps) {
     url: d.jira.siteUrl() ? `${d.jira.siteUrl()!.replace(/\/$/, '')}/browse/${i.key}` : null
   });
 
+  /** Latest decision state per changed issue — read by the Jira workflow validator (no crawl at transition time). */
+  async function recordDecision(rec: PlanRec) {
+    await d.store.set(`decision:${rec.rootIssueKey}`, { planId: rec.plan.planId, scenarioId: rec.plan.scenarioId, status: rec.plan.status, at: iso() });
+  }
+
   /** Re-extract the plan's evidence neighbourhood live and diff it (Continuous Decision Safety). */
   async function evidenceDrift(rec: PlanRec, snap: SnapRec): Promise<EvidenceDrift> {
     const checkedAt = iso();
@@ -83,6 +88,7 @@ export function createService(d: Deps) {
     rec.plan = { ...rec.plan, status: 'EVIDENCE_CHANGED' };
     rec.timeline.push({ at: iso(), event: `Evidence changed before ${stage}: ${drift.reason}`.slice(0, 200) });
     await d.store.set(K.plan(rec.plan.planId), rec);
+    await recordDecision(rec);
     throw new AppError('EVIDENCE_CHANGED', drift.reason, false, { addedEdges: drift.addedEdges, removedEdges: drift.removedEdges, becameUnknown: drift.becameUnknown });
   }
 
@@ -242,6 +248,7 @@ export function createService(d: Deps) {
         rec.plan = { ...rec.plan, status: verified === out.length ? 'COMPLETED' : verified === 0 ? 'FAILED' : 'PARTIAL' };
         rec.timeline.push({ at: iso(), event: `Execution finished: ${verified}/${out.length} verified` });
         await d.store.set(K.plan(input.planId), rec);
+        await recordDecision(rec);
         return out;
       } finally {
         const held = await d.store.get<typeof lease>(lockKey);
