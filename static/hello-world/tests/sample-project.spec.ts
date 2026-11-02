@@ -1,10 +1,16 @@
 import { test, expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
-import { capabilities, graph, response } from "./core-test-data";
+import { capabilities, graph, meta, response } from "./core-test-data";
 
 async function sampleCore(
   page: Page,
-  mode: "success" | "denied" | "partial" | "timeout" | "empty" = "success",
+  mode:
+    | "success"
+    | "denied"
+    | "partial"
+    | "timeout"
+    | "empty"
+    | "conflict" = "success",
   { openPanel = true, selectProject = true } = {},
 ) {
   const calls: { operation: string; input: Record<string, unknown> }[] = [];
@@ -82,6 +88,22 @@ async function sampleCore(
         break;
       case "createSampleProject":
         expect(call.input).toEqual({ projectKey: "ABC", confirm: true });
+        if (mode === "conflict") {
+          // Another creation holds the project lease; nothing written by us.
+          await route.fulfill({
+            json: {
+              ok: false,
+              meta,
+              error: {
+                code: "CONFLICT",
+                message: "Sample creation already running for ABC.",
+                requestId: meta.requestId,
+                retryable: false,
+              },
+            },
+          });
+          return;
+        }
         created = true;
         data = {
           ...sample,
@@ -424,4 +446,36 @@ test("display and accessibility menu applies theme and preferences everywhere an
     "data-contrast",
     "system",
   );
+});
+
+test("sample creation already running (CONFLICT) is re-checked like the slow case, never resubmitted", async ({
+  page,
+}) => {
+  const calls = await sampleCore(page, "conflict");
+  await page
+    .getByRole("button", { name: "Preview sample data", exact: true })
+    .click();
+  await page
+    .getByRole("button", {
+      name: "Create missing sample data in Jira",
+      exact: true,
+    })
+    .click();
+  await page
+    .getByRole("button", { name: "Create sample data", exact: true })
+    .click();
+  await expect(
+    page.getByText("Another sample creation is already running", {
+      exact: false,
+    }),
+  ).toBeVisible();
+  await expect(page.getByText("CONFLICT")).toHaveCount(0);
+  await expect(page.getByRole("alert")).toHaveCount(0);
+  expect(
+    calls.filter((call) => call.operation === "createSampleProject"),
+  ).toHaveLength(1);
+  // One preview before, one automatic read-only recheck after.
+  expect(
+    calls.filter((call) => call.operation === "previewSampleProject"),
+  ).toHaveLength(2);
 });

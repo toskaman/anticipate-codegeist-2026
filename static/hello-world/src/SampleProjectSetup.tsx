@@ -79,12 +79,17 @@ export default function SampleProjectSetup({
       // First-time creation can outlast the response window (12 sequential
       // Jira writes). The write may still finish server side, so instead of
       // surfacing TIMEOUT, re-read current Jira state with the read-only
-      // preview. The write itself is never retried.
+      // preview. The write itself is never retried. CONFLICT means another
+      // creation for this project is already running: same safe handling.
       if (
         create &&
         error instanceof CoreClientError &&
-        ["TIMEOUT", "NETWORK_ERROR"].includes(error.code)
+        ["TIMEOUT", "NETWORK_ERROR", "CONFLICT"].includes(error.code)
       ) {
+        const running =
+          error.code === "CONFLICT"
+            ? "Another sample creation is already running for this project"
+            : "Sample creation is taking longer than usual and may still be running in Jira";
         try {
           const current = await client.request(
             "previewSampleProject",
@@ -97,16 +102,17 @@ export default function SampleProjectSetup({
           setRecheckNote(
             current.items.some((item) => item.status === "TO_CREATE") ||
               current.links.some((link) => link.status === "TO_CREATE")
-              ? "Sample creation is taking longer than usual and may still be running in Jira. Current Jira state is shown below; preview again in a few seconds before creating anything else."
-              : "Sample creation took longer than usual. Jira was checked again and the sample data shown below is in place.",
+              ? `${running}. Current Jira state is shown below; preview again in a few seconds before creating anything else.`
+              : error.code === "CONFLICT"
+                ? "Another sample creation for this project has finished. Jira was checked again and the sample data shown below is in place."
+                : "Sample creation took longer than usual. Jira was checked again and the sample data shown below is in place.",
           );
           return;
         } catch {
           if (abort.signal.aborted) return;
           setFailure({
             code: "STILL_RUNNING",
-            message:
-              "Sample creation is taking longer than usual and may still be running in Jira. Preview the sample data again in a few seconds. No result is assumed.",
+            message: `${running}. Preview the sample data again in a few seconds. No result is assumed.`,
             mutation: true,
             retryable: false,
             context: "sample",

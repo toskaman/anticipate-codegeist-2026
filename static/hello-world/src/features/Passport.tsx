@@ -75,6 +75,14 @@ function approvalTargets(ids: string[], actionOf: ActionLookup) {
   return keys.length > 12 ? `${shown} and ${keys.length - 12} more` : shown;
 }
 
+const retentionCopy = {
+  LIVE: "Full snapshot available until",
+  EXPIRED_SNAPSHOT:
+    "The full snapshot has expired; this record keeps the decision as it was reviewed then. It does not reflect Jira today.",
+  ARCHIVED:
+    "The full snapshot was archived; only minimized provenance (counts and a digest) is kept. It does not reflect Jira today.",
+} as const;
+
 export default function Passport({ w }: { w: Workflow }) {
   const p = w.passport;
   const evidence = useMemo(() => {
@@ -113,6 +121,7 @@ export default function Passport({ w }: { w: Workflow }) {
       </>
     );
   const plan = p.plan;
+  const historical = !!p.evidence && p.evidence.state !== "LIVE";
   const status = plan ? planStatusCopy[plan.status] : null;
   const selected = p.comparison.results.find(
     (r) => r.scenarioId === plan?.scenarioId,
@@ -164,8 +173,33 @@ export default function Passport({ w }: { w: Workflow }) {
               {p.mode === "LIVE" ? "Live mode record" : "Demo fixture"}
             </Badge>
             {status && <Badge tone={status.tone}>{status.label}</Badge>}
+            {historical && (
+              <Badge tone="info" icon="history">
+                Historical record
+              </Badge>
+            )}
           </div>
         </header>
+        {p.evidence && (
+          <p className="ax-report__retention" data-testid="passport-retention">
+            <Icon name={historical ? "history" : "clock"} size={14} />
+            <span>
+              {historical ? (
+                <>
+                  <strong>
+                    Evidence as reviewed on {formatTime(p.evidence.capturedAt)}.
+                  </strong>{" "}
+                  {retentionCopy[p.evidence.state]}
+                </>
+              ) : (
+                <>
+                  Evidence captured {formatTime(p.evidence.capturedAt)}.{" "}
+                  {retentionCopy.LIVE} {formatTime(p.evidence.expiresAt)}.
+                </>
+              )}
+            </span>
+          </p>
+        )}
         <Notice tone="neutral" icon="info" title="About this record">
           {p.disclaimer}
         </Notice>
@@ -206,6 +240,7 @@ export default function Passport({ w }: { w: Workflow }) {
             Mode {p.mode} · snapshot {p.snapshotId} · plan {plan?.planId} ·
             scenario {plan?.scenarioId}
             {plan && <> · hash {plan.planHash}</>} · passport {p.passportId}
+            {p.evidence && <> · evidence digest {p.evidence.snapshotDigest}</>}
           </p>
         </Section>
         <Section n="02" title="Evidence summary">
@@ -221,6 +256,17 @@ export default function Passport({ w }: { w: Workflow }) {
                 </div>
               ))}
             </div>
+          ) : p.evidence ? (
+            <p>
+              Recorded at decision time: {p.evidence.nodeCount} records,{" "}
+              {p.evidence.edgeCount} relationships ({p.evidence.causalEdgeCount}{" "}
+              causal). Confirmed / inferred / unknown breakdown needs the full
+              snapshot, which{" "}
+              {p.evidence.state === "LIVE"
+                ? "is not loaded in this session"
+                : "is no longer available"}
+              .
+            </p>
           ) : (
             <p className="ax-muted">
               Relationship counts are shown only while the matching snapshot is
