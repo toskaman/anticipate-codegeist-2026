@@ -4,6 +4,8 @@ import { Badge } from "../components/ui";
 import { stages, stageState, stageStateText, stageFor } from "./journey";
 import type { Workflow } from "./useCoreWorkflow";
 import { planStatusCopy, scenarioName } from "./copy";
+import { AccessibilityMenu } from "../components/AccessibilityControls";
+import { preferenceAttributes, type PreferencesApi } from "./preferences";
 
 function remaining(expiresAt: string) {
   const ms = Date.parse(expiresAt) - Date.now();
@@ -45,10 +47,14 @@ function ExpiryChip({
 export default function AppShell({
   w,
   theme,
+  prefs,
+  onStartDemo,
   children,
 }: {
   w: Workflow;
   theme: string;
+  prefs: PreferencesApi;
+  onStartDemo?: () => void;
   children: React.ReactNode;
 }) {
   const current = stageFor(w.page);
@@ -57,7 +63,11 @@ export default function AppShell({
   const settings = stages.find((s) => s.page === "Settings")!;
   const connected = w.resource.status === "ready";
   return (
-    <div className="ax-app" data-theme={theme}>
+    <div
+      className="ax-app"
+      data-theme={theme}
+      {...preferenceAttributes(prefs.prefs)}
+    >
       <a
         className="ax-skip"
         href="#main"
@@ -162,6 +172,18 @@ export default function AppShell({
             <span aria-current="location">{current.page}</span>
           </div>
           <div className="ax-topbar__status">
+            {onStartDemo && (
+              <button
+                type="button"
+                className="ax-btn ax-btn--primary ax-btn--sm ax-topbar__demo"
+                disabled={!!w.busy}
+                onClick={onStartDemo}
+              >
+                <Icon name="play" size={14} />
+                Start demo
+              </button>
+            )}
+            <AccessibilityMenu api={prefs} />
             {connected ? (
               <Badge tone="success" icon="dot" size="sm">
                 Connected · live mode · CORE 0.2.0

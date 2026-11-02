@@ -13,6 +13,7 @@ import PreventionPlan from "./features/PreventionPlan";
 import Passport from "./features/Passport";
 import Settings from "./features/Settings";
 import { stageFor } from "./app/journey";
+import { resolveTheme, usePreferences } from "./app/preferences";
 
 export { simulationRequest } from "./app/workflow";
 
@@ -27,9 +28,24 @@ export default function CoreWorkspace({
   hostNotice?: string;
 }) {
   const w = useCoreWorkflow(client);
+  const prefs = usePreferences();
+  const resolved = resolveTheme(prefs.prefs, theme);
+  // Incremented to ask Mission Control to open and focus the demo setup.
+  const [demoRequest, setDemoRequest] = React.useState(0);
   const ready = w.resource.status === "ready";
+  const startDemo = () => {
+    if (w.page !== "Mission Control") w.actions.go("Mission Control");
+    setDemoRequest((n) => n + 1);
+  };
   return (
-    <AppShell w={w} theme={theme}>
+    <AppShell
+      w={w}
+      theme={resolved}
+      prefs={prefs}
+      onStartDemo={
+        ready && w.allowed("previewSampleProject") ? startDemo : undefined
+      }
+    >
       {hostNotice && w.page !== "Settings" && (
         <p className="ax-host-note">
           <Icon name="info" size={13} />
@@ -111,14 +127,26 @@ export default function CoreWorkspace({
             </Notice>
           )}
           <div className="ax-page" key={w.page}>
-            {w.page === "Mission Control" && <MissionControl w={w} />}
+            {w.page === "Mission Control" && (
+              <MissionControl
+                w={w}
+                demoRequest={demoRequest}
+                onStartDemo={startDemo}
+              />
+            )}
             {w.page === "Evidence Graph" && <EvidencePage w={w} />}
             {w.page === "Scenario Lab" && <ScenarioLab w={w} />}
             {w.page === "Decision Firewall" && <DecisionFirewall w={w} />}
             {w.page === "Prevention Plan" && <PreventionPlan w={w} />}
             {w.page === "Prevention Passport" && <Passport w={w} />}
             {w.page === "Settings" && (
-              <Settings w={w} theme={theme} hostNotice={hostNotice} />
+              <Settings
+                w={w}
+                theme={resolved}
+                hostTheme={theme}
+                prefs={prefs}
+                hostNotice={hostNotice}
+              />
             )}
           </div>
         </>
