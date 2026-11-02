@@ -66,7 +66,7 @@ export async function extractGraph(jira: JiraPort, rootKey: string, o: ExtractOp
       const testLike = /test/i.test(is.issueType);
       nodes.set(nid, {
         id: nid, kind: testLike ? 'TEST' : 'ISSUE', label: `${is.key} ${is.summary}`.slice(0, 500), status: 'CONFIRMED',
-        attributes: { status: is.status, issueType: is.issueType, projectKey: is.projectKey, updated: is.updated },
+        attributes: { status: is.status, statusCategory: is.statusCategory ?? null, issueType: is.issueType, projectKey: is.projectKey, updated: is.updated },
         references: [ref(is.key, 'jira.issue', issueUrl(is.key))]
       });
       for (const c of is.components) {

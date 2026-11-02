@@ -8,4 +8,4 @@ Plan (only after P0 end-to-end works, on an isolated test workflow, with rollbac
 3. Missing/expired snapshot → pass with a warning (never block on our own outage), documented.
 4. Rollback = remove the validator from the test workflow; the module is inert elsewhere.
 
-Status: DEFERRED. Must be verified against current Forge docs and a real test workflow before claiming it.
+Status: IMPLEMENTED (src/validator.ts), DEPLOYED_DEV, UNIT_TESTED; hosted attachment to a test workflow pending (admin action). Fail-open availability policy chosen so an ANTICIPATE outage never blocks a team. Must be verified against current Forge docs and a real test workflow before claiming it.
