@@ -9,28 +9,32 @@ import { issueNodeId } from './jira/extractor';
 import type { Deps } from './core/ports';
 import { AppError } from './core/errors';
 
-interface ActionPayload { issueKey?: string; replacementIssueKey?: string; planId?: string; context?: { accountId?: string; siteUrl?: string } }
+interface ActionPayload { issueKey?: string; replacementIssueKey?: string; planId?: string; context?: { accountId?: string; siteUrl?: string; principal?: { accountId?: string } } }
+interface ActionContext { accountId?: string; principal?: { accountId?: string } }
+/** Forge may deliver the invoking user in the payload context or in the second handler argument. */
+export const actorOf = (p: ActionPayload, c?: ActionContext): string | null =>
+  p?.context?.accountId ?? p?.context?.principal?.accountId ?? c?.principal?.accountId ?? c?.accountId ?? null;
 const KEY = /^[A-Z][A-Z0-9_]+-[0-9]+$/;
 
 export function createRovoActions(deps: (p: ActionPayload) => Deps) {
-  const ctxOf = (p: ActionPayload) => ({ requestId: deps(p).newId(), accountId: p.context?.accountId ?? null, installationId: 'rovo' });
-  const safe = (fn: (p: ActionPayload) => Promise<string>) => async (p: ActionPayload) => {
-    try { return await fn(p ?? {}); } catch (e) { return `ANTICIPATE could not complete this request: ${e instanceof AppError ? `${e.code} — ${e.message}` : 'unexpected error'}.`; }
+  const ctxOf = (p: ActionPayload, c?: ActionContext) => ({ requestId: deps(p).newId(), accountId: actorOf(p, c), installationId: 'rovo' });
+  const safe = (fn: (p: ActionPayload, c?: ActionContext) => Promise<string>) => async (p: ActionPayload, c?: ActionContext) => {
+    try { return await fn(p ?? {}, c); } catch (e) { return `ANTICIPATE could not complete this request: ${e instanceof AppError ? `${e.code} — ${e.message}` : 'unexpected error'}.`; }
   };
   return {
-    getGraph: safe(async (p) => {
+    getGraph: safe(async (p, c) => {
       if (!p.issueKey || !KEY.test(p.issueKey)) throw new AppError('VALIDATION', 'issueKey must look like ABC-123');
       const svc = createService(deps(p));
-      const g = await svc.getGraphSnapshot(ctxOf(p), { projectId: p.issueKey.split('-')[0]!, rootIssueKey: p.issueKey, source: 'JIRA', maxDepth: 3 });
+      const g = await svc.getGraphSnapshot(ctxOf(p, c), { projectId: p.issueKey.split('-')[0]!, rootIssueKey: p.issueKey, source: 'JIRA', maxDepth: 3 });
       const count = (s: string) => g.edges.filter((e) => e.status === s).length;
       return [`Evidence graph for ${p.issueKey} (snapshot ${g.snapshotId}, ${g.truncated ? 'truncated' : 'complete within limits'}):`,
         `${g.nodes.length} items, ${g.edges.length} relations — ${count('CONFIRMED')} confirmed, ${count('INFERRED')} inferred, ${count('UNKNOWN')} unknown.`,
         ...g.edges.filter((e) => e.kind === 'DEPENDS_ON' || e.kind === 'USES').slice(0, 20).map((e) => `- ${e.from.replace('issue:', '')} ${e.kind} ${e.to.replace('issue:', '')} [${e.status}]`)].join('\n');
     }),
-    simulateRetirement: safe(async (p) => {
+    simulateRetirement: safe(async (p, actx) => {
       if (!p.issueKey || !KEY.test(p.issueKey)) throw new AppError('VALIDATION', 'issueKey must look like ABC-123');
       const svc = createService(deps(p));
-      const ctx = ctxOf(p);
+      const ctx = ctxOf(p, actx);
       const g = await svc.getGraphSnapshot(ctx, { projectId: p.issueKey.split('-')[0]!, rootIssueKey: p.issueKey, source: 'JIRA', maxDepth: 3 });
       const repl = p.replacementIssueKey && KEY.test(p.replacementIssueKey) && g.nodes.some((n) => n.id === issueNodeId(p.replacementIssueKey!)) ? issueNodeId(p.replacementIssueKey) : null;
       const c = await svc.compareScenarios(ctx, { snapshotId: g.snapshotId, change: { issueKey: p.issueKey, targetNodeId: issueNodeId(p.issueKey), description: `Retire ${p.issueKey}` },
@@ -40,9 +44,9 @@ export function createRovoActions(deps: (p: ActionPayload) => Deps) {
         c.recommendedScenarioId ? `Lowest-risk now: ${c.recommendedScenarioId}. ${c.recommendationReason}` : c.recommendationReason,
         'No Jira changes were made. Open ANTICIPATE to review and approve a prevention plan.'].join('\n');
     }),
-    getPassport: safe(async (p) => {
+    getPassport: safe(async (p, c) => {
       if (!p.planId) throw new AppError('VALIDATION', 'planId is required');
-      const pp = await createService(deps(p)).getPreventionPassport(ctxOf(p), { planId: p.planId });
+      const pp = await createService(deps(p)).getPreventionPassport(ctxOf(p, c), { planId: p.planId });
       return [`Prevention Passport ${pp.passportId} (${pp.mode})`, `Plan status: ${pp.plan?.status ?? 'none'}`,
         `Executions: ${pp.executions.map((e) => `${e.actionId}=${e.status}`).join(', ') || 'none'}`, `Open unknowns: ${pp.openUnknowns.length}`, pp.disclaimer].join('\n');
     })

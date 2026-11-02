@@ -17,3 +17,10 @@ it('rovo actions are read-only and explain results', async () => {
   expect(jira.writes).toEqual({ create: 0, link: 0, comment: 0, label: 0 });
   expect(standardScenarios('x', 'y')).toHaveLength(3);
 });
+
+import { actorOf } from '../src/rovo';
+it('resolves the invoking user from payload or handler context', () => {
+  expect(actorOf({ context: { accountId: 'a' } })).toBe('a');
+  expect(actorOf({}, { principal: { accountId: 'b' } })).toBe('b');
+  expect(actorOf({})).toBeNull();
+});
