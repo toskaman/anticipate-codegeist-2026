@@ -19,6 +19,10 @@
 - ✅ **Production déployée** (v2.0.0) avec ton autorisation. Web triggers de diagnostic/seed retirés du manifest.
 - ⛔ Lien d'installation pour les juges : l'activation du partage public (« Sharing with anyone ») a été bloquée par une protection de sécurité de mon côté. À faire par toi dans la console : Distribution → Edit → *Sharing with anyone*, puis remplir contact support, politique de confidentialité, et **déclarer « Yes » pour les données personnelles** (l'app stocke l'accountId de l'auteur des plans dans le stockage Forge).
 - ✅ 13:00 UTC — Production **2.1.0** = build `4c68d90` (frontend copine + backend corrigé). Dépôt GitHub passé en **public** (scan secrets : 0). **Partage activé (« Sharing with anyone »)** : support info@lepcpro.fr, politique de confidentialité + CGU sur GitHub, données personnelles = Yes. **Lien d'installation juges : `docs/submission/INSTALL_LINK.md`.**
+- ✅ 13:30 UTC — PR #1 (CORE) et PR #2 (EXPERIENCE) **fusionnées dans `main`** (CI verte). Identité de déploiement confirmée par ta copine.
+- ✅ **Lien juges testé sur un 2e site vierge** (`toskaman5962.atlassian.net`) : installation « successful » en production 2.1.0 (installation `32676e8b-…`), l'app s'ouvre et affiche l'état vide honnête « No projects available… no demonstration project is inserted ».
+- 🟡 Rovo MCP : module déployé en prod/dev ; test via client MCP externe non fait (nécessite activation admin « Connected apps » + client MCP OAuth). Étapes : admin.atlassian.com → Apps → Sites → site → Connected apps → ANTICIPATE → activer MCP, puis connecter un client à `https://mcp.atlassian.com/forge/39a28f48-c891-4d86-a3cf-c14409cbd29e`.
+- Décisions : tickets de démo TD-1…TD-8 **conservés** (tournage vidéo). zod : pas de correctif 3.x (seul zod 4 corrige) ; risque accepté car toutes les listes validées ont une taille max (`.max()`), documenté dans THREAT_MODEL. Validateur de workflow : reste DEFERRED (P1, non requis pour le jury).
 - URL de l'app : `https://one-atlas-euza.atlassian.net/apps/full-page/2ae8efdf-84b8-4851-a341-e4fa2499595c/hello-world/`
 - ⚠️ Le web trigger de diagnostic doit être retiré du manifest avant la version jury.
 

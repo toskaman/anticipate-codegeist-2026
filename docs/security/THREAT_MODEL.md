@@ -13,3 +13,6 @@
 | Secret leakage | no secrets in code; logs contain op/requestId/code/duration only | Old CLI token must be revoked by owner |
 | Demo data mistaken for real | fixture snapshot id prefix → `meta.mode = DEMO_FIXTURE`; fixture plans cannot execute | — |
 | Prompt injection via Rovo | actions are read-only, deterministic, no LLM inside ANTICIPATE | Rovo's own model behaviour is out of scope |
+
+## Dependency advisory: zod < 4.6.6 (GHSA-mrhx-c7xc-m3w5, memory exhaustion on oversized constrained collections)
+No 3.x fix exists. Mitigation: every array in the contracts has an explicit `.max()` bound and Forge limits resolver payload size. Accepted for the hackathon release; migrate contracts to zod 4 after Codegeist.
