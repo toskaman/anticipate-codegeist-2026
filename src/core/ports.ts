@@ -30,6 +30,6 @@ export interface Store {
   delete(key: string): Promise<void>;
 }
 
-export interface Deps { jira: JiraPort; store: Store; now: () => Date; newId: () => string; }
+export interface Deps { jira: JiraPort; store: Store; now: () => Date; newId: () => string; context?: import('../context/sources').ContextSource; }
 
 export interface Ctx { requestId: string; accountId: string | null; installationId: string; }

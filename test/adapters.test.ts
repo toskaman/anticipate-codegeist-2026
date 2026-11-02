@@ -16,7 +16,7 @@ vi.mock('@forge/kvs', () => ({ kvs: {
   delete: async (k: string) => { kv.delete(k); }
 } }));
 
-import { createForgeJira, forgeStore } from '../src/forge-adapters';
+import { createForgeJira, forgeStore, retentionFor } from '../src/forge-adapters';
 
 describe('Forge Jira adapter (mocked transport)', () => {
   beforeEach(() => { calls.length = 0; kv.clear(); });
@@ -56,6 +56,11 @@ describe('Forge Jira adapter (mocked transport)', () => {
     await createForgeJira(null).createLink({ typeName: 'Blocks', outwardKey: 'NEW-1', inwardKey: 'ROOT-1' });
     const b = JSON.parse(calls.at(-1)!.init.body!);
     expect(b.inwardIssue.key).toBe('NEW-1'); expect(b.outwardIssue.key).toBe('ROOT-1');
+  });
+  it('applies a bounded retention to every stored key', () => {
+    expect(retentionFor('snap:x')).toEqual({ value: 2, unit: 'DAYS' });
+    expect(retentionFor('lock:p')).toEqual({ value: 1, unit: 'DAYS' });
+    expect(retentionFor('plan:p')).toEqual({ value: 90, unit: 'DAYS' });
   });
   it('setIfAbsent is atomic via FAIL_IF_EXISTS', async () => {
     expect(await forgeStore.setIfAbsent('k', 1)).toBe(true);

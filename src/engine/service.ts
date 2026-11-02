@@ -16,6 +16,7 @@ import { DEFAULT_POLICIES } from './policies';
 import { actionMarker, buildPlan } from './plans';
 import { diffEvidence } from './drift';
 import { previewSample, createSample } from './sample';
+import { mergeSource, notConfiguredTwg } from '../context/sources';
 import type { EvidenceDrift } from '../../packages/contracts/src/index';
 
 export const CHANGE_LABEL = 'anticipate-change';
@@ -134,7 +135,11 @@ export function createService(d: Deps) {
       if (root.kind === 'forbidden') fail('PERMISSION_DENIED', `You cannot browse ${input.rootIssueKey}.`);
       if (root.kind === 'not_found') fail('NOT_FOUND', `${input.rootIssueKey} does not exist or is not visible to you.`);
       const snapshotId = `snap-${d.newId()}`;
-      const snapshot = await extractGraph(d.jira, input.rootIssueKey, { maxDepth: input.maxDepth, maxNodes: 200, snapshotId, projectId: input.projectId, now: d.now(), ttlHours: SNAPSHOT_TTL_HOURS });
+      const jiraOnly = await extractGraph(d.jira, input.rootIssueKey, { maxDepth: input.maxDepth, maxNodes: 200, snapshotId, projectId: input.projectId, now: d.now(), ttlHours: SNAPSHOT_TTL_HOURS });
+      const source = d.context ?? notConfiguredTwg;
+      const keys = jiraOnly.nodes.filter((n) => n.id.startsWith('issue:') && n.status !== 'UNKNOWN').map((n) => n.id.slice(6));
+      const extra = await source.fetch(keys).catch((e) => ({ state: 'UNAVAILABLE' as const, detail: `Teamwork Graph error: ${e instanceof Error ? e.message.slice(0, 200) : 'unknown'}`, objects: [], relations: [] }));
+      const snapshot = mergeSource(jiraOnly, extra);
       const projectKey = root.kind === 'ok' ? root.issue.projectKey : input.projectId;
       await d.store.set<SnapRec>(K.snap(snapshotId), { snapshot, owner: ctx.accountId, rootIssueKey: input.rootIssueKey, projectKey });
       return snapshot;

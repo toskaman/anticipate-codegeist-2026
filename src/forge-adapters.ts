@@ -105,11 +105,22 @@ export function adf(text: string) {
   return { type: 'doc', version: 1, content: text.split('\n').map((line) => ({ type: 'paragraph', content: line ? [{ type: 'text', text: line }] : [] })) };
 }
 
+/**
+ * Retention policy (Forge KVS TTL): storage never grows without bound.
+ * Snapshots are short-lived evidence; plans/executions/comparisons form the audit trail behind Prevention Passports.
+ */
+export function retentionFor(key: string): { value: number; unit: 'DAYS' } {
+  if (key.startsWith('snap:')) return { value: 2, unit: 'DAYS' };
+  if (key.startsWith('lock:') || key.startsWith('lock-takeover:')) return { value: 1, unit: 'DAYS' };
+  if (key.startsWith('idem:')) return { value: 7, unit: 'DAYS' };
+  return { value: 90, unit: 'DAYS' }; // plan:, exec:, cmp: (audit)
+}
+
 export const forgeStore: Store = {
   get: (k) => kvs.get(k),
-  set: (k, v) => kvs.set(k, v),
+  set: (k, v) => kvs.set(k, v, { ttl: retentionFor(k) }),
   async setIfAbsent(k, v) {
-    try { await kvs.set(k, v, { keyPolicy: 'FAIL_IF_EXISTS' }); return true; }
+    try { await kvs.set(k, v, { keyPolicy: 'FAIL_IF_EXISTS', ttl: retentionFor(k) }); return true; }
     catch (e) { if ((await kvs.get(k)) !== undefined) return false; throw e; }
   },
   delete: (k) => kvs.delete(k)
