@@ -12,7 +12,7 @@ const service = (req: ResolverRequest) => createService({ jira: createForgeJira(
 type Svc = ReturnType<typeof createService>;
 
 const ops: OperationName[] = ['getCapabilities', 'getPolicies', 'listProjects', 'getChangeCandidates', 'getGraphSnapshot', 'getEvidenceGraph', 'simulateChange',
-  'compareScenarios', 'generatePreventionPlan', 'approvePlan', 'executeApprovedPlan', 'getExecutionStatus', 'getPreventionPassport', 'checkPlanFreshness'];
+  'compareScenarios', 'generatePreventionPlan', 'approvePlan', 'executeApprovedPlan', 'getExecutionStatus', 'getPreventionPassport', 'checkPlanFreshness', 'previewSampleProject', 'createSampleProject'];
 
 for (const op of ops) {
   resolver.define(op, makeHandler(op, () => 'LIVE', newId, now, (ctx, input, req) => {

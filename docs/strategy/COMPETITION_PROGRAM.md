@@ -15,9 +15,9 @@ Scope: CORE/architecture only. UI is owned by the EXPERIENCE agent. Status words
 | **Continuous Decision Safety (new, this cycle)** | UNIT_TESTED, DEPLOYED_DEV 4.12.0, **VERIFIED_ON_REAL_JIRA** | see §K |
 | **Adversarial concurrency hardening (new)** | UNIT_TESTED | test/concurrency.test.ts |
 | Teamwork Graph | **BLOCKED** | requires Atlassian allowlisting of the app ID (support request) + new `read:graph:*` scopes |
-| Rovo agent (`rovo:agent`) | NOT_IMPLEMENTED | — |
+| Rovo agent "ANTICIPATE Decision Reviewer" (`rovo:agent`, 4 read-only actions, grounded prompt) | IMPLEMENTED, lint OK, DEPLOYED_DEV 4.13.0; **not yet visible in the Rovo @-mention list on one-atlas-euza** (indexing/enablement pending) | manifest.yml |
 | Jira workflow validator | NOT_IMPLEMENTED (design note docs/research/WORKFLOW_VALIDATOR.md) | — |
-| Judge sample-data bootstrap in-app | NOT_IMPLEMENTED (dev-only seed web trigger removed) | — |
+| Judge sample project (`previewSampleProject` read-only, `createSampleProject` with `confirm:true`, asUser, idempotent by role labels, verified, never touches existing issues, no delete) | UNIT_TESTED (3 tests incl. end-to-end analysis on created data), DEPLOYED_DEV; needs UI (handoff) | src/engine/sample.ts |
 | README | template-like; to rewrite with EXPERIENCE visuals | — |
 
 Top 10 gaps to an exceptional product: (1) evidence limited to Jira links; (2) no in-app demo bootstrap for judges; (3) UI does not yet surface EVIDENCE_CHANGED reasons; (4) no Rovo agent; (5) no measured impact study; (6) TWG blocked; (7) README/Devpost narrative; (8) zod advisory not properly analysed (§H); (9) only one use case (API retirement) proven; (10) no native enforcement point (workflow validator).

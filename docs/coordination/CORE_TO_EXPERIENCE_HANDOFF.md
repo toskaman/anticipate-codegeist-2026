@@ -24,3 +24,11 @@ loading (crawl up to depth 3 / 200 nodes, a few seconds), fresh, changed, PERMIS
 test/drift.test.ts (6), test/concurrency.test.ts (3).
 ### Limitations
 Detects causal relation changes (DEPENDS_ON/USES/BLOCKS) and readability loss within the snapshot's crawl limits; ignores labels/comments/timestamps and issues created by the plan itself.
+
+
+## Feature: Judge sample project — status: UNIT_TESTED, DEPLOYED_DEV 4.13.0 (needs your UI)
+Goal: a judge on a blank site gets a working demo in a few clicks.
+- `previewSampleProject({ projectKey })` → `SampleProjectPlan` (read-only): `canCreate`, `missingPermissions`, `issueType`, `items[6]{role,summary,issueKey,status:TO_CREATE|EXISTS}`, `links[4]`, `rootIssueKey`, `replacementIssueKey`, `note`.
+- `createSampleProject({ projectKey, confirm: true })` → same shape with statuses CREATED / EXISTS / FAILED, verified by re-reading Jira. Idempotent (safe to click twice). Never modifies existing issues. Errors: PERMISSION_DENIED (lists missing Jira permissions), VALIDATION.
+- Suggested flow: Mission Control empty state ("No projects/candidates") → "Prepare sample data" → choose project → show preview list → explicit confirm button → result → button "Analyze <rootIssueKey>" (prefill root key, and replacement = replacementIssueKey for scenario C).
+- Data is labelled `anticipate-sample` + `anticipate-sample-<role>`; root issue also `anticipate-change`, so it appears in change candidates.

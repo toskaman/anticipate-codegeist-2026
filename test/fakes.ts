@@ -49,7 +49,7 @@ export class FakeJira implements JiraPort {
   async createIssue(i: { projectKey: string; summary: string; labels: string[] }) {
     this.writes.create++; const key = `${i.projectKey}-${this.seq++}`; this.add(key, i.summary, { labels: i.labels }); return { key };
   }
-  async createLink(i: { typeName: string; inwardKey: string; outwardKey: string }) { this.writes.link++; this.link(i.typeName, 'blocks', 'is blocked by', i.outwardKey, i.inwardKey); }
+  async createLink(i: { typeName: string; inwardKey: string; outwardKey: string }) { this.writes.link++; const rel = i.typeName === 'Relates'; this.link(i.typeName, rel ? 'relates to' : 'blocks', rel ? 'relates to' : 'is blocked by', i.outwardKey, i.inwardKey); }
   async addComment(k: string, t: string) {
     this.writes.comment++;
     if (this.failNextComment) { this.failNextComment = false; throw new Error('HTTP 503'); }

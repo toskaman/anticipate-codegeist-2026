@@ -15,6 +15,7 @@ import { extractGraph, issueNodeId } from '../jira/extractor';
 import { DEFAULT_POLICIES } from './policies';
 import { actionMarker, buildPlan } from './plans';
 import { diffEvidence } from './drift';
+import { previewSample, createSample } from './sample';
 import type { EvidenceDrift } from '../../packages/contracts/src/index';
 
 export const CHANGE_LABEL = 'anticipate-change';
@@ -85,6 +86,13 @@ export function createService(d: Deps) {
   }
 
   return {
+    async previewSampleProject(_ctx: Ctx, input: { projectKey: string }) { return previewSample(d.jira, input.projectKey); },
+
+    async createSampleProject(ctx: Ctx, input: { projectKey: string; confirm: true }) {
+      if (!ctx.accountId) fail('PERMISSION_DENIED', 'Creating sample data requires an authenticated Atlassian user.');
+      return createSample(d.jira, input.projectKey);
+    },
+
     async checkPlanFreshness(ctx: Ctx, input: { planId: string }): Promise<EvidenceDrift> {
       const rec = await loadPlan(ctx, input.planId);
       const snap = await loadSnap(ctx, rec.plan.snapshotId);
@@ -336,5 +344,5 @@ export function normalizeDate(s: string): string {
 }
 
 export const OPERATION_NAMES = ['getCapabilities', 'getPolicies', 'listProjects', 'getChangeCandidates', 'getGraphSnapshot', 'getEvidenceGraph', 'simulateChange',
-  'compareScenarios', 'generatePreventionPlan', 'approvePlan', 'executeApprovedPlan', 'getExecutionStatus', 'getPreventionPassport', 'checkPlanFreshness'];
+  'compareScenarios', 'generatePreventionPlan', 'approvePlan', 'executeApprovedPlan', 'getExecutionStatus', 'getPreventionPassport', 'checkPlanFreshness', 'previewSampleProject', 'createSampleProject'];
 export { issueNodeId };

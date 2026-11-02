@@ -7,7 +7,7 @@ import { z } from 'zod';
 
 /** Wire version stays 0.2.0: the EXPERIENCE client pins it exactly. 0.3 additions are additive and listed in CONTRACT_FEATURES. */
 export const CONTRACT_VERSION = '0.2.0';
-export const CONTRACT_FEATURES = ['continuous-decision-safety'] as const;
+export const CONTRACT_FEATURES = ['continuous-decision-safety', 'sample-project'] as const;
 
 // ---------- primitives ----------
 export const Id = z.string().min(1).max(200);
@@ -219,6 +219,16 @@ export const EvidenceDrift = z.object({
 });
 export type EvidenceDrift = z.infer<typeof EvidenceDrift>;
 
+// ---------- judge sample project ----------
+export const SampleItem = z.object({ role: z.string(), summary: z.string(), issueKey: z.string().nullable(), status: z.enum(['TO_CREATE', 'EXISTS', 'CREATED', 'FAILED']) });
+export const SampleLink = z.object({ from: z.string(), relation: z.literal('blocks'), to: z.string(), status: z.enum(['TO_CREATE', 'EXISTS', 'CREATED', 'FAILED']) });
+export const SampleProjectPlan = z.object({
+  projectKey: z.string(), issueType: z.string().nullable(), canCreate: z.boolean(), missingPermissions: z.array(z.string()),
+  items: z.array(SampleItem).max(10), links: z.array(SampleLink).max(10),
+  rootIssueKey: z.string().nullable(), replacementIssueKey: z.string().nullable(), note: z.string()
+});
+export type SampleProjectPlan = z.infer<typeof SampleProjectPlan>;
+
 // ---------- operation catalogue ----------
 export const OPERATIONS = {
   getCapabilities: { input: z.object({}), output: CapabilityAvailability },
@@ -234,6 +244,8 @@ export const OPERATIONS = {
   getExecutionStatus: { input: z.object({ planId: Id }), output: z.array(ExecutionRecord) },
   getPreventionPassport: { input: z.object({ planId: Id }), output: PreventionPassport },
   getPolicies: { input: z.object({}), output: z.array(PolicyRule) },
-  checkPlanFreshness: { input: z.object({ planId: Id }), output: EvidenceDrift }
+  checkPlanFreshness: { input: z.object({ planId: Id }), output: EvidenceDrift },
+  previewSampleProject: { input: z.object({ projectKey: z.string().regex(/^[A-Z][A-Z0-9_]+$/) }), output: SampleProjectPlan },
+  createSampleProject: { input: z.object({ projectKey: z.string().regex(/^[A-Z][A-Z0-9_]+$/), confirm: z.literal(true) }), output: SampleProjectPlan }
 } as const;
 export type OperationName = keyof typeof OPERATIONS;
