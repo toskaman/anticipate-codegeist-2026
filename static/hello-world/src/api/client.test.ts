@@ -45,6 +45,8 @@ describe("Forge boundary", () => {
       const assertion = expect(
         client.request("executeApprovedPlan", {
           planId: "p",
+          version: 1,
+          actionIds: ["a"],
           idempotencyKey: "k",
         }),
       ).rejects.toMatchObject({ code: "TIMEOUT" });
@@ -84,4 +86,21 @@ describe("Forge boundary", () => {
         code: "REQUIRES_LIVE_BACKEND",
       });
   });
+});
+
+it("never accepts fixture capability or plan payloads as Forge responses", async () => {
+  const fixture = new FixtureClient();
+  const capabilities = new ForgeClient(() => fixture.getCapabilities(), {
+    getCapabilities: "capabilities",
+  });
+  await expect(capabilities.getCapabilities()).rejects.toMatchObject({
+    code: "INVALID_RESPONSE",
+  });
+  const plans = new ForgeClient(
+    () => fixture.request("generatePreventionPlan", {}),
+    { generatePreventionPlan: "plan" },
+  );
+  await expect(
+    plans.request("generatePreventionPlan", {}),
+  ).rejects.toMatchObject({ code: "INVALID_RESPONSE" });
 });

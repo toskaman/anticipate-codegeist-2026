@@ -1,5 +1,8 @@
 import {
   capabilitiesSchema,
+  planSchema,
+  executionSchema,
+  mutationInputSchema,
   projectSchema,
   ClientError,
   type AnticipateClient,
@@ -90,7 +93,7 @@ export class ForgeClient implements AnticipateClient {
     const result = capabilitiesSchema.safeParse(
       await this.call("getCapabilities", {}, signal),
     );
-    if (!result.success)
+    if (!result.success || result.data.mode !== "forge")
       throw new ClientError(
         "INVALID_RESPONSE",
         "Invalid backend capability payload",
@@ -105,11 +108,53 @@ export class ForgeClient implements AnticipateClient {
       throw new ClientError("INVALID_RESPONSE", "Invalid project payload");
     return result.data;
   }
-  request(
+  async request(
     operation: Exclude<Operation, "getCapabilities" | "getProjects">,
     input: Record<string, unknown>,
     signal?: AbortSignal,
   ) {
-    return this.call(operation, input, signal);
+    if (
+      operation === "approvePreventionPlan" ||
+      operation === "executeApprovedPlan"
+    ) {
+      const validation = mutationInputSchema.safeParse(input);
+      if (!validation.success)
+        throw new ClientError(
+          "INVALID_RESPONSE",
+          "Plan version and explicit action selection are required",
+        );
+      if (
+        operation === "executeApprovedPlan" &&
+        (typeof input.idempotencyKey !== "string" || !input.idempotencyKey)
+      )
+        throw new ClientError(
+          "INVALID_RESPONSE",
+          "An execution idempotency key is required",
+        );
+    }
+    const payload = await this.call(operation, input, signal);
+    const schema =
+      operation === "generatePreventionPlan" ||
+      operation === "approvePreventionPlan"
+        ? planSchema
+        : operation === "executeApprovedPlan" ||
+            operation === "getExecutionStatus"
+          ? executionSchema
+          : null;
+    if (schema) {
+      const validated = schema.safeParse(payload);
+      if (!validated.success)
+        throw new ClientError(
+          "INVALID_RESPONSE",
+          "Invalid plan or execution response",
+        );
+      if ("mode" in validated.data && validated.data.mode !== "forge")
+        throw new ClientError(
+          "INVALID_RESPONSE",
+          "Fixture plan returned by Forge backend",
+        );
+      return validated.data;
+    }
+    return payload;
   }
 }

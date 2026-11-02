@@ -1,17 +1,17 @@
 {
   "workstream": "EXPERIENCE",
   "branch": "feat/product-experience",
-  "revisionBase": "18b5b54",
-  "revisionScope": "working tree: production/fixture split and v2 client boundary",
+  "revisionBase": "c508eca",
+  "revisionScope": "working tree: action-level review and official requirements log",
   "contractVersion": "frontend-proposal-v2 — TEMPORARY, not CORE approved",
-  "status": "IMPLEMENTED",
+  "status": "VERIFIED_LOCAL",
   "screens": {
     "development": "seven fixture screens plus component showcase",
     "production": "Forge capability and access onboarding; no fixture fallback"
   },
   "tests": {
-    "unit": 23,
-    "browser": 17,
+    "unit": 28,
+    "browser": 18,
     "lint": "PASS",
     "typecheck": "PASS",
     "format": "PASS",
@@ -37,11 +37,12 @@
     "Legacy development harness still uses ExperienceAdapter and authored scenario results; not the completed v2 FixtureClient mapping",
     "Live action approval/execution UI awaits shared schemas",
     "Transport cancellation stops observation, not server-side writes",
-    "Production full-page routing, CSP, host theming and authentication are not verified in Forge"
+    "Production full-page routing, CSP, host theming and authentication are not verified in Forge",
+    "ActionReview is development-showcase tested and not yet replacing the legacy Plan page; shared client migration is incomplete"
   ],
   "next": [
-    "Map full fixture harness to shared AnticipateClient payloads",
-    "Implement per-action plan and execution states after schema agreement",
-    "Complete official requirements log, research, curated evidence and final reproducibility audit"
+    "Migrate main Plan screen from legacy workflow to ActionReview without simulated live success",
+    "Complete shared client mapping and reviewed CORE schemas",
+    "Research product positioning and measure representative graphs"
   ]
 }

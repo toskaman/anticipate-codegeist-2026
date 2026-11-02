@@ -1,5 +1,8 @@
 import React, { useMemo, useState } from "react";
 import Graph from "./Graph";
+import ActionReview from "./ActionReview";
+import { FixtureClient } from "./api/FixtureClient";
+const fixtureClient = new FixtureClient();
 import { localAdapter } from "./adapters";
 export default function Showcase() {
   const [preview, setPreview] = useState("ready");
@@ -58,6 +61,10 @@ export default function Showcase() {
         </label>
       </section>
       <Graph adapter={adapter} />
+      <ActionReview
+        client={fixtureClient}
+        snapshotId="demo-auth-v1-2026-11-02"
+      />
     </>
   );
 }

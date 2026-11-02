@@ -657,3 +657,17 @@ dialog::backdrop {
     display: none;
   }
 }
+.action > input[type="checkbox"] {
+  width: 18px;
+  min-height: 18px;
+  padding: 0;
+  flex: 0 0 18px;
+  margin: 5px 0;
+}
+.action > input[type="checkbox"] {
+  align-self: flex-start;
+  width: 24px;
+  height: 24px;
+  min-height: 24px;
+  flex-basis: 24px;
+}

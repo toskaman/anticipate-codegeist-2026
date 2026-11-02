@@ -1,5 +1,6 @@
 import {
   ClientError,
+  planSchema,
   type AnticipateClient,
   type Operation,
 } from "./provisional-contracts";
@@ -16,7 +17,11 @@ export class FixtureClient implements AnticipateClient {
     return {
       mode: "fixture" as const,
       contractVersion: "frontend-proposal-v2",
-      operations: ["getCapabilities", "getProjects"] as Operation[],
+      operations: [
+        "getCapabilities",
+        "getProjects",
+        "generatePreventionPlan",
+      ] as Operation[],
       integrations: [],
       launchUrl: null,
     };
@@ -32,6 +37,28 @@ export class FixtureClient implements AnticipateClient {
     _input: Record<string, unknown>,
   ) {
     this.check();
+    if (operation === "generatePreventionPlan") {
+      const { actionDetails, services } = await import("../domain");
+      return planSchema.parse({
+        planId: "fixture-plan-C",
+        version: 1,
+        snapshotId: "demo-auth-v1-2026-11-02",
+        mode: "fixture",
+        actions: actionDetails.map((action, index) => ({
+          actionId: `fixture-action-${index + 1}`,
+          title: action.title,
+          target: action.target,
+          reason: action.reason,
+          evidence: action.evidenceIds.map((id) => ({
+            reference: services.find((service) => service.id === id)!.source,
+            url: null,
+          })),
+          requiredPermission: "Owner review and backend-authorized Jira action",
+          verificationRule: action.outcome,
+          approval: "REQUIRED",
+        })),
+      });
+    }
     if (
       [
         "approvePreventionPlan",

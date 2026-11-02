@@ -71,3 +71,37 @@ export interface AnticipateClient {
     signal?: AbortSignal,
   ): Promise<unknown>;
 }
+
+export const safeSourceUrlSchema = z
+  .string()
+  .url()
+  .refine(
+    (value) => new URL(value).protocol === "https:",
+    "Only HTTPS evidence URLs are allowed",
+  );
+export const actionSchema = z.object({
+  actionId: z.string().min(1),
+  title: z.string().min(1),
+  target: z.string().min(1),
+  reason: z.string().min(1),
+  evidence: z.array(
+    z.object({ reference: z.string(), url: safeSourceUrlSchema.nullable() }),
+  ),
+  requiredPermission: z.string().min(1),
+  verificationRule: z.string().min(1),
+  approval: z.enum(["REQUIRED", "APPROVED", "DENIED"]),
+});
+export const planSchema = z.object({
+  planId: z.string().min(1),
+  version: z.number().int().positive(),
+  snapshotId: z.string().min(1),
+  mode: z.enum(["fixture", "forge"]),
+  actions: z.array(actionSchema),
+});
+export type ReviewPlan = z.infer<typeof planSchema>;
+export type Execution = z.infer<typeof executionSchema>;
+export const mutationInputSchema = z.object({
+  planId: z.string().min(1),
+  version: z.number().int().positive(),
+  actionIds: z.array(z.string().min(1)).min(1),
+});

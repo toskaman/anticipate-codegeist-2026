@@ -39,3 +39,5 @@ ForgeClient currently supports explicit resolver bindings, response validation f
 ## Access information needed
 
 Verified installation link, site hostname, installation UUID, environment, owner-approved development test account permissions and launch URL. Existing routePrefix is hello-world. Do not invent an Apps-menu entry or distribution URL.
+
+New v2 action review proposal: planId, version, snapshotId, mode and per-action actionId/title/target/reason/evidence/requiredPermission/verificationRule/approval. Mutation requests include planId/version/actionIds. Execution adds idempotencyKey. Status lookup must support the request key after a lost response, because no executionId may have reached the frontend. This lookup is a pending CORE requirement, not a claimed endpoint. Client-side controls suppress repeat submissions but do not guarantee exactly-once writes. The review is currently development-gallery only; production rendering awaits contracts.

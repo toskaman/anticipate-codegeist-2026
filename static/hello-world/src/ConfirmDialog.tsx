@@ -3,8 +3,10 @@ export default function ConfirmDialog({
   title,
   onCancel,
   onConfirm,
+  description = "No Jira changes will be made. This affects only the current in-memory demo.",
 }: {
   title: string;
+  description?: string;
   onCancel(): void;
   onConfirm(): void;
 }) {
@@ -44,10 +46,7 @@ export default function ConfirmDialog({
       }}
     >
       <h2 id="confirm-title">{title}</h2>
-      <p>
-        No Jira changes will be made. This affects only the current in-memory
-        demo.
-      </p>
+      <p>{description}</p>
       <button onClick={onCancel}>Cancel</button>
       <button className="primary" onClick={onConfirm}>
         Confirm
