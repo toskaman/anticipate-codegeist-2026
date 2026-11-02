@@ -46,9 +46,8 @@ export async function validateTransition(args: { issue?: { key?: string } }) {
   try {
     const jira = createForgeJira(null, 'app');
     const issue = await jira.getIssue(key);
-    const labels = issue.kind === 'ok' ? issue.issue.labels : null;
     const decision = await forgeStore.get<DecisionRecord>(`decision:${key}`);
-    return decideTransition(labels, decision, key);
+    return decideTransition(issue.kind === 'ok' ? issue.issue : null, decision, key);
   } catch (e) {
     console.warn(JSON.stringify({ app: 'anticipate', op: 'validateTransition', failOpen: true, detail: e instanceof Error ? e.message.slice(0, 200) : 'error' }));
     return { result: true };

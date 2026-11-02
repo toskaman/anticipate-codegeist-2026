@@ -33,6 +33,12 @@ Goal: a judge on a blank site gets a working demo in a few clicks.
 - Suggested flow: Mission Control empty state ("No projects/candidates") → "Prepare sample data" → choose project → show preview list → explicit confirm button → result → button "Analyze <rootIssueKey>" (prefill root key, and replacement = replacementIssueKey for scenario C).
 - Data is labelled `anticipate-sample` + `anticipate-sample-<role>`; root issue also `anticipate-change`, so it appears in change candidates.
 
+## 2 Nov 2026 (evening) - CORE contract additions (backward compatible, wire version still 0.2.0)
+
+- `PreventionPassport.evidence` (optional): `{ state: 'LIVE' | 'EXPIRED_SNAPSHOT' | 'ARCHIVED', capturedAt, expiresAt, nodeCount, edgeCount, causalEdgeCount, snapshotDigest }`. When state is not LIVE the disclaimer starts with "HISTORICAL RECORD". Suggested UI: a "Historical record, evidence as reviewed on <capturedAt>" badge on the Passport.
+- `createSampleProject` can now return `CONFLICT` when another creation is running for the same project. Suggested UI: treat like the slow-creation path (re-check by preview, no resubmit).
+- Upgrade scenarios: a declared-compatible upgrade without a confirmed test returns uncertainty reason `MISSING_TEST_EVIDENCE` (existing enum value).
+- Workflow validator messages changed (expired attestation, links changed, legacy decision). No UI impact.
 
 ## EXPERIENCE → CORE requests (v4 UX pass, 2 Nov 2026)
 Details and context: `docs/design/UX_AUDIT_V4.md`. No CORE file was changed by EXPERIENCE.

@@ -206,7 +206,10 @@ export const PreventionPassport = z.object({
   plan: PreventionPlan.nullable(), approvals: z.array(z.object({ accountId: Id.nullable(), at: IsoDate, actionIds: z.array(Id) })),
   executions: z.array(ExecutionRecord), openUnknowns: z.array(UncertaintyRecord),
   timeline: z.array(z.object({ at: IsoDate, event: z.string().max(200) })),
-  disclaimer: z.string()
+  disclaimer: z.string(),
+  /** Retention state of the evidence behind this record. ARCHIVED = full snapshot gone, minimized provenance kept. */
+  evidence: z.object({ state: z.enum(['LIVE', 'EXPIRED_SNAPSHOT', 'ARCHIVED']), capturedAt: IsoDate, expiresAt: IsoDate,
+    nodeCount: z.number().int().nonnegative(), edgeCount: z.number().int().nonnegative(), causalEdgeCount: z.number().int().nonnegative(), snapshotDigest: z.string().max(64) }).optional()
 });
 export type PreventionPassport = z.infer<typeof PreventionPassport>;
 

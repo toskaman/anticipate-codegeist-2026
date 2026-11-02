@@ -59,9 +59,19 @@ describe('dependency upgrade use case', () => {
     expect(r.violations.map((v) => v.ruleId)).toEqual(['P3']);
     expect(r.verdict).toBe('NEEDS_REVIEW');
   });
-  it('backward-compatible upgrade has no consumer impact', () => {
-    const r = simulate(S, { scenarioId: 'U-compat', label: 'Compatible upgrade', operations: [{ op: 'UPGRADE_NODE', nodeId: target, breaking: false }] }, P);
+  const compat = { scenarioId: 'U-compat', label: 'Compatible upgrade', operations: [{ op: 'UPGRADE_NODE' as const, nodeId: target, breaking: false }] };
+  it('declared-compatible upgrade propagates no impact but is flagged as unverified', () => {
+    const r = simulate(S, compat, P);
     expect(r.impacts).toEqual([]);
     expect(r.violations).toEqual([]);
+    expect(r.uncertainties.map((u) => [u.nodeId, u.reason])).toEqual([[target, 'MISSING_TEST_EVIDENCE']]);
+    expect(r.verdict).toBe('NEEDS_REVIEW');
+  });
+  it('a confirmed contract test turns the same upgrade into a verified PASS', () => {
+    const withTest: GraphSnapshot = { ...S, nodes: [...S.nodes, { ...S.nodes[0]!, id: 'test-contract', label: 'Contract test' }],
+      edges: [...S.edges, { id: 'e-test', from: target, to: 'test-contract', kind: 'VERIFIED_BY', status: 'CONFIRMED', references: [], accessLimited: false }] };
+    const r = simulate(withTest, compat, P);
+    expect(r.uncertainties).toEqual([]);
+    expect(r.verdict).toBe('PASS');
   });
 });
