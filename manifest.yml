@@ -13,6 +13,12 @@ resources:
     path: static/hello-world/build
     tunnel:
       port: 3000
+permissions:
+  scopes:
+    - read:jira-work
+    - write:jira-work
+    - read:jira-user
+    - storage:app
 app:
   runtime:
     name: nodejs24.x

@@ -1,17 +1,25 @@
 {
-  "name": "global-full-page-custom-ui",
-  "title": "Global full page custom UI",
-  "description": "Template for Global full page for custom UI",
-  "link": "https://developer.atlassian.com/platform/forge/manifest-reference/modules/global-full-page/",
-  "version": "1.2.6-next.1",
+  "name": "anticipate",
+  "description": "ANTICIPATE — The Decision Firewall for Software Teams (Forge backend + Custom UI)",
+  "version": "0.2.0",
   "main": "index.js",
   "license": "MIT",
   "private": true,
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:packages": "cd packages/contracts && npm test && cd ../simulation-core && npm test"
+  },
   "devDependencies": {
     "eslint": "^8.56.0",
-    "eslint-plugin-react-hooks": "^4.6.0"
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "typescript": "5.6.3",
+    "vitest": "2.1.9"
   },
   "dependencies": {
-    "@forge/resolver": "2.0.2-next.0"
+    "@forge/api": "8.4.0",
+    "@forge/kvs": "2.1.1",
+    "@forge/resolver": "2.0.2",
+    "zod": "3.23.8"
   }
 }

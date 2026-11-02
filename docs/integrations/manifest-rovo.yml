@@ -1,0 +1,40 @@
+# Merge into manifest.yml ONLY after the base app deploys and `forge lint` passes (rovo:mcp is Preview).
+# Tools are read-only (actionVerb GET). External MCP exposure stays disabled until a site admin enables it.
+modules:
+  rovo:mcp:
+    - key: anticipate-mcp
+      name: "ANTICIPATE"
+      tools:
+        - anticipate-get-graph
+        - anticipate-simulate-retirement
+        - anticipate-get-passport
+  action:
+    - key: anticipate-get-graph
+      name: Get evidence graph
+      function: rovoGetGraph
+      actionVerb: GET
+      description: Build an evidence graph (confirmed / inferred / unknown dependencies) around a Jira issue.
+      inputs:
+        issueKey: { title: Issue key, type: string, required: true, description: "Jira issue key, e.g. PAY-412" }
+    - key: anticipate-simulate-retirement
+      name: Simulate retirement
+      function: rovoSimulateRetirement
+      actionVerb: GET
+      description: Deterministically compare removing now vs retaining vs migrating first. Makes no Jira changes.
+      inputs:
+        issueKey: { title: Issue key, type: string, required: true, description: "Issue representing the API/component to retire" }
+        replacementIssueKey: { title: Replacement issue key, type: string, required: false, description: "Optional replacement (enables scenario C)" }
+    - key: anticipate-get-passport
+      name: Get prevention passport
+      function: rovoGetPassport
+      actionVerb: GET
+      description: Summarise the Prevention Passport of a plan you own.
+      inputs:
+        planId: { title: Plan id, type: string, required: true, description: "ANTICIPATE plan id" }
+  function:
+    - key: rovoGetGraph
+      handler: index.rovoGetGraph
+    - key: rovoSimulateRetirement
+      handler: index.rovoSimulateRetirement
+    - key: rovoGetPassport
+      handler: index.rovoGetPassport
