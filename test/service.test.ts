@@ -143,6 +143,14 @@ describe('end-to-end use cases (fake Jira)', () => {
 });
 
 describe('resolver envelope', () => {
+  it('rejects oversized payloads before schema validation (DoS bound)', async () => {
+    let ran = false;
+    const h = makeHandler('approvePlan', () => 'LIVE', () => 'req-2', () => new Date('2026-11-02T09:00:00Z'), async () => { ran = true; return {}; });
+    const huge = await h({ payload: { planId: 'p', planHash: 'h', approvedActionIds: Array.from({ length: 200_000 }, (_, i) => `a${i}`), idempotencyKey: 'k'.repeat(16) } });
+    expect(huge).toMatchObject({ ok: false, error: { code: 'VALIDATION' } });
+    expect((huge as { error: { message: string } }).error.message).toMatch(/too large/);
+    expect(ran).toBe(false);
+  });
   it('validates input and wraps errors without leaking internals', async () => {
     const h = makeHandler('getGraphSnapshot', () => 'LIVE', () => 'req-1', () => new Date('2026-11-02T09:00:00Z'), async () => { throw new Error('secret stack'); });
     const bad = await h({ payload: { projectId: '' } });

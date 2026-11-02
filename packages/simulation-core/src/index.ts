@@ -13,7 +13,7 @@ const RANK: Record<EvidenceStatus, number> = { CONFIRMED: 2, INFERRED: 1, UNKNOW
 const weakest = (a: EvidenceStatus, b: EvidenceStatus): EvidenceStatus => (RANK[a] <= RANK[b] ? a : b);
 const SEV_ORDER = { BLOCKER: 0, HIGH: 1, MEDIUM: 2, LOW: 3 } as const;
 
-interface WorkingGraph { attrs: ReadonlyMap<string, Record<string, unknown>>; nodes: ReadonlySet<string>; edges: readonly EvidenceEdge[]; removed: Set<string>; deprecated: Set<string>; upgraded: Set<string>; }
+interface WorkingGraph { attrs: ReadonlyMap<string, Record<string, unknown>>; nodes: ReadonlySet<string>; edges: readonly EvidenceEdge[]; removed: Set<string>; deprecated: Set<string>; upgraded: Set<string>; declaredCompatible: Set<string>; }
 
 /** Apply operations to an isolated functional copy of the snapshot. */
 export function applyScenario(snapshot: GraphSnapshot, scenario: ScenarioDefinition): WorkingGraph {
@@ -22,13 +22,15 @@ export function applyScenario(snapshot: GraphSnapshot, scenario: ScenarioDefinit
   const removed = new Set<string>();
   const deprecated = new Set<string>();
   const upgraded = new Set<string>();
+  const declaredCompatible = new Set<string>();
   for (const op of scenario.operations) {
     assertNode(nodeIds, op);
     switch (op.op) {
       case 'REMOVE_NODE': removed.add(op.nodeId); break;
       case 'DEPRECATE_NODE': deprecated.add(op.nodeId); break;
       // Dependency upgrade: only a breaking upgrade propagates to consumers; a compatible one changes no contract.
-      case 'UPGRADE_NODE': if (op.breaking) upgraded.add(op.nodeId); break;
+      // A compatible upgrade is only *declared* compatible unless a confirmed test verifies the node (see uncertainties()).
+      case 'UPGRADE_NODE': if (op.breaking) upgraded.add(op.nodeId); else declaredCompatible.add(op.nodeId); break;
       case 'MIGRATE_DEPENDENTS': {
         const kinds = new Set<string>(op.edgeKinds);
         // Only known (CONFIRMED/INFERRED) dependencies can be migrated; UNKNOWN ones stay attached.
@@ -38,7 +40,7 @@ export function applyScenario(snapshot: GraphSnapshot, scenario: ScenarioDefinit
       }
     }
   }
-  return { attrs: new Map(snapshot.nodes.map((n) => [n.id, { ...n.attributes, __status: n.status, __kind: n.kind }])), nodes: nodeIds, edges, removed, deprecated, upgraded };
+  return { attrs: new Map(snapshot.nodes.map((n) => [n.id, { ...n.attributes, __status: n.status, __kind: n.kind }])), nodes: nodeIds, edges, removed, deprecated, upgraded, declaredCompatible };
 }
 
 function assertNode(ids: Set<string>, op: ChangeOperation) {
@@ -110,6 +112,13 @@ function uncertainties(g: WorkingGraph, impacts: ImpactRecord[], truncated: bool
     if (last.status === 'UNKNOWN') out.push({ nodeId: i.nodeId, edgeId: last.id, reason: 'UNKNOWN_EDGE', explanation: `Dependency of ${i.nodeId} could not be verified.` });
     else if (last.status === 'INFERRED') out.push({ nodeId: i.nodeId, edgeId: last.id, reason: 'INFERRED_ONLY', explanation: `Dependency of ${i.nodeId} is inferred, not confirmed.` });
     if (last.accessLimited) out.push({ nodeId: i.nodeId, edgeId: last.id, reason: 'ACCESS_LIMITED', explanation: 'Part of the evidence was not readable with the current permissions.' });
+  }
+  // Compatibility evidence: "compatible" without a CONFIRMED VERIFIED_BY test on the upgraded node is a claim, not proof.
+  const verifiedNodes = new Set(g.edges.filter((e) => e.kind === 'VERIFIED_BY' && e.status === 'CONFIRMED').map((e) => e.from));
+  for (const id of [...g.declaredCompatible].sort()) {
+    if (verifiedNodes.has(id)) continue;
+    const consumers = g.edges.filter((e) => e.to === id && PROPAGATING_KINDS.has(e.kind) && e.status !== 'UNKNOWN').length;
+    if (consumers) out.push({ nodeId: id, edgeId: null, reason: 'MISSING_TEST_EVIDENCE', explanation: `Compatibility of ${id} is declared but not verified by a linked test; ${consumers} consumer(s) rely on it.` });
   }
   if (truncated) out.push({ nodeId: null, edgeId: null, reason: 'TRUNCATED', explanation: 'Traversal stopped at the depth limit; further impacts may exist.' });
   return out;

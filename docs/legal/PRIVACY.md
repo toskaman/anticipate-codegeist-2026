@@ -15,6 +15,6 @@ ANTICIPATE is an Atlassian Forge app built for Codegeist 2026. It runs entirely 
 
 **Not collected:** no analytics, no tracking, no third-party services, no AI/LLM processing of your data, no sale or sharing of data.
 
-**Retention and deletion.** Data stays in Forge storage for the installing site and is removed when the app is uninstalled (per Forge storage behaviour). Contact us to request earlier deletion.
+**Retention and deletion.** Data stays in Forge storage for the installing site and expires automatically: full dependency snapshots after 2 days; plans, comparisons, execution records and a minimized decision provenance record (identifiers, counts and reviewed dependency relations, no issue text) after 90 days; locks after 1 day; idempotency keys after 7 days. Everything is removed when the app is uninstalled (per Forge storage behaviour). Contact us to request earlier deletion.
 
 **Contact.** See the support contact on the app's installation page.

@@ -36,4 +36,15 @@ describe('judge sample project', () => {
     await expect(s.svc.createSampleProject(ctx, { projectKey: 'JDG', confirm: true })).rejects.toMatchObject({ code: 'PERMISSION_DENIED' });
     expect(s.jira.writes.create).toBe(0);
   });
+  it('concurrent creation requests never duplicate sample issues', async () => {
+    const s = mk();
+    const res = await Promise.allSettled([1, 2, 3].map(() => s.svc.createSampleProject(ctx, { projectKey: 'JDG', confirm: true })));
+    expect(res.filter((r) => r.status === 'fulfilled')).toHaveLength(1);
+    expect(res.filter((r) => r.status === 'rejected').every((r) => (r as PromiseRejectedResult).reason.code === 'CONFLICT')).toBe(true);
+    expect(s.jira.writes.create).toBe(6);
+    // lease released: a retry afterwards is allowed and idempotent
+    const again = await s.svc.createSampleProject(ctx, { projectKey: 'JDG', confirm: true });
+    expect(again.items.every((i) => i.status === 'EXISTS')).toBe(true);
+    expect(s.jira.writes.create).toBe(6);
+  });
 });
