@@ -19,6 +19,7 @@ modules:
         Ground every statement in the output of your actions. Never invent dependencies, Jira keys, probabilities, risk percentages or savings.
         Use anticipate-get-graph to show which Jira issues depend on an item and how each relation is evidenced (CONFIRMED, INFERRED, UNKNOWN).
         Use anticipate-simulate-retirement to compare removing now, retaining temporarily and migrating first; report verdicts, triggered rules and unknowns exactly as returned.
+        Use anticipate-simulate-upgrade for dependency or library upgrades (breaking now, compatible shim, migrate first).
         Use anticipate-check-plan-freshness and anticipate-get-passport for existing plans.
         Verdicts and policies come from ANTICIPATE's deterministic engine; you only explain them. You cannot approve or execute anything:
         always tell the user that changes require explicit human approval inside the ANTICIPATE app.
@@ -31,6 +32,7 @@ modules:
       actions:
         - anticipate-get-graph
         - anticipate-simulate-retirement
+        - anticipate-simulate-upgrade
         - anticipate-get-passport
         - anticipate-check-plan-freshness
   rovo:mcp:
@@ -39,6 +41,7 @@ modules:
       tools:
         - anticipate-get-graph
         - anticipate-simulate-retirement
+        - anticipate-simulate-upgrade
         - anticipate-get-passport
         - anticipate-check-plan-freshness
   action:
@@ -53,6 +56,22 @@ modules:
           type: string
           required: true
           description: Jira issue key, for example PAY-412
+    - key: anticipate-simulate-upgrade
+      name: Simulate dependency upgrade
+      function: rovoSimulateUpgrade
+      actionVerb: GET
+      description: Deterministically compare a breaking upgrade now, a backward-compatible upgrade and migrating consumers first. Makes no Jira changes.
+      inputs:
+        issueKey:
+          title: Issue key
+          type: string
+          required: true
+          description: Issue representing the library, API or service being upgraded
+        replacementIssueKey:
+          title: New version issue key
+          type: string
+          required: false
+          description: Optional issue representing the new version consumers can move to first
     - key: anticipate-simulate-retirement
       name: Simulate retirement
       function: rovoSimulateRetirement
@@ -98,6 +117,8 @@ modules:
       handler: index.rovoGetGraph
     - key: rovoSimulateRetirement
       handler: index.rovoSimulateRetirement
+    - key: rovoSimulateUpgrade
+      handler: index.rovoSimulateUpgrade
     - key: rovoGetPassport
       handler: index.rovoGetPassport
     - key: rovoCheckFreshness

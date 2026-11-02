@@ -50,3 +50,18 @@ describe('simulation-core ground truth (fixture)', () => {
     expect(() => simulate(S, { scenarioId: 'x', label: 'x', operations: [{ op: 'REMOVE_NODE', nodeId: 'nope' }] }, P)).toThrow(/VALIDATION/);
   });
 });
+
+describe('dependency upgrade use case', () => {
+  const target = (A.operations[0] as { nodeId: string }).nodeId;
+  it('breaking upgrade reaches the same consumers but triggers no removal-only rules', () => {
+    const r = SimulationResult.parse(simulate(S, { scenarioId: 'U-breaking', label: 'Breaking upgrade', operations: [{ op: 'UPGRADE_NODE', nodeId: target, breaking: true }] }, P));
+    expect(r.impacts.map((i) => i.nodeId)).toEqual(simulate(S, A, P).impacts.map((i) => i.nodeId));
+    expect(r.violations.map((v) => v.ruleId)).toEqual(['P3']);
+    expect(r.verdict).toBe('NEEDS_REVIEW');
+  });
+  it('backward-compatible upgrade has no consumer impact', () => {
+    const r = simulate(S, { scenarioId: 'U-compat', label: 'Compatible upgrade', operations: [{ op: 'UPGRADE_NODE', nodeId: target, breaking: false }] }, P);
+    expect(r.impacts).toEqual([]);
+    expect(r.violations).toEqual([]);
+  });
+});
