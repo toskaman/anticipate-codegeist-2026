@@ -72,7 +72,7 @@ function checkResponseBudget(raw: unknown) {
 export class ForgeClient {
   constructor(
     private transport: Transport,
-    private timeoutMs = 12000,
+    private timeoutMs?: number,
   ) {}
   async request<K extends OperationName>(
     operation: K,
@@ -99,7 +99,7 @@ export class ForgeClient {
                 new CoreClientError(
                   "TIMEOUT",
                   operation === "createSampleProject"
-                    ? "Response not received. Preview sample data in the selected Jira project before any further creation. No result is assumed."
+                    ? "Response not received. Sample creation may still be running. Preview sample data in the selected Jira project before any further creation. No result is assumed."
                     : operation === "previewSampleProject"
                       ? "Sample preview response not received. No Jira creation was requested."
                       : operation === "checkPlanFreshness"
@@ -107,7 +107,8 @@ export class ForgeClient {
                         : "Response not received. Recover execution status by planId before another write.",
                 ),
               ),
-            this.timeoutMs,
+            this.timeoutMs ??
+              (operation === "createSampleProject" ? 60000 : 12000),
           );
           onAbort = () =>
             reject(new DOMException("Request aborted", "AbortError"));

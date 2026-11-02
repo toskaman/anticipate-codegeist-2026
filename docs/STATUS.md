@@ -25,3 +25,7 @@ The requester authorized the existing Forge owner identity and assigned public p
 ## Known dependency/legal limitations
 
 Installed dependency findings remain frontend 14 moderate / 2 high and root 15 moderate / 2 high / 2 critical. Eleven missing root license texts/custom terms still require review. [Dependency triage](integration/DEPENDENCY_TRIAGE.md) records context and existing risk acceptance; this UI work claims no security or legal clearance. Unrelated local `Claude outputs/` is preserved and excluded from publication.
+
+## Judge/sample timeout follow-up
+
+Root README now replaces the Hello World template and embeds genuine MOCK_TRANSPORT screenshots. The frontend guide no longer describes a missing backend. Confirmed sample creation allows 60 seconds (other defaults remain 12 seconds), warns that a timed-out write may still be running and directs re-preview without automatic retries. TypeScript/lint/format/build, 49 frontend unit tests and 22 connected/safety/sample browser tests passed (114.2 s). [CORE handoff and remaining hosted checks](coordination/EXPERIENCE_UI_V3_CORE_FOLLOWUP.md).

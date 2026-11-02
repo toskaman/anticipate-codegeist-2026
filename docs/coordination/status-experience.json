@@ -6,7 +6,7 @@
   "contractVersion": "0.2.0",
   "status": "VERIFIED_LOCAL_READY_FOR_HOSTED_VALIDATION",
   "tests": {
-    "unit": 47,
+    "unit": 49,
     "browser": 72,
     "coreScreenThemeViewportCases": 42,
     "prototypeScreenThemeViewportCases": 42,
@@ -167,6 +167,13 @@
     "chromiumSeconds": 234.6,
     "firefoxCriticalCases": 32,
     "webkitCriticalCases": 32,
-    "mainCompatibility": "main 6641e43 merged; 47 frontend / 43 CORE / 3 contracts / 10 simulation pass; final full Chromium 72/72 (234.6 s)"
+    "mainCompatibility": "main 6641e43 merged; 47 frontend / 43 CORE / 3 contracts / 10 simulation pass; final full Chromium 72/72 (234.6 s)",
+    "sampleTimeoutFollowup": {
+      "unit": 49,
+      "focusedChromium": 22,
+      "seconds": 114.2,
+      "creationTimeoutMs": 60000,
+      "handoff": "docs/coordination/EXPERIENCE_UI_V3_CORE_FOLLOWUP.md"
+    }
   }
 }

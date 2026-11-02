@@ -57,5 +57,21 @@
     "contractTests": 3,
     "simulationTests": 10,
     "chromiumFullSuite": 72
+  },
+  "sampleTimeoutFollowup": {
+    "frontendUnit": 49,
+    "chromiumConnectedAndSample": {
+      "startTime": "2026-11-02T16:46:18.261Z",
+      "duration": 114204.921,
+      "expected": 22,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "timeoutMilliseconds": {
+      "createSampleProject": 60000,
+      "otherDefault": 12000
+    },
+    "hostedForge": "NOT_RUN"
   }
 }
