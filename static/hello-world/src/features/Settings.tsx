@@ -47,13 +47,13 @@ const rows: { key: Key; name: string; what: string; inApp: string }[] = [
     key: "teamworkGraph",
     name: "Teamwork Graph",
     what: "Additional relationship sources across Atlassian products.",
-    inApp: "Not in this version",
+    inApp: "Reported by backend",
   },
   {
     key: "workflowValidator",
     name: "Jira workflow validator",
-    what: "Enforce decisions inside Jira transitions. ANTICIPATE policies are not workflow validators.",
-    inApp: "Not in this version",
+    what: "Optional Jira transition validator declared in the manifest. An administrator must add it to a workflow; the policy explanation screen alone does not enforce transitions.",
+    inApp: "Declared by the app",
   },
   {
     key: "llm",

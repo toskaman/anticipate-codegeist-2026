@@ -27,5 +27,18 @@
   "format": "PASS",
   "build": "PASS",
   "hostedForge": "NOT_RUN",
-  "noRealJiraWrites": true
+  "noRealJiraWrites": true,
+  "postMainSync": {
+    "main": "fda93de",
+    "coreTests": 43,
+    "frontendUnit": 47,
+    "criticalAndMatrix": 14,
+    "visual": 13
+  },
+  "finalMobileTableFix": {
+    "mobileAccessibilityMatrix": 2,
+    "mobileVisualJourneys": 2,
+    "result": "PASS",
+    "note": "Light passed in focused four-case run; dark passed in targeted retry after Windows screenshot file-open errors. Overflow assertions unchanged."
+  }
 }

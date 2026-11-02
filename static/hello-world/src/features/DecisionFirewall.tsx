@@ -136,8 +136,9 @@ export default function DecisionFirewall({ w }: { w: Workflow }) {
       </section>
       <p className="ax-muted ax-small ax-scope-note">
         <Icon name="info" size={13} />
-        These rules govern ANTICIPATE decisions. They are not Jira workflow
-        validators and do not block Jira transitions.
+        These policy results explain this comparison. Optional Jira transition
+        enforcement is a separate workflow configuration and must be enabled by
+        an administrator.
       </p>
       {writeState && writeState !== "AVAILABLE" && (
         <Notice

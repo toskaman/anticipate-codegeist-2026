@@ -10,7 +10,7 @@
     "browser": 72,
     "coreScreenThemeViewportCases": 42,
     "prototypeScreenThemeViewportCases": 42,
-    "core": 31,
+    "core": 43,
     "contracts": 3,
     "simulation": 8,
     "typecheck": "PASS",
@@ -25,7 +25,7 @@
     "Review the sample relation label mismatch noted in EXPERIENCE_CONTINUOUS_SAFETY.md",
     "Keep unrelated newer CORE fc89faa work and external UI redesign output separate until reviewed"
   ],
-  "coreRef": "f2c19f1",
+  "coreRef": "02d6104",
   "deploymentRequest": {
     "status": "DEPLOYED_REPORTED_BY_CORE",
     "executor": "CORE",
@@ -167,6 +167,7 @@
     "forgeDeploymentPerformedByExperience": false,
     "chromiumSeconds": 227.3,
     "firefoxCriticalCases": 32,
-    "webkitCriticalCases": 32
+    "webkitCriticalCases": 32,
+    "mainCompatibility": "main fda93de merged; 47 frontend / 43 CORE / 3 contracts / 8 simulation; 14 critical/matrix and 13 visual rerun pass"
   }
 }
