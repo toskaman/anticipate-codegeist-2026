@@ -9,7 +9,7 @@ ANTICIPATE is an Atlassian Forge app built for Codegeist 2026. It runs entirely 
 **What the app stores** (Forge key-value storage, inside the installing site's Atlassian tenant):
 - evidence-graph snapshots (issue keys, summaries, link types): usable for 24 hours, then deleted from storage after 2 days;
 - scenario comparisons, prevention plans and execution records;
-- decision attestations used by the workflow validator (per issue: plan identifiers, verdicts, a digest of the issue's links and an expiry date; no issue text, no accountId);
+- decision attestations used by the workflow validator (per issue and plan: plan identifiers, verdicts, a digest of the issue's links, an expiry date and the **accountId** of the plan owner, which is also part of the storage key; no issue text);
 - the validator outage policy (Allow or Block), with the **accountId** of the administrator who last changed it and when;
 - the Atlassian **accountId** of the user who created or approved a plan, and approval timestamps (audit trail).
 
