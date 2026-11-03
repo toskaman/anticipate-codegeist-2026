@@ -33,7 +33,7 @@ export const verdictCopy: Record<
     label: "Pass",
     tone: "success",
     headline: "No policy violation reported",
-    next: "Open questions and human approval still apply. Pass does not mean the change is safe.",
+    next: "Open questions and human approval still apply. Pass does not mean the change is safe, and it does not authorize the Jira transition.",
   },
 };
 
@@ -200,10 +200,17 @@ export const nodeKindCopy: Record<string, string> = {
   DECISION: "Decision",
 };
 
+/**
+ * Option C is a what-if: the simulation pretends consumers already moved.
+ * Nothing is migrated, and the Jira workflow validator re-checks live Jira links.
+ */
+export const MIGRATION_ASSUMPTION =
+  "Simulation assumption: consumers have already moved. Comparing options migrates nothing, and Jira must show the migration before the workflow validator lets the change through.";
+
 /** Scenario wording for the three definitions this frontend sends (see simulationRequest). */
 export const scenarioCopy: Record<
   string,
-  { letter: string; title: string; does: string }
+  { letter: string; title: string; does: string; assumes?: string }
 > = {
   "A-remove-now": {
     letter: "A",
@@ -219,6 +226,7 @@ export const scenarioCopy: Record<
     letter: "C",
     title: "Migrate first",
     does: "Moves uses and depends-on links to the replacement you chose, then removes the target.",
+    assumes: MIGRATION_ASSUMPTION,
   },
   "A-breaking-upgrade-now": {
     letter: "A",
@@ -234,6 +242,7 @@ export const scenarioCopy: Record<
     letter: "C",
     title: "Move consumers first",
     does: "Moves uses and depends-on links to the new version you chose, then ships the breaking upgrade.",
+    assumes: MIGRATION_ASSUMPTION,
   },
 };
 export const scenarioOrder = [

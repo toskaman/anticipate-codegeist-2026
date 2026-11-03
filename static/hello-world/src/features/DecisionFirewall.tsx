@@ -134,11 +134,16 @@ export default function DecisionFirewall({ w }: { w: Workflow }) {
           <p>{v.next}</p>
         </div>
       </section>
+      {option?.assumes && (
+        <Notice tone="info" icon="info" title="This result is a what-if">
+          <p>{option.assumes}</p>
+        </Notice>
+      )}
       <p className="ax-muted ax-small ax-scope-note">
-        <Icon name="info" size={13} />
-        These policy results explain this comparison. Optional Jira transition
-        enforcement is a separate workflow configuration and must be enabled by
-        an administrator.
+        <Icon name="info" size={13} />A result here is a simulation, not
+        permission to move the Jira issue. When an administrator adds the
+        ANTICIPATE workflow validator, it re-checks the live Jira links at
+        transition time.
       </p>
       {writeState && writeState !== "AVAILABLE" && (
         <Notice

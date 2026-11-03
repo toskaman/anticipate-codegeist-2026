@@ -94,6 +94,17 @@ const gateCopy: Record<
   NOT_GATED: { label: "Not gated by the validator", tone: "neutral" },
 };
 
+const gateSummary: Record<
+  NonNullable<PreventionPassport["gate"]>["status"],
+  string
+> = {
+  OPEN: "Jira transition: currently allowed by the workflow validator.",
+  CLOSED:
+    "Jira transition: currently refused by the workflow validator (reason below).",
+  NOT_GATED:
+    "Jira transition: this issue is not gated by the workflow validator.",
+};
+
 export default function Passport({ w }: { w: Workflow }) {
   const p = w.passport;
   const evidence = useMemo(() => {
@@ -211,6 +222,35 @@ export default function Passport({ w }: { w: Workflow }) {
             </span>
           </p>
         )}
+        <section
+          className="ax-report__summary"
+          aria-labelledby="report-summary-title"
+          data-testid="passport-summary"
+        >
+          <h2 id="report-summary-title" className="ax-report__summary-k">
+            In short
+          </h2>
+          <ul>
+            <li>
+              Option chosen:{" "}
+              <strong>{plan ? scenarioName(plan.scenarioId) : "none"}</strong>
+              {selected && <> ({verdictCopy[selected.verdict].label})</>}.
+            </li>
+            <li>
+              <strong>
+                {verified} of{" "}
+                {plural(plan?.actions.length ?? 0, "proposed Jira action")}
+              </strong>{" "}
+              verified by reading Jira back.
+            </li>
+            {p.gate && <li>{gateSummary[p.gate.status]}</li>}
+            <li>
+              {p.openUnknowns.length
+                ? `${plural(p.openUnknowns.length, "open question")} still unresolved.`
+                : "No open questions recorded."}
+            </li>
+          </ul>
+        </section>
         <Notice tone="neutral" icon="info" title="About this record">
           {p.disclaimer}
         </Notice>
@@ -497,6 +537,15 @@ export default function Passport({ w }: { w: Workflow }) {
               Only actions marked Verified were read back from Jira by the
               backend.
             </li>
+            {p.gate?.status === "CLOSED" && (
+              <li>
+                <strong>
+                  The recorded outcome does not authorize the Jira transition.
+                </strong>{" "}
+                The workflow validator still refuses it until Jira shows the
+                work this decision assumed.
+              </li>
+            )}
             <li>
               A completed decision means the approved Jira actions were applied
               and verified. Engineering work they track (for example a created

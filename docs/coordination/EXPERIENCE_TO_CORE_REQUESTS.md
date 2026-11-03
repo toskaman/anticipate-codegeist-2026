@@ -2,17 +2,21 @@
 
 Read this file first. Newest request at the top. When a request is done, change its state and answer in `CORE_TO_EXPERIENCE_HANDOFF.md`.
 
-## R-37 (3 Nov 2026): merge PR #37, deploy, check on dev. State: MERGED (0e37a1e); non-admin Settings check PASS on dev; other hosted checks reported by CORE
+## R-38 (3 Nov 2026): three contracts and one doc. State: OPEN
+1. **`docs/submission/TECHNICAL_SECTION.md` is out of date.** It still says three MCP tools, 16 backend tests, "not yet as a Jira workflow validator". Please update it from `docs/STATUS.md`: five tools, 74 backend tests, the validator with outage policy, R17 and `gate`, upgrade scenarios. EXPERIENCE keeps the overall Devpost wording consistent.
+2. **Teamwork Graph provenance (when the adapter is wired).** The UI already reads `GraphSnapshot.coverage`. Before EXPERIENCE shows Teamwork Graph relations, please confirm the fields per edge or per source: source (`JIRA` / `TEAMWORK_GRAPH`), whether a relation is verified or only documentary, whether it feeds the simulation, and a source state (`LIVE` / `PARTIAL` / `UNAVAILABLE` / `NOT_CONFIGURED`, plus "needs admin" if any). The design proposal is in `docs/design/ENTERPRISE_AND_TWG_UX.md` §2. Nothing will be shown as live until the backend reports it.
+3. **Enterprise workspace.** `docs/design/ENTERPRISE_AND_TWG_UX.md` §1 proposes the screens for your `ENTERPRISE_WORKSPACE.md` design. EXPERIENCE needs a contract before building: who can approve (with the reason when not), the step waiting on a person, approval expiry and Passport visibility. Nothing multi-user will be shown before the backend enforces it.
+4. Not needed now: the rest is display only.
 
-PR: https://github.com/toskaman/anticipate-codegeist-2026/pull/37 (branch `feat/product-experience`). It implements your two requests of 3 Nov: the validator outage policy in Settings and the Passport `gate` row. Frontend only (`static/hello-world`, docs and evidence); no backend, manifest or contract change.
+## R-37 (3 Nov 2026): PR #37 hosted acceptance. State: MERGED (0e37a1e) and DEPLOYED ON DEV; acceptance PARTIAL
 
-Both owners agree that you can merge it and deploy it as usual. Orphee asked for it; toskaman asked for these two features.
+PR #37 is merged; no merge request remains. Dev already runs it: the Settings panel appeared on dev for a non-admin on 3 Nov.
 
-1. When CI is green, merge PR #37 into `main`. If there is a conflict in `docs/coordination/*`, keep both sides.
-2. Deploy to **development** the same way as your previous frontend deployments. Production follows your usual rule after the dev checks.
-3. Hosted checks on dev, to record in `CORE_TO_EXPERIENCE_HANDOFF.md`:
-   - Settings as a site administrator: the "Workflow validator during an outage" panel shows Allow/Block. Switch it to Block, confirm, reload: Block stays. Then switch it back to Allow.
-   - Settings as a non-administrator, if you have such an account: the current setting is shown, without a switch.
-   - Passport for MOBL "Migrate first": the "Jira transition" line shows "Closed · the validator refuses it" with the reason.
-   - Optional: print the Passport to check that the line is not split between two pages.
-4. If something is wrong on screen, describe it in the handoff file (screen, what you saw, what was expected). Do not change `static/hello-world` yourself; EXPERIENCE will fix it.
+What is still needed (checklist and results table: `docs/jury/HOSTED_ACCEPTANCE_PR37.md`):
+1. Production deployment under your usual rule, then note the version in `docs/STATUS.md`.
+2. Admin checks on dev: Allow → Block with confirmation, Cancel changes nothing, reload keeps Block, then switch back to Allow.
+3. Passport MOBL "Migrate first": the summary and the "Jira transition" row show CLOSED with its reason while the outcome is Completed. Print it once.
+4. Optional: call `setValidatorPolicy` as a non-admin and check `PERMISSION_DENIED`. A frontend that hides the switch is not server security.
+5. Any visual defect: describe it in the handoff file. EXPERIENCE fixes `static/hello-world`.
+
+Done: Settings as non-admin on dev, PASS (3 Nov, Orphee, invited account, capture `evidence/experience/v4-ux/settings-validator-policy-non-admin-LIVE_FORGE-dev.png`).

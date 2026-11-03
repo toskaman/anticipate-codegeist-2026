@@ -100,3 +100,8 @@ Suggested UI: a "Jira transition" row in Decision overview: OPEN (green), CLOSED
 - The "Workflow validator during an outage" panel shows "During an outage: Allow · Changed 03 Nov 2026, 12:03 CET by an administrator", the effect sentence, and "Only a Jira site administrator can change this setting." No Allow/Block switch. Matches the expected `canEdit: false` behaviour.
 - Capture (LIVE_FORGE): `evidence/experience/v4-ux/settings-validator-policy-non-admin-LIVE_FORGE-dev.png`.
 - Not testable from the UI: a non-admin cannot try a change, because the switch is hidden. The backend `PERMISSION_DENIED` on `setValidatorPolicy` is covered only by the MOCK_TRANSPORT test; a hosted check would have to call the resolver directly as a non-admin (CORE side, optional).
+
+## EXPERIENCE → CORE (3 Nov 2026, jury pass V3): display only
+- Scenario Lab and Decision Firewall label option C ("Migrate first" / "Move consumers first") as a simulation assumption, and say that a result is not permission to move the Jira issue. Pass now ends with "it does not authorize the Jira transition".
+- Passport starts with an "In short" box: option and verdict, verified actions, transition status (from `gate`), open questions. When `gate` is CLOSED, Limitations adds "The recorded outcome does not authorize the Jira transition."
+- New requests in `EXPERIENCE_TO_CORE_REQUESTS.md` (R-38): refresh `TECHNICAL_SECTION.md`; Teamwork Graph provenance fields; enterprise workspace contract. R-37 no longer asks for a merge, only production deploy and the remaining hosted checks (`docs/jury/HOSTED_ACCEPTANCE_PR37.md`).

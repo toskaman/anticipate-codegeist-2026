@@ -227,6 +227,15 @@ for (const gate of [
     const row = page.getByTestId("passport-gate");
     await expect(row).toContainText("Jira transition");
     await expect(row).toContainText(gate.label);
+    // The summary states the transition separately from the recorded outcome.
+    const summary = page.getByTestId("passport-summary");
+    await expect(summary).toContainText("Jira transition:");
+    await expect(summary).toContainText("0 of 1 proposed Jira action");
+    const notAuthorized = page.getByText(
+      "The recorded outcome does not authorize the Jira transition.",
+    );
+    if (gate.status === "CLOSED") await expect(notAuthorized).toBeVisible();
+    else await expect(notAuthorized).toHaveCount(0);
     if (gate.status === "OPEN")
       await expect(row).not.toContainText(gate.reason);
     else await expect(row).toContainText(gate.reason);

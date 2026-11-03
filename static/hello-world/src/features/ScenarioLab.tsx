@@ -260,6 +260,11 @@ export default function ScenarioLab({ w }: { w: Workflow }) {
                         <span className="ax-scenario__does">
                           {meta?.does ?? "Scenario defined by the backend."}
                         </span>
+                        {meta?.assumes && (
+                          <span className="ax-scenario__assumes">
+                            {meta.assumes}
+                          </span>
+                        )}
                         <span className="ax-scenario__verdict">
                           <Badge tone={v.tone} size="lg">
                             {v.label}
