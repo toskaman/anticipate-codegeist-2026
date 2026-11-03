@@ -21,7 +21,7 @@ Target: English, under 5 minutes, everything essential before 3:00. Subtitles in
 | 1:05–1:40 | Scenario Lab: compare remove now / retain / migrate first; optionally switch to "Upgrade a dependency" | "Instead of one answer, it simulates alternatives on the same evidence: remove now, keep it for a while, or migrate consumers first. Same input, same result, every time." | Compare decisions, not tickets. | Live comparison |
 | 1:40–2:05 | Decision Firewall on the blocked option: reason chain and remaining uncertainty | "Removing now is blocked: the services listed on screen still use the API. The reason is traced from the change to the dependency to the policy." | Blocked, with the reason. | Live verdict |
 | 2:05–2:35 | Prevention Plan: select actions → Approve → separately Execute → statuses Verified | "Fixing it takes people. You approve specific Jira actions, then confirm execution separately. Each result is verified by reading Jira back." | Two human steps. Verified in Jira. | Execution authorized for these exact actions |
-| 2:35–2:55 | Prevention Passport, scroll, then the printed PDF | "The Prevention Passport records what was known, what was compared, who approved and what actually happened." | An auditable decision record. | Live Passport + print from the same site |
+| 2:35–2:55 | Prevention Passport: "In short" box, then the "Jira transition" row, then the printed PDF | "The Prevention Passport records what was known, what was compared, who approved and what actually happened. Here the actions are done, but the Jira transition stays closed: Jira does not show the migration yet." | An auditable record. Done is not the same as allowed. | Live Passport for a "Migrate first" plan with gate CLOSED + print from the same site |
 | 2:55–3:20 | Rovo chat with the Decision Reviewer, same issue | "Teams can ask from Rovo too. The agent uses the same engine, read-only: it explains, people decide." | Read-only in Rovo. People stay accountable. | Rovo answer recorded that day |
 | 3:20–3:45 | Optional: evidence-changed refusal, or the workflow validator blocking a transition | "If dependencies change after approval, the old decision no longer counts, and ANTICIPATE refuses to act." | Stale decisions are refused. | Prepared drift or validator test |
 | 3:45–4:10 | Settings (capabilities truth table) + closing card | "Built on Forge, with Jira permissions, deterministic simulations and human approval. ANTICIPATE helps software teams change things safely." | ANTICIPATE — The Decision Firewall for Software Teams | — |
@@ -29,6 +29,21 @@ Target: English, under 5 minutes, everything essential before 3:00. Subtitles in
 Teamwork Graph appears only if it is integrated and demonstrated before recording; otherwise do not mention it beyond "Jira evidence only".
 
 Narration that names numbers or services must be adjusted to what the hosted screen shows on the day.
+
+## Shot list (record on the hosted site, same day)
+1. Jira issue view of the sample API ticket (its links visible).
+2. Mission Control → Start the guided demo → project → Preview → Create (cut the wait) → result list.
+3. Evidence Graph after Analyze: select the indirect consumer, inspector open; zoom crop at 125 %.
+4. Scenario Lab with the three options; hold on the "Simulation assumption" line under option C.
+5. Decision Firewall on "Remove now" (blocked) with the reason chain.
+6. Prevention Plan: select actions → Approve dialog → Execute dialog → Verified statuses.
+7. Passport "In short" and the "Jira transition" row; print preview.
+8. Rovo chat with the Decision Reviewer (dev site), same issue.
+9. Settings: capability table and the outage policy panel (admin view).
+10. Optional: drift refusal or validator refusing a transition in Jira.
+11. Still: `evidence/experience/v4-ux/value-direct-vs-transitive.svg` for the problem intro (labelled "sample data").
+
+Keep the raw recordings and the editing project file (for example a DaVinci Resolve or Shotcut project) in the shared drive, not in the repository.
 
 ## Transitions and pacing
 

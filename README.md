@@ -17,7 +17,8 @@ A change ticket says "retire Auth API v1". It looks safe. The services that brea
 3. **Explains the decision.** Policies say why an option is blocked or needs review, following the path from the change to the affected dependency.
 4. **Keeps people accountable.** A prevention plan lists concrete Jira actions. A person approves them, then confirms execution as a separate step. The backend re-reads Jira to verify each result.
 5. **Refuses stale decisions.** If the dependencies change after approval, execution is refused and the screen shows exactly what changed.
-6. **Records the proof.** The Prevention Passport keeps the evidence, alternatives, approvals, verified outcomes and timeline, as JSON or a printable A4 report. It is an audit-style record, not a legal or cryptographic certificate.
+6. **Guards the Jira transition (optional).** A workflow validator stops issues labelled `anticipate-change` until their decision is completed and the live Jira links agree. A simulated "migrate first" never opens the gate by itself. Administrators choose whether transitions pass or are blocked when ANTICIPATE is unavailable.
+7. **Records the proof.** The Prevention Passport starts with a short answer (option, verified actions, transition status, open questions) and keeps the evidence, alternatives, approvals, verified outcomes and timeline, as JSON or a printable A4 report. It is an audit-style record, not a legal or cryptographic certificate.
 
 ## Screens
 
@@ -27,7 +28,7 @@ These are real Playwright captures of the connected UI with a **mock backend tra
 | --- | --- | --- |
 | ![Dependency map with evidence sources, provenance inspector and accessible list](evidence/experience/v3-redesign/visual/02-evidence-graph-desktop-dark.png) | ![Three alternatives compared on the same evidence, with verdicts and named open questions](evidence/experience/v3-redesign/visual/03-scenario-lab-desktop-dark.png) | ![Decision record with alternatives, approvals and verified execution](evidence/experience/v3-redesign/visual/11-prevention-passport-desktop-light.png) |
 
-More: [all screens, mobile and error states](docs/design/UI_VISUAL_QA.md) · [dependency upgrade comparison](evidence/experience/v4-ux/scenario-lab-upgrade-light-1440-MOCK_TRANSPORT.png) · [printed Passport (PDF)](evidence/experience/v4-ux/passport-long-print-MOCK_TRANSPORT.pdf).
+What the graph adds on the sample data: [direct Jira links vs ANTICIPATE](docs/jury/VALUE_BENCHMARK.md). More: [all screens, mobile and error states](docs/design/UI_VISUAL_QA.md) · [dependency upgrade comparison](evidence/experience/v4-ux/scenario-lab-upgrade-light-1440-MOCK_TRANSPORT.png) · [printed Passport (PDF)](evidence/experience/v4-ux/passport-long-print-MOCK_TRANSPORT.pdf).
 
 ## Try it in Jira (about one minute once sample data exists)
 
@@ -43,13 +44,13 @@ Opening or previewing never writes to Jira. No Jira project is created and nothi
 - **Forge Custom UI** (React, TypeScript) in a Jira global full page, with the Atlassian host theme, a dark default and a Display & accessibility menu.
 - **Forge resolvers** (Node) call Jira REST as the user, so Jira permissions apply. Forge storage keeps plans, approvals and execution leases.
 - **Pure TypeScript simulation and policy engine**, shared **zod contracts** validated on both sides.
-- **Jira workflow validator** (optional, admin-configured): issues labelled `anticipate-change` cannot move forward until their decision is completed.
+- **Jira workflow validator** (optional, admin-configured): issues labelled `anticipate-change` cannot move forward until their decision is completed; an admin setting in Settings decides what happens during an outage (Allow by default, or Block).
 
 ### Rovo and MCP
 
 A Rovo agent, *ANTICIPATE Decision Reviewer*, and five read-only MCP tools (evidence graph, simulate retirement, simulate upgrade, Passport, plan freshness) answer "what happens if we change X?" using the same engine. They never approve or execute. Availability depends on the site's Rovo access and an administrator toggle for MCP.
 
-**Teamwork Graph:** not integrated yet (allowlisting pending). The app shows it as *Not configured* and uses Jira evidence only.
+**Teamwork Graph:** not integrated. It is a Forge Preview capability that needs graph read scopes and access checks; CORE has a prototype adapter that is not wired. The app shows it as *Not configured* and uses Jira evidence only.
 
 ## Safety by design
 
@@ -72,7 +73,7 @@ npx playwright test
 
 From the repository root: `npm ci`, `npm run typecheck`, `npm test`.
 
-Latest local results (Chromium, mock transport): 59 frontend unit tests and 83 browser tests, including axe WCAG 2.2 AA checks on light and dark themes, 320 px reflow, keyboard paths, Passport A4 print and security refusals. Automated accessibility checks are not a WCAG certification. Firefox and WebKit runs are recorded per release in [UI release readiness](docs/design/UI_RELEASE_READINESS.md).
+Latest local results (Chromium, mock transport): 60 frontend unit tests and 90 browser tests, including axe WCAG 2.2 AA checks on light and dark themes, 320 px reflow, keyboard paths, Passport A4 print and security refusals. Automated accessibility checks are not a WCAG certification. Firefox and WebKit runs are recorded per release in [UI release readiness](docs/design/UI_RELEASE_READINESS.md).
 
 Hosted results (deployed Forge app on Jira Cloud) are recorded by CORE with date, site and procedure in the [evidence pack](docs/evidence/EVIDENCE_PACK.md), including verified writes, the evidence-changed refusal, the workflow validator, sample data and Rovo.
 
