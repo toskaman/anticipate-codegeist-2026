@@ -1,3 +1,5 @@
+> **Superseded by [DEVPOST_FINAL.md](DEVPOST_FINAL.md). Not for submission.** Kept for history; some values below are out of date (for example five MCP tools, now six).
+
 # Devpost draft (English) — to be finalised with EXPERIENCE
 
 **Name:** ANTICIPATE — The Decision Firewall for Software Teams
@@ -26,7 +28,7 @@ See docs/submission/TECHNICAL_SECTION.md (Forge global:fullPage Custom UI, Node 
 Jira's issue-link POST direction is the inverse of how links read — we found it on a real site and fixed it with a regression test. Making retries safe without transactions (marker reconciliation + atomic lease claims). Keeping AI out of the decision: agents explain, the engine decides, humans approve.
 
 ## Accomplishments
-Real end-to-end run on Jira (6/6 writes verified), workflow validator blocking a real Jira transition with a clear reason, sample data created and re-read from Jira (6 issues, 4 links, idempotent), Rovo agent answering retirement and upgrade questions, refusal on evidence drift with zero writes, judge-link install verified on a clean site, a "migrate first" decision that only assumes the migration is refused by the Jira gate (shown as CLOSED in the Passport), MCP verified from an external client, 100 % precision/recall vs an independent oracle on 200 annotated graphs.
+Real end-to-end run on Jira (6/6 writes verified), workflow validator blocking a real Jira transition with a clear reason, sample data created and re-read from Jira (6 issues, 4 links, idempotent), Rovo agent answering retirement and upgrade questions, refusal on evidence drift with zero writes, judge-link install verified on a clean site, a "migrate first" decision that only assumes the migration is refused by the Jira gate (shown as CLOSED in the Passport), MCP verified from an external client, 100 % precision/recall vs an independent oracle on 200 generated graphs (synthetic benchmark: it checks the engine against its own definition of impact, not field accuracy).
 
 ## What we learned / What's next
 Teamwork Graph sources (PRs, deployments, Confluence) once Atlassian allowlists the app (request ECOHELP-180616); shared team workspace with separation of duties; more change types (database migrations, feature-flag removal); policy packs per team; Marketplace edition.

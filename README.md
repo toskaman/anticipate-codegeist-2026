@@ -75,7 +75,7 @@ Details: [privacy](docs/legal/PRIVACY.md) · [terms](docs/legal/TERMS.md) · [th
 
 ## Tests and CI
 
-Counts from a local run on `main` 41e5d2a (3 Nov 2026): **93 backend tests** (authorization, concurrency, outage policy, a 50-cycle soak), **16 simulation-core tests**, **68 frontend unit tests**, plus Playwright browser journeys with axe WCAG A/AA checks on light and dark themes, keyboard paths, 320 px reflow and A4 print. CI runs typecheck, lint, formatting, unit tests, Playwright and a security audit on every pull request. Automated accessibility checks are not a certification.
+Counts from a local run on `main` d995021 (3 Nov 2026): **93 backend tests** (authorization, concurrency, outage policy, a 50-cycle soak), **16 simulation-core tests**, **69 frontend unit tests**, plus Playwright browser journeys with axe WCAG A/AA checks on light and dark themes, keyboard paths, 320 px reflow and A4 print. CI runs typecheck, lint, formatting, unit tests, Playwright and a security audit on every pull request. Automated accessibility checks are not a certification.
 
 ```bash
 npm ci && npm run typecheck && npm test                 # repository root (backend)
