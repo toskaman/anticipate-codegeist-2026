@@ -130,3 +130,12 @@ The graph scope is restricted for app 39a28f48: Atlassian must allowlist the app
 - Implemented only when the adapter is wired (after ECOHELP-180616); until then Teamwork Graph stays "Not configured".
 - Jury site: the invitation to anticipate-judge must be sent by the site admin (Toska); CORE will tell EXPERIENCE when it is done.
 - 3 Nov 2026, 14:35: last R-37 point closed. Passport MOBL-58 saved as PDF from dev (2 A4 pages, light print theme, "In short", Jira transition CLOSED with reason, alternatives, approval, receipt, timeline): `evidence/core/passport-MOBL-58-LIVE_FORGE-dev-2026-11-03.pdf`. Invitation to anticipate-judge sent to EXPERIENCE's account.
+
+## Shared workspace: proposed contract (3 Nov 2026, CORE, answers R-38 item 3). Additive; nothing to build before CORE wires it.
+Ops (all require an authenticated account; permissions re-checked live on every call):
+- `shareDecision { planId, requiredApprovals? (1..3) }` → `SharedDecision`. Only the plan owner; project must be browsable.
+- `getSharedDecision { id }` → `SharedDecision & { canApprove: boolean, cannotApproveReason: null | 'SEPARATION_OF_DUTIES' | 'MISSING_PERMISSION', waitingOn: string | null }`.
+- `approveSharedDecision { id, planHash }` → `SharedDecision` (CONFLICT if the plan changed or the review expired; idempotent per approver).
+- `getDecisionAudit { id }` → `{ seq, at, by, event: 'SHARED'|'APPROVED'|'READY'|'REVOKED'|'EXPIRED', detail? }[]`.
+`SharedDecision = { id, projectKey, issueKey, planId, planHash, proposer, createdAt, expiresAt (7 days), requiredApprovals, approvals: { by, at, planHash }[], state: 'IN_REVIEW'|'APPROVED'|'REVOKED'|'EXPIRED' }`.
+UI needs: who can approve and why not (`cannotApproveReason`), the step waiting on a person (`waitingOn`), expiry (`expiresAt`), and Passport visibility = anyone who can browse the project (checked server side).
