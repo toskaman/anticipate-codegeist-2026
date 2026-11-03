@@ -26,7 +26,7 @@ Updated: 3 Nov 2026, ~12:40 Paris. Owner of this file: CORE.
 | Prevention Passport, historical record after snapshot expiry | UNIT_TESTED (expiry), LIVE_FORGE (live passport + PDF print) | retention tests |
 | MCP tools (5, read-only) | LIVE_FORGE | external Claude client on dev |
 | Rovo agent | LIVE_FORGE on dev (site has Rovo); production site has no Rovo |
-| Teamwork Graph | BLOCKED: app not allowlisted | 3 Nov: `read:graph:jira` refused at deploy (restricted scope); `read:graph:issue:jira` deployed on dev (branch exp/teamwork-graph, v5.1.0), but the user consent flow never grants it (the issued code lists only the Jira scopes), so the hosted probe keeps asking for authorization. Atlassian docs: apps must be allowlisted via Atlassian support. Dev rolled back to CORE (v6.0.0, no graph scope); production never changed. Bonus not claimable without allowlisting |
+| Teamwork Graph | BLOCKED: app not allowlisted | 3 Nov: `read:graph:jira` refused at deploy (restricted scope); `read:graph:issue:jira` deployed on dev (branch exp/teamwork-graph, v5.1.0), but the user consent flow never grants it (the issued code lists only the Jira scopes), so the hosted probe keeps asking for authorization. Atlassian docs: apps must be allowlisted via Atlassian support. Dev rolled back to CORE (v6.0.0, no graph scope); production never changed. Allowlist requested: ECOHELP-180616 (2 Nov 2026); evidence in docs/evidence/TEAMWORK_GRAPH_ALLOWLIST.md. Bonus not claimable until enabled |
 
 ## Known limitations
 - The production clean site has only Jira Service Management: the judge demo needs a site with Jira software projects (see docs/submission/INSTALL_LINK.md). Full clean-site judge run: NOT TESTED.
