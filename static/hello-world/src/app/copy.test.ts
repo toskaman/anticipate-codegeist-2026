@@ -48,6 +48,11 @@ describe("plan status display", () => {
       ]).label,
     ).toBe("Partially completed");
   });
+  it("labels an INVALIDATED plan as needing re-review", () => {
+    expect(
+      planStatusDisplay({ ...two, status: "INVALIDATED" as const }, []).label,
+    ).toBe("Invalidated · re-review");
+  });
   it("leaves other statuses and unknown records unchanged", () => {
     expect(planStatusDisplay({ ...two, status: "PARTIAL" }, []).label).toBe(
       "Partially completed",

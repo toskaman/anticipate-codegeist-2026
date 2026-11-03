@@ -6,6 +6,8 @@
  * Availability policy: if ANTICIPATE storage/Jira is unreachable the validator FAILS OPEN (allows) and logs, so our
  * outage can never lock a team's workflow; this is documented and visible in logs.
  * Removal: delete the validator from the transition in the workflow editor.
+ * Attestations are scoped per owner+plan (decision:owner:issueKey:planId); legacy decision:issueKey
+ * records are honored only when the caller expects no scope.
  */
 import { stableHash } from '../packages/simulation-core/src/index';
 
@@ -17,11 +19,35 @@ import { stableHash } from '../packages/simulation-core/src/index';
  */
 export interface DecisionRecord {
   planId: string; scenarioId: string; status: string; at: string;
+  /** AccountId of the plan owner. Absent on records written before scoped attestations (legacy). */
+  owner?: string | null;
   schema?: 2 | 3; issueKey?: string; verdict?: string; blockers?: number | null; allActionsVerified?: boolean;
   /** Verdict of the change itself (scenario without its migration assumptions) on live Jira evidence at completion. */
   currentVerdict?: string; currentBlockers?: number | null; planHash?: string; snapshotId?: string; linksDigest?: string | null; validUntil?: string | null;
 }
 export const ATTESTATION_VALID_DAYS = 14;
+
+/**
+ * Scoped attestation keys (TOP7). Plans are private per owner, so attestations are too:
+ * `decision:{owner}:{issueKey}:{planId}`. One plan can never overwrite another owner's attestation.
+ * Legacy keys `decision:{issueKey}` (no owner/plan segments) are deprecated: the service still writes
+ * them as a migration mirror for the current workflow wiring, but they stay last-writer-wins per issue
+ * and their records are rejected as soon as a caller enforces an expected scope.
+ */
+export interface DecisionScope { owner?: string | null; planId?: string | null; }
+
+export function decisionKey(owner: string, issueKey: string, planId: string): string {
+  return `decision:${owner}:${issueKey}:${planId}`;
+}
+
+/** Parses scoped keys and legacy keys; returns null for anything else. */
+export function parseDecisionKey(key: string): { owner: string; issueKey: string; planId: string } | { legacyIssueKey: string } | null {
+  if (!key.startsWith('decision:')) return null;
+  const parts = key.split(':');
+  if (parts.length === 2 && parts[1]) return { legacyIssueKey: parts[1] };
+  if (parts.length === 4 && parts[1] && parts[2] && parts[3]) return { owner: parts[1], issueKey: parts[2], planId: parts[3] };
+  return null;
+}
 
 type Link = { typeName: string; direction: string; otherKey: string };
 /** Order-independent digest of an issue's dependency links (type, direction, other issue). Ids are ignored. */
@@ -29,12 +55,18 @@ export function linksDigest(links: Link[]): string {
   return stableHash(links.map((l) => `${l.typeName}|${l.direction}|${l.otherKey}`).sort());
 }
 
-export function decideTransition(issue: { labels: string[]; links: Link[] } | null, decision: DecisionRecord | undefined, issueKey: string, now: Date = new Date()): { result: boolean; errorMessage?: string } {
+export function decideTransition(issue: { labels: string[]; links: Link[] } | null, decision: DecisionRecord | undefined, issueKey: string, now: Date = new Date(), expectedScope?: DecisionScope): { result: boolean; errorMessage?: string } {
   if (!issue || !issue.labels.includes('anticipate-change')) return { result: true };
   const block = (why: string) => ({ result: false, errorMessage: `ANTICIPATE Decision Firewall: ${issueKey} cannot move forward because ${why}. Open ANTICIPATE, review the consequences and complete a verified prevention plan.` });
   if (!decision) return block('no ANTICIPATE decision has been recorded');
   if (decision.issueKey && decision.issueKey !== issueKey) return block('the stored decision belongs to another issue');
+  if (expectedScope?.owner != null) {
+    if (decision.owner == null) return block(`plan ${decision.planId} was recorded before scoped attestations existed; re-run it to attest the current evidence`);
+    if (decision.owner !== expectedScope.owner) return block('the stored decision belongs to another user');
+  }
+  if (expectedScope?.planId != null && decision.planId !== expectedScope.planId) return block(`the stored decision belongs to plan ${decision.planId}, not plan ${expectedScope.planId}`);
   if (decision.status === 'EVIDENCE_CHANGED') return block(`the dependency evidence changed after plan ${decision.planId} was approved`);
+  if (decision.status === 'INVALIDATED') return block(`the evidence changed after plan ${decision.planId} was approved and the plan was invalidated`);
   if (decision.status !== 'COMPLETED') return block(`the latest prevention plan ${decision.planId} is ${decision.status}, not COMPLETED`);
   if (decision.schema !== 3 || !decision.linksDigest || !decision.validUntil || decision.allActionsVerified !== true) return block(`plan ${decision.planId} was completed before the current decision attestations existed; re-run it to attest the current evidence`);
   // Preventive tickets created for a BLOCKED option are work to do, not proof that the dependency was migrated.
@@ -53,6 +85,7 @@ export function decideTransition(issue: { labels: string[]; links: Link[] } | nu
  * Policy ALLOW (default): the transition passes and the degradation is logged. Policy BLOCK (opt-in by a Jira admin):
  * the transition is refused with a message that names the outage and the recovery path. If even the policy cannot be
  * read, ALLOW applies, so a full storage outage can never lock every gated workflow.
+ * When expectedScope is given, the decision must belong to that owner+plan (scoped attestations, TOP7).
  */
 export async function runValidator(key: string, io: {
   readIssue(k: string): Promise<{ kind: string; issue?: { labels: string[]; links: Link[] } }>;
@@ -60,7 +93,7 @@ export async function runValidator(key: string, io: {
   readPolicy(): Promise<{ onOutage?: string } | undefined>;
   log(fields: Record<string, unknown>): void;
   now?: Date;
-}): Promise<{ result: boolean; errorMessage?: string }> {
+}, expectedScope?: DecisionScope): Promise<{ result: boolean; errorMessage?: string }> {
   const outage = async (reason: string, detail: string) => {
     let policy = 'ALLOW';
     try { policy = (await io.readPolicy())?.onOutage === 'BLOCK' ? 'BLOCK' : 'ALLOW'; } catch { policy = 'ALLOW'; }
@@ -73,7 +106,7 @@ export async function runValidator(key: string, io: {
     // An issue the app cannot read (403/404 without exception) is unknown evidence, never "an issue without the label" (R18).
     if (issue.kind !== 'ok' || !issue.issue) return outage(`issue_${issue.kind}`, `issue read returned ${issue.kind}`);
     const decision = await io.readDecision(key);
-    return decideTransition(issue.issue, decision, key, io.now ?? new Date());
+    return decideTransition(issue.issue, decision, key, io.now ?? new Date(), expectedScope);
   } catch (e) {
     return outage('exception', e instanceof Error ? e.message : 'error');
   }

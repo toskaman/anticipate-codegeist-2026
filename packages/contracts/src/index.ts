@@ -7,7 +7,7 @@ import { z } from 'zod';
 
 /** Wire version stays 0.2.0: the EXPERIENCE client pins it exactly. 0.3 additions are additive and listed in CONTRACT_FEATURES. */
 export const CONTRACT_VERSION = '0.2.0';
-export const CONTRACT_FEATURES = ['continuous-decision-safety', 'sample-project', 'evidence-coverage', 'service-decommission', 'workflow-validator'] as const;
+export const CONTRACT_FEATURES = ['continuous-decision-safety', 'sample-project', 'evidence-coverage', 'service-decommission', 'workflow-validator', 'plan-invalidation'] as const;
 
 // ---------- primitives ----------
 export const Id = z.string().min(1).max(200);
@@ -183,7 +183,7 @@ export const ProposedAction = z.object({
 export type ProposedAction = z.infer<typeof ProposedAction>;
 
 export const PreventionPlan = z.object({
-  planId: Id, snapshotId: Id, scenarioId: Id, createdAt: IsoDate, status: z.enum(['DRAFT', 'PENDING_APPROVAL', 'APPROVED', 'EXECUTING', 'COMPLETED', 'PARTIAL', 'FAILED', 'EXPIRED', 'EVIDENCE_CHANGED']),
+  planId: Id, snapshotId: Id, scenarioId: Id, createdAt: IsoDate, status: z.enum(['DRAFT', 'PENDING_APPROVAL', 'APPROVED', 'EXECUTING', 'COMPLETED', 'PARTIAL', 'FAILED', 'EXPIRED', 'EVIDENCE_CHANGED', 'INVALIDATED']),
   actions: z.array(ProposedAction).max(50), planHash: z.string()
 });
 export type PreventionPlan = z.infer<typeof PreventionPlan>;

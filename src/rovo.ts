@@ -74,7 +74,7 @@ export function createRovoActions(deps: (p: ActionPayload) => Deps) {
         ...(d.addedEdges.length ? ['New relations:', ...d.addedEdges.map(fmt)] : []),
         ...(d.removedEdges.length ? ['Removed relations:', ...d.removedEdges.map(fmt)] : []),
         ...(d.becameUnknown.length ? [`No longer readable: ${d.becameUnknown.join(', ')}`] : []),
-        'Read-only check. Execution of a plan with changed evidence is blocked server-side until a new plan is reviewed.'].join('\n');
+        'Freshness check. A stale APPROVED plan is marked INVALIDATED; execution of a changed or invalidated plan is blocked server-side until a new plan is reviewed.'].join('\n');
     }),
     getPassport: safe(async (p, c) => {
       if (!p.planId) throw new AppError('VALIDATION', 'planId is required');
