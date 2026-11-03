@@ -21,6 +21,51 @@ import { loadExperience, fixtureClient } from "./adapters";
 import ActionReview from "./ActionReview";
 import PassportView from "./PassportView";
 import { useResource } from "./useResource";
+import {
+  STORAGE_KEY as PREFERENCES_STORAGE_KEY,
+  defaultPreferences,
+  parsePreferences,
+} from "./app/preferences";
+
+export const THEME_STORAGE_KEY = "anticipate-theme";
+
+export type StoredTheme = "light" | "dark";
+
+/**
+ * Best-effort theme restore. Missing keys, invalid values, corrupted JSON,
+ * and blocked storage all fall back to the shared default theme.
+ */
+export function readStoredTheme(): StoredTheme {
+  const fallback: StoredTheme =
+    defaultPreferences.theme === "light" ? "light" : "dark";
+  try {
+    const legacy = localStorage.getItem(THEME_STORAGE_KEY);
+    if (legacy === "light" || legacy === "dark") return legacy;
+  } catch {
+    /* storage blocked: fall through to shared preferences */
+  }
+  try {
+    const raw = localStorage.getItem(PREFERENCES_STORAGE_KEY);
+    if (raw != null) {
+      const theme = parsePreferences(raw).theme;
+      if (theme === "light" || theme === "dark") return theme;
+    }
+  } catch {
+    /* storage blocked: fall through to defaults */
+  }
+  return fallback;
+}
+
+/** Best-effort theme persist: never throws when storage is blocked. */
+export function persistStoredTheme(next: string): void {
+  if (next !== "light" && next !== "dark") return;
+  try {
+    localStorage.setItem(THEME_STORAGE_KEY, next);
+  } catch {
+    /* storage blocked: theme lasts for this page only */
+  }
+}
+
 const loadLocalExperience = (signal?: AbortSignal) =>
   loadExperience(fixtureClient, signal);
 const Graph = lazy(() => import("./Graph"));
@@ -47,9 +92,7 @@ const icons = [
 ];
 export default function App() {
   const [page, setPage] = usePage(pages);
-  const [theme, setTheme] = useState(
-    localStorage.getItem("anticipate-theme") || "dark",
-  );
+  const [theme, setTheme] = useState(readStoredTheme);
   const [scenario, setScenario] = useState<ScenarioId>("C");
   const [resetVersion, setResetVersion] = useState(0);
   const [compare, setCompare] = useState(true);
@@ -166,7 +209,7 @@ export default function App() {
           onClick={() => {
             const next = theme === "dark" ? "light" : "dark";
             setTheme(next);
-            localStorage.setItem("anticipate-theme", next);
+            persistStoredTheme(next);
           }}
         >
           {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />} Switch

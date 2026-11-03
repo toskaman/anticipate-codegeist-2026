@@ -1,58 +1,45 @@
 // Workflow state and CORE operations for the hosted workspace.
 // Ported from the verified workspace including evidence drift and sample setup; preserves validation,
 // idempotency, recovery or mutation guards. Presentation lives in src/features.
-import { useCallback, useEffect, useReducer, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type {
-  CapabilityAvailability,
-  ProjectSummary,
   JiraIssueSummary,
   GraphSnapshot,
   ScenarioComparison,
   PreventionPlan,
-  PreventionPassport,
-  ExecutionRecord,
-  OperationName,
 } from "@anticipate/contracts";
 import { ForgeClient, CoreClientError } from "../api/ForgeClient";
-import { useResource } from "../useResource";
 import { usePage } from "../usePage";
 import type { OperationFailure } from "../CoreOperationError";
 import {
   pages,
   simulationRequest,
-  storedPlan,
   hasExecutionAttempt,
   rememberExecution,
   rememberPlan,
   download,
-  UPGRADE_CAPABILITY,
   type ChangeKind,
 } from "./workflow";
+import { useBootstrap } from "./useBootstrap";
+import { usePlanState } from "./usePlan";
+import { assertSnapshotFresh, useExpired } from "./useExpiry";
 
-/**
- * True once `expiresAt` has passed. Re-renders once at the expiry instant instead of
- * re-rendering the whole workspace every second (the previous 1 s clock).
- */
-export function useExpired(expiresAt: string | null | undefined) {
-  const [tick, bump] = useReducer((x: number) => x + 1, 0);
-  const at = expiresAt ? Date.parse(expiresAt) : NaN;
-  const expired = Number.isFinite(at) ? at <= Date.now() : false;
-  useEffect(() => {
-    if (!Number.isFinite(at)) return;
-    const remaining = at - Date.now();
-    if (remaining <= 0) return;
-    // setTimeout overflows above 2^31-1 ms; re-arm for very distant expiries.
-    const timer = setTimeout(bump, Math.min(remaining + 25, 2 ** 31 - 1));
-    return () => clearTimeout(timer);
-  }, [at, tick]);
-  return expired;
-}
+export { useExpired } from "./useExpiry";
 
 export function useCoreWorkflow(client: ForgeClient) {
   const [page, setPage] = usePage(pages);
   const [projectId, setProjectId] = useState("");
-  const [projects, setProjects] = useState<ProjectSummary[]>([]);
-  const [projectCursor, setProjectCursor] = useState<string | null>(null);
+  const {
+    resource,
+    capabilities,
+    allowed,
+    requireOperation,
+    upgradeSupported,
+    projects,
+    setProjects,
+    projectCursor,
+    setProjectCursor,
+  } = useBootstrap(client);
   const [candidates, setCandidates] = useState<JiraIssueSummary[] | null>(null);
   const [candidateCursor, setCandidateCursor] = useState<string | null>(null);
   const [rootIssueKey, setRootIssueKey] = useState("");
@@ -61,23 +48,33 @@ export function useCoreWorkflow(client: ForgeClient) {
   const [requestedKind, setRequestedKind] = useState<ChangeKind>("retire");
   const [comparison, setComparison] = useState<ScenarioComparison | null>(null);
   const [scenarioId, setScenarioId] = useState("");
-  const [plan, setPlan] = useState<PreventionPlan | null>(null);
-  const [selected, setSelected] = useState<string[]>([]);
-  const [passport, setPassport] = useState<PreventionPassport | null>(null);
-  const [records, setRecords] = useState<ExecutionRecord[] | null>(null);
-  const [recoveryId, setRecoveryId] = useState(storedPlan);
-  const [attempted, setAttempted] = useState(false);
-  const [approvalUncertain, setApprovalUncertain] = useState(false);
-  const [confirmation, setConfirmation] = useState<
-    "approve" | "execute" | null
-  >(null);
+  const {
+    plan,
+    setPlan,
+    selected,
+    setSelected,
+    passport,
+    setPassport,
+    records,
+    setRecords,
+    recoveryId,
+    setRecoveryId,
+    attempted,
+    setAttempted,
+    approvalUncertain,
+    setApprovalUncertain,
+    confirmation,
+    setConfirmation,
+    evidenceFailure,
+    setEvidenceFailure,
+    clearPlan,
+    approvedIds,
+  } = usePlanState();
   const [operationBusy, setBusy] = useState("");
   const [sampleBusy, setSampleBusy] = useState(false);
   const busy =
     operationBusy || (sampleBusy ? "Preparing Jira sample data…" : "");
   const [sampleReplacement, setSampleReplacement] = useState("");
-  const [evidenceFailure, setEvidenceFailure] =
-    useState<OperationFailure | null>(null);
   const [error, setError] = useState<OperationFailure | null>(null);
   const [notice, setNotice] = useState("");
   const pending = useRef(false);
@@ -90,74 +87,16 @@ export function useCoreWorkflow(client: ForgeClient) {
       controller.current?.abort();
     };
   }, []);
-  const load = useCallback(
-    async (signal?: AbortSignal) => {
-      // Both start together: each Forge invocation costs ~0.5-3.7 s on a cold
-      // start (LIVE_FORGE timings). The listing is read-only and is used only
-      // if capabilities then confirm Jira read; otherwise it is discarded.
-      const listing = client
-        .request("listProjects", { cursor: null }, signal)
-        .then(
-          (data) => ({ ok: true as const, data }),
-          (error: unknown) => ({ ok: false as const, error }),
-        );
-      const capabilities = await client.request("getCapabilities", {}, signal);
-      const available =
-        capabilities.jiraRead === "AVAILABLE" &&
-        capabilities.operations.includes("listProjects");
-      if (!available) return { capabilities, first: null };
-      const result = await listing;
-      if (!result.ok) throw result.error;
-      return { capabilities, first: result.data };
-    },
-    [client],
-  );
-  const resource = useResource(load);
-  const bootstrap = resource.status === "ready" ? resource.data : null;
-  useEffect(() => {
-    if (bootstrap) {
-      setProjects(bootstrap.first?.items ?? []);
-      setProjectCursor(bootstrap.first?.page.nextCursor ?? null);
-    }
-  }, [bootstrap]);
-  const capabilities: CapabilityAvailability | null =
-    resource.status === "ready" ? resource.data.capabilities : null;
-  const allowed = (op: OperationName) =>
-    capabilities?.operations.includes(op) ?? false;
-  // Upgrade comparisons are offered only when the backend says it supports them.
-  const upgradeSupported =
-    capabilities?.operations.includes(UPGRADE_CAPABILITY) ?? false;
   const changeKind: ChangeKind =
     requestedKind === "upgrade" && !upgradeSupported ? "retire" : requestedKind;
   const expired = useExpired(snapshot?.expiresAt);
   function fresh() {
-    if (!snapshot || Date.parse(snapshot.expiresAt) <= Date.now())
-      throw new CoreClientError(
-        "SNAPSHOT_EXPIRED",
-        "Reload a snapshot and compare scenarios before reviewing a new plan.",
-      );
-  }
-  function requireOperation(op: OperationName) {
-    if (!allowed(op))
-      throw new CoreClientError(
-        "UNSUPPORTED",
-        `${op} is not enabled by the backend.`,
-      );
+    assertSnapshotFresh(snapshot);
   }
   function go(next: string) {
     setPage(next);
     location.hash = encodeURIComponent(next);
     document.getElementById("main")?.focus();
-  }
-  function clearPlan() {
-    setEvidenceFailure(null);
-    setPlan(null);
-    setPassport(null);
-    setSelected([]);
-    setRecords(null);
-    setAttempted(false);
-    setApprovalUncertain(false);
-    setConfirmation(null);
   }
   function clearComparison() {
     setComparison(null);
@@ -280,11 +219,6 @@ export function useCoreWorkflow(client: ForgeClient) {
   }
   const currentResult = comparison?.results.find(
     (r) => r.scenarioId === scenarioId,
-  );
-  const approvedIds = new Set(
-    passport?.approvals
-      .flatMap((a) => a.actionIds)
-      .filter((id) => plan?.actions.some((a) => a.actionId === id)) ?? [],
   );
   const writesAvailable = capabilities?.jiraWrite === "AVAILABLE";
   const executionMarked = plan ? hasExecutionAttempt(plan.planId) : false;

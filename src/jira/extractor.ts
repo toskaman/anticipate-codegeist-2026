@@ -1,6 +1,6 @@
 /**
  * Builds an evidence GraphSnapshot from real Jira data (issue links + components), as the requesting user.
- * Bounded BFS (depth, node count), cycle-safe. Unreadable issues stay UNKNOWN — never assumed safe.
+ * Bounded BFS (depth, node count), cycle-safe. Unreadable issues stay UNKNOWN Ã¢â‚¬â€ never assumed safe.
  *
  * Link semantics (edge `from -> to`, "from depends on to" for propagating kinds):
  *  - "A blocks B"            -> B DEPENDS_ON A   (CONFIRMED, extractor jira.issuelink:blocks)
@@ -11,9 +11,39 @@
  *  - issue has component C   -> issue AFFECTS C  (CONFIRMED, extractor jira.component)
  */
 import type { EdgeKind, EvidenceEdge, EvidenceNode, EvidenceStatus, GraphSnapshot } from '../../packages/contracts/src/index';
-import type { JiraIssue, JiraPort } from '../core/ports';
+import type { IssueFetch, JiraIssue, JiraPort } from '../core/ports';
 
 export interface ExtractOptions { maxDepth: number; maxNodes: number; snapshotId: string; projectId: string; now: Date; ttlHours: number; }
+
+/** Max parallel Jira fetches per crawl batch: faster than sequential, kind to rate limits. */
+export const CRAWL_FETCH_CONCURRENCY = 5;
+
+/** Run-scoped snapshot cache: one entry per issue key, dropped at the end of the run. Callers may share one across crawls of unchanged data. */
+export type IssueCache = Map<string, IssueFetch>;
+export const createIssueCache = (): IssueCache => new Map();
+
+/** Bounded worker pool over `items`; results keep input order regardless of completion order. */
+export async function mapWithConcurrency<T, R>(items: readonly T[], limit: number, fn: (item: T, index: number) => Promise<R>): Promise<R[]> {
+  const results = new Array<R>(items.length);
+  let next = 0;
+  const workers = Math.min(Math.max(1, limit), items.length);
+  async function worker(): Promise<void> {
+    for (;;) {
+      const i = next++;
+      if (i >= items.length) return;
+      results[i] = await fn(items[i] as T, i);
+    }
+  }
+  await Promise.all(Array.from({ length: workers }, () => worker()));
+  return results;
+}
+
+/** Fetches `keys` in input order via a bounded pool; cached keys cost no network call. */
+export async function fetchIssues(jira: JiraPort, keys: readonly string[], cache: IssueCache, limit: number = CRAWL_FETCH_CONCURRENCY): Promise<IssueFetch[]> {
+  const missing = [...new Set(keys.filter((k) => !cache.has(k)))];
+  await mapWithConcurrency(missing, limit, async (k) => { cache.set(k, await jira.getIssue(k)); });
+  return keys.map((k) => cache.get(k) as IssueFetch);
+}
 
 type Classified = { kind: EdgeKind; status: EvidenceStatus; from: 'self' | 'other'; tag: string };
 
@@ -23,7 +53,7 @@ export function classifyLink(l: JiraIssue['links'][number]): Classified {
   const type = l.typeName.toLowerCase();
   const out = l.direction === 'outward';
   if (type === 'blocks' || /\bblock/.test(phrase)) {
-    // outward "blocks": self blocks other → other depends on self. inward "is blocked by": self depends on other.
+    // outward "blocks": self blocks other Ã¢â€ â€™ other depends on self. inward "is blocked by": self depends on other.
     const selfBlocks = /is blocked by/.test(phrase) ? false : out;
     return { kind: 'DEPENDS_ON', status: 'CONFIRMED', from: selfBlocks ? 'other' : 'self', tag: 'jira.issuelink:blocks' };
   }
@@ -37,7 +67,7 @@ export function classifyLink(l: JiraIssue['links'][number]): Classified {
 export const issueNodeId = (key: string) => `issue:${key}`;
 export const componentNodeId = (id: string) => `component:${id}`;
 
-export async function extractGraph(jira: JiraPort, rootKey: string, o: ExtractOptions): Promise<GraphSnapshot> {
+export async function extractGraph(jira: JiraPort, rootKey: string, o: ExtractOptions, cache: IssueCache = createIssueCache()): Promise<GraphSnapshot> {
   const site = jira.siteUrl();
   const issueUrl = (k: string) => (site ? `${site.replace(/\/$/, '')}/browse/${encodeURIComponent(k)}` : null);
   const at = o.now.toISOString();
@@ -48,19 +78,14 @@ export async function extractGraph(jira: JiraPort, rootKey: string, o: ExtractOp
 
   const visited = new Set<string>();
   let frontier = [rootKey];
-  for (let depth = 0; frontier.length && depth <= o.maxDepth; depth++) {
-    const next: string[] = [];
-    for (const key of frontier.sort()) {
-      if (visited.has(key)) continue;
-      if (nodes.size >= o.maxNodes) { truncated = true; break; }
-      visited.add(key);
-      const res = await jira.getIssue(key);
+  // Per-key handling is unchanged; batching only affects how fetches are issued.
+  const process = (key: string, res: IssueFetch, depth: number, next: string[]) => {
       const nid = issueNodeId(key);
       if (res.kind !== 'ok') {
         nodes.set(nid, { id: nid, kind: 'ISSUE', label: key, status: 'UNKNOWN', attributes: { access: res.kind }, references: [] });
         // Mark every edge touching this node as access-limited / UNKNOWN.
         for (const [id, e] of edges) if (e.from === nid || e.to === nid) edges.set(id, { ...e, status: 'UNKNOWN', accessLimited: true });
-        continue;
+        return;
       }
       const is = res.issue;
       const testLike = /test/i.test(is.issueType);
@@ -85,6 +110,23 @@ export async function extractGraph(jira: JiraPort, rootKey: string, o: ExtractOp
           if (depth < o.maxDepth) next.push(l.otherKey);
           else { truncated = true; if (!nodes.has(other)) nodes.set(other, { id: other, kind: 'ISSUE', label: l.otherKey, status: 'UNKNOWN', attributes: { access: 'not_crawled' }, references: [] }); }
         }
+      }
+  };
+  for (let depth = 0; frontier.length && depth <= o.maxDepth; depth++) {
+    const next: string[] = [];
+    const pending = [...new Set(frontier)].sort().filter((k) => !visited.has(k));
+    let idx = 0;
+    let capped = false;
+    while (idx < pending.length && !capped) {
+      if (nodes.size >= o.maxNodes) { truncated = true; break; }
+      const room = Math.max(1, o.maxNodes - nodes.size);
+      const batch = pending.slice(idx, idx + Math.min(CRAWL_FETCH_CONCURRENCY, room));
+      idx += batch.length;
+      for (const k of batch) visited.add(k);
+      const fetched = await fetchIssues(jira, batch, cache);
+      for (let b = 0; b < batch.length; b++) {
+        if (nodes.size >= o.maxNodes) { truncated = true; capped = true; break; }
+        process(batch[b] as string, fetched[b] as IssueFetch, depth, next);
       }
     }
     frontier = [...new Set(next)];
