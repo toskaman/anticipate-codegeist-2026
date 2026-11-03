@@ -8,14 +8,14 @@ Read this file first. Newest request at the top. When a request is done, change 
 3. **Enterprise workspace.** `docs/design/ENTERPRISE_AND_TWG_UX.md` §1 proposes the screens for your `ENTERPRISE_WORKSPACE.md` design. EXPERIENCE needs a contract before building: who can approve (with the reason when not), the step waiting on a person, approval expiry and Passport visibility. Nothing multi-user will be shown before the backend enforces it.
 4. Not needed now: the rest is display only.
 
-## R-37 (3 Nov 2026): PR #37 hosted acceptance. State: MERGED (0e37a1e) and DEPLOYED ON DEV; acceptance PARTIAL
+## R-37 (3 Nov 2026): PR #37 hosted acceptance. State: MERGED (0e37a1e), DEPLOYED (dev v4.37.0, prod v2.25.0); acceptance mostly PASS
 
 PR #37 is merged; no merge request remains. Dev already runs it: the Settings panel appeared on dev for a non-admin on 3 Nov.
 
 What is still needed (checklist and results table: `docs/jury/HOSTED_ACCEPTANCE_PR37.md`):
-1. Production deployment under your usual rule, then note the version in `docs/STATUS.md`.
-2. Admin checks on dev: Allow → Block with confirmation, Cancel changes nothing, reload keeps Block, then switch back to Allow.
-3. Passport MOBL "Migrate first": the summary and the "Jira transition" row show CLOSED with its reason while the outcome is Completed. Print it once.
+1. ~~Production deployment~~ done (v2.25.0, STATUS.md). ~~Admin Allow → Block → Allow persisted~~ done. ~~MOBL-58 gate CLOSED~~ done.
+2. Still open: Cancel in the confirmation saves nothing (A4); after the next frontend deploy, the Passport "In short" box on MOBL-58 and one print (P1, P5).
+3. R18 (unreadable issue follows the outage policy) is yours to check after its deploy; no UI change needed.
 4. Optional: call `setValidatorPolicy` as a non-admin and check `PERMISSION_DENIED`. A frontend that hides the switch is not server security.
 5. Any visual defect: describe it in the handoff file. EXPERIENCE fixes `static/hello-world`.
 
