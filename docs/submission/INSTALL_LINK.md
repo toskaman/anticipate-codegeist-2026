@@ -19,3 +19,15 @@ Manual demo setup without the guided flow: docs/demo/JIRA_DEMO_SETUP.md.
 
 Support: info@lepcpro.fr · Privacy: docs/legal/PRIVACY.md · Terms: docs/legal/TERMS.md
 The link always installs the latest production deployment.
+
+
+## Notes from the clean-site run (3 Nov 2026)
+- The install page lists only the sites where the signed-in Atlassian account is an admin. If your site is missing, switch account (avatar, top right) to the site admin.
+- Jira Free works for the full demo. Limited-permission roles cannot be configured on Free; they are covered by automated tests.
+
+## Optional: turn on the Jira workflow gate (5 steps, company-managed project)
+1. Project settings > Workflows > edit the workflow.
+2. Select the transition to protect (for example "In Progress").
+3. Rules > Add rule > Validate details > "ANTICIPATE Decision Firewall".
+4. Save and publish the workflow.
+5. Label the change issue `anticipate-change`. The transition is refused until its ANTICIPATE plan is completed and verified, and refused again if the plan only assumes a migration Jira does not show yet.
