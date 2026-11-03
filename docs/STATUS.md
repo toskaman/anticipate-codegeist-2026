@@ -18,7 +18,7 @@ Updated: 3 Nov 2026, ~12:40 Paris. Owner of this file: CORE.
 | Continuous Decision Safety (evidence drift refusal) | LIVE_FORGE | plan-4ac3c031 refused, plan-85ba308a CHANGED via MCP |
 | Workflow validator with decision attestations (schema 3) | LIVE_FORGE | AVT-3 allowed then refused after new link; partial plan refused (PARTIAL) |
 | Validator outage policy (admin) | LIVE_FORGE on dev | admin ALLOW to BLOCK to ALLOW persisted (12:03); non-admin read-only, no control (EXPERIENCE capture) |
-| Assumed-migration guard (R17) and Passport `gate` | LIVE_FORGE on dev | MOBL-58 Migrate first: Jira transition CLOSED with reason |
+| Assumed-migration guard (R17), legitimate OPEN and Passport `gate` | LIVE_FORGE on dev and in production (judge site JDG: CLOSED then OPEN after real migration) | MOBL-58 Migrate first: Jira transition CLOSED with reason |
 | Validator: unreadable issue (403/404) follows outage policy (R18) | UNIT_TESTED; hosted attempt | 6 tests; on AVT a reporter-only security level does not hide issues from the app, so 403 cannot be produced on this site (see ENGINEERING_REPORT R18) |
 | Judge journey (guided demo → Passport) | LIVE_FORGE in production on a clean site | anticipate-judge JDG-1, 3 Nov 14:01 |
 | Sample data (guided demo), CONFLICT guard | LIVE_FORGE | MP, AVT, MOBL; CONFLICT logged, no duplicates |

@@ -70,3 +70,14 @@ Site: anticipate-judge.atlassian.net, created 3 Nov 2026 on the Jira Free plan; 
 | Prevention Passport | Completed, In short, gate | PASS: Completed, 1 of 1 verified, Jira transition reported as refused by the validator |
 
 Not covered on this run: limited-permission users (Jira Free has no custom permission schemes; covered by unit tests), the workflow validator on JDG (not added to the JDG workflow), and print to PDF.
+
+## Workflow validator on the clean judge site, 3 Nov 2026, 15:00-15:06 Paris (PRODUCTION)
+Setup: the "ANTICIPATE Decision Firewall" validator (production extension `.../4d3acc12-4ae2-4391-ae84-ea853b078830/static/anticipate-decision-firewall`) added to the JDG workflow transition "En cours" (workflow version 0 to 1, via the Jira workflows update API). Default outage policy (Allow).
+
+| Case | Expected | Observed |
+|---|---|---|
+| JDG-6, no `anticipate-change` label | passes | PASS (204) |
+| JDG-1, labelled, plan "Migrate first" COMPLETED but consumers still linked (R17) | CLOSED with reason | PASS: refused, "assumes work that Jira does not show as done yet (consumers still depend on it)" |
+| Consumers actually migrated (links JDG-1 blocks JDG-2 and JDG-3 removed), re-analysis: "Remove now" PASS (0 affected), new plan approved and executed (VERIFIED 15:05) | OPEN | PASS: JDG-1 moved to "En cours" (204) |
+
+Cleanup: JDG-6 and JDG-1 back to Backlog. The two removed consumer links are part of the scenario (the migration); "Preview sample data" will offer to recreate them.
