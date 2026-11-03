@@ -1,4 +1,4 @@
-import { GraphSnapshot, ScenarioDefinition, PolicyRule, OPERATIONS, envelope, CONTRACT_VERSION } from '../src/index';
+import { GraphSnapshot, ScenarioDefinition, PolicyRule, OPERATIONS, envelope, CONTRACT_VERSION, PreventionPlan } from '../src/index';
 import { FIXTURE_SNAPSHOT, FIXTURE_SCENARIOS, FIXTURE_POLICIES } from '../src/fixtures';
 
 describe('contracts', () => {
@@ -16,5 +16,8 @@ describe('contracts', () => {
     const meta = { contractVersion: CONTRACT_VERSION, requestId: 'r1', mode: 'LIVE', generatedAt: '2026-11-02T09:00:00.000Z' };
     expect(E.safeParse({ ok: false, meta, error: { code: 'PERMISSION_DENIED', message: 'x', requestId: 'r1', retryable: false } }).success).toBe(true);
     expect(E.safeParse({ ok: true, meta, data: {} }).success).toBe(false);
+  });
+  it('accepts the INVALIDATED plan status (active invalidation)', () => {
+    expect(PreventionPlan.shape.status.parse('INVALIDATED')).toBe('INVALIDATED');
   });
 });
