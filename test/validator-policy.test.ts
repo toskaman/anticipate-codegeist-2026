@@ -51,7 +51,7 @@ describe('validator: unreadable issue (R18)', () => {
     allActionsVerified: true, linksDigest: linksDigest([]), validUntil: '2026-12-01T00:00:00Z' };
   const run = (kind: string, policy?: string, logs: unknown[] = []) => runValidator('X-1', { readIssue: async () => ({ kind }), readDecision: async () => dec,
     readPolicy: async () => (policy ? { onOutage: policy } : undefined), log: (f) => logs.push(f), now: new Date('2026-11-10T00:00:00Z') });
-  for (const kind of ['forbidden', 'not_found']) {
+  for (const kind of ['forbidden', 'not_found', 'no_issue_key']) {
     it(`${kind} + BLOCK refuses: an unreadable issue is not an issue without label`, async () => {
       const logs: unknown[] = [];
       const r = await run(kind, 'BLOCK', logs);
