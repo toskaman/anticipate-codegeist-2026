@@ -6,6 +6,7 @@
 import type { SampleProjectPlan } from '../../packages/contracts/src/index';
 import { AppError } from '../core/errors';
 import type { JiraPort } from '../core/ports';
+import { CRAWL_FETCH_CONCURRENCY, createIssueCache, fetchIssues, mapWithConcurrency } from '../jira/extractor';
 
 const ROLES = [
   { role: 'api', summary: 'Legacy Auth API v1 (sample)', change: true },
@@ -25,11 +26,16 @@ async function inspect(jira: JiraPort, projectKey: string): Promise<SampleProjec
   const types = await jira.issueTypes(projectKey);
   const issueType = types.find((t) => t === 'Task') ?? types.find((t) => !/epic|sub/i.test(t)) ?? null;
   const keys: Record<string, string | null> = {};
-  for (const r of ROLES) keys[r.role] = (await jira.searchIssues(`project = ${projectKey} AND labels = "${label(r.role)}"`, null, 1)).items[0]?.key ?? null;
+  const found = await mapWithConcurrency(ROLES, CRAWL_FETCH_CONCURRENCY,
+    (r) => jira.searchIssues(`project = ${projectKey} AND labels = "${label(r.role)}"`, null, 1));
+  ROLES.forEach((r, i) => { keys[r.role] = found[i]?.items[0]?.key ?? null; });
+  // One fetch per distinct link source; repeated roles (api x3) hit the run cache.
+  const cache = createIssueCache();
+  await fetchIssues(jira, [...new Set(LINKS.filter(([a, b]) => keys[a] && keys[b]).map(([a]) => keys[a] as string))], cache);
   const links = [];
   for (const [a, b] of LINKS) {
     let exists = false;
-    if (keys[a] && keys[b]) { const cur = await jira.getIssue(keys[a]!); exists = cur.kind === 'ok' && cur.issue.links.some((l) => l.otherKey === keys[b] && (b === 'v2' ? true : l.typeName === 'Blocks' && l.direction === 'outward')); }
+    if (keys[a] && keys[b]) { const cur = cache.get(keys[a] as string)!; exists = cur.kind === 'ok' && cur.issue.links.some((l) => l.otherKey === keys[b] && (b === 'v2' ? true : l.typeName === 'Blocks' && l.direction === 'outward')); }
     links.push({ from: keys[a] ?? a, relation: 'blocks' as const, to: keys[b] ?? b, status: exists ? 'EXISTS' as const : 'TO_CREATE' as const });
   }
   return {
