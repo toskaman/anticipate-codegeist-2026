@@ -4148,3 +4148,43 @@ body:has(.ax-app) {
     break-inside: avoid;
   }
 }
+
+/* 19. What-if slip panel (Scenario Lab, CORE simulateSlip) */
+.ax-slip__form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ax-2) var(--ax-3);
+  align-items: center;
+}
+.ax-slip__form p {
+  flex-basis: 100%;
+  margin: 0;
+}
+.ax-app .ax-slip__form input.ax-slip__days {
+  width: 6em;
+}
+.ax-slip__result {
+  display: grid;
+  gap: var(--ax-3);
+  margin-top: var(--ax-4);
+}
+.ax-slip__headline {
+  margin: 0;
+}
+.ax-slip__list {
+  margin: var(--ax-1) 0 0;
+  padding-left: 1.2em;
+}
+.ax-slip__list li + li {
+  margin-top: var(--ax-2);
+}
+.ax-slip__path {
+  display: block;
+  font-size: var(--ax-fs-xs);
+  color: var(--ax-text-3);
+  overflow-wrap: anywhere;
+}
+.ax-slip__assumptions summary {
+  cursor: pointer;
+  font-weight: 600;
+}

@@ -1,6 +1,7 @@
 import React from "react";
 import type { SimulationResult } from "@anticipate/contracts";
 import Icon from "../components/Icon";
+import SlipPanel from "./SlipPanel";
 import {
   Badge,
   EmptyState,
@@ -453,6 +454,7 @@ export default function ScenarioLab({ w }: { w: Workflow }) {
           )}
         </>
       )}
+      {s && <SlipPanel w={w} />}
     </>
   );
 }
