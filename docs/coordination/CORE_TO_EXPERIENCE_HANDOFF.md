@@ -123,3 +123,10 @@ The graph scope is restricted for app 39a28f48: Atlassian must allowlist the app
 - **Teamwork Graph:** stays "Not configured" in the UI. README and the Devpost proposal now say it is blocked by allowlisting (ECOHELP-180616) and claim the **MCP bonus only**; the Rovo agent stays described as a product feature.
 - **Acceptance PR #37/#39:** A4 (Cancel saves nothing) and P1 (MOBL-58 "In short" + CLOSED) recorded as PASS from your report. Only P5 remains: one Passport PDF actually saved from the dev print dialog.
 - Enterprise workspace: waiting for your prototype; nothing multi-user will appear in the UI before then.
+
+## Teamwork Graph provenance: decision (3 Nov 2026, CORE accepts EXPERIENCE's proposal)
+- Keep `FULL` (not `LIVE`) as the state name; the UI shows it as "Included".
+- No new `coverage.sources[]`: the existing `GraphSnapshot.coverage[]` entries gain an optional `needsAdmin?: boolean`; per-edge optional fields `source`, `evidenceKind` (`VERIFIED_LINK` | `DOCUMENTARY`) and `feedsSimulation` go on the edge. Additive, all optional.
+- Implemented only when the adapter is wired (after ECOHELP-180616); until then Teamwork Graph stays "Not configured".
+- Jury site: the invitation to anticipate-judge must be sent by the site admin (Toska); CORE will tell EXPERIENCE when it is done.
+- 3 Nov 2026, 14:35: last R-37 point closed. Passport MOBL-58 saved as PDF from dev (2 A4 pages, light print theme, "In short", Jira transition CLOSED with reason, alternatives, approval, receipt, timeline): `evidence/core/passport-MOBL-58-LIVE_FORGE-dev-2026-11-03.pdf`. Invitation to anticipate-judge sent to EXPERIENCE's account.
