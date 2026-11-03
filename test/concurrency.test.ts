@@ -10,8 +10,13 @@ async function ready() {
   const jira = demoJira(); const store = memoryStore();
   // Yield on every store/jira call so concurrent executions genuinely interleave.
   const tick = () => new Promise((r) => setTimeout(r, 0));
-  for (const k of ['get', 'set', 'setIfAbsent', 'delete'] as const) { const f = store[k].bind(store); (store as any)[k] = async (...a: any[]) => { await tick(); return (f as any)(...a); }; }
-  for (const k of ['getIssue', 'searchIssues', 'createIssue', 'createLink', 'addComment', 'addLabel'] as const) { const f = (jira as any)[k].bind(jira); (jira as any)[k] = async (...a: any[]) => { await tick(); return f(...a); }; }
+  type Fn = (...a: unknown[]) => Promise<unknown>;
+  const yieldEachCall = (obj: object, keys: readonly string[]) => {
+    const o = obj as Record<string, Fn>;
+    for (const k of keys) { const f = o[k]!.bind(obj); o[k] = async (...a: unknown[]) => { await tick(); return f(...a); }; }
+  };
+  yieldEachCall(store, ['get', 'set', 'setIfAbsent', 'delete']);
+  yieldEachCall(jira, ['getIssue', 'searchIssues', 'createIssue', 'createLink', 'addComment', 'addLabel']);
   const svc = createService({ jira, store, now: () => new Date('2026-11-02T09:00:00Z'), newId: () => `c${++n}` });
   const snap = await svc.getGraphSnapshot(ctx, { projectId: 'PAY', rootIssueKey: 'PAY-1', source: 'JIRA', maxDepth: 3 });
   await svc.compareScenarios(ctx, { snapshotId: snap.snapshotId, change: { issueKey: 'PAY-1', targetNodeId: 'issue:PAY-1', description: 'x' },
