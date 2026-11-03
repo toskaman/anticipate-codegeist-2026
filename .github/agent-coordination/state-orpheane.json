@@ -1,29 +1,21 @@
 {
   "agent": "orpheane",
-  "updated": "2026-11-03T19:45:00Z",
-  "runner": "Claude Code cloud session opened by the human owner (Orpheane). Runs only while that session is open; no scheduler between sessions. Each session resumes from GitHub (issues labelled agent:orpheane, open PRs) and this file.",
-  "current": "ORP-10 gallery (#78)",
-  "review": [
-    {
-      "issue": 80,
-      "pr": 81,
-      "task": "ORP-12 validator admin guide"
-    },
-    {
-      "issue": 79,
-      "task": "ORP-11 docs single source"
-    }
-  ],
+  "updated": "2026-11-03T22:26:00Z",
+  "runner": "EXPERIENCE follow-up currently runs in Codex desktop on feat/product-experience, with a five-minute chat heartbeat. GitHub issues and PRs coordinate with Muse. Local checks use MOCK_TRANSPORT; owner-machine and hosted verification remain with Muse/owner.",
+  "current": null,
+  "review": [],
   "blockers": [
-    "Hosted browser checks: assigned to muse (see constraints).",
-    "Firefox, WebKit and a native screen reader are not available in this runner."
+    "Owner-machine bridge HMAC activation and rotation have no acceptance evidence in #107 yet.",
+    "Hosted browser checks remain with Muse/owner (#64, #53); Firefox, WebKit and native screen-reader results are not verified by this session."
   ],
   "next": [
-    "Muse: hosted browser checks in #64.",
-    "Orpheane: ORP-10 gallery pack (#78), then the next ready issue."
+    "ORP-29 (#117) is deferred by the owner and closed unstarted; do not create video assets until explicitly reopened.",
+    "Wait for new ready EXPERIENCE issues and for Muse's reply to the owner-task request in #107.",
+    "Muse/owner: complete the bridge acceptance record from #115/#118 and hosted checks #64/#53."
   ],
   "constraints": [
-    "Orpheane runs in a cloud container with no access to any Jira site or user browser session. Every check in a real browser on a hosted site (dev, prod, judge site) is done by muse, not orpheane. Orpheane covers local Playwright with MOCK_TRANSPORT only."
+    "Frontend build, unit tests and Playwright use local MOCK_TRANSPORT and do not establish hosted Jira or bridge behaviour.",
+    "Forge identity, deployment and CORE-owned files remain with CORE/Muse. The owner-machine bridge is unavailable in this session."
   ],
   "done": [
     {
@@ -57,6 +49,83 @@
     {
       "issue": 73,
       "pr": 74
+    },
+    {
+      "issue": 78,
+      "pr": 83
+    },
+    {
+      "issue": 79,
+      "pr": 82
+    },
+    {
+      "issue": 80,
+      "pr": 81
+    },
+    {
+      "issue": 85,
+      "pr": 84,
+      "kind": "review"
+    },
+    {
+      "issue": 87,
+      "pr": 86,
+      "kind": "review"
+    },
+    {
+      "issue": 88,
+      "pr": 91
+    },
+    {
+      "issue": 89,
+      "pr": 92
+    },
+    {
+      "issue": 90,
+      "pr": 93
+    },
+    {
+      "issue": 96,
+      "pr": 94,
+      "kind": "review"
+    },
+    {
+      "issue": 97,
+      "pr": 98
+    },
+    {
+      "issue": 99,
+      "pr": 104
+    },
+    {
+      "issue": 100,
+      "pr": 103
+    },
+    {
+      "issue": 101,
+      "pr": 102
+    },
+    {
+      "issue": 105,
+      "pr": 110
+    },
+    {
+      "issue": 106,
+      "pr": 111
+    },
+    {
+      "issue": 107,
+      "pr": 115,
+      "followupPr": 118,
+      "note": "Runbook merged; owner-machine activation is not verified."
+    },
+    {
+      "issue": 108,
+      "pr": 112
+    },
+    {
+      "issue": 113,
+      "pr": 114
     }
   ]
 }
