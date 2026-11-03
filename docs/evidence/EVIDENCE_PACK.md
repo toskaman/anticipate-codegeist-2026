@@ -86,3 +86,14 @@ Cleanup: JDG-6 and JDG-1 back to Backlog. The two removed consumer links are par
 Test data (dev test project MP): due dates MP-5 01 Dec, MP-6 04 Dec, MP-7 06 Dec, MP-8 08 Dec, MP-9 09 Dec; version "Winter release (test)" 10 Dec on MP-8. Links: MP-5 blocks MP-6 and MP-7; MP-6 blocks MP-8; MP-5 relates to MP-9.
 Rovo agent "ANTICIPATE Decision Reviewer", question "What happens to our dates and releases if MP-5 slips 4 days?" → action anticipate-simulate-slip:
 MP-5 01→05 Dec, MP-6 04→08 Dec, MP-7 06→10 Dec, MP-8 08→12 Dec (+4 d each, via the blocks chain); "Winter release (test)" late by 2 days because of MP-8; MP-9 (relates to) not moved; assumptions listed; "no Jira data was modified". PASS.
+
+## K4 cold start after memoryMB 1024 (dev 6.3.0, 3 Nov 2026 ~16:40 UTC)
+
+Site one-atlas-euza (development), built-in browser, Resource Timing on the Jira page (the two resolver invocations go through `gateway/api/graphql/pq/17357…`, started in parallel).
+
+| Load | Invocation durations | Data received after navigation start |
+|---|---|---|
+| First open after the 6.3.0 deploy (~20 min, no prior app traffic seen) | 1582 ms, 1607 ms | ~3.9 s |
+| Reload (warm) | 569 ms, 416 ms | ~2.6 s |
+
+Baseline before the change: 8 to 11 s first open (RELEASE.md). Limits: one cold sample only; "cold" is inferred from no traffic since deploy, not confirmed in Forge logs; Jira page load itself (~2 s) is outside the app's control. Production (judge site) not re-measured: it still runs the previous version until a production deploy.
