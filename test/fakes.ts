@@ -1,15 +1,25 @@
 import { AppError } from '../src/core/errors';
 import type { IssueFetch, JiraIssue, JiraPort, Store } from '../src/core/ports';
 
+/** Forge KVS key pattern (docs: keys must match this and be at most 500 characters). */
+export const FORGE_KVS_KEY = /^(?!\s+$)[a-zA-Z0-9:._\s\-#]+$/;
+
 export function memoryStore(): Store & { data: Map<string, unknown> } {
   const data = new Map<string, unknown>();
   const clone = <T>(v: T): T => (v === undefined ? v : JSON.parse(JSON.stringify(v)));
+  // Enforce the real Forge KVS key contract so storage-key bugs fail in unit tests, not in production
+  // (production 2.31.0 outage: an ARI with "/" in a throttle key). Pattern and limit from the Forge KVS docs.
+  const check = (k: string) => {
+    if (typeof k !== 'string' || k.length === 0 || k.length > 500 || !FORGE_KVS_KEY.test(k)) {
+      throw new Error(`INVALID_KEY: Forge KVS rejects key ${JSON.stringify(String(k).slice(0, 80))}`);
+    }
+  };
   return {
     data,
-    async get(k) { return clone(data.get(k)) as never; },
-    async set(k, v) { data.set(k, clone(v)); },
-    async setIfAbsent(k, v) { if (data.has(k)) return false; data.set(k, clone(v)); return true; },
-    async delete(k) { data.delete(k); }
+    async get(k) { check(k); return clone(data.get(k)) as never; },
+    async set(k, v) { check(k); data.set(k, clone(v)); },
+    async setIfAbsent(k, v) { check(k); if (data.has(k)) return false; data.set(k, clone(v)); return true; },
+    async delete(k) { check(k); data.delete(k); }
   };
 }
 

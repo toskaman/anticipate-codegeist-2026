@@ -4,6 +4,13 @@ All notable changes to ANTICIPATE, written for readers who use or judge the app.
 
 ## [Unreleased]
 
+### Added (engine, not yet in the app UI)
+- Portfolio Impact Simulator: simulate up to 10 proposed changes together on one frozen snapshot, with shared impacts, conflicts between changes, a safe order (or the cycle that prevents one), evidence gaps and a reproducible hash. Pure engine and contracts only; not exposed in Jira yet. Design: docs/design-core/PORTFOLIO_SIMULATOR.md.
+
+### Fixed
+- Shared decision workspace (prototype, not enabled): two administrators approving at the same time no longer lose an approval; revocation and expiry are recorded once; an approved decision expires after 7 days.
+- Tests now reject storage keys that Forge would reject, so a fault like the 2.31.0 outage fails in CI.
+
 Changes merged after the last recorded production deployment (production 2.30.0 from `main` d995021, see [docs/evidence/EVIDENCE_PACK.md](docs/evidence/EVIDENCE_PACK.md)) are listed under 3 November below until the next deployment is recorded.
 
 ## 3 November 2026

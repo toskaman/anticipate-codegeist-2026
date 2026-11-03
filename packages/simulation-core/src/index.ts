@@ -135,6 +135,12 @@ export function stableHash(value: unknown): string {
 }
 
 export function simulate(snapshot: GraphSnapshot, scenario: ScenarioDefinition, rules: PolicyRule[], maxDepth = 6): SimulationResult {
+  const body = simulateUnhashed(snapshot, scenario, rules, maxDepth);
+  return { ...body, resultHash: stableHash(body) };
+}
+
+/** `simulate` without the result hash (same body); used by callers that run many intermediate simulations. */
+export function simulateUnhashed(snapshot: GraphSnapshot, scenario: ScenarioDefinition, rules: PolicyRule[], maxDepth = 6): Omit<SimulationResult, 'resultHash'> {
   const g = applyScenario(snapshot, scenario);
   const changed = [...new Set([...g.removed, ...g.deprecated, ...g.upgraded])];
   const { impacts, truncated } = computeImpacts(g, changed, maxDepth);
@@ -146,7 +152,7 @@ export function simulate(snapshot: GraphSnapshot, scenario: ScenarioDefinition, 
     summary: { impacted: impacts.length, direct: impacts.filter((i) => i.direct).length, transitive: impacts.filter((i) => !i.direct).length, blockers, unknowns: unc.filter((u) => u.reason === 'UNKNOWN_EDGE' || u.reason === 'TRUNCATED').length },
     verdict: (blockers ? 'BLOCKED' : violations.length || unc.length ? 'NEEDS_REVIEW' : 'PASS') as SimulationResult['verdict']
   };
-  return { ...body, resultHash: stableHash(body) };
+  return body;
 }
 
 export function compareScenarios(snapshot: GraphSnapshot, scenarios: ScenarioDefinition[], rules: PolicyRule[], maxDepth = 6): ScenarioComparison {
