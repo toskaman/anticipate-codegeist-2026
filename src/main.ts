@@ -37,6 +37,7 @@ export const rovoGetPassport = rovo.getPassport;
 export const rovoCheckFreshness = rovo.checkFreshness;
 
 export { diagnostics, seedDemo } from './diagnostics';
+export { twgProbe } from './context/twg-probe';
 
 // ---- Jira workflow validator (opt-in per workflow transition) ----
 import { runValidator, type DecisionRecord } from './validator';

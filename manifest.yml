@@ -44,6 +44,7 @@ modules:
         - anticipate-simulate-upgrade
         - anticipate-get-passport
         - anticipate-check-plan-freshness
+        - anticipate-twg-probe
   action:
     - key: anticipate-get-graph
       name: Get evidence graph
@@ -110,7 +111,20 @@ modules:
           type: string
           required: true
           description: ANTICIPATE plan id
+    - key: anticipate-twg-probe
+      name: Teamwork Graph probe (experimental)
+      function: twgProbe
+      actionVerb: GET
+      description: Experimental read-only probe of Teamwork Graph relations for a Jira issue. Makes no changes.
+      inputs:
+        issueKey:
+          title: Issue key
+          type: string
+          required: true
+          description: Jira issue key, for example MOBL-58
   function:
+    - key: twgProbe
+      handler: index.twgProbe
     - key: resolver
       handler: index.handler
     - key: rovoGetGraph
@@ -136,6 +150,8 @@ permissions:
     - write:jira-work
     - read:jira-user
     - storage:app
+    - read:graph:jira
+    - read:graph:issue:jira
 app:
   runtime:
     name: nodejs24.x
