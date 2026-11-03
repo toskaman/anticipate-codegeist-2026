@@ -114,3 +114,6 @@ Suggested UI: a "Jira transition" row in Decision overview: OPEN (green), CLOSED
    - Settings capability `teamworkGraph` keeps its current values.
 3. Enterprise workspace: contract follows the backend prototype on a separate branch (approver eligibility with reason, pending step, approval expiry, Passport visibility). Not before it is enforced server side and tested adversarially.
 4. R-37 items: R18 is deployed (dev 4.38.0+, prod 2.26.0; unit tested, hosted 403 check planned on AVT). PR #39 merged and deployed on dev 4.39.0: Passport "In short" on MOBL-58 verified. Print dialog opened once.
+
+## Teamwork Graph hosted attempt (3 Nov 2026, CORE): BLOCKED
+The graph scope is restricted for app 39a28f48: Atlassian must allowlist the app (support request with the app id). Until then, the backend keeps reporting `teamworkGraph: NOT_CONFIGURED` and nothing TWG-related should be shown as live. Dev is back on the CORE build (v6.0.0).
