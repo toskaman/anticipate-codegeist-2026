@@ -43,7 +43,7 @@ Playwright captures of the real UI with a **mock backend transport (MOCK_TRANSPO
 | `global:fullPage` | The ANTICIPATE app (Custom UI) |
 | `jira:workflowValidator` | "ANTICIPATE Decision Firewall" transition rule |
 | `rovo:agent` | "ANTICIPATE Decision Reviewer" (read-only) |
-| `rovo:mcp` | Six read-only tools: get graph, simulate retirement, simulate upgrade, simulate slip, get Passport, check plan freshness |
+| `rovo:mcp` | Six tools that never write to Jira: get graph, simulate retirement, simulate upgrade, simulate slip, get Passport, check plan freshness (which can mark a stale approved plan Invalidated in ANTICIPATE) |
 | `action` | The actions behind the agent and MCP tools |
 
 Scopes: `read:jira-work`, `write:jira-work` (only for actions a person approved), `read:jira-user`, `storage:app`. The manifest declares no external egress.
@@ -60,7 +60,7 @@ Scopes: `read:jira-work`, `write:jira-work` (only for actions a person approved)
 
 - Approval and execution are separate, explicit steps; the backend authorizes every action and refuses stale or changed evidence.
 - Plans and Passports are private to the person who created them.
-- Rovo and MCP tools are read-only; Jira text is treated as data, never as instructions.
+- Rovo and MCP tools never write to Jira and cannot approve or execute; the only state they can change is marking a stale approved plan Invalidated. Jira text is treated as data, never as instructions. Details: [validator admin guide](docs/admin/WORKFLOW_VALIDATOR.md#invalidated-plans).
 - Timeouts are never treated as success or failure: the app re-reads Jira.
 
 Details: [privacy](docs/legal/PRIVACY.md) · [terms](docs/legal/TERMS.md) · [threat model](docs/security/THREAT_MODEL.md).
