@@ -1,6 +1,6 @@
 # Devpost submission checklist (field by field)
 
-Purpose: the owner fills the Devpost form by copy-paste, and every mandatory rule item has a source. Rules source: `docs/research/VERIFIED_RULES_AND_APIS.md` (rules read 2 Nov 2026) and `docs/compliance/CODEGEIST_COMPLIANCE.md`. Deadline: **22 Dec 2026, 12:00 PT (21:00 Paris)**. Counts measured on `docs/submission/DEVPOST_FINAL.md` after this PR (words / characters, body only).
+Purpose: the owner fills the Devpost form by copy-paste, and every mandatory rule item has a source. Rules source: `docs/research/VERIFIED_RULES_AND_APIS.md` (rules read 2 Nov 2026) and `docs/compliance/CODEGEIST_COMPLIANCE.md`. Deadline: **22 Dec 2026, 12:00 PT (21:00 Paris)**. Counts measured on `docs/submission/DEVPOST_FINAL.md` (words / characters, body only); re-measured 3 Nov 2026 on `main` 0df1874 (ORP-24).
 
 Status: **ready** (copy as is) · **needs owner** (a person must act or decide) · **missing** (does not exist yet).
 
@@ -11,15 +11,15 @@ Status: **ready** (copy as is) · **needs owner** (a person must act or decide) 
 | 1 | Project name | DEVPOST_FINAL → header "Project name" | 53 chars | ready |
 | 2 | Tagline / elevator pitch | DEVPOST_FINAL → header "Tagline" | 55 chars | ready |
 | 3 | Inspiration | DEVPOST_FINAL → Inspiration | 72 w / 404 c | ready |
-| 4 | What it does | DEVPOST_FINAL → What it does | 456 w / 2,940 c | ready |
-| 5 | How we built it (includes how it meets the Forge + Atlassian product requirement) | DEVPOST_FINAL → How we built it | 239 w / 1,630 c | ready |
+| 4 | What it does | DEVPOST_FINAL → What it does | 465 w / 2,987 c | ready |
+| 5 | How we built it (includes how it meets the Forge + Atlassian product requirement) | DEVPOST_FINAL → How we built it | 240 w / 1,633 c | ready |
 | 6 | Challenges we ran into | DEVPOST_FINAL → Challenges | 117 w / 713 c | ready |
 | 7 | Accomplishments | DEVPOST_FINAL → Accomplishments | 137 w / 847 c | ready |
 | 8 | What we learned | DEVPOST_FINAL → What we learned | 44 w / 246 c | ready |
 | 9 | What's next | DEVPOST_FINAL → What's next | 43 w / 316 c | ready |
 | 10 | Built with (tags) | Proposed from the code: `forge`, `jira`, `rovo`, `atlassian-mcp`, `react`, `typescript`, `node.js`, `zod`, `vite`, `playwright`, `vitest` | 11 tags | needs owner (pick tags in the form) |
 | 11 | Category (one only) | DEVPOST_FINAL header: Apps for Software Teams | — | needs owner (select in the form) |
-| 12 | Bonus prize and its write-up (one bonus can be won) | DEVPOST_FINAL → "Bonus write-up: Best app with Atlassian MCP"; decision D1 | 121 w / 756 c | ready (owner selects the bonus) |
+| 12 | Bonus prize and its write-up (one bonus can be won) | DEVPOST_FINAL → "Bonus write-up: Best app with Atlassian MCP"; decision D1 | 144 w / 884 c | ready (owner selects the bonus) |
 | 13 | Install link (Atlassian sharing link) | `docs/submission/INSTALL_LINK.md` (first link, "Sharing with anyone") | — | ready; re-check it opens on the final build |
 | 14 | Testing instructions (detailed, for judges) | DEVPOST_FINAL → Testing instructions (+ INSTALL_LINK prerequisites and validator/MCP steps) | 191 w / 1,322 c | ready |
 | 15 | Demo video URL (public YouTube, under 5 min, app running, no unlicensed music or trademarks) | Script: `docs/submission/VIDEO_SCRIPT.md` (4:20) | — | **missing** (to record on the hosted judge site; risk K1) |
