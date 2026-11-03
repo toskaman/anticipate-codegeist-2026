@@ -78,11 +78,11 @@ Hosted verification of these behaviours is recorded in [EVIDENCE_PACK.md](../evi
 - validator refusal under Block;
 - judge-site validator run.
 
-## Request limits (implemented, not enabled)
+## Request limits (enabled)
 
 The backend has a per-user, per-installation, per-operation limit of **60 requests per 60 seconds** (`DEFAULT_THROTTLE`, `src/core/throttle.ts:43`).
 - **Check order.** The check runs after input validation and before the operation (`src/core/handler.ts:38`).
 - **Refusal.** Over the limit, a request is refused with **RATE_LIMITED**, and `retryAfterMs` tells clients how long to wait before retrying; nothing is retried automatically.
-- **Status on `main` (f02ac8f):** the limit is **not wired** into the Forge entry (`src/main.ts` passes no throttle), so no request is limited today. This section will be updated when it is enabled.
+- **Status:** wired into the Forge entry: `src/main.ts` passes a store-backed throttle (`createStoreThrottle`, `DEFAULT_THROTTLE`) to every resolver, so all operations are limited per user, installation and operation.
 
-When it is enabled, the app's current RATE_LIMITED message ("Jira limited this request…", `static/hello-world/src/CoreOperationError.tsx:31`) should also cover this app-side limit.
+The app's RATE_LIMITED message covers both Jira-side and app-side limits (`static/hello-world/src/CoreOperationError.tsx`, `guidanceFor`).

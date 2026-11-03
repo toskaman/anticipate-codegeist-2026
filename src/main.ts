@@ -1,6 +1,7 @@
 import Resolver from '@forge/resolver';
 import type { OperationName } from '../packages/contracts/src/index';
 import { makeHandler, type ResolverRequest } from './core/handler';
+import { createStoreThrottle, DEFAULT_THROTTLE } from './core/throttle';
 import { createService } from './engine/service';
 import { createForgeJira, forgeStore } from './forge-adapters';
 
@@ -10,6 +11,7 @@ const newId = () => globalThis.crypto.randomUUID();
 
 const service = (req: ResolverRequest) => createService({ jira: createForgeJira(req.context?.siteUrl ?? null), store: forgeStore, now, newId });
 type Svc = ReturnType<typeof createService>;
+const throttle = createStoreThrottle(forgeStore, DEFAULT_THROTTLE);
 
 const ops: OperationName[] = ['getCapabilities', 'getPolicies', 'listProjects', 'getChangeCandidates', 'getGraphSnapshot', 'getEvidenceGraph', 'simulateChange',
   'compareScenarios', 'generatePreventionPlan', 'approvePlan', 'executeApprovedPlan', 'getExecutionStatus', 'getPreventionPassport', 'checkPlanFreshness', 'previewSampleProject', 'createSampleProject', 'getValidatorPolicy', 'setValidatorPolicy', 'simulateSlip'];
@@ -18,7 +20,7 @@ for (const op of ops) {
   resolver.define(op, makeHandler(op, () => 'LIVE', newId, now, (ctx, input, req) => {
     const svc = service(req) as unknown as Record<string, (c: unknown, i: unknown) => Promise<unknown>>;
     return svc[op]!(ctx, input);
-  }) as never);
+  }, { throttle }) as never);
 }
 
 export const handler = resolver.getDefinitions();

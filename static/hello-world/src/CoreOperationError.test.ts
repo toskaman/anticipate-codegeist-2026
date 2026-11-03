@@ -26,3 +26,15 @@ describe("guidanceFor PERMISSION_DENIED", () => {
     );
   });
 });
+
+describe("guidanceFor RATE_LIMITED", () => {
+  it("does not blame Jira: the limit can be app-side", () => {
+    const g = guidanceFor({
+      ...base,
+      code: "RATE_LIMITED",
+      message: "Rate limit exceeded for getPolicies; retry in 42s.",
+    });
+    expect(g).not.toContain("Jira limited this request");
+    expect(g).toContain("rate limited");
+  });
+});
