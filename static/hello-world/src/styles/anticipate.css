@@ -4120,7 +4120,8 @@ body:has(.ax-app) {
   border: 1px solid var(--ax-border);
   border-radius: var(--ax-r-sm);
 }
-.ax-report__summary-k {
+.ax-report .ax-report__summary-k {
+  line-height: 1.4;
   margin: 0 0 var(--ax-1);
   font-size: var(--ax-fs-xs);
   font-weight: 650;

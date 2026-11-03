@@ -73,7 +73,7 @@ npx playwright test
 
 From the repository root: `npm ci`, `npm run typecheck`, `npm test`.
 
-Latest local results (Chromium, mock transport): 59 frontend unit tests and 83 browser tests, including axe WCAG 2.2 AA checks on light and dark themes, 320 px reflow, keyboard paths, Passport A4 print and security refusals. Automated accessibility checks are not a WCAG certification. Firefox and WebKit runs are recorded per release in [UI release readiness](docs/design/UI_RELEASE_READINESS.md).
+Latest local results (Chromium, mock transport): 60 frontend unit tests and 90 browser tests, including axe WCAG 2.2 AA checks on light and dark themes, 320 px reflow, keyboard paths, Passport A4 print and security refusals. Automated accessibility checks are not a WCAG certification. Firefox and WebKit runs are recorded per release in [UI release readiness](docs/design/UI_RELEASE_READINESS.md).
 
 Hosted results (deployed Forge app on Jira Cloud) are recorded by CORE with date, site and procedure in the [evidence pack](docs/evidence/EVIDENCE_PACK.md), including verified writes, the evidence-changed refusal, the workflow validator, sample data and Rovo.
 
