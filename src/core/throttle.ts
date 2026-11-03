@@ -57,7 +57,9 @@ export interface ThrottleVerdict {
 
 /** Stable store key: budget is per (installation, user, operation). */
 export function throttleKey(installationId: string, accountId: string | null, operation: string): string {
-  return `throttle:${installationId}:${accountId ?? 'anon'}:${operation}`;
+  // Forge KVS keys only accept [a-zA-Z0-9:._ -#]. installContext is an ARI such as
+  // "ari:cloud:jira::site/<cloudId>": the "/" made every kvs call throw (production 2.31.0 outage).
+  return `throttle:${installationId}:${accountId ?? 'anon'}:${operation}`.replace(/[^a-zA-Z0-9:._\s#-]/g, '_').slice(0, 500);
 }
 
 type ThrottleState = number[]; // epoch-ms of allowed requests, ascending
@@ -85,5 +87,13 @@ export type ThrottleCheck = (identity: ThrottleIdentity, operation: string) => P
 
 /** Binds a Store + options into the single function `makeHandler` needs. */
 export function createStoreThrottle(store: Store, opts: ThrottleOptions & { now?: () => number }): ThrottleCheck {
-  return (identity, operation) => checkThrottle(store, identity, operation, opts);
+  // Fail open: the throttle is abuse control and must never take the app down. A storage error
+  // admits the request (the operation itself still runs its own authorization and storage checks).
+  return async (identity, operation) => {
+    try {
+      return await checkThrottle(store, identity, operation, opts);
+    } catch {
+      return { allowed: true, retryAfterMs: 0, remaining: 0 };
+    }
+  };
 }
