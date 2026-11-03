@@ -1,32 +1,32 @@
 {
-  "timestampUTC": "2026-11-02T00:49:54.341Z",
+  "timestampUTC": "2026-11-03T23:51:29.116Z",
   "mode": "LOCAL synthetic fixtures",
   "scope": "filter/page selection plus iterative BFS; fixture creation/schema validation/index construction excluded; not browser/Forge/network performance",
-  "runtime": "v26.7.0",
+  "runtime": "v22.23.4",
   "results": [
     {
       "nodes": 100,
       "edges": 101,
       "iterations": 100,
-      "medianMs": 0.008600000000001273,
-      "p95Ms": 0.022000000000048203,
-      "maxMs": 0.05770000000001119
+      "medianMs": 0.013443999999992684,
+      "p95Ms": 0.020241999999996096,
+      "maxMs": 0.1514009999999928
     },
     {
       "nodes": 500,
       "edges": 501,
       "iterations": 100,
-      "medianMs": 0.022000000000048203,
-      "p95Ms": 0.03570000000001983,
-      "maxMs": 0.15510000000000446
+      "medianMs": 0.036999000000008664,
+      "p95Ms": 0.06919600000000514,
+      "maxMs": 0.13858300000001122
     },
     {
       "nodes": 1000,
       "edges": 1001,
       "iterations": 100,
-      "medianMs": 0.04600000000004911,
-      "p95Ms": 0.06220000000001846,
-      "maxMs": 0.45839999999998327
+      "medianMs": 0.06828699999999799,
+      "p95Ms": 0.08627400000000307,
+      "maxMs": 1.0667369999999892
     }
   ]
 }

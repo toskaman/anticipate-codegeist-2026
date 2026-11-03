@@ -30,7 +30,7 @@ function setup() {
   return { ws, store, race, perms, plans, advance: (days: number) => { t = new Date(t.getTime() + days * 86400000); } };
 }
 
-describe('enterprise workspace prototype', () => {
+describe('enterprise workspace (behind flag sharedDecisions)', () => {
   it('only the plan owner can share; anonymous refused', async () => {
     const { ws } = setup();
     await expect(ws.share(ctx('bob'), { planId: 'p1' })).rejects.toMatchObject({ code: 'PERMISSION_DENIED' });
@@ -40,7 +40,7 @@ describe('enterprise workspace prototype', () => {
   it('separation of duties: the proposer cannot approve, and sees why', async () => {
     const { ws, perms } = setup(); perms.alice!.add('ADMINISTER_PROJECTS');
     const d = await ws.share(ctx('alice'), { planId: 'p1' });
-    expect((await ws.view(ctx('alice'), d.id)).cannotApproveReason).toBe('SEPARATION_OF_DUTIES');
+    expect((await ws.view(ctx('alice'), d.id)).capabilities.canApprove).toEqual({ allowed: false, reason: 'PROPOSER' });
     await expect(ws.approve(ctx('alice'), { id: d.id, planHash: 'h1' })).rejects.toMatchObject({ code: 'PERMISSION_DENIED' });
   });
   it('approval needs the permission, the exact plan hash, and becomes APPROVED', async () => {
@@ -52,7 +52,7 @@ describe('enterprise workspace prototype', () => {
   it('non-members cannot view; access removal denies immediately', async () => {
     const { ws, perms } = setup(); const d = await ws.share(ctx('alice'), { planId: 'p1' });
     await expect(ws.view(ctx('mallory'), d.id)).rejects.toMatchObject({ code: 'PERMISSION_DENIED' });
-    expect((await ws.view(ctx('eve'), d.id)).canApprove).toBe(false);
+    expect((await ws.view(ctx('eve'), d.id)).capabilities.canApprove).toEqual({ allowed: false, reason: 'MISSING_PERMISSION' });
     perms.eve!.delete('BROWSE_PROJECTS');
     await expect(ws.view(ctx('eve'), d.id)).rejects.toMatchObject({ code: 'PERMISSION_DENIED' });
   });

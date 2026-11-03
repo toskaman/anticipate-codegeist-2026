@@ -7,7 +7,7 @@ import { z } from 'zod';
 
 /** Wire version stays 0.2.0: the EXPERIENCE client pins it exactly. 0.3 additions are additive and listed in CONTRACT_FEATURES. */
 export const CONTRACT_VERSION = '0.2.0';
-export const CONTRACT_FEATURES = ['continuous-decision-safety', 'sample-project', 'evidence-coverage', 'service-decommission', 'workflow-validator', 'plan-invalidation'] as const;
+export const CONTRACT_FEATURES = ['continuous-decision-safety', 'sample-project', 'evidence-coverage', 'service-decommission', 'workflow-validator', 'plan-invalidation', 'portfolio-simulation', 'shared-decision-workspace'] as const;
 
 // ---------- primitives ----------
 export const Id = z.string().min(1).max(200);
@@ -54,7 +54,12 @@ export const CapabilityAvailability = z.object({
   jiraRead: CapabilityState, jiraWrite: CapabilityState, confluenceRead: CapabilityState,
   workflowValidator: CapabilityState, rovoAgent: CapabilityState, rovoMcp: CapabilityState,
   teamworkGraph: CapabilityState, llm: CapabilityState,
-  operations: z.array(z.string())
+  operations: z.array(z.string()),
+  /** Portfolio Impact Simulator exposure and hard bounds (optional, additive; absent on older backends). */
+  portfolioSimulation: z.object({
+    available: z.boolean(), maxChanges: z.number().int().positive(), maxOperationsPerChange: z.number().int().positive(),
+    maxNodes: z.number().int().positive(), maxEdges: z.number().int().positive(), maxDepth: z.number().int().positive()
+  }).optional()
 });
 export type CapabilityAvailability = z.infer<typeof CapabilityAvailability>;
 
@@ -319,16 +324,96 @@ export const PortfolioResult = z.object({
 });
 export type PortfolioResult = z.infer<typeof PortfolioResult>;
 
+/** Input of getGraphSnapshot (shared with simulatePortfolio, which builds the same permission-filtered snapshot). */
+export const GraphSnapshotRequest = z.object({ projectId: Id, rootIssueKey: z.string().max(50), source: z.enum(['JIRA', 'DEMO_FIXTURE']).default('JIRA'), maxDepth: z.number().int().min(1).max(5).default(3) });
+export type GraphSnapshotRequest = z.infer<typeof GraphSnapshotRequest>;
+
+/**
+ * simulatePortfolio input: the snapshot inputs of getGraphSnapshot (graph depth renamed snapshotMaxDepth) plus the portfolio.
+ * Optional snapshotId reuses a snapshot the caller already owns (must have been built for the same rootIssueKey) instead of re-reading Jira.
+ */
+export const SimulatePortfolioRequest = z.object({
+  projectId: GraphSnapshotRequest.shape.projectId, rootIssueKey: GraphSnapshotRequest.shape.rootIssueKey, source: GraphSnapshotRequest.shape.source,
+  snapshotMaxDepth: GraphSnapshotRequest.shape.maxDepth, snapshotId: Id.nullable().default(null),
+  changes: PortfolioInput.shape.changes, maxDepth: PortfolioInput.shape.maxDepth, proposedOrder: PortfolioInput.shape.proposedOrder
+});
+export type SimulatePortfolioRequest = z.infer<typeof SimulatePortfolioRequest>;
+
+/** simulatePortfolio output: the pure PortfolioResult plus metadata of the snapshot it ran on. */
+export const SimulatePortfolioResult = PortfolioResult.extend({
+  snapshot: z.object({
+    snapshotId: Id, projectId: Id, rootIssueKey: z.string().max(50), mode: DataMode, createdAt: IsoDate, expiresAt: IsoDate,
+    truncated: z.boolean(), nodeCount: z.number().int().nonnegative(), edgeCount: z.number().int().nonnegative(),
+    reused: z.boolean(), coverage: GraphSnapshot.shape.coverage
+  })
+});
+export type SimulatePortfolioResult = z.infer<typeof SimulatePortfolioResult>;
+
 export const ValidatorPolicy = z.object({
   onOutage: z.enum(['ALLOW', 'BLOCK']), updatedBy: Id.nullable(), updatedAt: IsoDate.nullable(), canEdit: z.boolean()
 });
 export type ValidatorPolicy = z.infer<typeof ValidatorPolicy>;
 
+// ---------- shared decision workspace (additive; behind capability flag sharedDecisions, off by default) ----------
+// BEGIN shared decision workspace — answers contract request #131 (issue #135). Every op below fails with
+// UNSUPPORTED (details.reason = 'FEATURE_DISABLED') until a Jira site admin turns the flag on via setFeatureFlag.
+export const SharedDecisionId = z.string().regex(/^dec-[A-Za-z0-9_-]{1,64}$/);
+export const SharedDecisionReason = z.string().trim().min(3).max(500);
+export const SharedDecisionState = z.enum(['IN_REVIEW', 'APPROVED', 'REJECTED', 'REVOKED', 'EXPIRED']);
+export type SharedDecisionState = z.infer<typeof SharedDecisionState>;
+/** Closed set of reasons why an actor cannot do something (null = allowed). AWAITING_APPROVAL: execution before all approvals. */
+export const SharedDecisionReasonCode = z.enum(['NOT_IN_ROLE', 'PROPOSER', 'EXPIRED', 'EVIDENCE_CHANGED', 'REVOKED', 'REJECTED', 'ALREADY_APPROVED', 'MISSING_PERMISSION', 'AWAITING_APPROVAL']);
+export type SharedDecisionReasonCode = z.infer<typeof SharedDecisionReasonCode>;
+export const ActorCapability = z.object({ allowed: z.boolean(), reason: SharedDecisionReasonCode.nullable() });
+export type ActorCapability = z.infer<typeof ActorCapability>;
+export const SharedDecisionApproval = z.object({ by: Id, at: IsoDate, planHash: z.string().max(200) });
+export const SharedDecision = z.object({
+  id: SharedDecisionId, projectKey: z.string().max(50), issueKey: z.string().max(50), planId: Id,
+  /** The decision is bound to exactly one plan version; version === planHash. */
+  version: z.string().max(200), planHash: z.string().max(200),
+  proposer: Id, createdAt: IsoDate, expiresAt: IsoDate, requiredApprovals: z.number().int().min(1).max(3),
+  state: SharedDecisionState,
+  /** Approvals bound to planHash; approvals for another hash are never counted. */
+  approvals: z.array(SharedDecisionApproval).max(3),
+  /** True when the current plan hash differs from the shared one (or the plan is gone / invalidated). */
+  evidenceChanged: z.boolean(),
+  waitingFor: z.string().max(300).nullable(),
+  /** Terminal marker (REJECTED / REVOKED / EXPIRED) recorded first-writer-wins; null while open. */
+  closed: z.object({ state: z.enum(['REJECTED', 'REVOKED', 'EXPIRED']), at: IsoDate, by: Id, reason: z.string().max(500) }).nullable(),
+  capabilities: z.object({ canApprove: ActorCapability, canReject: ActorCapability, canRevoke: ActorCapability, canExecute: ActorCapability })
+});
+export type SharedDecision = z.infer<typeof SharedDecision>;
+export const SharedDecisionAuditEvent = z.object({
+  /** Stable id: `${decisionId}:${seq}`. */
+  id: z.string().max(100), decisionId: SharedDecisionId, seq: z.number().int().positive(), at: IsoDate, by: Id,
+  event: z.enum(['SHARED', 'APPROVED', 'READY', 'REJECTED', 'REVOKED', 'EXPIRED']), detail: z.string().max(1000).nullable()
+});
+export type SharedDecisionAuditEvent = z.infer<typeof SharedDecisionAuditEvent>;
+export const SHARED_DECISION_AUDIT_PAGE_MAX = 100;
+export const FeatureFlagName = z.enum(['sharedDecisions']);
+export const FeatureFlag = z.object({ flag: FeatureFlagName, enabled: z.boolean(), updatedBy: Id.nullable(), updatedAt: IsoDate.nullable(), canEdit: z.boolean() });
+export type FeatureFlag = z.infer<typeof FeatureFlag>;
+
+export const SHARED_DECISION_OPERATIONS = {
+  shareDecision: { input: z.object({ planId: Id, requiredApprovals: z.number().int().min(1).max(3).default(1) }), output: SharedDecision },
+  getSharedDecision: { input: z.object({ id: SharedDecisionId }), output: SharedDecision },
+  approveSharedDecision: { input: z.object({ id: SharedDecisionId, planHash: z.string().min(1).max(200) }), output: SharedDecision },
+  rejectSharedDecision: { input: z.object({ id: SharedDecisionId, reason: SharedDecisionReason }), output: SharedDecision },
+  revokeSharedDecision: { input: z.object({ id: SharedDecisionId, reason: SharedDecisionReason }), output: SharedDecision },
+  /** cursor = seq of the last event already received (null = from the start). nextCursor null = no more events. */
+  listDecisionAudit: { input: z.object({ id: SharedDecisionId, cursor: z.number().int().min(0).nullable().default(null), limit: z.number().int().min(1).max(SHARED_DECISION_AUDIT_PAGE_MAX).default(50) }),
+    output: z.object({ items: z.array(SharedDecisionAuditEvent).max(SHARED_DECISION_AUDIT_PAGE_MAX), nextCursor: z.number().int().positive().nullable() }) },
+  /** Any authenticated user may read a flag (the UI hides the workspace when off); only Jira site admins (ADMINISTER) may set it. */
+  getFeatureFlag: { input: z.object({ flag: FeatureFlagName }), output: FeatureFlag },
+  setFeatureFlag: { input: z.object({ flag: FeatureFlagName, enabled: z.boolean() }), output: FeatureFlag }
+} as const;
+// END shared decision workspace
+
 export const OPERATIONS = {
   getCapabilities: { input: z.object({}), output: CapabilityAvailability },
   listProjects: { input: z.object({ cursor: z.string().nullable().default(null) }), output: z.object({ items: z.array(ProjectSummary), page: PageInfo }) },
   getChangeCandidates: { input: z.object({ projectId: Id, cursor: z.string().nullable().default(null) }), output: z.object({ items: z.array(JiraIssueSummary), page: PageInfo }) },
-  getGraphSnapshot: { input: z.object({ projectId: Id, rootIssueKey: z.string().max(50), source: z.enum(['JIRA', 'DEMO_FIXTURE']).default('JIRA'), maxDepth: z.number().int().min(1).max(5).default(3) }), output: GraphSnapshot },
+  getGraphSnapshot: { input: GraphSnapshotRequest, output: GraphSnapshot },
   getEvidenceGraph: { input: z.object({ snapshotId: Id }), output: GraphSnapshot },
   simulateChange: { input: SimulationRequest, output: z.array(SimulationResult) },
   compareScenarios: { input: SimulationRequest, output: ScenarioComparison },
@@ -343,6 +428,9 @@ export const OPERATIONS = {
   createSampleProject: { input: z.object({ projectKey: z.string().regex(/^[A-Z][A-Z0-9_]+$/), confirm: z.literal(true) }), output: SampleProjectPlan },
   getValidatorPolicy: { input: z.object({}), output: ValidatorPolicy },
   simulateSlip: { input: z.object({ issueKey: z.string().regex(/^[A-Z][A-Z0-9_]{0,19}-\d{1,9}$/), days: z.number().int().min(1).max(365) }), output: SlipSimulation },
-  setValidatorPolicy: { input: z.object({ onOutage: z.enum(['ALLOW', 'BLOCK']) }), output: ValidatorPolicy }
+  setValidatorPolicy: { input: z.object({ onOutage: z.enum(['ALLOW', 'BLOCK']) }), output: ValidatorPolicy },
+  simulatePortfolio: { input: SimulatePortfolioRequest, output: SimulatePortfolioResult },
+  // shared decision workspace (see section above)
+  ...SHARED_DECISION_OPERATIONS
 } as const;
 export type OperationName = keyof typeof OPERATIONS;
