@@ -43,10 +43,10 @@ import { runValidator, type DecisionRecord } from './validator';
 import { VALIDATOR_POLICY_KEY } from './engine/service';
 export async function validateTransition(args: { issue?: { key?: string } }) {
   const key = args?.issue?.key;
-  if (!key) return { result: true };
   const jira = createForgeJira(null, 'app');
-  return runValidator(key, {
-    readIssue: (k) => jira.getIssue(k),
+  // No issue key = no evidence: follow the outage policy instead of passing silently (audit #1).
+  return runValidator(key ?? '(unknown issue)', {
+    readIssue: (k) => (key ? jira.getIssue(k) : Promise.resolve({ kind: 'no_issue_key' })),
     readDecision: (k) => forgeStore.get<DecisionRecord>(`decision:${k}`),
     readPolicy: () => forgeStore.get<{ onOutage?: string }>(VALIDATOR_POLICY_KEY),
     log: (f) => console.warn(JSON.stringify(f))
