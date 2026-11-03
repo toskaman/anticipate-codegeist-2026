@@ -243,6 +243,7 @@ export function useCoreWorkflow(client: ForgeClient) {
     !!plan &&
     !busy &&
     plan?.status !== "EVIDENCE_CHANGED" &&
+    plan?.status !== "INVALIDATED" &&
     !expired &&
     !!snapshot &&
     !approvalUncertain &&
@@ -252,6 +253,7 @@ export function useCoreWorkflow(client: ForgeClient) {
   const canApprove =
     !busy &&
     plan?.status !== "EVIDENCE_CHANGED" &&
+    plan?.status !== "INVALIDATED" &&
     !expired &&
     !!snapshot &&
     !!selected.length &&
@@ -265,7 +267,13 @@ export function useCoreWorkflow(client: ForgeClient) {
 
   async function confirmMutation(kind: "approve" | "execute") {
     setConfirmation(null);
-    if (!plan || plan.status === "EVIDENCE_CHANGED" || evidenceFailure) return;
+    if (
+      !plan ||
+      plan.status === "EVIDENCE_CHANGED" ||
+      plan.status === "INVALIDATED" ||
+      evidenceFailure
+    )
+      return;
     await run(
       kind === "approve"
         ? "Recording approval…"

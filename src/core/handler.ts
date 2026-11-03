@@ -2,6 +2,16 @@
 import { CONTRACT_VERSION, OPERATIONS, type OperationName } from '../../packages/contracts/src/index';
 import { AppError } from './errors';
 import type { Ctx } from './ports';
+import type { ThrottleCheck } from './throttle';
+
+export interface HandlerOptions {
+  /**
+   * Optional per-user/per-installation throttle (see src/core/throttle.ts).
+   * Checked AFTER input validation (bad payloads never consume budget) and BEFORE execution.
+   * Omitted = no application-level limiting (existing behaviour, e.g. tests).
+   */
+  throttle?: ThrottleCheck;
+}
 
 /** Hard input bound applied BEFORE schema validation (mitigates GHSA-mrhx-c7xc-m3w5 in zod 3: oversized collections). */
 export const MAX_PAYLOAD_CHARS = 64_000;
@@ -10,7 +20,8 @@ export interface ResolverRequest { payload?: unknown; context?: { accountId?: st
 
 export function makeHandler<N extends OperationName>(
   name: N, mode: () => 'LIVE' | 'DEMO_FIXTURE', newId: () => string, now: () => Date,
-  run: (ctx: Ctx, input: never, req: ResolverRequest) => Promise<unknown>
+  run: (ctx: Ctx, input: never, req: ResolverRequest) => Promise<unknown>,
+  opts?: HandlerOptions
 ) {
   return async (req: ResolverRequest) => {
     const requestId = newId();
@@ -24,6 +35,14 @@ export function makeHandler<N extends OperationName>(
       const parsed = OPERATIONS[name].input.safeParse(req.payload ?? {});
       if (!parsed.success) throw new AppError('VALIDATION', parsed.error.issues.slice(0, 3).map((i) => `${i.path.join('.')}: ${i.message}`).join('; '));
       const ctx: Ctx = { requestId, accountId: req.context?.accountId ?? null, installationId: req.context?.installContext ?? 'unknown' };
+      if (opts?.throttle) {
+        const verdict = await opts.throttle({ installationId: ctx.installationId, accountId: ctx.accountId }, name);
+        if (!verdict.allowed) {
+          throw new AppError('RATE_LIMITED',
+            `Rate limit exceeded for ${name}; retry in ${Math.ceil(verdict.retryAfterMs / 1000)}s.`,
+            true, { retryAfterMs: verdict.retryAfterMs });
+        }
+      }
       const data = await run(ctx, parsed.data as never, req);
       const out = OPERATIONS[name].output.safeParse(data);
       if (!out.success) throw new AppError('INTERNAL', `Output contract violation in ${name}.`, false, { issue: out.error.issues[0]?.path.join('.') });

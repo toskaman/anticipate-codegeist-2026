@@ -4,11 +4,20 @@ import EvidenceChangeDetails from "../EvidenceChangeDetails";
 import { Notice } from "./ui";
 
 export default function EvidenceChangeNotice({ w }: { w: Workflow }) {
-  if (w.plan?.status !== "EVIDENCE_CHANGED" && !w.evidenceFailure) return null;
+  if (
+    w.plan?.status !== "EVIDENCE_CHANGED" &&
+    w.plan?.status !== "INVALIDATED" &&
+    !w.evidenceFailure
+  )
+    return null;
   const reason =
     w.evidenceFailure?.message ??
     w.passport?.timeline
-      .filter((entry) => entry.event.startsWith("Evidence changed"))
+      .filter(
+        (entry) =>
+          entry.event.startsWith("Evidence changed") ||
+          entry.event.startsWith("Plan invalidated"),
+      )
       .slice(-1)[0]?.event;
   return (
     <Notice

@@ -33,7 +33,11 @@ function lifecycle(
   record: ExecutionRecord | undefined,
 ): Lifecycle {
   if (record) return executionCopy[record.status];
-  if (w.plan?.status === "EVIDENCE_CHANGED" || w.evidenceFailure)
+  if (
+    w.plan?.status === "EVIDENCE_CHANGED" ||
+    w.plan?.status === "INVALIDATED" ||
+    w.evidenceFailure
+  )
     return {
       label: "Evidence changed",
       tone: "warning",
@@ -138,7 +142,9 @@ export default function PreventionPlan({ w }: { w: Workflow }) {
   const allVerified =
     !!w.records?.length && w.records.every((r) => r.status === "VERIFIED");
   const evidenceBlocked =
-    plan.status === "EVIDENCE_CHANGED" || !!w.evidenceFailure;
+    plan.status === "EVIDENCE_CHANGED" ||
+    plan.status === "INVALIDATED" ||
+    !!w.evidenceFailure;
   const executed = w.attempted || !!w.records?.length;
   const steps: { label: string; state: StepState }[] = [
     {
