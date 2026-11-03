@@ -61,9 +61,7 @@ describe("assertSnapshotFresh mutation guard", () => {
   });
   it("does not throw for a fresh snapshot", () => {
     vi.setSystemTime(NOW);
-    expect(() =>
-      assertSnapshotFresh({ expiresAt: FUTURE }),
-    ).not.toThrowError();
+    expect(() => assertSnapshotFresh({ expiresAt: FUTURE })).not.toThrowError();
   });
   it("does not throw for an unparsable expiresAt", () => {
     vi.setSystemTime(NOW);
