@@ -1,5 +1,6 @@
 import EvidenceChangeNotice from "../components/EvidenceChangeNotice";
 import React, { useMemo } from "react";
+import type { PreventionPassport } from "@anticipate/contracts";
 import Icon from "../components/Icon";
 import {
   Badge,
@@ -82,6 +83,16 @@ const retentionCopy = {
   ARCHIVED:
     "The full snapshot was archived; only minimized provenance (counts and a digest) is kept. It does not reflect Jira today.",
 } as const;
+
+/** What the Jira workflow validator would decide now for the changed issue. */
+const gateCopy: Record<
+  NonNullable<PreventionPassport["gate"]>["status"],
+  { label: string; tone: "success" | "warning" | "neutral" }
+> = {
+  OPEN: { label: "Open · the validator allows it", tone: "success" },
+  CLOSED: { label: "Closed · the validator refuses it", tone: "warning" },
+  NOT_GATED: { label: "Not gated by the validator", tone: "neutral" },
+};
 
 export default function Passport({ w }: { w: Workflow }) {
   const p = w.passport;
@@ -236,6 +247,22 @@ export default function Passport({ w }: { w: Workflow }) {
               </dd>
             </div>
           </dl>
+          {p.gate && (
+            <p
+              className={`ax-report__gate ax-report__gate--${p.gate.status.toLowerCase()}`}
+              data-testid="passport-gate"
+            >
+              <span className="ax-report__gate-label">
+                Jira transition, checked when this record was loaded
+              </span>
+              <Badge tone={gateCopy[p.gate.status].tone} size="sm">
+                {gateCopy[p.gate.status].label}
+              </Badge>
+              {p.gate.status !== "OPEN" && p.gate.reason && (
+                <span className="ax-report__gate-reason">{p.gate.reason}</span>
+              )}
+            </p>
+          )}
           <p className="ax-report__refs" data-testid="passport-refs">
             Mode {p.mode} · snapshot {p.snapshotId} · plan {plan?.planId} ·
             scenario {plan?.scenarioId}

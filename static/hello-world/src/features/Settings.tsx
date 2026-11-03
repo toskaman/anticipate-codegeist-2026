@@ -13,6 +13,7 @@ import { capabilityStateCopy } from "../app/copy";
 import { AccessibilityControls } from "../components/AccessibilityControls";
 import type { PreferencesApi } from "../app/preferences";
 import PerformancePanel from "../components/PerformancePanel";
+import ValidatorPolicyPanel from "../components/ValidatorPolicyPanel";
 
 type Key = Exclude<keyof CapabilityAvailability, "operations">;
 const rows: { key: Key; name: string; what: string; inApp: string }[] = [
@@ -178,6 +179,7 @@ export default function Settings({
           </table>
         </div>
       </Panel>
+      <ValidatorPolicyPanel client={w.client} capabilities={caps} />
       <Panel
         title="Use ANTICIPATE from Rovo"
         id="rovo-title"
