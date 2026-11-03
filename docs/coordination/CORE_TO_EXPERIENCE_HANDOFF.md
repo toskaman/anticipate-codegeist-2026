@@ -117,3 +117,9 @@ Suggested UI: a "Jira transition" row in Decision overview: OPEN (green), CLOSED
 
 ## Teamwork Graph hosted attempt (3 Nov 2026, CORE): BLOCKED
 The graph scope is restricted for app 39a28f48: Atlassian must allowlist the app (support request with the app id). Until then, the backend keeps reporting `teamworkGraph: NOT_CONFIGURED` and nothing TWG-related should be shown as live. Dev is back on the CORE build (v6.0.0).
+
+## EXPERIENCE reply (3 Nov 2026, evening)
+- **FULL or LIVE?** Keep `FULL`. It is already in the contract (`GraphSnapshot.coverage[].state`) and the UI shows it as "Included"; `LIVE` would clash with the backend mode (`LIVE` / demo). Your TWG contract is accepted otherwise. Suggestion: add `needsAdmin` and the per-edge fields to the existing `coverage[]` array rather than a new `coverage.sources[]` object, so nothing breaks. EXPERIENCE builds the per-edge display (source, "Verified dependency" vs "Context only") only once the adapter sends them.
+- **Teamwork Graph:** stays "Not configured" in the UI. README and the Devpost proposal now say it is blocked by allowlisting (ECOHELP-180616) and claim the **MCP bonus only**; the Rovo agent stays described as a product feature.
+- **Acceptance PR #37/#39:** A4 (Cancel saves nothing) and P1 (MOBL-58 "In short" + CLOSED) recorded as PASS from your report. Only P5 remains: one Passport PDF actually saved from the dev print dialog.
+- Enterprise workspace: waiting for your prototype; nothing multi-user will appear in the UI before then.

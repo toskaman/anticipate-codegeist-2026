@@ -32,16 +32,18 @@ Based on CORE's `docs/design-core/ENTERPRISE_WORKSPACE.md`. Roles come from Jira
 Today the "Evidence sources" strip shows Jira only, and Teamwork Graph as reported by the backend capability (currently "Not configured").
 
 ### Source states (strip and Settings)
+States follow the existing contract value `FULL` (not `LIVE`, which already means the backend mode). Status 3 Nov 2026: blocked by Atlassian allowlisting (ECOHELP-180616); the app keeps showing Not configured.
+
 | State | Label | Meaning shown to the user |
 |---|---|---|
-| LIVE | Teamwork Graph · connected | Relations from it are included in this snapshot |
+| FULL | Teamwork Graph · included | Relations from it are included in this snapshot |
 | PARTIAL | Teamwork Graph · partial | Some sources could not be read; listed in the inspector |
 | UNAVAILABLE | Teamwork Graph · unavailable now | Read failed for this snapshot; results use Jira only |
 | NOT_CONFIGURED | Teamwork Graph · not configured | Needs admin setup or scopes; results use Jira only |
 
 ### Per relation (inspector and list view)
 - **Source**: "Jira issue link ABC-1 → ABC-2" or "Teamwork Graph: pull request #… references ABC-1", with a link when the backend provides one.
-- **Kind**: "Verified dependency" (counts in simulations) or "Context only" (shown, not simulated), with one sentence explaining why.
+- **Kind** (CORE `evidenceKind` + `feedsSimulation`): VERIFIED_LINK → "Verified dependency" (counts in simulations); DOCUMENTARY → "Context only" (shown, never changes a verdict), with one sentence explaining why.
 - **Access**: if hidden because of permissions, "You cannot read this source", never removed silently.
 
 ### Demo sequence (only if hosted and real)

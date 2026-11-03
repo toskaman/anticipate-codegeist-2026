@@ -50,7 +50,7 @@ Opening or previewing never writes to Jira. No Jira project is created and nothi
 
 A Rovo agent, *ANTICIPATE Decision Reviewer*, and five read-only MCP tools (evidence graph, simulate retirement, simulate upgrade, Passport, plan freshness) answer "what happens if we change X?" using the same engine. They never approve or execute. Availability depends on the site's Rovo access and an administrator toggle for MCP.
 
-**Teamwork Graph:** not integrated. It is a Forge Preview capability that needs graph read scopes and access checks; CORE has a prototype adapter that is not wired. The app shows it as *Not configured* and uses Jira evidence only. Atlassian refuses the graph scopes for this app until it is allowlisted; the request is open as [ECOHELP-180616](https://ecosystem.atlassian.net/servicedesk/customer/portal/34/ECOHELP-180616) (2 Nov 2026). Evidence: [docs/evidence/TEAMWORK_GRAPH_ALLOWLIST.md](docs/evidence/TEAMWORK_GRAPH_ALLOWLIST.md).
+**Teamwork Graph:** not integrated. CORE has a prototype adapter that is not wired; the app shows Teamwork Graph as *Not configured* and uses Jira evidence only. Atlassian refuses the graph scopes for this app until it is allowlisted; the request is open as [ECOHELP-180616](https://ecosystem.atlassian.net/servicedesk/customer/portal/34/ECOHELP-180616) (2 Nov 2026). Evidence: [docs/evidence/TEAMWORK_GRAPH_ALLOWLIST.md](docs/evidence/TEAMWORK_GRAPH_ALLOWLIST.md).
 
 ## Safety by design
 
@@ -86,6 +86,6 @@ Hosted results (deployed Forge app on Jira Cloud) are recorded by CORE with date
 
 ## Codegeist 2026
 
-Category: Apps for Software Teams. Bonus candidates: Rovo agent and MCP tools. Built by two people: CORE (backend, engine, Forge, security) and EXPERIENCE (interface, accessibility, presentation).
+Category: Apps for Software Teams. Bonus claimed: Atlassian MCP (the Rovo agent is part of the product but not claimed as a bonus). Built by two people: CORE (backend, engine, Forge, security) and EXPERIENCE (interface, accessibility, presentation).
 
 Licence: proprietary, source available. Copyright © 2026 toskaman and Orphee; see [LICENSE](LICENSE). Support, privacy and terms: [installation information](docs/submission/INSTALL_LINK.md), [privacy](docs/legal/PRIVACY.md), [terms](docs/legal/TERMS.md).
