@@ -2,14 +2,10 @@ import React from "react";
 import type { Workflow } from "../app/useCoreWorkflow";
 import EvidenceChangeDetails from "../EvidenceChangeDetails";
 import { Notice } from "./ui";
+import { isPlanStale } from "../app/planGuards";
 
 export default function EvidenceChangeNotice({ w }: { w: Workflow }) {
-  if (
-    w.plan?.status !== "EVIDENCE_CHANGED" &&
-    w.plan?.status !== "INVALIDATED" &&
-    !w.evidenceFailure
-  )
-    return null;
+  if (!isPlanStale(w.plan?.status) && !w.evidenceFailure) return null;
   const reason =
     w.evidenceFailure?.message ??
     w.passport?.timeline

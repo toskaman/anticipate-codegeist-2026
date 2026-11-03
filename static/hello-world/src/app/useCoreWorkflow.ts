@@ -23,6 +23,7 @@ import {
 import { useBootstrap } from "./useBootstrap";
 import { usePlanState } from "./usePlan";
 import { assertSnapshotFresh, useExpired } from "./useExpiry";
+import { isPlanStale } from "./planGuards";
 
 export { useExpired } from "./useExpiry";
 
@@ -242,8 +243,7 @@ export function useCoreWorkflow(client: ForgeClient) {
   const canSelectActions =
     !!plan &&
     !busy &&
-    plan?.status !== "EVIDENCE_CHANGED" &&
-    plan?.status !== "INVALIDATED" &&
+    !isPlanStale(plan?.status) &&
     !expired &&
     !!snapshot &&
     !approvalUncertain &&
@@ -252,8 +252,7 @@ export function useCoreWorkflow(client: ForgeClient) {
     ["PENDING_APPROVAL", "APPROVED"].includes(plan.status);
   const canApprove =
     !busy &&
-    plan?.status !== "EVIDENCE_CHANGED" &&
-    plan?.status !== "INVALIDATED" &&
+    !isPlanStale(plan?.status) &&
     !expired &&
     !!snapshot &&
     !!selected.length &&
@@ -267,13 +266,7 @@ export function useCoreWorkflow(client: ForgeClient) {
 
   async function confirmMutation(kind: "approve" | "execute") {
     setConfirmation(null);
-    if (
-      !plan ||
-      plan.status === "EVIDENCE_CHANGED" ||
-      plan.status === "INVALIDATED" ||
-      evidenceFailure
-    )
-      return;
+    if (!plan || isPlanStale(plan.status) || evidenceFailure) return;
     await run(
       kind === "approve"
         ? "Recording approval…"
