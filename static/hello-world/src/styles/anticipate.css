@@ -4188,3 +4188,16 @@ body:has(.ax-app) {
   cursor: pointer;
   font-weight: 600;
 }
+.ax-slip__status {
+  margin: var(--ax-2) 0 0;
+  min-height: 1em;
+}
+.ax-slip__error {
+  display: grid;
+  gap: var(--ax-2);
+  justify-items: start;
+  margin-top: var(--ax-3);
+}
+.ax-slip__error p {
+  margin: 0;
+}

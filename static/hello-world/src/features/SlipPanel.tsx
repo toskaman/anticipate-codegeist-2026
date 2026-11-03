@@ -90,16 +90,49 @@ export default function SlipPanel({ w }: { w: Workflow }) {
             : "From 1 to 365 days. Uses due dates and fix versions as they are in Jira now."}
         </p>
       </form>
+      <p className="ax-muted ax-small ax-slip__status" role="status">
+        {busy
+          ? `Simulating a ${days ?? ""}-day slip of ${issueKey}…`
+          : view
+            ? "Simulation complete."
+            : ""}
+      </p>
       {error && (
-        <p className="ax-error-text" role="alert">
-          {error}
-        </p>
+        <div className="ax-slip__error" role="alert">
+          <p className="ax-error-text">{error}</p>
+          <p className="ax-small">
+            No result is shown, and nothing was changed in Jira.
+          </p>
+          <button
+            type="button"
+            className="ax-btn"
+            disabled={days === null || busy}
+            onClick={() => void run()}
+          >
+            Try again
+          </button>
+        </div>
       )}
       {view && (
-        <div className="ax-slip__result" role="status" aria-live="polite">
+        <section
+          className="ax-slip__result"
+          aria-labelledby={`${id}-result`}
+          aria-busy={busy}
+        >
+          <h3 id={`${id}-result`} className="ax-h4">
+            Simulation result (nothing changed in Jira)
+          </h3>
           <p className="ax-slip__headline">
             <strong>{view.headline}</strong>
           </p>
+          {view.nothingMoves && (
+            <Notice tone="neutral" icon="info" title="Nothing to move">
+              No due date or release would change for this delay. This usually
+              means {issueKey} and the issues that depend on it have no due
+              dates or fix versions in Jira. Add them in Jira to simulate a
+              slip.
+            </Notice>
+          )}
           {view.lateReleases.length > 0 && (
             <section aria-labelledby={`${id}-late`}>
               <h3 id={`${id}-late`} className="ax-h4">
@@ -188,7 +221,7 @@ export default function SlipPanel({ w }: { w: Workflow }) {
               ))}
             </ul>
           </details>
-        </div>
+        </section>
       )}
     </Panel>
   );

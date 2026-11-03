@@ -14,6 +14,8 @@ export interface SlipView {
   unreadable: string[];
   assumptions: string[];
   truncated: boolean;
+  /** No due date or release would change (for example no dates in Jira). */
+  nothingMoves: boolean;
 }
 
 const plural = (n: number, one: string, many = `${one}s`) =>
@@ -52,6 +54,7 @@ export function slipView(r: SlipSimulation): SlipView {
     unreadable: r.unreadable,
     assumptions: r.assumptions,
     truncated: r.truncated,
+    nothingMoves: moved.length === 0 && lateReleases.length === 0,
   };
 }
 
