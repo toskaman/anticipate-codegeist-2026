@@ -8,8 +8,9 @@ import { standardScenarios, upgradeScenarios } from './engine/scenarios';
 import { issueNodeId } from './jira/extractor';
 import type { Deps } from './core/ports';
 import { AppError } from './core/errors';
+import { slipFromJira, formatSlip } from './engine/slip-service';
 
-interface ActionPayload { issueKey?: string; replacementIssueKey?: string; planId?: string; context?: { accountId?: string; siteUrl?: string; principal?: { accountId?: string } } }
+interface ActionPayload { days?: number | string; issueKey?: string; replacementIssueKey?: string; planId?: string; context?: { accountId?: string; siteUrl?: string; principal?: { accountId?: string } } }
 interface ActionContext { accountId?: string; principal?: { accountId?: string } }
 /** Forge may deliver the invoking user in the payload context or in the second handler argument. */
 export const actorOf = (p: ActionPayload, c?: ActionContext): string | null =>
@@ -56,6 +57,10 @@ export function createRovoActions(deps: (p: ActionPayload) => Deps) {
         ...c.results.map((r) => `- ${r.scenarioId}: ${r.verdict}; impacted ${r.summary.impacted} (${r.summary.direct} direct); blockers ${r.summary.blockers}; unknowns ${r.summary.unknowns}; open questions ${r.uncertainties.map((u) => u.reason).join(',') || 'none'}; rules ${r.violations.map((v) => v.ruleId).join(',') || 'none'}`),
         c.recommendedScenarioId ? `Lowest-risk now: ${c.recommendedScenarioId}. ${c.recommendationReason}` : c.recommendationReason,
         'No Jira changes were made.'].join('\n');
+    }),
+    simulateSlip: safe(async (p, c) => {
+      if (!p.issueKey || !KEY.test(p.issueKey)) throw new AppError('VALIDATION', 'issueKey must look like ABC-123');
+      return formatSlip(await slipFromJira(deps(p).jira, ctxOf(p, c), { issueKey: p.issueKey, days: Number(p.days) }));
     }),
     checkFreshness: safe(async (p, c) => {
       if (!p.planId) throw new AppError('VALIDATION', 'planId is required');

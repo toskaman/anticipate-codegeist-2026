@@ -2,6 +2,8 @@
 export interface JiraIssue {
   id: string; key: string; summary: string; status: string; statusCategory?: string | null; issueType: string; projectId: string; projectKey: string;
   updated: string; labels: string[]; components: { id: string; name: string }[];
+  /** Jira due date (YYYY-MM-DD) and fix versions; optional so older fakes stay valid. */
+  due?: string | null; versions?: { name: string; releaseDate: string | null }[];
   links: { id: string; typeName: string; outward: string; inward: string; direction: 'outward' | 'inward'; otherKey: string }[];
 }
 export type IssueFetch = { kind: 'ok'; issue: JiraIssue } | { kind: 'forbidden' } | { kind: 'not_found' };

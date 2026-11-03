@@ -139,3 +139,7 @@ Ops (all require an authenticated account; permissions re-checked live on every 
 - `getDecisionAudit { id }` → `{ seq, at, by, event: 'SHARED'|'APPROVED'|'READY'|'REVOKED'|'EXPIRED', detail? }[]`.
 `SharedDecision = { id, projectKey, issueKey, planId, planHash, proposer, createdAt, expiresAt (7 days), requiredApprovals, approvals: { by, at, planHash }[], state: 'IN_REVIEW'|'APPROVED'|'REVOKED'|'EXPIRED' }`.
 UI needs: who can approve and why not (`cannotApproveReason`), the step waiting on a person (`waitingOn`), expiry (`expiresAt`), and Passport visibility = anyone who can browse the project (checked server side).
+
+## New op for the UI: `simulateSlip` (3 Nov 2026, CORE, additive)
+Input `{ issueKey, days (1..365) }` → `SlipSimulation { issueKey, days, assumptions[], moved[{key, oldDue, newDue, slipDays, path[]}], absorbed[{key, due, path[]}], unknown[{key, reason, path[]}], releases[{name, releaseDate, lateByDays, issues[]}], unreadable[], truncated }`.
+Read-only, deterministic, as the user. Label it as a simulation; never present `unknown` items as safe. Task: issue ORP-5.
