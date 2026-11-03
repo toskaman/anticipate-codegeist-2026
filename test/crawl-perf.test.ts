@@ -120,15 +120,15 @@ describe('crawl perf: sample inspect', () => {
   it('parallelizes reads and dedupes link-target fetches', async () => {
     const j = new InstrumentedJira();
     j.add('JDG-1', 'existing customer issue');
-    await createSample(j, 'JDG');
+    await createSample(j, 'JDG', new Date(NOW));
     j.resetCounters();
-    const p1 = await previewSample(j, 'JDG');
+    const p1 = await previewSample(j, 'JDG', new Date(NOW));
     expect(j.searchIssuesCalls).toBe(6);
     expect(j.getIssueCalls).toBe(2); // api + checkout; sequential N+1 code fetches 4
     expect(j.maxActive).toBeGreaterThan(1); // sequential code stays at 1
     expect(j.maxActive).toBeLessThanOrEqual(CRAWL_FETCH_CONCURRENCY);
     expect(p1.links.every((l) => l.status === 'EXISTS')).toBe(true);
-    const p2 = await previewSample(j, 'JDG');
+    const p2 = await previewSample(j, 'JDG', new Date(NOW));
     expect(p2).toEqual(p1);
   });
 });

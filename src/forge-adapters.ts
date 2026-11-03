@@ -82,7 +82,8 @@ export function createForgeJira(siteUrl: string | null, actor: 'user' | 'app' = 
     },
     async createIssue(i) {
       return json<{ key: string }>(await call2(route`/rest/api/3/issue`, { method: 'POST', body: { fields: {
-        project: { key: i.projectKey }, summary: i.summary, issuetype: { name: i.issueType }, labels: i.labels, description: adf(i.description) } } }), 'create issue');
+        project: { key: i.projectKey }, summary: i.summary, issuetype: { name: i.issueType }, labels: i.labels, description: adf(i.description),
+        ...(i.dueDate !== undefined ? { duedate: i.dueDate } : {}) } } }), 'create issue');
     },
     async createLink(i) {
       await json(await call2(route`/rest/api/3/issueLink`, { method: 'POST', body: { type: { name: i.typeName },

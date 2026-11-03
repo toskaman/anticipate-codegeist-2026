@@ -47,6 +47,15 @@ describe('Forge Jira adapter (mocked transport)', () => {
     const body = JSON.parse(calls[0]!.init.body!);
     expect(body.body.content[0].content[0]).toEqual({ type: 'text', text: '<script>x</script>' });
   });
+  it('sends sample due dates as Jira duedate and leaves other creations unchanged', async () => {
+    responder = () => ({ status: 201, body: { key: 'JDG-1' } });
+    const jira = createForgeJira(null);
+    const input = { projectKey: 'JDG', summary: '[ANTICIPATE sample] root', description: 'sample', issueType: 'Task', labels: ['anticipate-sample'] };
+    await jira.createIssue({ ...input, dueDate: '2026-11-09' });
+    expect(JSON.parse(calls.at(-1)!.init.body!).fields.duedate).toBe('2026-11-09');
+    await jira.createIssue(input);
+    expect(JSON.parse(calls.at(-1)!.init.body!).fields).not.toHaveProperty('duedate');
+  });
   it('accepts empty 201 bodies (issueLink create)', async () => {
     responder = () => ({ status: 201 });
     await expect(createForgeJira(null).createLink({ typeName: 'Blocks', inwardKey: 'A-1', outwardKey: 'A-2' })).resolves.toBeUndefined();

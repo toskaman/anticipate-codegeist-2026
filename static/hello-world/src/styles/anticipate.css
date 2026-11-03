@@ -4060,6 +4060,12 @@ body:has(.ax-app) {
   font-size: var(--ax-fs-xs);
   color: var(--ax-text-2);
 }
+.ax-sample-list__date {
+  display: block;
+  font-weight: 400;
+  font-size: var(--ax-fs-xs);
+  color: var(--ax-text-2);
+}
 .ax-sample-next {
   display: flex;
   flex-wrap: wrap;

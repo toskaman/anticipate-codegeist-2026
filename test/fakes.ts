@@ -49,7 +49,7 @@ export class FakeJira implements JiraPort {
   noTypes = new Set<string>();
   links: Link[] = [];
   comments = new Map<string, string[]>();
-  perms: Record<string, boolean> = { CREATE_ISSUES: true, LINK_ISSUES: true, ADD_COMMENTS: true, EDIT_ISSUES: true, BROWSE_PROJECTS: true };
+  perms: Record<string, boolean> = { CREATE_ISSUES: true, LINK_ISSUES: true, ADD_COMMENTS: true, EDIT_ISSUES: true, BROWSE_PROJECTS: true, SCHEDULE_ISSUES: true };
   writes = { create: 0, link: 0, comment: 0, label: 0 };
   failNextComment = false;
   private seq = 100;
@@ -84,8 +84,8 @@ export class FakeJira implements JiraPort {
   async myPermissions(_p: string, ps: string[]) { return Object.fromEntries(ps.map((p) => [p, !!this.perms[p]])); }
   globalPerms: Record<string, boolean> = {};
   async globalPermissions(ps: string[]) { return Object.fromEntries(ps.map((p) => [p, !!this.globalPerms[p]])); }
-  async createIssue(i: { projectKey: string; summary: string; labels: string[] }) {
-    this.writes.create++; const key = `${i.projectKey}-${this.seq++}`; this.add(key, i.summary, { labels: i.labels }); return { key };
+  async createIssue(i: { projectKey: string; summary: string; labels: string[]; dueDate?: string }) {
+    this.writes.create++; const key = `${i.projectKey}-${this.seq++}`; this.add(key, i.summary, { labels: i.labels, ...(i.dueDate !== undefined ? { due: i.dueDate } : {}) }); return { key };
   }
   async createLink(i: { typeName: string; inwardKey: string; outwardKey: string }) { this.writes.link++; const rel = i.typeName === 'Relates'; this.link(i.typeName, rel ? 'relates to' : 'blocks', rel ? 'relates to' : 'is blocked by', i.outwardKey, i.inwardKey); }
   async addComment(k: string, t: string) {

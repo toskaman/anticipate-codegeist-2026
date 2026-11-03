@@ -269,6 +269,22 @@ export default function SampleProjectSetup({
                         <li key={item.role}>
                           <span className="ax-sample-list__name">
                             {item.summary}
+                            {item.dueDate !== undefined && (
+                              <span className="ax-sample-list__date">
+                                {item.dueDate ? (
+                                  <>
+                                    {item.status === "TO_CREATE"
+                                      ? "Planned due: "
+                                      : "Due: "}
+                                    <time dateTime={item.dueDate}>
+                                      {item.dueDate}
+                                    </time>
+                                  </>
+                                ) : (
+                                  "No due date in Jira"
+                                )}
+                              </span>
+                            )}
                           </span>
                           <span className="ax-sample-list__key">
                             {item.issueKey ?? "not in Jira yet"}

@@ -16,7 +16,7 @@ export interface JiraPort {
   myPermissions(projectKey: string, permissions: string[]): Promise<Record<string, boolean>>;
   /** Global (site) permissions of the caller, e.g. ADMINISTER. */
   globalPermissions(permissions: string[]): Promise<Record<string, boolean>>;
-  createIssue(input: { projectKey: string; summary: string; description: string; issueType: string; labels: string[] }): Promise<{ key: string }>;
+  createIssue(input: { projectKey: string; summary: string; description: string; issueType: string; labels: string[]; dueDate?: string }): Promise<{ key: string }>;
   /** Creates "<outwardKey> <outward phrase> <inwardKey>", e.g. outwardKey blocks inwardKey. */
   createLink(input: { typeName: string; inwardKey: string; outwardKey: string }): Promise<void>;
   deleteLink?(linkId: string): Promise<void>;
