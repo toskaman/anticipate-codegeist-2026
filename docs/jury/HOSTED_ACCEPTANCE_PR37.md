@@ -10,7 +10,7 @@ Record for each run: date and time (Paris), commit or deployed version, account 
 | A1 | Open Settings | Panel "Workflow validator during an outage" is visible | PASS (CORE, dev, 3 Nov ~12:03, `docs/STATUS.md`) |
 | A2 | Read current setting | "During an outage: Allow" (or the stored value) with when it changed | PASS (CORE, dev, 3 Nov ~12:03, `docs/STATUS.md`) |
 | A3 | Click Block | Confirmation "Block gated transitions during an outage?" explains the trade-off; Cancel is focused | Not reported separately (the switch was used, so the dialog appeared) |
-| A4 | Cancel | Dialog closes, Allow is still selected, nothing saved (Forge log: no `setValidatorPolicy`) | NOT RUN |
+| A4 | Cancel | Dialog closes, Allow is still selected, nothing saved (Forge log: no `setValidatorPolicy`) | PASS (CORE, dev, 3 Nov): nothing saved, stays Allow |
 | A5 | Block → "Block during outages" | Badge shows Block, "Changed … by an administrator" | PASS (CORE, dev, 3 Nov ~12:03, `docs/STATUS.md`): ALLOW → BLOCK |
 | A6 | Reload the page | Block is still shown (re-read from the backend) | PASS (CORE, dev, 3 Nov ~12:03, `docs/STATUS.md`): "persisted" |
 | A7 | Switch back to Allow and confirm | Allow shown; reload keeps Allow | PASS (CORE, dev, 3 Nov ~12:03, `docs/STATUS.md`): BLOCK → ALLOW |
@@ -25,11 +25,11 @@ Record for each run: date and time (Paris), commit or deployed version, account 
 ## Passport
 | # | Step | Expected | Result |
 |---|---|---|---|
-| P1 | MOBL plan "Migrate first", outcome Completed | "In short" says "Jira transition: currently refused…"; row "Closed · the validator refuses it" in amber with the reason | Row: PASS (CORE, MOBL-58, dev, PR #37 build). "In short" box is newer (this branch): re-check after deploy |
+| P1 | MOBL plan "Migrate first", outcome Completed | "In short" says "Jira transition: currently refused…"; row "Closed · the validator refuses it" in amber with the reason | PASS (CORE, MOBL-58, dev 4.39.0 with PR #39): "In short" shown, transition CLOSED with reason |
 | P2 | Limitations | "The recorded outcome does not authorize the Jira transition." | NOT RUN |
 | P3 | Gated issue with a valid decision | "Open · the validator allows it" in green | NOT RUN |
 | P4 | Issue without `anticipate-change` label | "Not gated by the validator", neutral, with reason | NOT RUN |
-| P5 | Print or save as PDF (A4) | Summary and gate row each on one page, reason not cut | NOT RUN |
+| P5 | Print or save as PDF (A4) | Summary and gate row each on one page, reason not cut | OPEN: print dialog opened on dev, no PDF saved yet (needs a person to save it) |
 | P6 | Screen reader (optional) | Badge text is read as words (status is never colour only) | NOT RUN |
 
 ## Network states (MOCK_TRANSPORT only, local)
