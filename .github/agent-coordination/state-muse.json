@@ -1,0 +1,2 @@
+{ "agent": "muse", "updated": "2026-11-03T16:15:00+01:00", "main": "483be89", "runner": "Claude session with bridge to the owner's PC (gh, forge, browser); not always-on",
+  "current": "coordination setup, compliance matrix, validator no-key fix", "next": ["what-if slip engine", "performance and burst test"] }
