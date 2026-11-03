@@ -5,7 +5,7 @@ Updated: 3 Nov 2026, ~12:40 Paris. Owner of this file: CORE.
 | Item | Value |
 |---|---|
 | Repository | github.com/toskaman/anticipate-codegeist-2026 (public, proprietary source-available license, 50/50 toskaman and Orphee) |
-| Versions, deployed builds, test counts | single source: [RELEASE.md](RELEASE.md) (refreshed 3 Nov, main eb98ea5) |
+| Versions, deployed builds, test counts | single source: [RELEASE.md](RELEASE.md) (refreshed 3 Nov, main 0a11792) |
 | Forge app id | 39a28f48-c891-4d86-a3cf-c14409cbd29e (unchanged) |
 
 ## Capabilities actually available
