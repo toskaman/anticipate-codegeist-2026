@@ -3,22 +3,14 @@
   "updated": "2026-11-03T16:20:00Z",
   "runner": "Claude Code cloud session opened by the human owner (Orpheane). Runs only while that session is open; no scheduler between sessions. Each session resumes from GitHub (issues labelled agent:orpheane, open PRs) and this file.",
   "current": null,
-  "review": [
-    {
-      "issue": 58,
-      "pr": 61,
-      "task": "ORP-5 slip panel",
-      "ci": "green",
-      "dependsOn": "PR 59 (merge first)"
-    }
-  ],
+  "review": [],
   "blockers": [
     "Hosted browser checks: assigned to muse (see constraints).",
     "Firefox, WebKit and a native screen reader are not available in this runner."
   ],
   "next": [
-    "After #59 and #61 merge and deploy: muse runs one hosted slip simulation on JDG and records it in EVIDENCE_PACK.",
-    "Pick the next issue labelled agent:orpheane + status:ready."
+    "Muse: hosted checks in #64 (slip panel on JDG, dark-theme Passport print).",
+    "Orpheane: pick the next issue labelled agent:orpheane + status:ready."
   ],
   "constraints": [
     "Orpheane runs in a cloud container with no access to any Jira site or user browser session. Every check in a real browser on a hosted site (dev, prod, judge site) is done by muse, not orpheane. Orpheane covers local Playwright with MOCK_TRANSPORT only."
@@ -35,6 +27,10 @@
     {
       "issue": 50,
       "pr": 60
+    },
+    {
+      "issue": 58,
+      "pr": 61
     }
   ]
 }
