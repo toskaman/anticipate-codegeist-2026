@@ -13,5 +13,5 @@ Validated: 3 Nov 2026, 13:40 Paris (CORE).
 | Capabilities | Jira read/write AVAILABLE; workflow validator AVAILABLE; Rovo agent AVAILABLE where Rovo exists; Rovo MCP PERMISSION_REQUIRED (admin toggle); Teamwork Graph NOT_CONFIGURED (allowlist ECOHELP-180616); Confluence NOT_CONFIGURED |
 | Tests | backend 80/80, contracts and engine pass, frontend 60 unit, Playwright journeys; CI green |
 | Hosted evidence | docs/evidence/EVIDENCE_PACK.md (2 and 3 Nov) |
-| Known limitations | clean-site judge run PASS (3 Nov, production, Jira Free; limited roles not configurable on Free); plans private to creator; cold start 8 to 11 s; 5 moderate advisories in Forge tooling |
+| Known limitations | clean-site judge run PASS (3 Nov, production, Jira Free; limited roles not configurable on Free); plans private to creator; first open ~2.6 s warm, ~3.9 s backend-cold, up to ~9.3 s right after a deploy (cold CDN), see EVIDENCE_PACK; 5 moderate advisories in Forge tooling |
 | Regressions | none known |

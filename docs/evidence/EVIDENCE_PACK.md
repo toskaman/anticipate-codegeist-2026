@@ -97,3 +97,14 @@ Site one-atlas-euza (development), built-in browser, Resource Timing on the Jira
 | Reload (warm) | 569 ms, 416 ms | ~2.6 s |
 
 Baseline before the change: 8 to 11 s first open (RELEASE.md). Limits: one cold sample only; "cold" is inferred from no traffic since deploy, not confirmed in Forge logs; Jira page load itself (~2 s) is outside the app's control. Production (judge site) not re-measured: it still runs the previous version until a production deploy.
+
+## Production 2.30.0 (3 Nov 2026, ~17:30 UTC) — first open after deploy
+
+Deployed by the owner from `main` d995021 (memoryMB 1024, slip simulation, ORP-6/7). Site toskaman5962 (production install from the public link), built-in browser pane visible, Resource Timing on the Jira page. App shows "Connected · live mode".
+
+| Load | CDN page for the app | First resolver calls start | Invocation durations | Data received |
+|---|---|---|---|---|
+| First open right after deploy (CDN and browser cache cold) | 2197 ms | 7.2 s | 2102 ms, 1491 ms | ~9.3 s |
+| Reload (warm) | 28 ms | 2.0 s | 607 ms | ~2.6 s |
+
+Reading: after the memory increase, server time is ~1.5–2.1 s even cold. The rest of a post-deploy first open is static asset delivery (CDN + browser cache cold), not the app backend. Earlier dev sample after ~20 min idle (CDN warm): ~3.9 s. Judges may see the cold-asset case on their very first open.
