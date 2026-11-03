@@ -209,7 +209,9 @@ export const PreventionPassport = z.object({
   disclaimer: z.string(),
   /** Retention state of the evidence behind this record. ARCHIVED = full snapshot gone, minimized provenance kept. */
   evidence: z.object({ state: z.enum(['LIVE', 'EXPIRED_SNAPSHOT', 'ARCHIVED']), capturedAt: IsoDate, expiresAt: IsoDate,
-    nodeCount: z.number().int().nonnegative(), edgeCount: z.number().int().nonnegative(), causalEdgeCount: z.number().int().nonnegative(), snapshotDigest: z.string().max(64) }).optional()
+    nodeCount: z.number().int().nonnegative(), edgeCount: z.number().int().nonnegative(), causalEdgeCount: z.number().int().nonnegative(), snapshotDigest: z.string().max(64) }).optional(),
+  /** What the Jira workflow validator would decide right now for the changed issue (only if that issue is gated). */
+  gate: z.object({ status: z.enum(['OPEN', 'CLOSED', 'NOT_GATED']), reason: z.string().max(500) }).optional()
 });
 export type PreventionPassport = z.infer<typeof PreventionPassport>;
 
