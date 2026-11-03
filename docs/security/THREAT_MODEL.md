@@ -14,5 +14,5 @@
 | Demo data mistaken for real | fixture snapshot id prefix → `meta.mode = DEMO_FIXTURE`; fixture plans cannot execute | — |
 | Prompt injection via Rovo | actions are read-only, deterministic, no LLM inside ANTICIPATE | Rovo's own model behaviour is out of scope |
 
-## Dependency advisory: zod < 4.6.6 (GHSA-mrhx-c7xc-m3w5, memory exhaustion on oversized constrained collections)
-No 3.x fix exists. Mitigation: every array in the contracts has an explicit `.max()` bound and Forge limits resolver payload size. Accepted for the hackathon release; migrate contracts to zod 4 after Codegeist.
+## Dependency advisory: zod < 4.6.6 (GHSA-mrhx-c7xc-m3w5) - REMEDIATED (3 Nov 2026)
+Backend, contracts and simulation engine now use zod 4.6.7 (frontend already did). All tests unchanged and green (backend 73, contracts 3, engine 11), typecheck clean. The 64 000-character payload bound before schema parsing stays as defence in depth.
