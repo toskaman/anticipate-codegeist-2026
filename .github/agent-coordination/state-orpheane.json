@@ -1,17 +1,43 @@
 {
   "agent": "orpheane",
-  "updated": "2026-11-03T22:26:00Z",
+  "updated": "2026-11-03T23:48:00Z",
   "runner": "EXPERIENCE follow-up currently runs in Codex desktop on feat/product-experience, with a five-minute chat heartbeat. GitHub issues and PRs coordinate with Muse. Local checks use MOCK_TRANSPORT; owner-machine and hosted verification remain with Muse/owner.",
-  "current": null,
-  "review": [],
+  "current": {
+    "issues": [
+      127,
+      133,
+      137,
+      139
+    ],
+    "branch": "feat/product-experience",
+    "phase": "validated locally; preparing PR for Muse review",
+    "baseline": "39ccc3f",
+    "leases": [
+      "127-202611032325",
+      "133-202611032332",
+      "137-202611032339",
+      "139-202611032343"
+    ]
+  },
+  "review": [
+    {
+      "issue": 136,
+      "pr": 138,
+      "owner": "other Orpheane session",
+      "note": "Do not duplicate competitive landscape; this session contributes only complementary buyer hypotheses."
+    }
+  ],
   "blockers": [
-    "Owner-machine bridge HMAC activation and rotation have no acceptance evidence in #107 yet.",
-    "Hosted browser checks remain with Muse/owner (#64, #53); Firefox, WebKit and native screen-reader results are not verified by this session."
+    "Hosted checks for the new first-screen/pair inspector/path focus and dated clean-project slip remain with Muse; LOCAL/MOCK tests do not establish hosted integration.",
+    "Portfolio/shared-decision/radar runtime contracts and hosted acceptance pending: #130/#131/#132, with CORE implementation #134/#135; concepts remain excluded from production.",
+    "Native screen reader, real browser zoom and human value study not performed.",
+    "HMAC activation reported by Muse in #107 comment 6617210214; key-file ACL not applied, rotation/rollback explicitly deferred."
   ],
   "next": [
-    "ORP-29 (#117) is deferred by the owner and closed unstarted; do not create video assets until explicitly reopened.",
-    "Wait for new ready EXPERIENCE issues and for Muse's reply to the owner-task request in #107.",
-    "Muse/owner: complete the bridge acceptance record from #115/#118 and hosted checks #64/#53."
+    "Open reviewed UX delivery for #127/#133/#137/#139; Muse reviews/merges after CI and performs hosted checklist.",
+    "Track #134/#135 and integrate only a stable authorized capability after required hosted proof.",
+    "Final video recording and Devpost submission remain deferred. The new brief authorized English storyboard/narration/caption preparation only (#139).",
+    "Monitor #107 for Muse response to the personal-task request after comment 6616776571; relay user tasks instead of taking them over."
   ],
   "constraints": [
     "Frontend build, unit tests and Playwright use local MOCK_TRANSPORT and do not establish hosted Jira or bridge behaviour.",
@@ -117,7 +143,7 @@
       "issue": 107,
       "pr": 115,
       "followupPr": 118,
-      "note": "Runbook merged; owner-machine activation is not verified."
+      "note": "Runbook merged; Muse reports live activation, with ACL/rotation/rollback not completed."
     },
     {
       "issue": 108,
@@ -126,6 +152,15 @@
     {
       "issue": 113,
       "pr": 114
+    },
+    {
+      "issue": 116,
+      "pr": 122
+    },
+    {
+      "issue": 121,
+      "pr": 126,
+      "note": "Merged; local backend 151, frontend 122 and Playwright 107 passed. Hosted dated clean-project slip pending Muse."
     }
   ]
 }

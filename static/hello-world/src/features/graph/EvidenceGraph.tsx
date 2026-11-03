@@ -39,6 +39,7 @@ import {
 } from "../../app/copy";
 import { hopDistances, layeredLayout, orderNodes, NODE_W } from "./layout";
 import { milestone, recordRender, startTimer } from "../../app/perf";
+import { focusedEvidence } from "./focusedEvidence";
 
 const kindIcon: Record<string, IconName> = {
   ISSUE: "target",
@@ -158,6 +159,7 @@ export default function EvidenceGraph({
   const [status, setStatus] = useState<(typeof statusFilters)[number]>("ALL");
   const [page, setPage] = useState(0);
   const [selectedId, setSelectedId] = useState("");
+  const [focusPath, setFocusPath] = useState(false);
   // Overlay choice is local: viewing another option never changes the decision.
   const [overlayId, setOverlayId] = useState(scenarioId);
   const overlay: SimulationResult | undefined =
@@ -233,24 +235,56 @@ export default function EvidenceGraph({
     return ids;
   }, [graph, pathEdges]);
   const highlighting = pathEdges.size > 0;
+  const pathView = focusPath && highlighting;
+  const focused = useMemo(
+    () =>
+      focusedEvidence(
+        graph,
+        impact?.pathEdgeIds ?? [],
+        rootId,
+        selected?.id ?? rootId,
+      ),
+    [graph, impact, rootId, selected?.id],
+  );
+  const mapNodes = pathView ? focused.nodes : visible;
+  const selectNode = (id: string) => {
+    const index = filtered.findIndex((node) => node.id === id);
+    if (index >= 0) setPage(Math.floor(index / pageSize));
+    else {
+      setQuery("");
+      setStatus("ALL");
+      setPage(
+        Math.max(
+          0,
+          Math.floor(ordered.findIndex((node) => node.id === id) / pageSize),
+        ),
+      );
+    }
+    setSelectedId(id);
+    setFocusPath(false);
+  };
 
   const layout = useMemo(
-    () => layeredLayout(visible, distance, 4),
-    [visible, distance],
+    () => layeredLayout(mapNodes, distance, 4),
+    [mapNodes, distance],
   );
   const visibleIds = useMemo(
-    () => new Set(visible.map((n) => n.id)),
-    [visible],
+    () => new Set(mapNodes.map((n) => n.id)),
+    [mapNodes],
   );
   const windowEdges = useMemo(
     () =>
-      graph.edges.filter((e) => visibleIds.has(e.from) && visibleIds.has(e.to)),
-    [graph, visibleIds],
+      pathView
+        ? focused.edges
+        : graph.edges.filter(
+            (e) => visibleIds.has(e.from) && visibleIds.has(e.to),
+          ),
+    [graph, visibleIds, pathView, focused.edges],
   );
   const drawnEdges = useMemo(() => windowEdges.slice(0, 120), [windowEdges]);
   const nodes: Node<EvidenceNodeData>[] = useMemo(
     () =>
-      visible.map((n) => {
+      mapNodes.map((n) => {
         const emphasis: Emphasis =
           n.id === selected?.id
             ? "selected"
@@ -279,7 +313,7 @@ export default function EvidenceGraph({
         };
       }),
     [
-      visible,
+      mapNodes,
       layout,
       selected?.id,
       highlighting,
@@ -407,7 +441,10 @@ export default function EvidenceGraph({
                   key={r.scenarioId}
                   className="ax-segmented__btn"
                   aria-pressed={overlay.scenarioId === r.scenarioId}
-                  onClick={() => setOverlayId(r.scenarioId)}
+                  onClick={() => {
+                    setOverlayId(r.scenarioId);
+                    setFocusPath(false);
+                  }}
                 >
                   {scenarioName(r.scenarioId)}
                   <span
@@ -439,6 +476,7 @@ export default function EvidenceGraph({
               onChange={(e) => {
                 setQuery(e.target.value);
                 setPage(0);
+                setFocusPath(false);
               }}
             />
           </div>
@@ -455,6 +493,7 @@ export default function EvidenceGraph({
                 onClick={() => {
                   setStatus(v);
                   setPage(0);
+                  setFocusPath(false);
                 }}
               >
                 {v !== "ALL" && (
@@ -471,9 +510,40 @@ export default function EvidenceGraph({
             ))}
           </div>
         </div>
+        <div className="ax-graph-path-controls">
+          <button
+            className="ax-btn ax-btn--ghost"
+            aria-pressed={pathView}
+            disabled={!highlighting}
+            aria-describedby="graph-path-hint"
+            onClick={() => setFocusPath(!pathView)}
+          >
+            <Icon name="graph" size={15} />
+            {pathView ? "Return to map overview" : "Focus supplied impact path"}
+          </button>
+          <p id="graph-path-hint" className="ax-muted ax-small">
+            {highlighting
+              ? "Focus uses only the simulation's supplied relationships. The evidence list and your decision stay unchanged."
+              : "Compare options and select an affected record with a supplied path to focus the map. No causal relationship is invented."}
+          </p>
+        </div>
+        {pathView &&
+          (focused.missingEdges.length > 0 ||
+            focused.missingNodes.length > 0 ||
+            focused.omittedNodes > 0 ||
+            focused.omittedEdges > 0) && (
+            <Notice tone="warning" title="Path context is incomplete">
+              {focused.missingEdges.length} supplied relationships and{" "}
+              {focused.missingNodes.length} endpoints are missing from the
+              snapshot. {focused.omittedNodes} loaded records and{" "}
+              {focused.omittedEdges} loaded relationships are outside this
+              bounded map. Missing relationships are never reconstructed;
+              inspect the ordered impact path for details.
+            </Notice>
+          )}
         <div className="ax-graph-layout">
           <div className="ax-graph-canvas-wrap" ref={wrapRef}>
-            {visible.length ? (
+            {mapNodes.length ? (
               <div
                 className={`ax-graph ${highlighting ? "is-highlighting" : ""}`}
                 style={{ height: canvasHeight }}
@@ -487,7 +557,7 @@ export default function EvidenceGraph({
                   const id = el?.getAttribute("data-id");
                   if (id) {
                     e.preventDefault();
-                    setSelectedId(id);
+                    selectNode(id);
                   }
                 }}
               >
@@ -497,7 +567,7 @@ export default function EvidenceGraph({
                   ))}
                 </div>
                 <ReactFlow
-                  key={`${pageSize}-${current}-${query}-${status}`}
+                  key={`${pageSize}-${current}-${query}-${status}-${pathView}`}
                   nodes={nodes}
                   edges={edges}
                   nodeTypes={nodeTypes}
@@ -508,7 +578,7 @@ export default function EvidenceGraph({
                           x: 12,
                           y:
                             canvasHeight / 2 -
-                            ((layout.positions.get(visible[0]?.id)?.y ?? 0) +
+                            ((layout.positions.get(mapNodes[0]?.id)?.y ?? 0) +
                               45) *
                               0.9,
                           zoom: 0.9,
@@ -522,7 +592,7 @@ export default function EvidenceGraph({
                   nodesConnectable={false}
                   elementsSelectable={false}
                   edgesFocusable={false}
-                  onNodeClick={(_, node) => setSelectedId(node.id)}
+                  onNodeClick={(_, node) => selectNode(node.id)}
                 >
                   <Background
                     variant={BackgroundVariant.Dots}
@@ -546,27 +616,43 @@ export default function EvidenceGraph({
                   every record.
                 </p>
               )}
-              <p className="ax-muted" id="graph-window">
-                Showing {visible.length} of {filtered.length} matching records
-                {pages > 1 && ` · page ${current + 1} of ${pages}`}.
-                Relationships to records outside this page are not drawn
-                {omittedEdges > 0 &&
-                  ` (${omittedEdges} more on this page are listed but not drawn)`}
-                . Layout columns show hop distance only — not impact.
-              </p>
+              {pathView ? (
+                <p className="ax-muted" id="graph-window" role="status">
+                  Focused map: {mapNodes.length} records and {drawnEdges.length}{" "}
+                  relationships from the supplied impact path, with
+                  change/selection context. The paginated evidence list keeps
+                  its filters; the inspector's ordered impact path remains the
+                  textual alternative.
+                </p>
+              ) : (
+                <p className="ax-muted" id="graph-window">
+                  Showing {visible.length} of {filtered.length} matching records
+                  {pages > 1 && ` · page ${current + 1} of ${pages}`}.
+                  Relationships to records outside this page are not drawn
+                  {omittedEdges > 0 &&
+                    ` (${omittedEdges} more on this page are listed but not drawn)`}
+                  . Layout columns show hop distance only — not impact.
+                </p>
+              )}
               {pages > 1 && (
                 <div className="ax-pager">
                   <button
                     className="ax-btn ax-btn--ghost"
                     disabled={current === 0}
-                    onClick={() => setPage(current - 1)}
+                    onClick={() => {
+                      setPage(current - 1);
+                      setFocusPath(false);
+                    }}
                   >
                     Previous evidence
                   </button>
                   <button
                     className="ax-btn ax-btn--ghost"
                     disabled={current + 1 >= pages}
-                    onClick={() => setPage(current + 1)}
+                    onClick={() => {
+                      setPage(current + 1);
+                      setFocusPath(false);
+                    }}
                   >
                     Next evidence
                   </button>
@@ -776,7 +862,7 @@ export default function EvidenceGraph({
               <li key={n.id}>
                 <button
                   className="ax-evidence-item"
-                  onClick={() => setSelectedId(n.id)}
+                  onClick={() => selectNode(n.id)}
                   aria-pressed={selected?.id === n.id}
                 >
                   <span

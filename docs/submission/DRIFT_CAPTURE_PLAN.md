@@ -1,0 +1,40 @@
+# Evidence-drift story — English preparation, not recorded
+
+4 November 2026 · #139. Proposed duration **4:30**, with the stale-decision proof before 3:00. This is a storyboard and narration/caption draft, not evidence that the hosted shots exist. It is the proposed narrative update to VIDEO_SCRIPT.md; keep that file's validator setup, capture/reset and privacy instructions. Final recording remains deferred. Do not publish or submit.
+
+The [competition rules](https://codegeist2026.devpost.com/rules), checked 4 November 2026, require a video shorter than five minutes and say judges need not watch beyond three. Aim for 4:30 including cards; trim optional scenes before making evidence unreadable. Recheck rules before submission.
+
+## Storyboard, narration and caption draft
+
+The quoted text is the English voice script. Use the same words for verbatim captions, split into readable two-line cues and **retimed to the actual recording**. The last column is optional short on-screen emphasis, not a substitute for captions. Timings below are editorial targets, not a finished subtitle file.
+
+| Time | Screen / visible proof | Narration and verbatim caption text | Emphasis |
+| --- | --- | --- | --- |
+| 0:00–0:15 | Jira root and a genuinely linked indirect consumer. Show the actual issue keys, not a composited link. | “A small API change can affect a service two links away. Before approving it, can we show what depends on it—and which facts the decision relies on?” | One change. Indirect consequences. |
+| 0:15–0:40 | Mission Control connected state; analyzed graph; source inspector and supplied path focus if deployed. | “ANTICIPATE reads the Jira evidence you can access. Follow the relationship to its source. Confirmed, Inferred and Unknown stay distinct; missing evidence is never treated as safety.” | Trace the source. Keep uncertainty. |
+| 0:40–1:10 | Scenario cards, pair inspector, named shared/unique records and migration assumption. | “Compare removing now, retaining temporarily, or migrating first. These are simulations on the same snapshot. Inspect which records differ without changing the chosen decision. A migration assumption does not move any consumer.” | Compare consequences, not forecasts. |
+| 1:10–1:35 | Firewall reason chain, exact prevention actions, approval confirmation. Hold on version/scope. | “The firewall explains the consequence and the rule behind it. Approval applies to specific actions and evidence. Executing them is a separate confirmation.” | Approve this scope. |
+| 1:35–2:05 | Owner-authorized relevant Jira link change on a disposable dev project, followed by the real freshness check/refusal. Label site switch. | “Now a relevant Jira fact changes after approval. ANTICIPATE checks the evidence again. The old decision is invalidated; its approval cannot be reused.” | Evidence changed. Decision invalidated. |
+| 2:05–2:30 | Readable real change notice, blocked approval/execution and fresh-analysis action. Show actual outcome, without fabricating network activity. | “The notice identifies the changed evidence and the next review step. Approval and execution are blocked. To continue, read the current evidence and make a new decision.” | Refuse stale authority. |
+| 2:30–2:55 | Fresh analysis, reviewed plan, distinct approval/execution confirmations, verified receipts and Passport summary. Cut only waiting time. | “Review the new facts, approve the new scope, and confirm execution. ANTICIPATE reads Jira back to verify the result. The Passport keeps the decision, its assumptions, approvals and outcomes together.” | Fresh review. Verified outcome. |
+| 2:55–3:15 | Passport gate reason and open questions; retain readable status and timestamps. | “A completed plan is not proof that a migration happened, or that the Jira transition is open. The record says what is verified and what still needs attention.” | Done does not mean allowed. |
+| 3:15–3:50 | Optional real Jira validator refusal/acceptance from VIDEO_SCRIPT's authorized capture procedure. Never imply the UI comparison changed the workflow. | “Jira can enforce the firewall too. An assumption is refused until the actual evidence satisfies the gate. Administrators control the documented outage policy.” | Evidence, then enforcement. |
+| 3:50–4:15 | Optional actual MCP/Rovo read-only answer, then capability table. Name dev site if different. | “The same deterministic engine can explain a change through read-only tools. It cannot approve or execute there. Capabilities and unavailable integrations remain visible.” | One engine. Explicit authority. |
+| 4:15–4:30 | Team-made closing card and install path; no customer/ROI claim. | “ANTICIPATE helps teams understand, challenge, approve and verify consequential Jira changes. Inspect the evidence. Compare the options. Keep the decision.” | ANTICIPATE · The Decision Firewall for Software Teams |
+
+## Capture and screenshot checklist — Muse/owner
+
+- [ ] Before capture, record site, deployed build/commit, UTC date, permitted account role and disposable project. Confirm #127/#133 UI is deployed before promising those shots. Do not deploy from this EXPERIENCE session.
+- [ ] Capture graph/source, pair inspector/assumption, approval scope, changed-evidence notice, invalidated controls, fresh verified receipt and Passport. Keep one uncropped contextual frame per close-up. Readable source, date and status matter more than a moving cursor.
+- [ ] Hosted drift proof is still pending in [EVIDENCE_PACK](../evidence/EVIDENCE_PACK.md). On an authorized dev dataset, approve a plan, change a **relevant** source link in Jira, then invoke the actual freshness check or guarded operation. Record the real refusal/change notice and verify no Jira action was executed from the invalidated plan. Restore the dataset afterwards. No backdated “yesterday” story, forged status, fake timer or substituted mock response.
+- [ ] If that experiment does not produce the expected refusal, stop the shot, report actual/expected outcome and correlation ID to CORE, and omit the unsupported claim. Local hook/browser guards prove a regression case, not this hosted acceptance.
+- [ ] Capture a new plan after fresh analysis; show exact approved actions and verified/unverified results. Do not reuse the invalidated approval. Preserve any Unknown or gate refusal that actually occurs.
+- [ ] Tag observed Jira reads **OBSERVED IN JIRA**, frozen calculations **SIMULATION**, verified writes **EXECUTED + VERIFIED**. LOCAL/MOCK captures remain development evidence and are excluded from the hosted submission footage.
+- [ ] Gallery candidates: source/path graph, named pair comparison, refusal notice and Passport. Each needs site/build/date and redaction review. Existing gallery diagrams remain diagrams; no screenshot is claimed collected here.
+- [ ] Record narration after the footage is accepted; read naturally and retime captions. Keep short cues, adequate contrast and clear space around evidence. Captions must not cover the refusal, assumptions or buttons. No music is needed.
+- [ ] Remove personal data, tokens, notifications and unrelated tabs. Preserve raw captures outside the repository. Use only owned/licensed assets; keep their provenance. Mark accelerated/cut waits; never splice success over a failure.
+- [ ] Confirm total runtime, first-three-minute proof, subtitle accuracy and both owners' publication agreement when recording is eventually reopened.
+
+## Evidence and pitches
+
+Implementation references: PR #110 (real hook guards), #126 (dated samples), issues #127/#133 (comparison/path focus). [EVIDENCE_PACK](../evidence/EVIDENCE_PACK.md) is the hosted authority. [VALUE_STUDY_PROTOCOL](../strategy/VALUE_STUDY_PROTOCOL.md) separates automated from human evidence. Product/developer/executive pitches and unvalidated packaging are in [BUYER_HYPOTHESES](../strategy/BUYER_HYPOTHESES.md); sourced competition is separately owned by ORP-31 (#136). Portfolio, shared workspace and continuous radar are excluded until actually enabled and hosted-tested.

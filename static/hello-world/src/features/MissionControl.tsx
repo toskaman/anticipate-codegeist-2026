@@ -42,7 +42,10 @@ const journey = [
 ] as const;
 
 const demoSteps = [
-  { title: "Choose a Jira project", text: "Any project you can edit." },
+  {
+    title: "Choose a Jira project",
+    text: "A company-managed software project you can edit.",
+  },
   {
     title: "Preview, then create sample tickets",
     text: "Six labelled tickets; nothing is written before you confirm.",
@@ -146,9 +149,14 @@ export default function MissionControl({
         frame = requestAnimationFrame(focusNext);
         return;
       }
-      document
-        .getElementById("demo-setup")
-        ?.scrollIntoView({ block: "start", behavior: "smooth" });
+      const setup = document.getElementById("demo-setup");
+      const reduceMotion =
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+        setup?.closest(".ax-app")?.getAttribute("data-motion") === "reduce";
+      setup?.scrollIntoView({
+        block: "start",
+        behavior: reduceMotion ? "instant" : "smooth",
+      });
       target?.focus({ preventScroll: true });
     };
     frame = requestAnimationFrame(focusNext);
@@ -182,7 +190,7 @@ export default function MissionControl({
         step="Step 1 of 6 · Choose a change"
         icon="target"
         title="Mission Control"
-        lead="Start from a real Jira issue that describes a change you are considering."
+        lead="See direct and indirect dependencies before retiring, upgrading or delaying a Jira change."
       />
       <DemoCallout
         w={w}
@@ -192,11 +200,17 @@ export default function MissionControl({
       <section className="ax-hero" aria-labelledby="hero-title">
         <div className="ax-hero__copy">
           <p id="hero-title" className="ax-hero__title">
-            Make your next change with confidence.
+            Know what depends on your next change.
           </p>
           <p className="ax-hero__text">
-            Explore dependencies, compare options, and verify preventive actions
-            before changing Jira.
+            A consumer two links away is easy to miss in a ticket. Trace the
+            evidence, compare alternatives, and review safeguards before you
+            act.
+          </p>
+          <p className="ax-hero__boundaries">
+            <strong>Read-only:</strong> analysis and simulations.{" "}
+            <strong>Explicit Jira writes:</strong> confirmed sample creation and
+            execution of approved actions.
           </p>
         </div>
         <ol className="ax-hero__journey" aria-label="How ANTICIPATE works">
@@ -238,14 +252,16 @@ export default function MissionControl({
               </p>
               <ul className="ax-small ax-steps-list">
                 <li>
-                  Create a project in Jira (any template), or ask a Jira
-                  administrator to give you access to one.
+                  Choose a company-managed software project in Jira, or ask a
+                  Jira administrator to give you access to one.
                 </li>
                 <li>
                   To prepare demo data you need permission to{" "}
                   <strong>browse</strong> the project,{" "}
                   <strong>create issues</strong> and{" "}
-                  <strong>link issues</strong>.
+                  <strong>link issues</strong>. Dated sample creation also needs{" "}
+                  <strong>Schedule Issues</strong> and the Due date field on the
+                  create screen.
                 </li>
                 <li>
                   Then reload ANTICIPATE. Projects you can read appear in the
