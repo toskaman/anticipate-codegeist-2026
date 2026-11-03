@@ -115,6 +115,18 @@ Deployed by the owner from `main` d995021 (memoryMB 1024, slip simulation, ORP-6
 
 Reading: after the memory increase, server time is ~1.5–2.1 s even cold. The rest of a post-deploy first open is static asset delivery (CDN + browser cache cold), not the app backend. Earlier dev sample after ~20 min idle (CDN warm): ~3.9 s. Judges may see the cold-asset case on their very first open.
 
+## Slip panel on the judge site (3 Nov 2026, ~22:40 UTC) · LIVE_FORGE, anticipate-judge (production 2.30.0)
+
+Built-in browser pane visible, signed in with the judge-site account. Mission Control → project JDG → JDG-1 → Analyze dependencies (2 records: JDG-1 affects JDG-5, Inferred) → Scenario Lab → "What if it slips?" → 10 days.
+
+| Check (#64) | Observed | Result |
+|---|---|---|
+| Panel reachable after analysis, read-only badge | "Simulation · nothing changed in Jira" | PASS |
+| Headline | "If JDG-1 slips 10 days: no release would be late, 0 due dates would move, 1 item cannot be assessed." | PASS (honest) |
+| Unknown items in the warning block | "Cannot be assessed (not assumed safe): JDG-1: no due date in Jira, Path: JDG-1" | PASS |
+| Late releases listed first, each moved date shows its path | not observable: the guided-demo sample tickets have no due dates or fix versions, so nothing moves | NOT TESTED HOSTED (follow-up ORP-30 #121 seeds due dates) |
+| Passport printed on paper in dark theme | needs a physical print | owner (manual) |
+
 ## Hosted (LIVE_FORGE) proofs still missing
 
 Each of these is either tested LOCAL only or not observed at all. The browser checks belong to muse (#64), and the video belongs to the owner.
