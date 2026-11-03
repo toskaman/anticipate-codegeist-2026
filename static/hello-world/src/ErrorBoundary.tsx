@@ -40,8 +40,7 @@ export function coreErrorDetails(error: unknown): CoreErrorDetails | null {
         typeof shaped.message === "string"
           ? shaped.message
           : "Request failed. No success is assumed.",
-      requestId:
-        typeof shaped.requestId === "string" ? shaped.requestId : null,
+      requestId: typeof shaped.requestId === "string" ? shaped.requestId : null,
       retryable: shaped.retryable === true,
     };
   }
