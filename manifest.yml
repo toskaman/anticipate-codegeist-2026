@@ -139,7 +139,7 @@ permissions:
 app:
   runtime:
     name: nodejs24.x
-    memoryMB: 256
+    memoryMB: 1024
     architecture: arm64
   id: ari:cloud:ecosystem::app/39a28f48-c891-4d86-a3cf-c14409cbd29e
   compatibility:
