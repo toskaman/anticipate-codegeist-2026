@@ -165,7 +165,7 @@ export function createService(d: Deps) {
       if (!(await d.jira.globalPermissions(['ADMINISTER']))['ADMINISTER']) fail('PERMISSION_DENIED', 'Only Jira administrators can change the validator outage policy.');
       const rec = { onOutage: input.onOutage, updatedBy: ctx.accountId, updatedAt: iso() };
       await d.store.set(VALIDATOR_POLICY_KEY, rec);
-      console.warn(JSON.stringify({ app: 'anticipate', op: 'setValidatorPolicy', onOutage: input.onOutage }));
+      console.warn(JSON.stringify({ app: 'anticipate', op: 'setValidatorPolicy', onOutage: input.onOutage, accountId: ctx.accountId }));
       return { ...rec, canEdit: true };
     },
 
@@ -443,7 +443,21 @@ export function createService(d: Deps) {
         await save({ ...base, status: 'SUBMITTED', resultRef: ref(issueKey), error: null, updatedAt: iso() });
         if (!(await d.jira.getCommentsText(issueKey)).some((t) => t.includes(tag))) throw new AppError('UPSTREAM_UNAVAILABLE', 'Comment not observed after write.', true);
       } else {
-        throw new AppError('UNSUPPORTED', `Action type ${a.type} not implemented.`);
+        if (a.type === 'ADD_ISSUE_LINK') {
+          const p = a.payload as { type: unknown; inward: unknown; outward: unknown };
+          if (typeof p.type !== 'string' || !p.type || typeof p.inward !== 'string' || !p.inward || typeof p.outward !== 'string' || !p.outward)
+            throw new AppError('VALIDATION', 'ADD_ISSUE_LINK payload requires { type, inward, outward } issue keys.');
+          const typeName = p.type; const inwardKey = p.inward; const outwardKey = p.outward;
+          issueKey = a.targetIssueKey ?? outwardKey;
+          const cur = await d.jira.getIssue(outwardKey);
+          const linked = cur.kind === 'ok' && cur.issue.links.some((l) => l.otherKey === inwardKey && l.typeName === typeName);
+          if (!linked) await d.jira.createLink({ typeName, outwardKey, inwardKey });
+          await save({ ...base, status: 'SUBMITTED', resultRef: ref(issueKey), error: null, updatedAt: iso() });
+          const v = await d.jira.getIssue(outwardKey);
+          if (!(v.kind === 'ok' && v.issue.links.some((l) => l.otherKey === inwardKey && l.typeName === typeName))) throw new AppError('UPSTREAM_UNAVAILABLE', 'Link not observed after write.', true);
+        } else {
+          throw new AppError('UNSUPPORTED', `Action type ${a.type} not implemented.`);
+        }
       }
       return save({ ...base, status: 'VERIFIED', resultRef: ref(issueKey), error: null, updatedAt: iso() });
     } catch (e) {

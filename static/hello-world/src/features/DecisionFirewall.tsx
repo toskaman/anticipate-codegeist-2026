@@ -37,10 +37,21 @@ const severityStep: Record<string, string> = {
   LOW: "Note it in the decision record.",
 };
 
+type SnapshotNode = NonNullable<Workflow["snapshot"]>["nodes"][number];
+
+/** Index backing nodeOf: O(1) lookups instead of a linear scan per id. */
+export function buildNodeIndex(
+  nodes: readonly SnapshotNode[] | null | undefined,
+): Map<string, SnapshotNode> {
+  return new Map((nodes ?? []).map((n) => [n.id, n]));
+}
+
 export default function DecisionFirewall({ w }: { w: Workflow }) {
   const r = w.currentResult;
   const g = w.snapshot;
-  const nodeOf = (id: string) => g?.nodes.find((n) => n.id === id);
+  const nodes = g?.nodes;
+  const nodeById = React.useMemo(() => buildNodeIndex(nodes), [nodes]);
+  const nodeOf = (id: string) => nodeById.get(id);
   const canGenerate =
     !w.busy && !w.expired && w.allowed("generatePreventionPlan");
   if (!r)

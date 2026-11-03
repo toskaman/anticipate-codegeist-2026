@@ -60,7 +60,11 @@ export function createRovoActions(deps: (p: ActionPayload) => Deps) {
     }),
     simulateSlip: safe(async (p, c) => {
       if (!p.issueKey || !KEY.test(p.issueKey)) throw new AppError('VALIDATION', 'issueKey must look like ABC-123');
-      return formatSlip(await slipFromJira(deps(p).jira, ctxOf(p, c), { issueKey: p.issueKey, days: Number(p.days) }));
+      // Coerce Forge string payloads, then fail fast before any auth/service call.
+      const raw: unknown = p.days;
+      const days = typeof raw === 'string' ? Number(raw.trim()) : raw;
+      if (typeof days !== 'number' || !Number.isInteger(days) || days < 1 || days > 365) throw new AppError('VALIDATION', 'days must be an integer between 1 and 365');
+      return formatSlip(await slipFromJira(deps(p).jira, ctxOf(p, c), { issueKey: p.issueKey, days }));
     }),
     checkFreshness: safe(async (p, c) => {
       if (!p.planId) throw new AppError('VALIDATION', 'planId is required');

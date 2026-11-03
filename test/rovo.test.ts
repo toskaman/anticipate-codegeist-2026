@@ -24,3 +24,24 @@ it('resolves the invoking user from payload or handler context', () => {
   expect(actorOf({}, { principal: { accountId: 'b' } })).toBe('b');
   expect(actorOf({})).toBeNull();
 });
+
+describe('simulateSlip days validation', () => {
+  const setup = () => {
+    const jira = demoJira(); const store = memoryStore(); let i = 0;
+    return createRovoActions(() => ({ jira, store, now: () => new Date('2026-11-02T09:00:00Z'), newId: () => `r${++i}` }));
+  };
+  // No auth context on purpose: days validation must run in the Rovo layer
+  // before any service/auth check, so invalid days always surface VALIDATION.
+  it.each([NaN, 0, 366, -5, 'not-a-number', 3.5])('rejects invalid days %p with VALIDATION', async (days) => {
+    const a = setup();
+    const r = await a.simulateSlip({ issueKey: 'PAY-1', days: days as number });
+    expect(r).toMatch(/VALIDATION/);
+    expect(r).toMatch(/days must be an integer between 1 and 365/);
+  });
+  it.each([1, 365, '1', '365'])('accepts valid days %p', async (days) => {
+    const a = setup();
+    const r = await a.simulateSlip({ issueKey: 'PAY-1', days: days as number, context: { accountId: 'u' } });
+    expect(r).toMatch(/What-if/);
+    expect(r).not.toMatch(/VALIDATION/);
+  });
+});

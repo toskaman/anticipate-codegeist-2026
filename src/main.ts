@@ -21,9 +21,6 @@ for (const op of ops) {
   }) as never);
 }
 
-// Legacy template resolver kept so an older frontend build does not break.
-resolver.define('getText', () => 'Hello, world!');
-
 export const handler = resolver.getDefinitions();
 export type { Svc };
 
@@ -36,8 +33,6 @@ export const rovoSimulateUpgrade = rovo.simulateUpgrade;
 export const rovoGetPassport = rovo.getPassport;
 export const rovoCheckFreshness = rovo.checkFreshness;
 export const rovoSimulateSlip = rovo.simulateSlip;
-
-export { diagnostics, seedDemo } from './diagnostics';
 
 // ---- Jira workflow validator (opt-in per workflow transition) ----
 import { runValidator, type DecisionRecord } from './validator';

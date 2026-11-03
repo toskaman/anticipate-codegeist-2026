@@ -2,7 +2,7 @@ import { createService } from '../src/engine/service';
 import { classifyLink } from '../src/jira/extractor';
 import { makeHandler } from '../src/core/handler';
 import { mapIssue, adf } from '../src/forge-adapters';
-import { GraphSnapshot, PreventionPassport } from '../packages/contracts/src/index';
+import { GraphSnapshot, PreventionPassport, ProposedAction } from '../packages/contracts/src/index';
 import { demoJira, memoryStore } from './fakes';
 
 vi.mock('@forge/api', () => ({ default: {}, route: () => '' }));
@@ -139,6 +139,62 @@ describe('end-to-end use cases (fake Jira)', () => {
     await s.svc.approvePlan(ctx, { planId: plan.planId, planHash: plan.planHash, approvedActionIds: [plan.actions[0]!.actionId], idempotencyKey: 'approve-key-000007' });
     await expect(s.svc.executeApprovedPlan(ctx, { planId: plan.planId, idempotencyKey: 'exec-key-00000010' })).rejects.toMatchObject({ code: 'UNSUPPORTED' });
     expect((await s.svc.getPreventionPassport(ctx, { planId: plan.planId })).disclaimer).toMatch(/DEMO FIXTURE/);
+  });
+});
+
+describe('W3: service actor audit + ADD_ISSUE_LINK execution (TOP4/TOP11)', () => {
+  it('setValidatorPolicy audit log includes the acting accountId', async () => {
+    const s = setup();
+    s.jira.globalPerms = { ADMINISTER: true };
+    const spy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    try {
+      await s.svc.setValidatorPolicy(ctx, { onOutage: 'BLOCK' });
+      expect(spy).toHaveBeenCalledTimes(1);
+      expect(JSON.parse(spy.mock.calls[0]![0] as string)).toMatchObject({ app: 'anticipate', op: 'setValidatorPolicy', onOutage: 'BLOCK', accountId: 'acc-1' });
+    } finally { spy.mockRestore(); }
+  });
+
+  function injectLinkAction(s: ReturnType<typeof setup>, planId: string, payload: Record<string, unknown>) {
+    const rec = s.store.data.get(`plan:${planId}`) as { plan: { actions: ProposedAction[] } };
+    rec.plan.actions.push({
+      actionId: 'link:PAY-2-blocks-PAY-4', type: 'ADD_ISSUE_LINK', targetProjectKey: 'PAY', targetIssueKey: 'PAY-4',
+      payload, reason: 'Make PAY-2 a blocker of PAY-4.', evidenceEdgeIds: [],
+      requiredPermission: 'LINK_ISSUES', verificationRule: 'PAY-2 carries a Blocks link to PAY-4.'
+    });
+  }
+
+  it('executes ADD_ISSUE_LINK via createLink and verifies the link', async () => {
+    const s = setup();
+    const { plan } = await toPlan(s);
+    injectLinkAction(s, plan.planId, { type: 'Blocks', outward: 'PAY-2', inward: 'PAY-4' });
+    await s.svc.approvePlan(ctx, { planId: plan.planId, planHash: plan.planHash, approvedActionIds: ['link:PAY-2-blocks-PAY-4'], idempotencyKey: 'approve-key-000011' });
+    const before = s.jira.writes.link;
+    const out = await s.svc.executeApprovedPlan(ctx, { planId: plan.planId, idempotencyKey: 'exec-key-00000011' });
+    expect(out.find((r) => r.actionId === 'link:PAY-2-blocks-PAY-4')).toMatchObject({ status: 'VERIFIED' });
+    expect(s.jira.writes.link).toBe(before + 1);
+    const v = await s.jira.getIssue('PAY-2');
+    expect(v.kind === 'ok' && v.issue.links.some((l) => l.otherKey === 'PAY-4' && l.typeName === 'Blocks')).toBe(true);
+  });
+
+  it('ADD_ISSUE_LINK is idempotent when the link already exists', async () => {
+    const s = setup();
+    const { plan } = await toPlan(s);
+    await s.jira.createLink({ typeName: 'Blocks', outwardKey: 'PAY-2', inwardKey: 'PAY-4' });
+    injectLinkAction(s, plan.planId, { type: 'Blocks', outward: 'PAY-2', inward: 'PAY-4' });
+    await s.svc.approvePlan(ctx, { planId: plan.planId, planHash: plan.planHash, approvedActionIds: ['link:PAY-2-blocks-PAY-4'], idempotencyKey: 'approve-key-000012' });
+    const before = s.jira.writes.link;
+    const out = await s.svc.executeApprovedPlan(ctx, { planId: plan.planId, idempotencyKey: 'exec-key-00000012' });
+    expect(out.find((r) => r.actionId === 'link:PAY-2-blocks-PAY-4')).toMatchObject({ status: 'VERIFIED' });
+    expect(s.jira.writes.link).toBe(before);
+  });
+
+  it('ADD_ISSUE_LINK with a malformed payload fails VALIDATION, never UNSUPPORTED', async () => {
+    const s = setup();
+    const { plan } = await toPlan(s);
+    injectLinkAction(s, plan.planId, { type: 'Blocks' });
+    await s.svc.approvePlan(ctx, { planId: plan.planId, planHash: plan.planHash, approvedActionIds: ['link:PAY-2-blocks-PAY-4'], idempotencyKey: 'approve-key-000013' });
+    const out = await s.svc.executeApprovedPlan(ctx, { planId: plan.planId, idempotencyKey: 'exec-key-00000013' });
+    expect(out.find((r) => r.actionId === 'link:PAY-2-blocks-PAY-4')).toMatchObject({ status: 'FAILED', error: { code: 'VALIDATION' } });
   });
 });
 

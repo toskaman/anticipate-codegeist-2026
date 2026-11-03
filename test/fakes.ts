@@ -1,3 +1,4 @@
+import { AppError } from '../src/core/errors';
 import type { IssueFetch, JiraIssue, JiraPort, Store } from '../src/core/ports';
 
 export function memoryStore(): Store & { data: Map<string, unknown> } {
@@ -13,9 +14,39 @@ export function memoryStore(): Store & { data: Map<string, unknown> } {
 }
 
 type Link = { id: string; type: string; outward: string; inward: string; from: string; to: string };
+
+/** Minimal JQL subset the app emits. Anything else is rejected like Jira would (HTTP 400 → UPSTREAM_UNAVAILABLE). */
+function parseJql(jql: string): { project: string | null; labels: string[] | null } {
+  const reject = (why: string): never => { throw new AppError('UPSTREAM_UNAVAILABLE', `Jira issue search rejected (HTTP 400): invalid JQL (${why}).`, false); };
+  if (typeof jql !== 'string' || !jql.trim()) reject('empty query');
+  const where = jql.replace(/(^|\s+)ORDER\s+BY\s+[A-Za-z_][\w\s,]*(\s+(ASC|DESC))?\s*$/i, '').trim();
+  if (!where) return { project: null, labels: null };
+  let project: string | null = null;
+  let labels: string[] | null = null;
+  for (const clause of where.split(/\s+AND\s+/i)) {
+    const c = clause.trim();
+    let m: RegExpExecArray | null;
+    if ((m = /^\s*project\s*=\s*"?([A-Za-z0-9_]+)"?\s*$/i.exec(c))) project = m[1]!;
+    else if ((m = /^\s*labels\s*=\s*"([^"]+)"\s*$/i.exec(c))) labels = [m[1]!];
+    else if (/^\s*labels\s+in\s*\(\s*"[^"]+"(\s*,\s*"[^"]+")*\s*\)\s*$/i.test(c)) labels = [...c.matchAll(/"([^"]+)"/g)].map((x) => x[1]!);
+    else if (/^\s*issueLinkType\s+is\s+(not\s+)?empty\s*$/i.test(c)) { /* accepted; link presence is not modelled as a filter */ }
+    else reject(`unsupported clause ${JSON.stringify(c.slice(0, 80))}`);
+  }
+  return { project, labels };
+}
+
+function parsePageToken(token: string | null | undefined): number {
+  if (token === null || token === undefined) return 0;
+  const m = /^page:(\d+)$/.exec(token);
+  if (!m) throw new AppError('UPSTREAM_UNAVAILABLE', 'Jira issue search rejected (HTTP 400): unknown nextPageToken.', false);
+  return Number.parseInt(m[1]!, 10);
+}
+
 export class FakeJira implements JiraPort {
   issues = new Map<string, JiraIssue>();
   forbidden = new Set<string>();
+  /** Projects whose createmeta exposes no usable types (live: service-desk projects via the platform API). */
+  noTypes = new Set<string>();
   links: Link[] = [];
   comments = new Map<string, string[]>();
   perms: Record<string, boolean> = { CREATE_ISSUES: true, LINK_ISSUES: true, ADD_COMMENTS: true, EDIT_ISSUES: true, BROWSE_PROJECTS: true };
@@ -33,12 +64,17 @@ export class FakeJira implements JiraPort {
     return { ...i, labels: [...i.labels], links };
   }
   async searchProjects() { return { items: [{ id: '10000', key: 'PAY', name: 'Payments', issueCount: this.issues.size }], isLast: true }; }
-  async searchIssues(jql: string) {
-    const m = /labels = "([^"]+)"/.exec(jql);
-    const inList = /labels in \(([^)]*)\)/.exec(jql);
-    const wanted = inList ? [...inList[1]!.matchAll(/"([^"]+)"/g)].map((x) => x[1]!) : null;
-    const items = [...this.issues.values()].filter((i) => (wanted ? i.labels.some((l) => wanted.includes(l)) : !m || i.labels.includes(m[1]!))).map((i) => this.view(i));
-    return { items, nextPageToken: null };
+  async searchIssues(jql: string, nextPageToken: string | null = null, max = 50) {
+    const where = parseJql(jql);
+    if (!Number.isInteger(max) || max <= 0) throw new AppError('UPSTREAM_UNAVAILABLE', `Jira issue search rejected (HTTP 400): maxResults must be a positive integer, got ${max}.`, false);
+    const offset = parsePageToken(nextPageToken);
+    const items = [...this.issues.values()]
+      .filter((i) => (!where.project || i.projectKey.toUpperCase() === where.project.toUpperCase() || i.projectId === where.project)
+        && (!where.labels || i.labels.some((l) => where.labels!.includes(l))))
+      .map((i) => this.view(i));
+    if (offset > items.length) throw new AppError('UPSTREAM_UNAVAILABLE', 'Jira issue search rejected (HTTP 400): unknown nextPageToken.', false);
+    const page = items.slice(offset, offset + max);
+    return { items: page, nextPageToken: offset + max < items.length ? `page:${offset + max}` : null };
   }
   async getIssue(key: string): Promise<IssueFetch> {
     if (this.forbidden.has(key)) return { kind: 'forbidden' };
@@ -59,7 +95,7 @@ export class FakeJira implements JiraPort {
   }
   async getCommentsText(k: string) { return this.comments.get(k) ?? []; }
   async addLabel(k: string, l: string) { this.writes.label++; this.issues.get(k)!.labels.push(l); }
-  async issueTypes() { return ['Epic', 'Task', 'Bug']; }
+  async issueTypes(projectKey?: string) { return projectKey && this.noTypes.has(projectKey) ? [] : ['Epic', 'Task', 'Bug']; }
 }
 
 /** Jira-shaped demo: PAY-1 is the legacy API; consumers depend on it through real link types. */
