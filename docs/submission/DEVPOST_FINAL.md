@@ -39,7 +39,7 @@ Who it helps: engineering managers reviewing risky changes, platform teams retir
 - **Deterministic engine:** a pure TypeScript simulation package applies each option to an isolated copy of a frozen snapshot, traces impact through reverse dependencies with causal paths, evaluates policies and returns a reproducible hash. No probabilities or invented savings.
 - **Safe execution:** approval is bound to the plan version and expires with the snapshot. Execution takes a per-plan lease, uses idempotency keys and marker reconciliation so retries never create duplicates, and only reports Verified after re-reading Jira. Partial outcomes are reported as Partial.
 - **Shared contracts:** zod schemas validate every request and response on both sides.
-- **Quality:** 141 backend tests (including authorization, concurrency, outage policy and a 50-cycle soak test), 16 engine tests, 113 frontend unit tests and 106 Playwright browser tests with automated accessibility checks on light and dark themes. CI runs typecheck, lint, formatting, unit tests, Playwright and a security audit on every pull request.
+- **Quality:** 142 backend tests (including authorization, concurrency, outage policy and a 50-cycle soak test), 16 engine tests, 122 frontend unit tests and 106 Playwright browser tests with automated accessibility checks on light and dark themes. CI runs typecheck, lint, formatting, unit tests, Playwright and a security audit on every pull request.
 - **Two-person team:** one owner on backend, engine, Forge and security; one on interface, accessibility and presentation, coordinating through written contracts in the repository.
 
 ## Challenges we ran into
@@ -105,7 +105,7 @@ ANTICIPATE exposes six tools through `rovo:mcp` that never write to Jira: get ev
 | MCP from an external client | EVIDENCE_PACK: "MCP (external client)", "MCP after rollback" |
 | Rovo agent answers | EVIDENCE_PACK: "Hosted verification, 2 Nov" (Rovo chat), "Dependency upgrade use case" |
 | Sample data, idempotent | EVIDENCE_PACK: "Hosted verification, 2 Nov"; clean-site run "Re-preview" |
-| Test counts | Local run on main 0df1874, 3 Nov 2026: backend 141, simulation-core 16, frontend unit 113 (method: docs/RELEASE.md) |
+| Test counts | Local run on main f9ce7a5, 3 Nov 2026: backend 142, simulation-core 16, frontend unit 122 (method: docs/RELEASE.md) |
 | Benchmark | `docs/evidence/BENCHMARK.md` (synthetic, 200 graphs) |
 | Teamwork Graph not integrated | `docs/evidence/TEAMWORK_GRAPH_ALLOWLIST.md`, decisions.md D1 |
 | Shared workspace prototype | decisions.md D3 |
