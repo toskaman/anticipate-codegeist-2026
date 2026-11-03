@@ -10,7 +10,7 @@
 | Continuous Decision Safety | 070b0f6+ | one-atlas-euza dev 4.12.0 | plan-4ac3c031… | 2026-11-02 ~14:30 UTC | approve → add Jira link TD-6 blocked by TD-1 → execute | refused, 0 writes | status EVIDENCE_CHANGED, 0 executions | UI does not yet show the reason |
 | MCP (external client) | dev | Claude connector, one-atlas-euza | TD | 2026-11-02 | get-graph / simulate-retirement / get-passport | grounded read-only answers | as expected | requires admin "Expose tools" toggle per site |
 | Benchmark | feat/core-engine | local | synthetic 200 graphs | 2026-11-02 | npm test | P=R=1 vs oracle | see BENCHMARK.md | synthetic |
-| Rovo agent | dev 4.13.0+ | one-atlas-euza | — | 2026-11-02 | Jira issue → Agents → search | agent listed | NOT FOUND yet ("check the agent is enabled in Studio") | needs Rovo Studio enablement by admin |
+| Rovo agent | dev 4.13.0+ | one-atlas-euza | — | 2026-11-02 | Jira issue → Agents → search | agent listed | NOT FOUND yet ("check the agent is enabled in Studio"); **superseded the same day: the agent answered in Rovo chat on dev, see "Hosted verification, 2 Nov 2026" below** | needs Rovo Studio enablement by admin |
 | Teamwork Graph | exp/teamwork-graph | dev 5.0.0-5.1.0 | MOBL-58 | 2026-11-03 | deploy with graph scopes, consent, probe | graph relations | BLOCKED: restricted scope, consent grants no graph scope; ECOHELP-180616 | docs/evidence/TEAMWORK_GRAPH_ALLOWLIST.md |
 
 ## Hosted verification, 2 Nov 2026 (main fda93de + CORE fixes)
