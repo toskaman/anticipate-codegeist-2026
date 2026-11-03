@@ -50,7 +50,7 @@ Opening or previewing never writes to Jira. No Jira project is created and nothi
 
 A Rovo agent, *ANTICIPATE Decision Reviewer*, and five read-only MCP tools (evidence graph, simulate retirement, simulate upgrade, Passport, plan freshness) answer "what happens if we change X?" using the same engine. They never approve or execute. Availability depends on the site's Rovo access and an administrator toggle for MCP.
 
-**Teamwork Graph:** not integrated. It is a Forge Preview capability that needs graph read scopes and access checks; CORE has a prototype adapter that is not wired. The app shows it as *Not configured* and uses Jira evidence only.
+**Teamwork Graph:** not integrated. It is a Forge Preview capability that needs graph read scopes and access checks; CORE has a prototype adapter that is not wired. The app shows it as *Not configured* and uses Jira evidence only. Atlassian refuses the graph scopes for this app until it is allowlisted; the request is open as [ECOHELP-180616](https://ecosystem.atlassian.net/servicedesk/customer/portal/34/ECOHELP-180616) (2 Nov 2026). Evidence: [docs/evidence/TEAMWORK_GRAPH_ALLOWLIST.md](docs/evidence/TEAMWORK_GRAPH_ALLOWLIST.md).
 
 ## Safety by design
 

@@ -105,3 +105,15 @@ Suggested UI: a "Jira transition" row in Decision overview: OPEN (green), CLOSED
 - Scenario Lab and Decision Firewall label option C ("Migrate first" / "Move consumers first") as a simulation assumption, and say that a result is not permission to move the Jira issue. Pass now ends with "it does not authorize the Jira transition".
 - Passport starts with an "In short" box: option and verdict, verified actions, transition status (from `gate`), open questions. When `gate` is CLOSED, Limitations adds "The recorded outcome does not authorize the Jira transition."
 - New requests in `EXPERIENCE_TO_CORE_REQUESTS.md` (R-38): refresh `TECHNICAL_SECTION.md`; Teamwork Graph provenance fields; enterprise workspace contract. R-37 no longer asks for a merge, only production deploy and the remaining hosted checks (`docs/jury/HOSTED_ACCEPTANCE_PR37.md`).
+
+## Reply to R-38 (3 Nov 2026, CORE)
+1. `docs/submission/TECHNICAL_SECTION.md` updated from STATUS.md: five MCP tools, Rovo agent, 80 backend tests, validator with outage policy (incl. R18 unreadable issue), R17 and `gate`, upgrade scenarios.
+2. Teamwork Graph provenance: proposed additive contract (no field removed, all optional, so the current UI keeps working). Nothing is sent until the adapter is wired and a hosted query succeeds.
+   - Per edge: `source: 'JIRA' | 'TEAMWORK_GRAPH'`; `evidenceKind: 'VERIFIED_LINK' | 'DOCUMENTARY'` (TWG relations are DOCUMENTARY unless backed by a Jira link); `feedsSimulation: boolean` (false for DOCUMENTARY: shown as context, never changes a verdict).
+   - Per source in `GraphSnapshot.coverage.sources[]`: `{ source, state: 'LIVE' | 'PARTIAL' | 'UNAVAILABLE' | 'NOT_CONFIGURED', needsAdmin?: boolean, detail?: string }`.
+   - Settings capability `teamworkGraph` keeps its current values.
+3. Enterprise workspace: contract follows the backend prototype on a separate branch (approver eligibility with reason, pending step, approval expiry, Passport visibility). Not before it is enforced server side and tested adversarially.
+4. R-37 items: R18 is deployed (dev 4.38.0+, prod 2.26.0; unit tested, hosted 403 check planned on AVT). PR #39 merged and deployed on dev 4.39.0: Passport "In short" on MOBL-58 verified. Print dialog opened once.
+
+## Teamwork Graph hosted attempt (3 Nov 2026, CORE): BLOCKED
+The graph scope is restricted for app 39a28f48: Atlassian must allowlist the app (support request with the app id). Until then, the backend keeps reporting `teamworkGraph: NOT_CONFIGURED` and nothing TWG-related should be shown as live. Dev is back on the CORE build (v6.0.0).

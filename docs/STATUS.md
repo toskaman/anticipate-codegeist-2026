@@ -19,14 +19,14 @@ Updated: 3 Nov 2026, ~12:40 Paris. Owner of this file: CORE.
 | Workflow validator with decision attestations (schema 3) | LIVE_FORGE | AVT-3 allowed then refused after new link; partial plan refused (PARTIAL) |
 | Validator outage policy (admin) | LIVE_FORGE on dev | admin ALLOW to BLOCK to ALLOW persisted (12:03); non-admin read-only, no control (EXPERIENCE capture) |
 | Assumed-migration guard (R17) and Passport `gate` | LIVE_FORGE on dev | MOBL-58 Migrate first: Jira transition CLOSED with reason |
-| Validator: unreadable issue (403/404) follows outage policy (R18) | UNIT_TESTED | 6 tests; hosted check pending deploy |
+| Validator: unreadable issue (403/404) follows outage policy (R18) | UNIT_TESTED; hosted attempt | 6 tests; on AVT a reporter-only security level does not hide issues from the app, so 403 cannot be produced on this site (see ENGINEERING_REPORT R18) |
 | Judge journey (guided demo → Passport) | LIVE_FORGE on dev (MOBL-58) | clean-site run pending a Jira site with software projects |
 | Sample data (guided demo), CONFLICT guard | LIVE_FORGE | MP, AVT, MOBL; CONFLICT logged, no duplicates |
 | Dependency upgrade + compatibility evidence | LIVE_FORGE | MP-5 via UI and MCP |
 | Prevention Passport, historical record after snapshot expiry | UNIT_TESTED (expiry), LIVE_FORGE (live passport + PDF print) | retention tests |
 | MCP tools (5, read-only) | LIVE_FORGE | external Claude client on dev |
 | Rovo agent | LIVE_FORGE on dev (site has Rovo); production site has no Rovo |
-| Teamwork Graph | NOT CONFIGURED; prototype adapter only | docs say Preview + read:graph scopes; no scopes added |
+| Teamwork Graph | BLOCKED: app not allowlisted | 3 Nov: `read:graph:jira` refused at deploy (restricted scope); `read:graph:issue:jira` deployed on dev (branch exp/teamwork-graph, v5.1.0), but the user consent flow never grants it (the issued code lists only the Jira scopes), so the hosted probe keeps asking for authorization. Atlassian docs: apps must be allowlisted via Atlassian support. Dev rolled back to CORE (v6.0.0, no graph scope); production never changed. Allowlist requested: ECOHELP-180616 (2 Nov 2026); evidence in docs/evidence/TEAMWORK_GRAPH_ALLOWLIST.md. Bonus not claimable until enabled |
 
 ## Known limitations
 - The production clean site has only Jira Service Management: the judge demo needs a site with Jira software projects (see docs/submission/INSTALL_LINK.md). Full clean-site judge run: NOT TESTED.
