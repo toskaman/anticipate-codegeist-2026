@@ -1,4 +1,4 @@
-import { GraphSnapshot, ScenarioDefinition, PolicyRule, OPERATIONS, envelope, CONTRACT_VERSION, PreventionPlan } from '../src/index';
+import { GraphSnapshot, ScenarioDefinition, PolicyRule, OPERATIONS, envelope, CONTRACT_VERSION, PreventionPlan, PortfolioChange, PortfolioInput, PortfolioConflict, PORTFOLIO_LIMITS } from '../src/index';
 import { FIXTURE_SNAPSHOT, FIXTURE_SCENARIOS, FIXTURE_POLICIES } from '../src/fixtures';
 
 describe('contracts', () => {
@@ -19,5 +19,14 @@ describe('contracts', () => {
   });
   it('accepts the INVALIDATED plan status (active invalidation)', () => {
     expect(PreventionPlan.shape.status.parse('INVALIDATED')).toBe('INVALIDATED');
+  });
+  it('portfolio input contract: bounds, unique ids, defaults', () => {
+    const c = { id: 'c1', label: 'Remove v1', operations: [{ op: 'REMOVE_NODE', nodeId: 'svc-auth-v1' }] };
+    expect(PortfolioInput.parse({ snapshotId: 's', changes: [c] })).toMatchObject({ maxDepth: 6, proposedOrder: null });
+    expect(PortfolioInput.safeParse({ snapshotId: 's', changes: [c, c] }).success).toBe(false);
+    expect(PortfolioInput.safeParse({ snapshotId: 's', changes: Array.from({ length: PORTFOLIO_LIMITS.maxChanges + 1 }, (_, i) => ({ ...c, id: `c${i}` })) }).success).toBe(false);
+    expect(PortfolioChange.safeParse({ ...c, operations: Array(PORTFOLIO_LIMITS.maxOperationsPerChange + 1).fill(c.operations[0]) }).success).toBe(false);
+    expect(PortfolioChange.safeParse({ ...c, operations: [] }).success).toBe(false);
+    expect(PortfolioConflict.safeParse({ conflictId: 'C1', kind: 'PROBABLE_FAILURE', changeIds: ['a'], nodeIds: [], reason: '', evidenceGapEdgeIds: [] }).success).toBe(false);
   });
 });

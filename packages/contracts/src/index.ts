@@ -250,6 +250,75 @@ export const SlipSimulation = z.object({
   unreadable: z.array(z.string().max(50)).max(60), truncated: z.boolean()
 });
 export type SlipSimulation = z.infer<typeof SlipSimulation>;
+// ---------- portfolio impact simulator (multi-change, additive) ----------
+/** Hard bounds of the portfolio simulator. Mirrored (and checked by a test) in simulation-core/src/portfolio.ts. */
+export const PORTFOLIO_LIMITS = { maxChanges: 10, maxOperationsPerChange: 20, maxNodes: 2000, maxEdges: 10000, maxDepth: 10 } as const;
+
+/** One named proposed change of a portfolio; operations reuse the scenario operation types. */
+export const PortfolioChange = z.object({
+  id: Id, label: z.string().max(200), operations: z.array(ChangeOperation).min(1).max(PORTFOLIO_LIMITS.maxOperationsPerChange)
+});
+export type PortfolioChange = z.infer<typeof PortfolioChange>;
+
+export const PortfolioInput = z.object({
+  snapshotId: Id,
+  changes: z.array(PortfolioChange).min(1).max(PORTFOLIO_LIMITS.maxChanges)
+    .refine((cs) => new Set(cs.map((c) => c.id)).size === cs.length, { message: 'change ids must be unique' }),
+  maxDepth: z.number().int().min(1).max(PORTFOLIO_LIMITS.maxDepth).default(6),
+  /** Optional sequence to check against the derived ordering constraints. */
+  proposedOrder: z.array(Id).max(PORTFOLIO_LIMITS.maxChanges).nullable().default(null)
+});
+export type PortfolioInput = z.infer<typeof PortfolioInput>;
+
+const NodeChanges = z.object({ nodeId: Id, changeIds: z.array(Id) });
+export const PortfolioConflict = z.object({
+  conflictId: Id,
+  kind: z.enum(['MIGRATE_ONTO_RETIRED', 'COMPETING_MIGRATION', 'SAME_TARGET', 'DEPENDENCY_CHAIN', 'EMERGENT_IMPACT']),
+  changeIds: z.array(Id).min(1), nodeIds: z.array(Id), reason: z.string().max(4000), evidenceGapEdgeIds: z.array(Id)
+});
+export type PortfolioConflict = z.infer<typeof PortfolioConflict>;
+
+export const PortfolioOrderingConstraint = z.object({
+  before: Id, after: Id, kind: z.enum(['MIGRATE_BEFORE_RETIRE', 'DEPENDENCY_FIRST', 'RETIRE_CONSUMER_FIRST']),
+  nodeIds: z.array(Id), reason: z.string().max(2000)
+});
+export type PortfolioOrderingConstraint = z.infer<typeof PortfolioOrderingConstraint>;
+
+export const PortfolioStep = z.object({
+  changeId: Id, verdict: SimulationResult.shape.verdict, impacted: z.number().int().nonnegative(),
+  newlyImpacted: z.array(Id), noLongerImpacted: z.array(Id)
+});
+export type PortfolioStep = z.infer<typeof PortfolioStep>;
+
+export const PortfolioEvidenceGap = z.object({
+  edgeId: Id, from: Id, to: Id, kind: z.enum(['UNKNOWN_ON_IMPACT_PATH', 'UNKNOWN_NOT_MIGRATED']), nodeIds: z.array(Id)
+});
+export type PortfolioEvidenceGap = z.infer<typeof PortfolioEvidenceGap>;
+
+export const PortfolioVerdictExplanation = z.object({
+  changeId: Id, standaloneVerdict: SimulationResult.shape.verdict, portfolioVerdict: SimulationResult.shape.verdict,
+  changedByOthers: z.boolean(), gainedNodeIds: z.array(Id), maskedNodeIds: z.array(Id), marginalNodeIds: z.array(Id),
+  causes: z.array(z.object({ changeId: Id, gainedNodeIds: z.array(Id), maskedNodeIds: z.array(Id), verdictEffect: z.boolean() })),
+  jointlyCausedNodeIds: z.array(Id), explanation: z.string().max(4000)
+});
+export type PortfolioVerdictExplanation = z.infer<typeof PortfolioVerdictExplanation>;
+
+export const PortfolioResult = z.object({
+  snapshotId: Id, maxDepth: z.number().int(), changeIds: z.array(Id),
+  individual: z.array(z.object({ changeId: Id, label: z.string().max(200), targetNodeIds: z.array(Id), result: SimulationResult })),
+  combined: z.object({ order: z.array(Id), result: SimulationResult }),
+  sharedImpacts: z.array(NodeChanges), emergentImpacts: z.array(NodeChanges), maskedImpacts: z.array(NodeChanges),
+  conflicts: z.array(PortfolioConflict),
+  ordering: z.object({
+    constraints: z.array(PortfolioOrderingConstraint), cycles: z.array(z.array(Id)), order: z.array(Id).nullable(), steps: z.array(PortfolioStep),
+    proposed: z.object({ order: z.array(Id), violatedConstraints: z.array(PortfolioOrderingConstraint), sameAsRecommended: z.boolean(), steps: z.array(PortfolioStep) }).nullable()
+  }),
+  evidenceGaps: z.array(z.object({ changeId: Id, gaps: z.array(PortfolioEvidenceGap) })),
+  verdictExplanations: z.array(PortfolioVerdictExplanation),
+  disclaimer: z.string(), resultHash: z.string()
+});
+export type PortfolioResult = z.infer<typeof PortfolioResult>;
+
 export const ValidatorPolicy = z.object({
   onOutage: z.enum(['ALLOW', 'BLOCK']), updatedBy: Id.nullable(), updatedAt: IsoDate.nullable(), canEdit: z.boolean()
 });
