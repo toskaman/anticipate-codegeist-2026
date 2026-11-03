@@ -30,6 +30,7 @@ modules:
         - Compare removing TD-1 now versus migrating to TD-5 first
         - Is my approved plan still based on fresh evidence?
       actions:
+        - anticipate-twg-probe
         - anticipate-get-graph
         - anticipate-simulate-retirement
         - anticipate-simulate-upgrade
@@ -150,7 +151,6 @@ permissions:
     - write:jira-work
     - read:jira-user
     - storage:app
-    - read:graph:jira
     - read:graph:issue:jira
 app:
   runtime:
