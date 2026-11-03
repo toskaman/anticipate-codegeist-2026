@@ -77,6 +77,14 @@ describe("slipView", () => {
       "If ABC-1 slips 1 day: no release would be late, 0 due dates would move.",
     );
   });
+  it("flags when nothing moves (no dates in Jira)", () => {
+    expect(slipView(base).nothingMoves).toBe(false);
+    expect(
+      slipView({ ...base, moved: [], releases: [], absorbed: [] }).nothingMoves,
+    ).toBe(true);
+    // A late release alone is still something that moves.
+    expect(slipView({ ...base, moved: [] }).nothingMoves).toBe(false);
+  });
   it("does not mutate the backend result", () => {
     const copy = structuredClone(base);
     slipView(base);
