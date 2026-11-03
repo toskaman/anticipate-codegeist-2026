@@ -1,3 +1,5 @@
+> **Superseded (2 Nov draft).** Its hosted-status lines are out of date: hosted runs now exist (see [EVIDENCE_PACK.md](../evidence/EVIDENCE_PACK.md), each result labelled LIVE_FORGE or LOCAL). Current submission text: [DEVPOST_FINAL.md](../submission/DEVPOST_FINAL.md).
+
 # ANTICIPATE — presentation draft
 
 Local draft for review, not a public submission. Follow docs/STATUS.md and integration/CORE_NIGHT_FOLLOWUP.md for evidence and remaining gates.
