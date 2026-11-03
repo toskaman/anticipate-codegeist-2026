@@ -43,6 +43,10 @@ export async function validateTransition(args: { issue?: { key?: string } }) {
   // No issue key = no evidence: follow the outage policy instead of passing silently (audit #1).
   return runValidator(key ?? '(unknown issue)', {
     readIssue: (k) => (key ? jira.getIssue(k) : Promise.resolve({ kind: 'no_issue_key' })),
+    // Legacy discovery by design: at gating time only the issue key is known, so the gate follows the
+    // latest decision recorded for the issue (last-writer-wins mirror). Records themselves are scoped per
+    // owner+plan since TOP7 (no cross-owner clobbering); owner-scoped gating needs product semantics for
+    // which owner's plan should gate an issue — see follow-up issue. Never pass a scope derived from the record.
     readDecision: (k) => forgeStore.get<DecisionRecord>(`decision:${k}`),
     readPolicy: () => forgeStore.get<{ onOutage?: string }>(VALIDATOR_POLICY_KEY),
     log: (f) => console.warn(JSON.stringify(f))

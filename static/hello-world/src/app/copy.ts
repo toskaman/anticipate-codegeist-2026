@@ -72,6 +72,7 @@ export const planStatusCopy: Record<
   { label: string; tone: Tone }
 > = {
   EVIDENCE_CHANGED: { label: "Evidence changed · re-review", tone: "warning" },
+  INVALIDATED: { label: "Invalidated · re-review", tone: "warning" },
   DRAFT: { label: "Draft", tone: "neutral" },
   PENDING_APPROVAL: { label: "Awaiting approval", tone: "warning" },
   APPROVED: { label: "Approved · not executed", tone: "accent" },

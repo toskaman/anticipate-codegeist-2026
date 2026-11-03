@@ -20,7 +20,7 @@ import { previewSample, createSample } from './sample';
 import { mergeSource, notConfiguredTwg } from '../context/sources';
 import type { EvidenceDrift } from '../../packages/contracts/src/index';
 import { stableHash } from '../../packages/simulation-core/src/index';
-import { ATTESTATION_VALID_DAYS, decideTransition, linksDigest, type DecisionRecord } from '../validator';
+import { ATTESTATION_VALID_DAYS, decideTransition, decisionKey, linksDigest, type DecisionRecord } from '../validator';
 
 export const CHANGE_LABEL = 'anticipate-change';
 export const VALIDATOR_POLICY_KEY = 'config:validator';
@@ -72,12 +72,12 @@ export function createService(d: Deps) {
     url: d.jira.siteUrl() ? `${d.jira.siteUrl()!.replace(/\/$/, '')}/browse/${i.key}` : null
   });
 
-  /** Latest decision state per changed issue — read by the Jira workflow validator (no crawl at transition time). */
+  /** Latest decision state per owner+plan (scoped attestation) plus a deprecated per-issue mirror — read by the Jira workflow validator (no crawl at transition time). */
   async function recordDecision(rec: PlanRec) {
     const cmp = await d.store.get<CmpRec>(K.cmp(`plan:${rec.plan.planId}`));
     const chosen = cmp?.comparison.results.find((x) => x.scenarioId === rec.plan.scenarioId);
     const r: DecisionRecord = { schema: 3, planId: rec.plan.planId, scenarioId: rec.plan.scenarioId, status: rec.plan.status, at: iso(),
-      issueKey: rec.rootIssueKey, planHash: rec.plan.planHash, snapshotId: rec.plan.snapshotId, linksDigest: null, validUntil: null,
+      issueKey: rec.rootIssueKey, owner: rec.owner, planHash: rec.plan.planHash, snapshotId: rec.plan.snapshotId, linksDigest: null, validUntil: null,
       verdict: chosen?.verdict ?? 'UNKNOWN', blockers: chosen?.summary.blockers ?? null,
       allActionsVerified: rec.plan.status === 'COMPLETED' };
     if (rec.plan.status === 'COMPLETED') {
@@ -104,6 +104,8 @@ export function createService(d: Deps) {
         r.validUntil = new Date(d.now().getTime() + ATTESTATION_VALID_DAYS * 86_400_000).toISOString();
       }
     }
+    await d.store.set(decisionKey(rec.owner ?? 'unknown', rec.rootIssueKey, rec.plan.planId), r);
+    // Deprecated migration mirror: the workflow wiring still reads the legacy per-issue key.
     await d.store.set(`decision:${rec.rootIssueKey}`, r);
   }
 
@@ -189,7 +191,16 @@ export function createService(d: Deps) {
     async checkPlanFreshness(ctx: Ctx, input: { planId: string }): Promise<EvidenceDrift> {
       const rec = await loadPlan(ctx, input.planId);
       const snap = await loadSnap(ctx, rec.plan.snapshotId);
-      return evidenceDrift(rec, snap);
+      const drift = await evidenceDrift(rec, snap);
+      // Active invalidation (TOP9): an APPROVED plan whose evidence changed must never execute. Mark it
+      // INVALIDATED now (persisted + attested); any other status stays read-only here.
+      if (!drift.fresh && rec.plan.status === 'APPROVED') {
+        rec.plan = { ...rec.plan, status: 'INVALIDATED' };
+        rec.timeline.push({ at: iso(), event: `Plan invalidated: evidence changed after approval: ${drift.reason}`.slice(0, 200) });
+        await d.store.set(K.plan(rec.plan.planId), rec);
+        await recordDecision(rec);
+      }
+      return drift;
     },
 
     async getCapabilities(): Promise<CapabilityAvailability> {
@@ -315,6 +326,7 @@ export function createService(d: Deps) {
     async executeApprovedPlan(ctx: Ctx, input: { planId: string; idempotencyKey: string }): Promise<ExecutionRecord[]> {
       const rec = await loadPlan(ctx, input.planId);
       if (rec.plan.snapshotId === FIXTURE_SNAPSHOT.snapshotId) fail('UNSUPPORTED', 'Demo-fixture plans can never write to Jira.');
+      if (rec.plan.status === 'INVALIDATED') fail('CONFLICT', 'This plan was invalidated because the evidence changed after approval. Re-run the comparison and review a new plan.');
       if (!['APPROVED', 'PARTIAL', 'FAILED'].includes(rec.plan.status)) fail('CONFLICT', `Plan is ${rec.plan.status}; approve it first.`);
       const latest = rec.approvals[rec.approvals.length - 1];
       if (!latest || latest.planHash !== rec.plan.planHash) fail('STALE_APPROVAL', 'No valid approval for the current plan.');
@@ -370,14 +382,15 @@ export function createService(d: Deps) {
       const cmp = await d.store.get<CmpRec>(K.cmp(`plan:${input.planId}`));
       if (!cmp) fail('NOT_FOUND', 'Comparison for this plan is missing.');
       const executions = await this.getExecutionStatus(ctx, input);
-      // Same decision the Jira workflow validator would take now (as the reading user; no write).
+      // Same decision the Jira workflow validator would take now (as the reading user; no write), scoped to this plan's attestation.
       let gate: { status: 'OPEN' | 'CLOSED' | 'NOT_GATED'; reason: string } | undefined;
       try {
         const live = await d.jira.getIssue(rec.rootIssueKey);
-        const decision = await d.store.get<DecisionRecord>(`decision:${rec.rootIssueKey}`);
+        const scoped = rec.owner ? await d.store.get<DecisionRecord>(decisionKey(rec.owner, rec.rootIssueKey, rec.plan.planId)) : undefined;
+        const decision = scoped ?? await d.store.get<DecisionRecord>(`decision:${rec.rootIssueKey}`);
         if (live.kind === 'ok' && !live.issue.labels.includes(CHANGE_LABEL)) gate = { status: 'NOT_GATED', reason: `${rec.rootIssueKey} is not labelled ${CHANGE_LABEL}; the workflow validator does not gate it.` };
         else if (live.kind === 'ok') {
-          const dec = decideTransition(live.issue, decision, rec.rootIssueKey, d.now());
+          const dec = decideTransition(live.issue, decision, rec.rootIssueKey, d.now(), { owner: rec.owner, planId: rec.plan.planId });
           gate = dec.result ? { status: 'OPEN', reason: 'A valid decision attestation allows the Jira transition.' } : { status: 'CLOSED', reason: (dec.errorMessage ?? '').replace(/^ANTICIPATE Decision Firewall: /, '').slice(0, 500) };
         }
       } catch { gate = undefined; }
