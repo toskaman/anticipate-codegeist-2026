@@ -2,90 +2,88 @@
 
 **Test the consequences. Prove the safeguards. Then ship.**
 
-ANTICIPATE is a Forge app for Jira, built for Atlassian Codegeist 2026 (Apps for Software Teams). Before a team retires an API, decommissions a service or ships a breaking upgrade, it shows what depends on the change, compares safer alternatives, explains why a risky option is blocked, and records the human decision with verified results.
+A Forge app for Jira that checks a risky change *before* it ships: it shows what really depends on it, compares safer options, refuses stale decisions and keeps a verified record of who decided what.
 
-[Install in Jira (judges)](docs/submission/INSTALL_LINK.md) · [Jury walkthrough](docs/jury/JURY_UI_SHOWCASE.md) · [Hosted evidence](docs/evidence/EVIDENCE_PACK.md) · [Status](docs/STATUS.md)
+A ticket says "retire Auth API v1". It looks safe. The service that breaks is two links away, on an issue nobody opened, and the team finds out in production. Afterwards nobody can show what was known when the decision was made.
 
-## The problem
+[Install (judges)](docs/submission/INSTALL_LINK.md) · [Evidence pack](docs/evidence/EVIDENCE_PACK.md) · [Devpost text](docs/submission/DEVPOST_FINAL.md) · [Video script](docs/submission/VIDEO_SCRIPT.md) · [Status](docs/STATUS.md)
 
-A change ticket says "retire Auth API v1". It looks safe. The services that break are two links away, behind an issue nobody opened, or mentioned only in a comment. Teams usually find out in production, and afterwards nobody can show what was known when the decision was made.
+## What it does
 
-## What ANTICIPATE does
+- **Evidence graph from real Jira links.** Every relation is Confirmed, Inferred or Unknown and keeps its Jira source; indirect consumers are shown with the path that reaches them. Unreadable evidence stays Unknown, never "safe".
+- **Compare decisions on the same evidence.** Remove now, retain temporarily or migrate consumers first (or, for upgrades: breaking, backward-compatible shim, move consumers first). Deterministic and reproducible, with policy verdicts and the reason chain. "Migrate first" is labelled as an assumption.
+- **What if it slips?** A Scenario Lab panel delays an issue by 1–365 days and shows which due dates move, which releases become late, and what cannot be assessed, from live Jira due dates, links and fix versions. Also available as the `anticipate-simulate-slip` Rovo/MCP action. Simulation only: nothing changes in Jira.
+- **Human approval, verified writes.** A prevention plan lists concrete Jira actions; a person approves, then confirms execution separately; every result is verified by reading Jira back. If the evidence changed after approval, execution is refused with zero writes.
+- **Jira gate.** An optional workflow validator stops issues labelled `anticipate-change` until their decision is completed and live Jira links agree; an assumed migration does not open it. Admins choose what happens during an outage (allow or block).
+- **Prevention Passport.** An audit-style record that opens with a short answer (option, verified actions, transition status, open questions), then evidence, alternatives, approvals and timeline; JSON export and A4 print. Not a legal or cryptographic certificate.
 
-1. **Reads the real dependencies.** It builds an evidence graph from the Jira issues and links you can access. Every relation is *Confirmed*, *Inferred* or *Unknown*, with the Jira record it came from. Unreadable evidence stays Unknown, never "safe".
-2. **Compares alternatives, not just tickets.** The same evidence is simulated under several options: remove now, retain temporarily, migrate consumers first, or, for upgrades, breaking upgrade, backward-compatible shim, move consumers first. Results are deterministic and reproducible; there are no invented risk percentages.
-3. **Explains the decision.** Policies say why an option is blocked or needs review, following the path from the change to the affected dependency.
-4. **Keeps people accountable.** A prevention plan lists concrete Jira actions. A person approves them, then confirms execution as a separate step. The backend re-reads Jira to verify each result.
-5. **Refuses stale decisions.** If the dependencies change after approval, execution is refused and the screen shows exactly what changed.
-6. **Guards the Jira transition (optional).** A workflow validator stops issues labelled `anticipate-change` until their decision is completed and the live Jira links agree. A simulated "migrate first" never opens the gate by itself. Administrators choose whether transitions pass or are blocked when ANTICIPATE is unavailable.
-7. **Records the proof.** The Prevention Passport starts with a short answer (option, verified actions, transition status, open questions) and keeps the evidence, alternatives, approvals, verified outcomes and timeline, as JSON or a printable A4 report. It is an audit-style record, not a legal or cryptographic certificate.
+![Direct Jira links compared with ANTICIPATE's dependency path on the sample dataset](evidence/experience/v4-ux/value-direct-vs-transitive.svg)
+
+## Install for judges
+
+1. You need a Jira Cloud site with **Jira software projects** (a free site works) and a **company-managed software project** you can edit. Sites with only Jira Service Management cannot host the demo.
+2. Install with the link in [docs/submission/INSTALL_LINK.md](docs/submission/INSTALL_LINK.md), then open **Jira → Apps → ANTICIPATE**. The first open takes about 10 seconds while Forge starts.
+3. **Start the guided demo** → choose your project → **Preview sample data** (read-only) → confirm. Six labelled issues and four links are created (about 15–20 s the first time; nothing is created twice).
+4. **Analyze** the sample root → **Compare options** (try **What if it slips?**) → **Check safeguards** → generate the plan → approve → execute → **Prevention Passport**.
+
+Optional: the workflow validator and the MCP tools need an administrator; steps are in [INSTALL_LINK.md](docs/submission/INSTALL_LINK.md).
 
 ## Screens
 
-These are real Playwright captures of the connected UI with a **mock backend transport (MOCK_TRANSPORT)**, labelled on screen. They are not hosted Jira results; hosted results are listed in the [evidence pack](docs/evidence/EVIDENCE_PACK.md).
+Playwright captures of the real UI with a **mock backend transport (MOCK_TRANSPORT)**, labelled on screen. They are not hosted Jira results; those are in the [evidence pack](docs/evidence/EVIDENCE_PACK.md).
 
 | Evidence Graph | Scenario Lab | Prevention Passport |
 | --- | --- | --- |
 | ![Dependency map with evidence sources, provenance inspector and accessible list](evidence/experience/v3-redesign/visual/02-evidence-graph-desktop-dark.png) | ![Three alternatives compared on the same evidence, with verdicts and named open questions](evidence/experience/v3-redesign/visual/03-scenario-lab-desktop-dark.png) | ![Decision record with alternatives, approvals and verified execution](evidence/experience/v3-redesign/visual/11-prevention-passport-desktop-light.png) |
 
-What the graph adds on the sample data: [direct Jira links vs ANTICIPATE](docs/jury/VALUE_BENCHMARK.md). More: [all screens, mobile and error states](docs/design/UI_VISUAL_QA.md) · [dependency upgrade comparison](evidence/experience/v4-ux/scenario-lab-upgrade-light-1440-MOCK_TRANSPORT.png) · [printed Passport (PDF)](evidence/experience/v4-ux/passport-long-print-MOCK_TRANSPORT.pdf).
+## Atlassian modules and scopes
 
-## Try it in Jira (about one minute once sample data exists)
+| Module (manifest.yml) | Used for |
+| --- | --- |
+| `global:fullPage` | The ANTICIPATE app (Custom UI) |
+| `jira:workflowValidator` | "ANTICIPATE Decision Firewall" transition rule |
+| `rovo:agent` | "ANTICIPATE Decision Reviewer" (read-only) |
+| `rovo:mcp` | Six read-only tools: get graph, simulate retirement, simulate upgrade, simulate slip, get Passport, check plan freshness |
+| `action` | The actions behind the agent and MCP tools |
 
-1. Install with the [judge link](docs/submission/INSTALL_LINK.md) and open ANTICIPATE from Jira.
-2. Click **Start the guided demo**, choose a company-managed project where you can browse, create and link issues.
-3. **Preview sample data** (read-only), then confirm **Create sample data**: six labelled issues and four links. First-time creation takes about 15–20 seconds; if the screen waits longer, ANTICIPATE re-reads Jira instead of retrying the write.
-4. **Analyze** the sample root → **Compare options** → **Check safeguards** → **Generate prevention plan** → approve, then execute → **Prevention Passport**.
-
-Opening or previewing never writes to Jira. No Jira project is created and nothing is deleted automatically. With no accessible project, the app says which permissions are needed.
+Scopes: `read:jira-work`, `write:jira-work` (only for actions a person approved), `read:jira-user`, `storage:app`. The manifest declares no external egress.
 
 ## Architecture
 
-- **Forge Custom UI** (React, TypeScript) in a Jira global full page, with the Atlassian host theme, a dark default and a Display & accessibility menu.
-- **Forge resolvers** (Node) call Jira REST as the user, so Jira permissions apply. Forge storage keeps plans, approvals and execution leases.
-- **Pure TypeScript simulation and policy engine**, shared **zod contracts** validated on both sides.
-- **Jira workflow validator** (optional, admin-configured): issues labelled `anticipate-change` cannot move forward until their decision is completed; an admin setting in Settings decides what happens during an outage (Allow by default, or Block).
+- **Custom UI** (React, TypeScript) in `static/hello-world`: one decision journey across seven screens, dark default, display and accessibility settings, print layout.
+- **Forge resolvers** (Node.js) call Jira REST **as the user**, so Jira permissions apply; writes re-check permissions just before each action.
+- **`packages/simulation-core`**: a pure TypeScript engine; each option runs on an isolated copy of a frozen snapshot and returns a reproducible hash.
+- **`packages/contracts`**: shared zod schemas validated on both sides.
+- **Forge storage** for snapshots, plans, approvals, idempotent execution leases and the validator outage policy.
 
-### Rovo and MCP
+## Security and privacy
 
-A Rovo agent, *ANTICIPATE Decision Reviewer*, and five read-only MCP tools (evidence graph, simulate retirement, simulate upgrade, Passport, plan freshness) answer "what happens if we change X?" using the same engine. They never approve or execute. Availability depends on the site's Rovo access and an administrator toggle for MCP.
+- Approval and execution are separate, explicit steps; the backend authorizes every action and refuses stale or changed evidence.
+- Plans and Passports are private to the person who created them.
+- Rovo and MCP tools are read-only; Jira text is treated as data, never as instructions.
+- Timeouts are never treated as success or failure: the app re-reads Jira.
 
-**Teamwork Graph:** not integrated. CORE has a prototype adapter that is not wired; the app shows Teamwork Graph as *Not configured* and uses Jira evidence only. Atlassian refuses the graph scopes for this app until it is allowlisted; the request is open as [ECOHELP-180616](https://ecosystem.atlassian.net/servicedesk/customer/portal/34/ECOHELP-180616) (2 Nov 2026). Evidence: [docs/evidence/TEAMWORK_GRAPH_ALLOWLIST.md](docs/evidence/TEAMWORK_GRAPH_ALLOWLIST.md).
-
-## Safety by design
-
-- Approval and execution are separate, explicit steps, and the backend authorizes every action.
-- Execution is idempotent and leased; lost responses are recovered by plan ID, never blindly retried.
-- A suggested option is never an approval. Timeouts are not treated as success or failure: the app re-reads Jira.
-- Display only what the backend reports: declared capabilities are not shown as verified.
-
-## Tests and evidence
-
-From `static/hello-world`:
-
-```bash
-npm ci
-npm run typecheck && npm run lint && npm run format:check
-npm test
-npm run build
-npx playwright test
-```
-
-From the repository root: `npm ci`, `npm run typecheck`, `npm test`.
-
-Latest local results (Chromium, mock transport): 60 frontend unit tests and 90 browser tests, including axe WCAG 2.2 AA checks on light and dark themes, 320 px reflow, keyboard paths, Passport A4 print and security refusals. Automated accessibility checks are not a WCAG certification. Firefox and WebKit runs are recorded per release in [UI release readiness](docs/design/UI_RELEASE_READINESS.md).
-
-Hosted results (deployed Forge app on Jira Cloud) are recorded by CORE with date, site and procedure in the [evidence pack](docs/evidence/EVIDENCE_PACK.md), including verified writes, the evidence-changed refusal, the workflow validator, sample data and Rovo.
+Details: [privacy](docs/legal/PRIVACY.md) · [terms](docs/legal/TERMS.md) · [threat model](docs/security/THREAT_MODEL.md).
 
 ## Honest limitations
 
-- Evidence comes from Jira issues, links and components only; unreadable items stay Unknown.
-- Policies are deterministic rules, not predictions; ANTICIPATE does not claim to prevent every incident.
-- Local browser tests use a mock transport; hosted behaviour is verified separately and is listed with its scope.
-- Native screen-reader and browser-zoom testing are partial.
+- **No Teamwork Graph yet.** Atlassian has not allowlisted the graph scope for this app (request ECOHELP-180616, [evidence](docs/evidence/TEAMWORK_GRAPH_ALLOWLIST.md)); the app shows it as *Not configured*.
+- **No Marketplace listing.** Distribution is the install link.
+- **Dependencies come only from Jira** issue links and components; anything unreadable stays Unknown.
+- **Deterministic rules, not predictions.** No probabilities; ANTICIPATE does not claim to prevent every incident.
+- Local browser tests use a mock transport; hosted behaviour is verified separately and listed with its date and site.
+
+## Tests and CI
+
+Counts from a local run on `main` 41e5d2a (3 Nov 2026): **93 backend tests** (authorization, concurrency, outage policy, a 50-cycle soak), **16 simulation-core tests**, **68 frontend unit tests**, plus Playwright browser journeys with axe WCAG A/AA checks on light and dark themes, keyboard paths, 320 px reflow and A4 print. CI runs typecheck, lint, formatting, unit tests, Playwright and a security audit on every pull request. Automated accessibility checks are not a certification.
+
+```bash
+npm ci && npm run typecheck && npm test                 # repository root (backend)
+cd static/hello-world && npm ci && npm run typecheck && npm run lint && npm test && npm run build && npx playwright test
+```
 
 ## Codegeist 2026
 
-Category: Apps for Software Teams. Bonus claimed: Atlassian MCP (the Rovo agent is part of the product but not claimed as a bonus). Built by two people: CORE (backend, engine, Forge, security) and EXPERIENCE (interface, accessibility, presentation).
+Category: Apps for Software Teams. Bonus claimed: Best app with Atlassian MCP. Built by two people: CORE (backend, engine, Forge, security) and EXPERIENCE (interface, accessibility, presentation).
 
-Licence: proprietary, source available. Copyright © 2026 toskaman and Orphee; see [LICENSE](LICENSE). Support, privacy and terms: [installation information](docs/submission/INSTALL_LINK.md), [privacy](docs/legal/PRIVACY.md), [terms](docs/legal/TERMS.md).
+Licence: proprietary, source available. Copyright © 2026 toskaman and Orphee; see [LICENSE](LICENSE).
