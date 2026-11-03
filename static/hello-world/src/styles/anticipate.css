@@ -4076,3 +4076,33 @@ body:has(.ax-app) {
   font-size: var(--ax-fs-sm);
   color: var(--ax-text-2);
 }
+
+/* 17. Passport: Jira transition gate (CORE `PreventionPassport.gate`) */
+.ax-report__gate {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ax-2) var(--ax-3);
+  align-items: center;
+  margin: var(--ax-4) 0 0;
+  padding: var(--ax-3);
+  border: 1px solid var(--ax-border);
+  border-radius: var(--ax-r-sm);
+  font-size: var(--ax-fs-sm);
+}
+.ax-report__gate--closed {
+  border-color: var(--ax-warning);
+}
+.ax-report__gate-label {
+  font-size: var(--ax-fs-xs);
+  color: var(--ax-text-3);
+}
+.ax-report__gate-reason {
+  flex-basis: 100%;
+  color: var(--ax-text-2);
+  overflow-wrap: anywhere;
+}
+@media print {
+  .ax-report__gate {
+    break-inside: avoid;
+  }
+}
