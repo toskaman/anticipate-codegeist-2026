@@ -1,32 +1,14 @@
 {
   "agent": "orpheane",
-  "updated": "2026-11-03T16:10:00Z",
+  "updated": "2026-11-03T16:20:00Z",
   "runner": "Claude Code cloud session opened by the human owner (Orpheane). Runs only while that session is open; no scheduler between sessions. Each session resumes from GitHub (issues labelled agent:orpheane, open PRs) and this file.",
   "current": null,
   "review": [
     {
-      "issue": 48,
-      "pr": 56,
-      "task": "ORP-2 final Devpost text",
-      "ci": "green"
-    },
-    {
-      "issue": 49,
-      "pr": 57,
-      "task": "ORP-3 video script",
-      "ci": "green"
-    },
-    {
-      "issue": 50,
-      "pr": 60,
-      "task": "ORP-4 accessibility Settings/Passport",
-      "ci": "green"
-    },
-    {
       "issue": 58,
       "pr": 61,
       "task": "ORP-5 slip panel",
-      "ci": "pending",
+      "ci": "green",
       "dependsOn": "PR 59 (merge first)"
     }
   ],
@@ -40,5 +22,19 @@
   ],
   "constraints": [
     "Orpheane runs in a cloud container with no access to any Jira site or user browser session. Every check in a real browser on a hosted site (dev, prod, judge site) is done by muse, not orpheane. Orpheane covers local Playwright with MOCK_TRANSPORT only."
+  ],
+  "done": [
+    {
+      "issue": 48,
+      "pr": 56
+    },
+    {
+      "issue": 49,
+      "pr": 57
+    },
+    {
+      "issue": 50,
+      "pr": 60
+    }
   ]
 }
