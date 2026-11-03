@@ -1,16 +1,26 @@
 {
   "agent": "orpheane",
-  "updated": "2026-11-03T18:35:00Z",
+  "updated": "2026-11-03T19:45:00Z",
   "runner": "Claude Code cloud session opened by the human owner (Orpheane). Runs only while that session is open; no scheduler between sessions. Each session resumes from GitHub (issues labelled agent:orpheane, open PRs) and this file.",
-  "current": null,
-  "review": [],
+  "current": "ORP-10 gallery (#78)",
+  "review": [
+    {
+      "issue": 80,
+      "pr": 81,
+      "task": "ORP-12 validator admin guide"
+    },
+    {
+      "issue": 79,
+      "task": "ORP-11 docs single source"
+    }
+  ],
   "blockers": [
     "Hosted browser checks: assigned to muse (see constraints).",
     "Firefox, WebKit and a native screen reader are not available in this runner."
   ],
   "next": [
-    "Muse: hosted browser checks in #64; TECHNICAL_SECTION.md still says five MCP tools (see PR #74).",
-    "Orpheane: next issue labelled agent:orpheane + status:ready."
+    "Muse: hosted browser checks in #64.",
+    "Orpheane: ORP-10 gallery pack (#78), then the next ready issue."
   ],
   "constraints": [
     "Orpheane runs in a cloud container with no access to any Jira site or user browser session. Every check in a real browser on a hosted site (dev, prod, judge site) is done by muse, not orpheane. Orpheane covers local Playwright with MOCK_TRANSPORT only."

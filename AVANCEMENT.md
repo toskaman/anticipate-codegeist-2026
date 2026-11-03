@@ -1,3 +1,5 @@
+> **Journal historique (2 novembre 2026), non tenu à jour.** État actuel : [docs/RELEASE.md](docs/RELEASE.md) (versions, tests) et [docs/STATUS.md](docs/STATUS.md) (capacités, preuves).
+
 # ANTICIPATE — Avancement CORE (mis à jour le 2 novembre 2026, 01:45)
 
 ## 🚀 Session autonome via bridge — résultats réels (Windows)

@@ -72,7 +72,9 @@ export const stageFor = (page: string) =>
  */
 export function stageState(w: Workflow, page: string): StageState {
   if (
-    (w.plan?.status === "EVIDENCE_CHANGED" || w.evidenceFailure) &&
+    (w.plan?.status === "EVIDENCE_CHANGED" ||
+      w.plan?.status === "INVALIDATED" ||
+      w.evidenceFailure) &&
     ["Decision Firewall", "Prevention Plan", "Prevention Passport"].includes(
       page,
     )

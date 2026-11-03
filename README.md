@@ -14,7 +14,7 @@ A ticket says "retire Auth API v1". It looks safe. The service that breaks is tw
 - **Compare decisions on the same evidence.** Remove now, retain temporarily or migrate consumers first (or, for upgrades: breaking, backward-compatible shim, move consumers first). Deterministic and reproducible, with policy verdicts and the reason chain. "Migrate first" is labelled as an assumption.
 - **What if it slips?** A Scenario Lab panel delays an issue by 1–365 days and shows which due dates move, which releases become late, and what cannot be assessed, from live Jira due dates, links and fix versions. Also available as the `anticipate-simulate-slip` Rovo/MCP action. Simulation only: nothing changes in Jira.
 - **Human approval, verified writes.** A prevention plan lists concrete Jira actions; a person approves, then confirms execution separately; every result is verified by reading Jira back. If the evidence changed after approval, execution is refused with zero writes.
-- **Jira gate.** An optional workflow validator stops issues labelled `anticipate-change` until their decision is completed and live Jira links agree; an assumed migration does not open it. Admins choose what happens during an outage (allow or block).
+- **Jira gate.** An optional workflow validator stops issues labelled `anticipate-change` until their decision is completed and live Jira links agree; an assumed migration does not open it. Admins choose what happens during an outage (allow by default, or block): see the [validator admin guide](docs/admin/WORKFLOW_VALIDATOR.md).
 - **Prevention Passport.** An audit-style record that opens with a short answer (option, verified actions, transition status, open questions), then evidence, alternatives, approvals and timeline; JSON export and A4 print. Not a legal or cryptographic certificate.
 
 ![Direct Jira links compared with ANTICIPATE's dependency path on the sample dataset](evidence/experience/v4-ux/value-direct-vs-transitive.svg)
@@ -75,7 +75,7 @@ Details: [privacy](docs/legal/PRIVACY.md) · [terms](docs/legal/TERMS.md) · [th
 
 ## Tests and CI
 
-Counts from a local run on `main` d995021 (3 Nov 2026): **93 backend tests** (authorization, concurrency, outage policy, a 50-cycle soak), **16 simulation-core tests**, **69 frontend unit tests**, plus Playwright browser journeys with axe WCAG A/AA checks on light and dark themes, keyboard paths, 320 px reflow and A4 print. CI runs typecheck, lint, formatting, unit tests, Playwright and a security audit on every pull request. Automated accessibility checks are not a certification.
+Counts on `main` eb98ea5 (3 Nov 2026; source and counting method: [docs/RELEASE.md](docs/RELEASE.md)): **93 backend tests** (authorization, concurrency, outage policy, a 50-cycle soak), **16 simulation-core tests**, **69 frontend unit tests**, **106 Playwright browser tests** with axe WCAG A/AA checks on light and dark themes, keyboard paths, 320 px reflow and A4 print. CI runs typecheck, lint, formatting, unit tests, Playwright and a security audit on every pull request. Automated accessibility checks are not a certification.
 
 ```bash
 npm ci && npm run typecheck && npm test                 # repository root (backend)

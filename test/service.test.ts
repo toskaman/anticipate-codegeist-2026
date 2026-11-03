@@ -1,4 +1,5 @@
 import { createService } from '../src/engine/service';
+import { decideTransition, linksDigest, type DecisionRecord } from '../src/validator';
 import { classifyLink } from '../src/jira/extractor';
 import { makeHandler } from '../src/core/handler';
 import { mapIssue, adf } from '../src/forge-adapters';
@@ -217,5 +218,119 @@ describe('resolver envelope', () => {
     const demo = makeHandler('getGraphSnapshot', () => 'LIVE', () => 'r3', () => new Date('2026-11-02T09:00:00Z'), async () => (await import('../packages/contracts/src/fixtures')).FIXTURE_SNAPSHOT);
     expect(await demo({ payload: { projectId: 'x', rootIssueKey: 'x', source: 'DEMO_FIXTURE' } })).toMatchObject({ ok: true, meta: { mode: 'DEMO_FIXTURE' } });
     expect(await okH({})).toMatchObject({ ok: true, meta: { contractVersion: '0.2.0', mode: 'LIVE' }, data: [] });
+  });
+});
+
+describe('S1a: scoped decision attestations (TOP7)', () => {
+  const alice = { requestId: 'r', accountId: 'alice', installationId: 'i' };
+  const bob = { requestId: 'r', accountId: 'bob', installationId: 'i' };
+
+  it('exposes the scoped attestation key format decision:owner:issueKey:planId', async () => {
+    const v = (await import('../src/validator')) as unknown as {
+      decisionKey(o: string, i: string, p: string): string;
+      parseDecisionKey(k: string): unknown;
+    };
+    expect(typeof v.decisionKey).toBe('function');
+    expect(v.decisionKey('alice', 'PAY-1', 'plan-9')).toBe('decision:alice:PAY-1:plan-9');
+    expect(v.parseDecisionKey('decision:alice:PAY-1:plan-9')).toEqual({ owner: 'alice', issueKey: 'PAY-1', planId: 'plan-9' });
+    expect(v.parseDecisionKey('decision:PAY-1')).toEqual({ legacyIssueKey: 'PAY-1' });
+  });
+
+  it('attestations are scoped per owner+plan: no cross-owner last-writer-wins', async () => {
+    const s = setup();
+    // Alice completes a full cycle first.
+    const snapA = await s.svc.getGraphSnapshot(alice, { projectId: 'PAY', rootIssueKey: 'PAY-1', source: 'JIRA', maxDepth: 3 });
+    await s.svc.compareScenarios(alice, { snapshotId: snapA.snapshotId, change: { issueKey: 'PAY-1', targetNodeId: 'issue:PAY-1', description: 'x' }, scenarios, maxDepth: 6 });
+    const planA = await s.svc.generatePreventionPlan(alice, { snapshotId: snapA.snapshotId, scenarioId: 'A' });
+    await s.svc.approvePlan(alice, { planId: planA.planId, planHash: planA.planHash, approvedActionIds: planA.actions.map((a) => a.actionId), idempotencyKey: 's1a-approve-alice001' });
+    await s.svc.executeApprovedPlan(alice, { planId: planA.planId, idempotencyKey: 's1a-exec-alice000001' });
+    // Bob prepares his own plan, then the evidence changes before he executes.
+    const snapB = await s.svc.getGraphSnapshot(bob, { projectId: 'PAY', rootIssueKey: 'PAY-1', source: 'JIRA', maxDepth: 3 });
+    await s.svc.compareScenarios(bob, { snapshotId: snapB.snapshotId, change: { issueKey: 'PAY-1', targetNodeId: 'issue:PAY-1', description: 'x' }, scenarios, maxDepth: 6 });
+    const planB = await s.svc.generatePreventionPlan(bob, { snapshotId: snapB.snapshotId, scenarioId: 'B' });
+    await s.svc.approvePlan(bob, { planId: planB.planId, planHash: planB.planHash, approvedActionIds: planB.actions.map((a) => a.actionId), idempotencyKey: 's1a-approve-bob00001' });
+    await s.jira.createLink({ typeName: 'Blocks', outwardKey: 'PAY-1', inwardKey: 'PAY-4' });
+    await expect(s.svc.executeApprovedPlan(bob, { planId: planB.planId, idempotencyKey: 's1a-exec-bob00000001' })).rejects.toMatchObject({ code: 'EVIDENCE_CHANGED' });
+    // Alice's attestation survives under its scoped key; Bob's is recorded separately.
+    const aRec = await s.store.get<DecisionRecord>(`decision:alice:PAY-1:${planA.planId}`);
+    const bRec = await s.store.get<DecisionRecord>(`decision:bob:PAY-1:${planB.planId}`);
+    expect(aRec).toMatchObject({ status: 'COMPLETED', owner: 'alice', planId: planA.planId, issueKey: 'PAY-1' });
+    expect(bRec).toMatchObject({ status: 'EVIDENCE_CHANGED', owner: 'bob', planId: planB.planId });
+    // The deprecated legacy mirror still reflects the latest write (last-writer-wins until wiring migrates).
+    expect(await s.store.get<DecisionRecord>('decision:PAY-1')).toMatchObject({ status: 'EVIDENCE_CHANGED', planId: planB.planId });
+  });
+
+  it('validator enforces the attestation scope when the caller expects one', () => {
+    const now = new Date('2026-11-10T00:00:00Z');
+    const gated = { labels: ['anticipate-change'], links: [] as { typeName: string; direction: string; otherKey: string }[] };
+    const base = {
+      schema: 3 as const, planId: 'plan-a', scenarioId: 'A', status: 'COMPLETED', at: '2026-11-02T09:00:00Z', issueKey: 'X-1',
+      verdict: 'NEEDS_REVIEW', blockers: 0, currentVerdict: 'NEEDS_REVIEW', currentBlockers: 0, allActionsVerified: true,
+      linksDigest: linksDigest([]), validUntil: '2026-11-20T00:00:00Z'
+    };
+    const scoped = { ...base, owner: 'alice' };
+    expect(decideTransition(gated, scoped, 'X-1', now, { owner: 'alice', planId: 'plan-a' }).result).toBe(true);
+    expect(decideTransition(gated, scoped, 'X-1', now, { owner: 'mallory', planId: 'plan-a' }))
+      .toMatchObject({ result: false, errorMessage: expect.stringMatching(/another user/) });
+    expect(decideTransition(gated, scoped, 'X-1', now, { owner: 'alice', planId: 'plan-other' }))
+      .toMatchObject({ result: false, errorMessage: expect.stringMatching(/belongs to plan/) });
+    // Legacy record (no owner): honored without scope (migration), rejected once a scope is expected.
+    expect(decideTransition(gated, base, 'X-1', now).result).toBe(true);
+    expect(decideTransition(gated, base, 'X-1', now, { owner: 'alice' }))
+      .toMatchObject({ result: false, errorMessage: expect.stringMatching(/before scoped attestations/) });
+  });
+
+  it('keeps writing the deprecated legacy decision:issueKey mirror during migration', async () => {
+    const s = setup();
+    const { plan } = await toPlan(s);
+    await s.svc.approvePlan(ctx, { planId: plan.planId, planHash: plan.planHash, approvedActionIds: plan.actions.map((a) => a.actionId), idempotencyKey: 's1a-approve-mirror001' });
+    await s.svc.executeApprovedPlan(ctx, { planId: plan.planId, idempotencyKey: 's1a-exec-mirror000001' });
+    expect(await s.store.get<DecisionRecord>('decision:PAY-1')).toMatchObject({ status: 'COMPLETED', planId: plan.planId, owner: 'acc-1' });
+  });
+});
+
+describe('S1b: active invalidation of stale approvals (TOP9)', () => {
+  it('checkPlanFreshness marks an APPROVED plan INVALIDATED when evidence changed', async () => {
+    const s = setup();
+    const { plan } = await toPlan(s);
+    await s.svc.approvePlan(ctx, { planId: plan.planId, planHash: plan.planHash, approvedActionIds: plan.actions.map((a) => a.actionId), idempotencyKey: 's1b-approve-stale0001' });
+    await s.jira.createLink({ typeName: 'Blocks', outwardKey: 'PAY-1', inwardKey: 'PAY-4' });
+    const drift = await s.svc.checkPlanFreshness(ctx, { planId: plan.planId });
+    expect(drift.fresh).toBe(false);
+    const rec = await s.store.get<{ plan: { status: string }; timeline: { at: string; event: string }[] }>(`plan:${plan.planId}`);
+    expect(rec?.plan.status).toBe('INVALIDATED');
+    expect(rec?.timeline.map((t) => t.event).join('\n')).toMatch(/invalidated/i);
+  });
+
+  it('INVALIDATED plans refuse execution with zero writes', async () => {
+    const s = setup();
+    const { plan } = await toPlan(s);
+    await s.svc.approvePlan(ctx, { planId: plan.planId, planHash: plan.planHash, approvedActionIds: plan.actions.map((a) => a.actionId), idempotencyKey: 's1b-approve-exec00001' });
+    await s.jira.createLink({ typeName: 'Blocks', outwardKey: 'PAY-1', inwardKey: 'PAY-4' });
+    await s.svc.checkPlanFreshness(ctx, { planId: plan.planId });
+    const before = { ...s.jira.writes };
+    await expect(s.svc.executeApprovedPlan(ctx, { planId: plan.planId, idempotencyKey: 's1b-exec-invalid00001' }))
+      .rejects.toMatchObject({ code: 'CONFLICT', message: expect.stringMatching(/invalidated/i) });
+    expect(s.jira.writes).toEqual(before);
+  });
+
+  it('checkPlanFreshness stays read-only when fresh or when the plan is not APPROVED', async () => {
+    const s = setup();
+    const { plan } = await toPlan(s);
+    // PENDING_APPROVAL + changed evidence: untouched (the approval-time guard still owns this case).
+    await s.jira.createLink({ typeName: 'Blocks', outwardKey: 'PAY-1', inwardKey: 'PAY-4' });
+    expect((await s.svc.checkPlanFreshness(ctx, { planId: plan.planId })).fresh).toBe(false);
+    const pending = await s.store.get<{ plan: { status: string }; timeline: unknown[] }>(`plan:${plan.planId}`);
+    expect(pending?.plan.status).toBe('PENDING_APPROVAL');
+    expect(pending?.timeline).toHaveLength(2);
+    // Fresh APPROVED plan: untouched.
+    const f = setup();
+    const { plan: fresh } = await toPlan(f);
+    await f.svc.approvePlan(ctx, { planId: fresh.planId, planHash: fresh.planHash, approvedActionIds: fresh.actions.map((a) => a.actionId), idempotencyKey: 's1b-approve-fresh0001' });
+    const beforeLen = (await f.store.get<{ timeline: unknown[] }>(`plan:${fresh.planId}`))?.timeline.length;
+    expect((await f.svc.checkPlanFreshness(ctx, { planId: fresh.planId })).fresh).toBe(true);
+    const after = await f.store.get<{ plan: { status: string }; timeline: unknown[] }>(`plan:${fresh.planId}`);
+    expect(after?.plan.status).toBe('APPROVED');
+    expect(after?.timeline.length).toBe(beforeLen);
   });
 });

@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 1000" width="1500" height="1000" role="img" aria-labelledby="t d" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <title id="t">ANTICIPATE architecture</title>
+  <desc id="d">Jira Cloud, the Forge app modules from manifest.yml, the resolvers and engine packages, Forge storage, and the Rovo and MCP entry points.</desc>
+  <defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#475569"/></marker></defs>
+  <rect width="1500" height="1000" fill="#ffffff"/>
+  <text x="60" y="70" font-size="40" font-weight="700" fill="#0f172a">How ANTICIPATE is built</text>
+  <text x="60" y="110" font-size="22" fill="#475569">Every box maps to a manifest.yml module or a repository path.</text>
+
+  <!-- Entry points -->
+  <g font-size="22" fill="#0f172a">
+    <rect x="60" y="160" width="300" height="96" rx="12" fill="#f1f5f9" stroke="#94a3b8"/>
+    <text x="210" y="200" text-anchor="middle" font-weight="700">Person in Jira</text><text x="210" y="232" text-anchor="middle" fill="#475569">opens the app</text>
+    <rect x="60" y="300" width="300" height="96" rx="12" fill="#f1f5f9" stroke="#94a3b8"/>
+    <text x="210" y="340" text-anchor="middle" font-weight="700">Rovo chat / MCP client</text><text x="210" y="372" text-anchor="middle" fill="#475569">asks a question</text>
+    <rect x="60" y="440" width="300" height="96" rx="12" fill="#f1f5f9" stroke="#94a3b8"/>
+    <text x="210" y="480" text-anchor="middle" font-weight="700">Jira transition</text><text x="210" y="512" text-anchor="middle" fill="#475569" font-size="19">labelled anticipate-change</text>
+  </g>
+
+  <!-- Forge app -->
+  <rect x="420" y="140" width="680" height="700" rx="18" fill="#f0fdfa" stroke="#0f766e" stroke-width="2"/>
+  <text x="440" y="180" font-size="24" font-weight="700" fill="#0f766e">Forge app (manifest.yml)</text>
+  <g font-size="20" fill="#0f172a">
+    <rect x="450" y="200" width="600" height="70" rx="10" fill="#ffffff" stroke="#14b8a6"/>
+    <text x="470" y="230" font-weight="700">global:fullPage · Custom UI</text><text x="470" y="256" fill="#475569">static/hello-world (React, TypeScript)</text>
+    <rect x="450" y="290" width="600" height="70" rx="10" fill="#ffffff" stroke="#14b8a6"/>
+    <text x="470" y="320" font-weight="700">rovo:agent + rovo:mcp (6 tools) · action</text><text x="470" y="346" fill="#475569">src/rovo.ts · anticipate-decision-reviewer, anticipate-mcp</text>
+    <rect x="450" y="380" width="600" height="70" rx="10" fill="#ffffff" stroke="#14b8a6"/>
+    <text x="470" y="410" font-weight="700">jira:workflowValidator · Decision Firewall</text><text x="470" y="436" fill="#475569">src/validator.ts · anticipate-decision-firewall</text>
+    <rect x="450" y="490" width="600" height="96" rx="10" fill="#ffffff" stroke="#0f766e" stroke-width="2"/>
+    <text x="470" y="522" font-weight="700">Resolvers and service (runs as the user)</text><text x="470" y="550" fill="#475569">src/main.ts · src/engine (scenarios, policies, plans,</text><text x="470" y="574" fill="#475569">drift, slip-service, sample) · src/jira</text>
+    <rect x="450" y="610" width="290" height="96" rx="10" fill="#ffffff" stroke="#14b8a6"/>
+    <text x="470" y="642" font-weight="700">simulation-core</text><text x="470" y="670" fill="#475569">packages/simulation-core</text><text x="470" y="694" fill="#475569">deterministic engine</text>
+    <rect x="760" y="610" width="290" height="96" rx="10" fill="#ffffff" stroke="#14b8a6"/>
+    <text x="780" y="642" font-weight="700">contracts</text><text x="780" y="670" fill="#475569">packages/contracts</text><text x="780" y="694" fill="#475569">zod, both sides</text>
+    <rect x="450" y="730" width="600" height="86" rx="10" fill="#ffffff" stroke="#14b8a6"/>
+    <text x="470" y="764" font-weight="700">Forge storage (storage:app)</text><text x="470" y="792" fill="#475569">snapshots, plans, approvals, execution leases, outage policy</text>
+  </g>
+
+  <!-- Jira -->
+  <rect x="1140" y="300" width="300" height="300" rx="18" fill="#eff6ff" stroke="#1d4ed8" stroke-width="2"/>
+  <g font-size="22" fill="#0f172a">
+    <text x="1290" y="350" text-anchor="middle" font-weight="700" fill="#1d4ed8">Jira Cloud REST</text>
+    <text x="1290" y="400" text-anchor="middle">issues, links,</text><text x="1290" y="430" text-anchor="middle">components,</text><text x="1290" y="460" text-anchor="middle">due dates, fix versions</text>
+    <text x="1290" y="510" text-anchor="middle" fill="#475569">read:jira-work</text><text x="1290" y="540" text-anchor="middle" fill="#475569">write:jira-work (approved</text><text x="1290" y="566" text-anchor="middle" fill="#475569">actions only)</text>
+  </g>
+
+  <g stroke="#475569" stroke-width="2.5" fill="none" marker-end="url(#a)">
+    <path d="M360 208 L448 235"/>
+    <path d="M360 348 L448 325"/>
+    <path d="M360 488 L448 415"/>
+    <path d="M1050 235 L1068 235 L1068 520 L1054 520"/>
+    <path d="M1050 325 L1068 325" marker-end="none"/>
+    <path d="M1050 415 L1068 415" marker-end="none"/>
+    <path d="M1050 570 L1138 520"/>
+    <path d="M600 586 L600 608"/>
+    <path d="M750 706 L750 728"/>
+  </g>
+  <text x="60" y="920" font-size="22" fill="#475569">No external egress is declared. Rovo and MCP tools are read-only; Jira writes need a person's approval and a separate execution step.</text>
+</svg>

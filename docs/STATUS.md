@@ -5,11 +5,8 @@ Updated: 3 Nov 2026, ~12:40 Paris. Owner of this file: CORE.
 | Item | Value |
 |---|---|
 | Repository | github.com/toskaman/anticipate-codegeist-2026 (public, proprietary source-available license, 50/50 toskaman and Orphee) |
-| main | `0e37a1e` (PR #37); feat/core-engine adds R18 (validator unreadable-issue fix) |
+| Versions, deployed builds, test counts | single source: [RELEASE.md](RELEASE.md) (refreshed 3 Nov, main eb98ea5) |
 | Forge app id | 39a28f48-c891-4d86-a3cf-c14409cbd29e (unchanged) |
-| Development | Forge major 4 (v4.37.0), main 0e37a1e incl. PR #37 UI, site one-atlas-euza. R18 fix: deploy pending |
-| Production | Forge major 2 (v2.25.0, 3 Nov 12:07), main 0e37a1e incl. PR #37, site toskaman5962 (Jira Service Management only) |
-| Tests | backend 80 on feat/core-engine (74 on main) (incl. 50-cycle soak), simulation engine 11, contracts 3, frontend 60 unit; CI green |
 
 ## Capabilities actually available
 | Capability | State | Proof |
