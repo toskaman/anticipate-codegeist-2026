@@ -1,15 +1,15 @@
 # ANTICIPATE - source of truth (dated)
 
-Updated: 3 Nov 2026, ~07:40 Paris. Owner of this file: CORE.
+Updated: 3 Nov 2026, ~12:40 Paris. Owner of this file: CORE.
 
 | Item | Value |
 |---|---|
 | Repository | github.com/toskaman/anticipate-codegeist-2026 (public, proprietary source-available license, 50/50 toskaman and Orphee) |
-| main | `5e04df1` (PR #35) + this update |
+| main | `0e37a1e` (PR #37); feat/core-engine adds R18 (validator unreadable-issue fix) |
 | Forge app id | 39a28f48-c891-4d86-a3cf-c14409cbd29e (unchanged) |
-| Development | deployed from feat/core-engine = main 5e04df1 (zod 4), site one-atlas-euza |
-| Production | deployed from main 5e04df1 (zod 4), judges' clean site toskaman5962 (loads) |
-| Tests (main) | backend 74 (incl. 50-cycle soak), simulation engine 11, contracts 3, frontend 60 unit; CI green |
+| Development | Forge major 4 (v4.37.0), main 0e37a1e incl. PR #37 UI, site one-atlas-euza. R18 fix: deploy pending |
+| Production | Forge major 2 (v2.25.0, 3 Nov 12:07), main 0e37a1e incl. PR #37, site toskaman5962 (Jira Service Management only) |
+| Tests | backend 80 on feat/core-engine (74 on main) (incl. 50-cycle soak), simulation engine 11, contracts 3, frontend 60 unit; CI green |
 
 ## Capabilities actually available
 | Capability | State | Proof |
@@ -17,8 +17,9 @@ Updated: 3 Nov 2026, ~07:40 Paris. Owner of this file: CORE.
 | Jira read/write with per-action approval and verification | LIVE_FORGE | 6/6 writes on TD; 4/4 on AVT-3 |
 | Continuous Decision Safety (evidence drift refusal) | LIVE_FORGE | plan-4ac3c031 refused, plan-85ba308a CHANGED via MCP |
 | Workflow validator with decision attestations (schema 3) | LIVE_FORGE | AVT-3 allowed then refused after new link; partial plan refused (PARTIAL) |
-| Validator outage policy (admin) | UNIT_TESTED | UI pending EXPERIENCE |
-| Assumed-migration guard (R17) and Passport `gate` | UNIT_TESTED; deployed | UI for `gate` pending EXPERIENCE |
+| Validator outage policy (admin) | LIVE_FORGE on dev | admin ALLOW to BLOCK to ALLOW persisted (12:03); non-admin read-only, no control (EXPERIENCE capture) |
+| Assumed-migration guard (R17) and Passport `gate` | LIVE_FORGE on dev | MOBL-58 Migrate first: Jira transition CLOSED with reason |
+| Validator: unreadable issue (403/404) follows outage policy (R18) | UNIT_TESTED | 6 tests; hosted check pending deploy |
 | Judge journey (guided demo → Passport) | LIVE_FORGE on dev (MOBL-58) | clean-site run pending a Jira site with software projects |
 | Sample data (guided demo), CONFLICT guard | LIVE_FORGE | MP, AVT, MOBL; CONFLICT logged, no duplicates |
 | Dependency upgrade + compatibility evidence | LIVE_FORGE | MP-5 via UI and MCP |

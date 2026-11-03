@@ -125,3 +125,9 @@ Guided demo (6 issues, 4 links) → Analyze MOBL-58 → Scenario Lab (A BLOCKED,
 
 ## 3 Nov 2026 - R4 remediated: zod 3 → 4.6.7 in backend, contracts and engine
 No code change needed; backend 73, contracts 3, engine 11 green, typecheck and forge lint clean. Remaining `npm audit` items: 5 moderate (glob/minimatch via @forge/api and @forge/manifest; fix requires a breaking @forge/api major) - not exploitable at runtime in our context (build-time globbing of trusted manifest paths), tracked.
+
+## 3 Nov 2026 - R18 MEDIUM: unreadable issue bypassed the BLOCK outage policy (FIXED)
+- Evidence: `runValidator` mapped a non-`ok` issue read (`forbidden` 403, `not_found` 404, returned without exception by `getIssue`) to `null`, and `decideTransition(null)` returned `result: true` as if the issue had no `anticipate-change` label. The admin BLOCK policy was never consulted and nothing was logged.
+- When: the validator reads the issue as the app; a 403 can come from issue security levels or a revoked app permission, a 404 from a deleted or moved issue, or from transient Jira errors mapped to these codes.
+- Fix: an unreadable issue is unknown evidence, not an unlabelled issue. It now follows the outage policy (default ALLOW, unchanged for existing installs) and logs `{outage:true, policy, reason:"issue_forbidden"|"issue_not_found"}`. A readable issue without the label still passes without reading the policy. If the policy itself is unreadable, ALLOW applies (no global lock).
+- Tests (RED then GREEN): test/validator-policy.test.ts, "validator: unreadable issue (R18)", 6 cases. Backend 80/80.
