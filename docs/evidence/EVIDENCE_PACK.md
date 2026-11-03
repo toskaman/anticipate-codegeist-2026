@@ -127,6 +127,13 @@ Built-in browser pane visible, signed in with the judge-site account. Mission Co
 | Late releases listed first, each moved date shows its path | not observable: the guided-demo sample tickets have no due dates or fix versions, so nothing moves | NOT TESTED HOSTED (follow-up ORP-30 #121 seeds due dates) |
 | Passport printed on paper in dark theme | needs a physical print | owner (manual) |
 
+## Production 2.31.0 outage and 2.32.0 hotfix (3 Nov 2026, ~22:45-23:00 UTC) · LIVE_FORGE, anticipate-judge
+
+- 22:45 UTC: production 2.31.0 deployed from main (K5–K8). On anticipate-judge the app showed "Backend connection unavailable — INTERNAL: Unexpected server error" (requests fadd2afd…, 4bbacac2…), retry did not help.
+- Cause: the K8 throttle (#109) built its Forge KVS key from `installContext`, an ARI containing "/" (`ari:cloud:jira::site/<cloudId>`). Forge KVS keys only accept `[a-zA-Z0-9:._ -#]`, so every resolver call threw before running. Unit tests used an in-memory store and could not catch it; dev 6.5.0 had the same defect but was not opened after deploy.
+- Fix: `throttleKey` maps disallowed characters to `_`, and the throttle fails open on any storage error (abuse control must never take the app down). 2 regression tests (backend 144/144). Deployed dev 6.6.0 and production 2.32.0 at ~22:55 UTC.
+- After 2.32.0 (#53 partial, built-in browser pane visible, first open right after deploy): "Connected · live mode"; CDN app page 2144 ms, resolver invocations 1220 ms and 1479 ms, data received ~8.4 s. Analyze JDG-1: invocations 1333 ms + 237 ms, graph shown ~2.0 s after the click. 10-parallel burst not run (the browser pane reuses one tab per URL).
+
 ## Hosted (LIVE_FORGE) proofs still missing
 
 Each of these is either tested LOCAL only or not observed at all. The browser checks belong to muse (#64), and the video belongs to the owner.

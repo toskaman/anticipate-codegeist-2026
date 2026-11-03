@@ -6,8 +6,8 @@ Validated: 3 Nov 2026, 13:40 Paris (CORE). Versions and test counts refreshed 3 
 |---|---|
 | main | f9ce7a5 (PRs #84 K5, #86 K6, #94 K7, #81–#110) |
 | Forge app id | 39a28f48-c891-4d86-a3cf-c14409cbd29e |
-| Development | v6.5.0 on one-atlas-euza, deployed 3 Nov 2026 ~22:00 UTC from main 8ef8239 (K5–K8 included; local gate before deploy: backend 142/142, forge lint clean) |
-| Production | v2.30.0 from main d995021 (memoryMB 1024, slip simulation, ORP-6/7), installs from the public link; recorded in EVIDENCE_PACK "Production 2.30.0" |
+| Development | v6.6.0 on one-atlas-euza, 3 Nov 2026 ~22:55 UTC (main + throttle KVS-key hotfix) |
+| Production | v2.32.0, 3 Nov 2026 ~22:55 UTC (K5–K8 + throttle KVS-key hotfix; 2.31.0 was broken for ~10 min, see EVIDENCE_PACK), installs from the public link |
 | Scopes | read:jira-work, write:jira-work, read:jira-user, storage:app (no graph scopes) |
 | Feature flags | none; validator outage policy per site (default Allow) |
 | Capabilities | Jira read/write AVAILABLE; workflow validator AVAILABLE; Rovo agent AVAILABLE where Rovo exists; Rovo MCP PERMISSION_REQUIRED (admin toggle); Teamwork Graph NOT_CONFIGURED (allowlist ECOHELP-180616); Confluence NOT_CONFIGURED |

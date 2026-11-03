@@ -105,3 +105,17 @@ describe('handler wiring', () => {
     expect(await h({})).toMatchObject({ ok: true, data: [] });
   });
 });
+
+describe('throttle hotfix (production 2.31.0)', () => {
+  it('builds Forge KVS-safe keys from ARI installation contexts', () => {
+    const k = throttleKey('ari:cloud:jira::site/c490925f-5338-4d25-b934-5ceb58162a0f', '630a8a3561f04d06813f80ff', 'getCapabilities');
+    expect(k).toMatch(/^(?!\s+$)[a-zA-Z0-9:._\s#-]+$/);
+    expect(k).not.toContain('/');
+    expect(k.length).toBeLessThanOrEqual(500);
+  });
+  it('fails open when the store throws', async () => {
+    const broken = { get: async () => { throw new Error('INVALID_KEY'); }, set: async () => { throw new Error('INVALID_KEY'); }, setIfAbsent: async () => true, delete: async () => undefined };
+    const check = createStoreThrottle(broken as never, DEFAULT_THROTTLE);
+    await expect(check({ installationId: 'ari:cloud:jira::site/x', accountId: 'a' }, 'getCapabilities')).resolves.toMatchObject({ allowed: true });
+  });
+});
