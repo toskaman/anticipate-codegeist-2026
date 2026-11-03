@@ -24,6 +24,7 @@ import {
   scenarioName,
   type Tone,
 } from "../app/copy";
+import { isPlanStale } from "../app/planGuards";
 
 type Lifecycle = { label: string; tone: Tone; detail: string };
 
@@ -33,11 +34,7 @@ function lifecycle(
   record: ExecutionRecord | undefined,
 ): Lifecycle {
   if (record) return executionCopy[record.status];
-  if (
-    w.plan?.status === "EVIDENCE_CHANGED" ||
-    w.plan?.status === "INVALIDATED" ||
-    w.evidenceFailure
-  )
+  if (isPlanStale(w.plan?.status) || w.evidenceFailure)
     return {
       label: "Evidence changed",
       tone: "warning",

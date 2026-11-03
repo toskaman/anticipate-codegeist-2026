@@ -1,5 +1,6 @@
 import type { IconName } from "../components/Icon";
 import type { Workflow } from "./useCoreWorkflow";
+import { isPlanStale } from "./planGuards";
 
 export type StageState = "done" | "attention" | "available" | "locked";
 
@@ -72,9 +73,7 @@ export const stageFor = (page: string) =>
  */
 export function stageState(w: Workflow, page: string): StageState {
   if (
-    (w.plan?.status === "EVIDENCE_CHANGED" ||
-      w.plan?.status === "INVALIDATED" ||
-      w.evidenceFailure) &&
+    (isPlanStale(w.plan?.status) || w.evidenceFailure) &&
     ["Decision Firewall", "Prevention Plan", "Prevention Passport"].includes(
       page,
     )
