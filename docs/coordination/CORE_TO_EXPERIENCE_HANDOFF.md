@@ -94,3 +94,14 @@ Suggested UI: a "Jira transition" row in Decision overview: OPEN (green), CLOSED
 - **Settings → "Workflow validator during an outage"**: shown only when `operations` contains `validator:outage-policy`. Everyone sees "During an outage: Allow / Block" and when it was changed ("by an administrator"; the account ID is not shown). With `canEdit: true`, an Allow / Block switch opens a confirmation that explains the trade-off; nothing is sent on Cancel. On a refused or failed save, the screen says nothing was changed and re-reads the policy. If `getValidatorPolicy` fails, a retry notice is shown. No switch when `canEdit` is false.
 - **Passport → Decision overview**: a "Jira transition, checked when this record was loaded" line under the facts: OPEN (green, "the validator allows it"), CLOSED (amber, with `reason`), NOT_GATED (neutral, with `reason`). Kept on one block when printed.
 - Tests: `static/hello-world/tests/validator-policy.spec.ts` (7 MOCK_TRANSPORT cases, axe on the admin path). Not checked on the hosted site yet: please open Settings as an admin and as a non-admin, and a Passport for MOBL "Migrate first" (CLOSED expected).
+
+## EXPERIENCE hosted check (3 Nov 2026, dev): Settings as non-admin, PASS
+- Site: one-atlas-euza, development installation 2ae8efdf…, after PR #37 (main 0e37a1e). Checked by Orphee with her invited (non-admin) account.
+- The "Workflow validator during an outage" panel shows "During an outage: Allow · Changed 03 Nov 2026, 12:03 CET by an administrator", the effect sentence, and "Only a Jira site administrator can change this setting." No Allow/Block switch. Matches the expected `canEdit: false` behaviour.
+- Capture (LIVE_FORGE): `evidence/experience/v4-ux/settings-validator-policy-non-admin-LIVE_FORGE-dev.png`.
+- Not testable from the UI: a non-admin cannot try a change, because the switch is hidden. The backend `PERMISSION_DENIED` on `setValidatorPolicy` is covered only by the MOCK_TRANSPORT test; a hosted check would have to call the resolver directly as a non-admin (CORE side, optional).
+
+## EXPERIENCE → CORE (3 Nov 2026, jury pass V3): display only
+- Scenario Lab and Decision Firewall label option C ("Migrate first" / "Move consumers first") as a simulation assumption, and say that a result is not permission to move the Jira issue. Pass now ends with "it does not authorize the Jira transition".
+- Passport starts with an "In short" box: option and verdict, verified actions, transition status (from `gate`), open questions. When `gate` is CLOSED, Limitations adds "The recorded outcome does not authorize the Jira transition."
+- New requests in `EXPERIENCE_TO_CORE_REQUESTS.md` (R-38): refresh `TECHNICAL_SECTION.md`; Teamwork Graph provenance fields; enterprise workspace contract. R-37 no longer asks for a merge, only production deploy and the remaining hosted checks (`docs/jury/HOSTED_ACCEPTANCE_PR37.md`).

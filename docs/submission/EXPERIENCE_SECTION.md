@@ -20,10 +20,12 @@ ANTICIPATE turns a proposed change in Jira into an evidence-backed decision.
 - **Act with accountability.** The prevention plan proposes concrete Jira actions. A person approves selected actions, then confirms execution separately. Each result is verified by reading Jira back.
 - **Refuse stale decisions.** If dependencies change after approval, execution is refused and the app shows what was added, removed or became unknown.
 - **Keep the record.** The Prevention Passport documents evidence, alternatives, approvals, verified outcomes and timeline, as JSON or a printable report.
-- **Enforce it in Jira, optionally.** A workflow validator can stop issues labelled `anticipate-change` from moving forward until their decision is completed.
+- **Enforce it in Jira, optionally.** A workflow validator can stop issues labelled `anticipate-change` from moving forward until their decision is completed and live Jira links agree. "Migrate first" is a simulation assumption, so it never opens the gate on its own; the Passport shows the transition status next to the outcome. Administrators choose what happens during an outage (allow, or block).
 - **Ask from Rovo.** The ANTICIPATE Decision Reviewer agent and five read-only MCP tools answer "what happens if we retire or upgrade X?" with the same engine. They cannot approve or execute.
 
 Detecting a risk is not resolving it: ANTICIPATE shows the gap, proposes preventive actions and records which were actually done.
+
+**Who it helps:** engineering managers reviewing risky changes, platform teams retiring or upgrading shared services, release governance, API lifecycle owners and anyone running technical change reviews in Jira.
 
 ## How we built it
 
@@ -62,6 +64,12 @@ Teamwork Graph sources (pull requests, deployments, Confluence) once available; 
 3. **Preview sample data**, then confirm **Create sample data** (six labelled issues, four links; about 15–20 s the first time).
 4. **Analyze** the sample root, **Compare options**, **Check safeguards**, **Generate prevention plan**, approve, execute, then open the **Prevention Passport**.
 5. Optional: Rovo chat → ANTICIPATE Decision Reviewer; MCP and the workflow validator need an administrator (steps in `DEVPOST_DRAFT.md`).
+
+## Bonus write-ups (use only with the matching hosted proof)
+
+- **Rovo agent:** "ANTICIPATE Decision Reviewer answers retirement and upgrade questions in Rovo chat from the same engine as the app. It is read-only: it explains and links to the decision, and people approve in ANTICIPATE." Proof: LIVE_FORGE on the dev site (Rovo is not available on the production clean site).
+- **MCP:** "Five read-only MCP tools (evidence graph, simulate retirement, simulate upgrade, Passport, plan freshness) let an external AI client query the same decisions. Availability depends on the site and an administrator enabling MCP." Proof: external client on dev.
+- **Teamwork Graph:** do not submit this bonus unless a hosted integration shows a real extra relation before the deadline.
 
 ## Wording to avoid
 

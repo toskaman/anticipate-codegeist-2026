@@ -147,6 +147,20 @@ test("upgrade journey requests CORE's upgrade scenarios and labels them plainly"
   expect(calls[0][0].operations).toEqual([
     { op: "UPGRADE_NODE", nodeId: "issue:ABC-1", breaking: true },
   ]);
+  // Option C is labelled as a what-if, never as a completed migration.
+  const optionC = page
+    .getByRole("radiogroup", { name: "Decision options" })
+    .locator("article")
+    .filter({ hasText: "Move consumers first" });
+  await expect(optionC).toContainText(
+    "Simulation assumption: consumers have already moved",
+  );
+  await expect(
+    page
+      .getByRole("radiogroup", { name: "Decision options" })
+      .locator("article")
+      .filter({ hasText: "Compatible upgrade" }),
+  ).not.toContainText("Simulation assumption");
   // Switching kind discards the previous comparison instead of relabelling it.
   await page.getByRole("radio", { name: /Retire or decommission/ }).check();
   await expect(
