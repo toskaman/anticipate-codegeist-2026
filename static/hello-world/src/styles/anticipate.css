@@ -3381,6 +3381,12 @@ body:has(.ax-app) {
   .ax-timeline > li {
     break-inside: avoid;
   }
+  /* The three evidence counts read as one row on paper (a narrow print
+     viewport otherwise wraps the third card onto the next page). */
+  .ax-report__evidence {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    break-inside: avoid;
+  }
   .ax-table-wrap {
     overflow: visible;
     border-color: #9aa6b4;

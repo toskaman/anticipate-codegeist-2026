@@ -1,5 +1,5 @@
 {
-  "timestampUTC": "2026-11-03T11:35:01.036Z",
+  "timestampUTC": "2026-11-03T13:40:41.448Z",
   "mode": "LOCAL development synthetic fixture",
   "browser": "153.0.8010.12",
   "nodes": 500,
@@ -10,66 +10,66 @@
     "height": 1000
   },
   "scope": "Warm dataset switch to 21 visible DOM nodes plus two animation frames; 5 samples; interactions include Playwright overhead. Heap samples are observations, not peak allocation or leak certification.",
-  "initialFixtureLoadMs": 1440.1313260000024,
+  "initialFixtureLoadMs": 594.471830000024,
   "renderSamplesMs": [
-    185.4698910000152,
-    98.0085609999951,
-    100.43669499998214,
-    100.30127500000526,
-    103.63360000000102
+    155.96522399998503,
+    121.08925300001283,
+    106.4578540000075,
+    174.07987099999445,
+    138.60925800001132
   ],
   "interactions": [
     {
       "operation": "search 498",
-      "ms": 45.47998100001132
+      "ms": 55.360679999983404
     },
     {
       "operation": "select 498",
-      "ms": 54.2734370000253
+      "ms": 66.8028200000117
     },
     {
       "operation": "search 249",
-      "ms": 44.71514700000989
+      "ms": 50.04754599998705
     },
     {
       "operation": "select 249",
-      "ms": 70.52385900000809
+      "ms": 66.95823099999689
     },
     {
       "operation": "search 124",
-      "ms": 39.23913099998026
+      "ms": 34.8018930000253
     },
     {
       "operation": "select 124",
-      "ms": 75.89894700000877
+      "ms": 63.80645000000368
     },
     {
       "operation": "search 497",
-      "ms": 31.435556999989785
+      "ms": 29.458829000010155
     },
     {
       "operation": "select 497",
-      "ms": 53.00378300002194
+      "ms": 38.796354999998584
     },
     {
       "operation": "search 0",
-      "ms": 28.958901000005426
+      "ms": 25.75692000001436
     },
     {
       "operation": "select 0",
-      "ms": 45.892912999988766
+      "ms": 64.20401699998183
     },
     {
       "operation": "next page",
-      "ms": 95.33650999999372
+      "ms": 98.17748299997766
     }
   ],
   "before": {
     "heap": {
-      "usedSize": 19469364,
+      "usedSize": 19457748,
       "totalSize": 20541440,
-      "embedderHeapUsedSize": 1489400,
-      "backingStorageSize": 13020424
+      "embedderHeapUsedSize": 1601216,
+      "backingStorageSize": 13020425
     },
     "dom": {
       "documents": 1,
@@ -78,10 +78,10 @@
     }
   },
   "renderHeap": {
-    "usedSize": 38359808,
-    "totalSize": 48590848,
-    "embedderHeapUsedSize": 13767456,
-    "backingStorageSize": 13029660
+    "usedSize": 39305444,
+    "totalSize": 49377280,
+    "embedderHeapUsedSize": 13914464,
+    "backingStorageSize": 13029067
   },
   "renderDom": {
     "documents": 1,
@@ -90,10 +90,10 @@
   },
   "after": {
     "heap": {
-      "usedSize": 22110256,
+      "usedSize": 22113896,
       "totalSize": 23162880,
-      "embedderHeapUsedSize": 2758272,
-      "backingStorageSize": 13021861
+      "embedderHeapUsedSize": 2912416,
+      "backingStorageSize": 13022242
     },
     "dom": {
       "documents": 1,

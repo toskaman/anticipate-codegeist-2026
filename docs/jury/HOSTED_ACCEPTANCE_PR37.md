@@ -29,8 +29,21 @@ Record for each run: date and time (Paris), commit or deployed version, account 
 | P2 | Limitations | "The recorded outcome does not authorize the Jira transition." | NOT RUN |
 | P3 | Gated issue with a valid decision | "Open · the validator allows it" in green | NOT RUN |
 | P4 | Issue without `anticipate-change` label | "Not gated by the validator", neutral, with reason | NOT RUN |
-| P5 | Print or save as PDF (A4) | Summary and gate row each on one page, reason not cut | OPEN: print dialog opened on dev, no PDF saved yet (needs a person to save it) |
+| P5 | Print or save as PDF (A4) | Summary and gate row each on one page, reason not cut | PASS (CORE, dev, 3 Nov): `evidence/core/passport-MOBL-58-LIVE_FORGE-dev-2026-11-03.pdf`, 3 A4 pages, light palette, "In short" and the CLOSED row intact. One defect found by EXPERIENCE: the three evidence cards wrapped to page 2; fixed on `feat/product-experience` (print keeps them on one row, regression test in `passport-print.spec.ts`) |
 | P6 | Screen reader (optional) | Badge text is read as words (status is never colour only) | NOT RUN |
 
 ## Network states (MOCK_TRANSPORT only, local)
 Loading text, read failure with "Try again", refused save with "Nothing was changed" and re-read, hidden panel when the backend does not advertise `validator:outage-policy`: `static/hello-world/tests/validator-policy.spec.ts`. Timeout and invalid responses go through the shared ForgeClient (timeouts never count as success; invalid payloads are rejected by the contract schema), covered in `reliability.spec.ts` and `schemas.test.ts`.
+
+## Clean judge site (anticipate-judge, production)
+CORE run as admin: PASS (`docs/evidence/EVIDENCE_PACK.md`, 3 Nov 13:55–14:02, JDG-1..JDG-6).
+
+Non-admin tour (Orphee, invited account), to record here:
+| # | Step | Expected | Result |
+|---|---|---|---|
+| J1 | Open ANTICIPATE from the judge site | App loads, "Connected · live mode" | NOT RUN |
+| J2 | Settings | Outage policy shown read-only, no Allow/Block switch, "Only a Jira site administrator can change this setting." | NOT RUN |
+| J3 | Mission Control → recover or open the JDG-1 Passport | Passport loads for a plan the viewer can access | NOT RUN |
+| J4 | Passport JDG-1 | "In short": Completed, 1 of 1 verified; "Jira transition" row with its status | NOT RUN |
+
+Note for J3: plans are private to the person who created them (`docs/STATUS.md`). A non-admin who did not create the JDG-1 plan may be refused; that refusal is the expected behaviour, not a defect.
