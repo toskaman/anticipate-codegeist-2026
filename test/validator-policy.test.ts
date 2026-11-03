@@ -45,3 +45,35 @@ describe('validator outage policy', () => {
     expect(r.result).toBe(true);
   });
 });
+
+describe('validator: unreadable issue (R18)', () => {
+  const dec = { schema: 3 as const, planId: 'p', scenarioId: 'B', status: 'COMPLETED', at: '', issueKey: 'X-1', verdict: 'PASS', blockers: 0, currentVerdict: 'PASS', currentBlockers: 0,
+    allActionsVerified: true, linksDigest: linksDigest([]), validUntil: '2026-12-01T00:00:00Z' };
+  const run = (kind: string, policy?: string, logs: unknown[] = []) => runValidator('X-1', { readIssue: async () => ({ kind }), readDecision: async () => dec,
+    readPolicy: async () => (policy ? { onOutage: policy } : undefined), log: (f) => logs.push(f), now: new Date('2026-11-10T00:00:00Z') });
+  for (const kind of ['forbidden', 'not_found']) {
+    it(`${kind} + BLOCK refuses: an unreadable issue is not an issue without label`, async () => {
+      const logs: unknown[] = [];
+      const r = await run(kind, 'BLOCK', logs);
+      expect(r.result).toBe(false);
+      expect(r.errorMessage).toMatch(/cannot be verified/);
+      expect(logs).toEqual([expect.objectContaining({ outage: true, policy: 'BLOCK', reason: `issue_${kind}` })]);
+    });
+    it(`${kind} + ALLOW (default) passes and logs the degradation`, async () => {
+      const logs: unknown[] = [];
+      expect((await run(kind, undefined, logs)).result).toBe(true);
+      expect(logs).toEqual([expect.objectContaining({ outage: true, policy: 'ALLOW', reason: `issue_${kind}` })]);
+    });
+  }
+  it('full storage outage (decision and policy unreadable) never locks: ALLOW', async () => {
+    const r = await runValidator('X-1', { readIssue: async () => ({ kind: 'forbidden' }), readDecision: async () => { throw new Error('kvs'); },
+      readPolicy: async () => { throw new Error('kvs'); }, log: () => undefined });
+    expect(r.result).toBe(true);
+  });
+  it('readable issue without the label still passes without consulting the policy', async () => {
+    let read = false;
+    const r = await runValidator('X-1', { readIssue: async () => ({ kind: 'ok', issue: { labels: [], links: [] } }), readDecision: async () => undefined,
+      readPolicy: async () => { read = true; return { onOutage: 'BLOCK' }; }, log: () => undefined });
+    expect(r.result).toBe(true); expect(read).toBe(false);
+  });
+});
