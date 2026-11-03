@@ -46,10 +46,16 @@ describe("journey attention state", () => {
     it(`flags ${page} for an INVALIDATED plan`, () => {
       expect(stageState(w("INVALIDATED"), page)).toBe("attention");
     });
-  it("does not flag the earlier stages", () => {
-    expect(stageState(w("INVALIDATED"), "Scenario Lab")).not.toBe("attention");
-  });
-  it("does not flag an APPROVED plan", () => {
-    expect(stageState(w("APPROVED"), "Prevention Plan")).not.toBe("attention");
-  });
+  for (const page of ["Mission Control", "Evidence Graph", "Scenario Lab"])
+    it(`does not flag ${page}, an earlier stage`, () => {
+      expect(stageState(w("INVALIDATED"), page)).not.toBe("attention");
+    });
+  for (const page of [
+    "Decision Firewall",
+    "Prevention Plan",
+    "Prevention Passport",
+  ])
+    it(`does not flag ${page} for an APPROVED plan`, () => {
+      expect(stageState(w("APPROVED"), page)).not.toBe("attention");
+    });
 });
