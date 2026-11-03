@@ -11,7 +11,7 @@
 | MCP (external client) | dev | Claude connector, one-atlas-euza | TD | 2026-11-02 | get-graph / simulate-retirement / get-passport | grounded read-only answers | as expected | requires admin "Expose tools" toggle per site |
 | Benchmark | feat/core-engine | local | synthetic 200 graphs | 2026-11-02 | npm test | P=R=1 vs oracle | see BENCHMARK.md | synthetic |
 | Rovo agent | dev 4.13.0+ | one-atlas-euza | — | 2026-11-02 | Jira issue → Agents → search | agent listed | NOT FOUND yet ("check the agent is enabled in Studio") | needs Rovo Studio enablement by admin |
-| Teamwork Graph | — | — | — | — | — | — | BLOCKED: allowlist request sent 2026-11-02 | merge layer + tests ready (context.test.ts) |
+| Teamwork Graph | exp/teamwork-graph | dev 5.0.0-5.1.0 | MOBL-58 | 2026-11-03 | deploy with graph scopes, consent, probe | graph relations | BLOCKED: restricted scope, consent grants no graph scope; ECOHELP-180616 | docs/evidence/TEAMWORK_GRAPH_ALLOWLIST.md |
 
 ## Hosted verification, 2 Nov 2026 (main fda93de + CORE fixes)
 
@@ -34,3 +34,16 @@
 - New engine operation UPGRADE_NODE (breaking or compatible). Scenarios: A breaking upgrade now, B backward-compatible shim, C migrate consumers first then upgrade. New read-only action and MCP tool `anticipate-simulate-upgrade`, wired to the Rovo agent.
 - Unit tests: breaking upgrade reaches the same consumers as removal but triggers no removal-only rules; compatible upgrade has zero impact.
 - Hosted (dev 4.19.0), Rovo chat with the ANTICIPATE Decision Reviewer: "breaking upgrade of MP-5, MP-9 as new version" returned A NEEDS_REVIEW (3 impacted, 2 direct, rule P3), B PASS (0 impacted).
+
+## Hosted verification, 3 Nov 2026 (main 0e37a1e to e24baf4; dev 4.37-6.0, prod 2.25-2.27)
+
+| Feature | Env | Procedure | Expected | Observed |
+|---|---|---|---|---|
+| Validator outage policy, admin | dev | Settings: Allow to Block (confirm), reload, back to Allow | persisted, timestamped | PASS (12:03, 13:08, 13:09) |
+| Outage policy, Cancel | dev | Block then Cancel, reload | nothing saved | PASS (still Allow, 12:03) |
+| Outage policy, non-admin | dev | invited account opens Settings | read-only, no control | PASS (Orphee, capture evidence/experience/v4-ux/settings-validator-policy-non-admin-LIVE_FORGE-dev.png) |
+| R17 gate in Passport | dev | MOBL-58 "Migrate first" Passport | Jira transition CLOSED with reason | PASS |
+| Passport "In short" (PR #39) | dev 4.39.0 | MOBL-58 Passport | summary of option, verified actions, gate | PASS; print dialog opened once |
+| Validator on gated issue, BLOCK policy | dev, AVT-9 | transition En cours | refused with a reason | PASS ("no ANTICIPATE decision has been recorded") |
+| R18 unreadable issue (403/404) | dev, AVT | reporter-only issue security | 403 path follows policy | NOT REPRODUCIBLE: the app still reads restricted issues on this site; unit tests (6) are the proof |
+| MCP after rollback | dev 6.0.0 | get-passport plan-3d6ca859 | COMPLETED, VERIFIED | PASS |
