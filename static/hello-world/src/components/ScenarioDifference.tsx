@@ -71,8 +71,9 @@ export default function ScenarioDifference({
       )}
       {ids.length > VISIBLE_RECORDS && (
         <p className="ax-muted ax-small">
-          Showing {VISIBLE_RECORDS} of {ids.length}. Inspect the option's
-          affected records below for the full result.
+          Showing {VISIBLE_RECORDS} of {ids.length}. The full details below
+          follow the selected decision card. Choosing another card changes your
+          decision selection; these inspection selectors do not.
         </p>
       )}
     </section>

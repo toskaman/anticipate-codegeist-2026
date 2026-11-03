@@ -28,7 +28,7 @@ These four **Chromium MOCK_TRANSPORT** element captures show the pair inspector,
 
 ## Build observation
 
-Vite reported ForgeApp **139.34 kB / 38.46 kB gzip** and lazy EvidenceGraph **196.37 / 63.18 kB gzip**. Before this work the observed raw chunks were 134.61 kB and 194.04 kB respectively. These are bundle outputs, not user latency measurements. No runtime dependency added; graph remains lazy-loaded. Graph focus caps 40 loaded records and 120 supplied relationships, with missing/omitted context disclosed. Pair groups render six named records with a full-result pointer.
+Vite reported ForgeApp **139.42 kB / 38.48 kB gzip** and lazy EvidenceGraph **196.37 / 63.18 kB gzip**. Before this work the observed raw chunks were 134.61 kB and 194.04 kB respectively. These are bundle outputs, not user latency measurements. No runtime dependency added; graph remains lazy-loaded. Graph focus caps 40 loaded records and 120 supplied relationships, with missing/omitted context disclosed. Pair groups render six named records with a full-result pointer.
 
 ## Required acceptance still pending
 
@@ -41,3 +41,5 @@ Vite reported ForgeApp **139.34 kB / 38.46 kB gzip** and lazy EvidenceGraph **19
 - [ ] Native screen reader, real browser zoom and human usability study remain unperformed. Firefox/WebKit results above cover only the six new cases, not the entire regression suite.
 
 Portfolio/shared workspace/radar remain passive design concepts excluded from production pending #130/#131/#132 and CORE #134/#135 runtime/hosted gates. No enterprise capability, customer result, commercial price or ROI is claimed.
+
+Final copy review clarified that inspecting a pair is independent from changing the decision card used by the full detail section. Its three component tests and production build passed again; the full-suite results above predate only this explanatory text adjustment.

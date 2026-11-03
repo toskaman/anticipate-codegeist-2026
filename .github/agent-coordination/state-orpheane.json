@@ -1,6 +1,6 @@
 {
   "agent": "orpheane",
-  "updated": "2026-11-03T23:48:00Z",
+  "updated": "2026-11-03T23:50:00Z",
   "runner": "EXPERIENCE follow-up currently runs in Codex desktop on feat/product-experience, with a five-minute chat heartbeat. GitHub issues and PRs coordinate with Muse. Local checks use MOCK_TRANSPORT; owner-machine and hosted verification remain with Muse/owner.",
   "current": {
     "issues": [
@@ -10,14 +10,15 @@
       139
     ],
     "branch": "feat/product-experience",
-    "phase": "validated locally; preparing PR for Muse review",
+    "phase": "PR #140 open; CI and Muse review pending",
     "baseline": "39ccc3f",
     "leases": [
       "127-202611032325",
       "133-202611032332",
       "137-202611032339",
       "139-202611032343"
-    ]
+    ],
+    "pr": 140
   },
   "review": [
     {
