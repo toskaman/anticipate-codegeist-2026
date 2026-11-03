@@ -60,6 +60,20 @@ describe('Decision Firewall: partial approval cannot authorize a transition (P0)
     await s.svc.executeApprovedPlan(alice, { planId: p.planId, idempotencyKey: k('fw-exec-3') });
     expect((await gate(s)).result).toBe(true);
   });
+  it('a PASS that only assumes migration (migrate first) does not open the gate while consumers still depend in Jira', async () => {
+    const s = setup();
+    const scen = [...remove, { scenarioId: 'C', label: 'Migrate first', operations: [
+      { op: 'MIGRATE_DEPENDENTS' as const, fromNodeId: 'issue:PAY-1', toNodeId: 'issue:PAY-5', edgeKinds: ['USES' as const, 'DEPENDS_ON' as const] },
+      { op: 'REMOVE_NODE' as const, nodeId: 'issue:PAY-1' }] }];
+    const snap = await s.svc.getGraphSnapshot(alice, { projectId: 'PAY', rootIssueKey: 'PAY-1', source: 'JIRA', maxDepth: 3 });
+    await s.svc.compareScenarios(alice, { snapshotId: snap.snapshotId, change: { issueKey: 'PAY-1', targetNodeId: 'issue:PAY-1', description: 'x' }, scenarios: scen, maxDepth: 6 });
+    const p = await s.svc.generatePreventionPlan(alice, { snapshotId: snap.snapshotId, scenarioId: 'C' });
+    await s.svc.approvePlan(alice, { planId: p.planId, planHash: p.planHash, approvedActionIds: p.actions.map((a) => a.actionId), idempotencyKey: k('fw-approve-c') });
+    await s.svc.executeApprovedPlan(alice, { planId: p.planId, idempotencyKey: k('fw-exec-c') });
+    const g = await gate(s);
+    expect(g.result).toBe(false);
+    expect(g.errorMessage).toMatch(/assumes work that Jira does not show as done/);
+  });
   it('an empty approval is refused by the service itself', async () => {
     const s = setup();
     const { p } = await plan(s, 'B');

@@ -21,7 +21,7 @@ describe('validator outage policy', () => {
   });
 
   const gated = { kind: 'ok', issue: { labels: ['anticipate-change'], links: [] } };
-  const okDecision = { schema: 3 as const, planId: 'p', scenarioId: 'B', status: 'COMPLETED', at: '', issueKey: 'X-1', verdict: 'PASS', blockers: 0,
+  const okDecision = { schema: 3 as const, planId: 'p', scenarioId: 'B', status: 'COMPLETED', at: '', issueKey: 'X-1', verdict: 'PASS', blockers: 0, currentVerdict: 'PASS', currentBlockers: 0,
     allActionsVerified: true, linksDigest: linksDigest([]), validUntil: '2026-12-01T00:00:00Z' };
   const io = (o: Partial<Parameters<typeof runValidator>[1]>) => ({ readIssue: async () => gated, readDecision: async () => okDecision, readPolicy: async () => undefined,
     log: () => undefined, now: new Date('2026-11-10T00:00:00Z'), ...o });

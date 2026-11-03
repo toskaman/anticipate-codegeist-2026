@@ -80,6 +80,22 @@ export function createService(d: Deps) {
       verdict: chosen?.verdict ?? 'UNKNOWN', blockers: chosen?.summary.blockers ?? null,
       allActionsVerified: rec.plan.status === 'COMPLETED' };
     if (rec.plan.status === 'COMPLETED') {
+      // A scenario can PASS because it ASSUMES work (e.g. "migrate consumers first"). Re-evaluate the change itself
+      // (the scenario without its MIGRATE assumptions) on the live Jira evidence: the gate opens only if the change
+      // is not blocked by what is in Jira now. Issues created by this plan are excluded (they are the plan's own work items).
+      try {
+        const scen = cmp?.request.scenarios.find((s) => s.scenarioId === rec.plan.scenarioId);
+        const direct = (scen?.operations ?? []).filter((o) => o.op !== 'MIGRATE_DEPENDENTS');
+        if (direct.length) {
+          const live = await extractGraph(d.jira, rec.rootIssueKey, { maxDepth: 3, maxNodes: 200, snapshotId: `${rec.plan.snapshotId}~attest`,
+            projectId: rec.projectKey, now: d.now(), ttlHours: SNAPSHOT_TTL_HOURS });
+          const creates = rec.plan.actions.filter((a) => a.type === 'CREATE_ISSUE');
+          const artifacts = creates.length ? (await d.jira.searchIssues(`labels in (${creates.map((a) => `"${actionMarker(rec.plan.planId, a.actionId)}"`).join(', ')})`, null, 50)).items.map((i) => `issue:${i.key}`) : [];
+          const g = { ...live, edges: live.edges.filter((e) => !artifacts.includes(e.from) && !artifacts.includes(e.to)) };
+          const now = simulate(g, { scenarioId: `${rec.plan.scenarioId}~as-is`, label: 'change on current evidence', operations: direct }, DEFAULT_POLICIES);
+          r.currentVerdict = now.verdict; r.currentBlockers = now.summary.blockers;
+        } else { r.currentVerdict = chosen?.verdict ?? 'UNKNOWN'; r.currentBlockers = chosen?.summary.blockers ?? null; }
+      } catch { r.currentVerdict = 'UNKNOWN'; r.currentBlockers = null; }
       // Attest the links as they are AFTER verified execution (the plan's own new links included). Unreadable => no attestation.
       const f = await d.jira.getIssue(rec.rootIssueKey).catch(() => null);
       if (f?.kind === 'ok') {

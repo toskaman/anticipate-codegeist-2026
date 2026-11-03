@@ -116,3 +116,6 @@ Hosted proof (dev, 2 Nov 2026 23:24 CET, isolated project AVT): new plan `plan-6
 
 ## 3 Nov 2026 - R8 validator outage policy (FIXED, unit tested; UI pending EXPERIENCE)
 Admin-only setting `config:validator` (never expires): ALLOW (default) or BLOCK when the decision or issue cannot be read during a transition. Server-side admin check (`mypermissions ADMINISTER`), change logged, policy unreadable => ALLOW (no global lock-out). `runValidator` is now a pure, tested function (5 tests). Hosted test pending the Settings UI.
+
+## 3 Nov 2026 - R17 HIGH: "migrate first" PASS opened the gate without any migration (FIXED)
+Found during the hosted judge run on MOBL: option C ("Migrate consumers first") is PASS in simulation because it assumes the migration, and its plan contains only a decision comment. Completing it wrote an attestation with verdict PASS, so the workflow gate would open while consumers still depended on MOBL-58 in Jira. Fix: on completion the attestation also records the verdict of the change itself (the scenario without its MIGRATE assumptions) re-evaluated on live Jira evidence, excluding the plan's own created issues; the validator refuses while that verdict is BLOCKED. Regression test in `test/firewall.test.ts`. Backend 73/73.
