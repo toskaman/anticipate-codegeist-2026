@@ -28,7 +28,7 @@ export function guidanceFor(failure: OperationFailure) {
         : failure.code === "INVALID_RESPONSE"
           ? "The service response could not be verified. Read it again before using its results."
           : failure.code === "RATE_LIMITED"
-            ? "Jira limited this request. Wait before trying the read again. No automatic retry was made."
+            ? "This request was rate limited. Wait before trying the read again. No automatic retry was made."
             : failure.code === "PERMISSION_DENIED" && isPrivateRecord(failure)
               ? PRIVATE_RECORD_GUIDANCE
               : failure.code === "PERMISSION_DENIED"
