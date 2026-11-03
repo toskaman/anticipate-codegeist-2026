@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 1000" width="1500" height="1000" role="img" aria-labelledby="t d" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <title id="t">What if it slips? How a delay walks downstream</title>
+  <desc id="d">Sample data from the engine test: API-1 slips 5 days. APP-2 and REL-6 move along the blocks chain, release v2.0 becomes 4 days late, WEB-4 and WEB-5 cannot be dated and are reported as unknown.</desc>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#b91c1c"/></marker>
+    <marker id="g" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#64748b"/></marker>
+  </defs>
+  <rect width="1500" height="1000" fill="#ffffff"/>
+  <text x="60" y="70" font-size="40" font-weight="700" fill="#0f172a">What if it slips? A delay walks the "blocks" chain</text>
+  <text x="60" y="112" font-size="24" fill="#475569">Sample data (engine test packages/simulation-core/test/slip.test.ts): API-1 slips 5 days.</text>
+  <rect x="1080" y="128" width="360" height="52" rx="26" fill="#eff6ff" stroke="#1d4ed8"/>
+  <text x="1260" y="162" font-size="22" text-anchor="middle" fill="#1d4ed8" font-weight="600">Simulation · nothing changed</text>
+
+  <g font-size="22" fill="#0f172a">
+    <!-- moved chain -->
+    <rect x="60" y="200" width="300" height="130" rx="14" fill="#fef2f2" stroke="#b91c1c" stroke-width="2"/>
+    <text x="80" y="240" font-weight="700" font-size="26">API-1 (slipped)</text>
+    <text x="80" y="276">due 1 Dec → 6 Dec</text><text x="80" y="310" fill="#b91c1c" font-weight="600">+5 days</text>
+    <rect x="460" y="200" width="300" height="130" rx="14" fill="#fef2f2" stroke="#b91c1c" stroke-width="2"/>
+    <text x="480" y="240" font-weight="700" font-size="26">APP-2</text>
+    <text x="480" y="276">due 5 Dec → 10 Dec</text><text x="480" y="310" fill="#b91c1c" font-weight="600">+5 days</text>
+    <rect x="860" y="200" width="300" height="130" rx="14" fill="#fef2f2" stroke="#b91c1c" stroke-width="2"/>
+    <text x="880" y="240" font-weight="700" font-size="26">REL-6</text>
+    <text x="880" y="276">due 9 Dec → 14 Dec</text><text x="880" y="310" fill="#b91c1c" font-weight="600">+5 days</text>
+
+    <!-- release -->
+    <rect x="1200" y="200" width="240" height="130" rx="14" fill="#fff7ed" stroke="#c2410c" stroke-width="3"/>
+    <text x="1320" y="240" text-anchor="middle" font-weight="700" font-size="26">Release v2.0</text>
+    <text x="1320" y="276" text-anchor="middle">10 Dec</text><text x="1320" y="310" text-anchor="middle" fill="#c2410c" font-weight="700">late by 4 days</text>
+
+    <!-- unknown chain -->
+    <rect x="460" y="430" width="300" height="130" rx="14" fill="#fefce8" stroke="#a16207" stroke-width="2" stroke-dasharray="8 6"/>
+    <text x="480" y="470" font-weight="700" font-size="26">WEB-4 · Unknown</text>
+    <text x="480" y="506">no due date in Jira</text><text x="480" y="540" fill="#a16207" font-weight="600">not assumed safe</text>
+    <rect x="860" y="430" width="300" height="130" rx="14" fill="#fefce8" stroke="#a16207" stroke-width="2" stroke-dasharray="8 6"/>
+    <text x="880" y="470" font-weight="700" font-size="26">WEB-5 · Unknown</text>
+    <text x="880" y="506">a blocker on the path</text><text x="880" y="534">has no due date</text>
+
+    <!-- unaffected -->
+    <rect x="1200" y="430" width="240" height="130" rx="14" fill="#f8fafc" stroke="#94a3b8"/>
+    <text x="1320" y="470" text-anchor="middle" font-weight="700" font-size="26">APP-3</text>
+    <text x="1320" y="506" text-anchor="middle">in v2.0, not on</text><text x="1320" y="534" text-anchor="middle">the blocks path</text>
+  </g>
+  <g fill="none" stroke-width="3">
+    <path d="M360 265 L456 265" stroke="#b91c1c" marker-end="url(#a)"/>
+    <path d="M760 265 L856 265" stroke="#b91c1c" marker-end="url(#a)"/>
+    <path d="M1160 265 L1196 265" stroke="#c2410c" marker-end="url(#a)"/>
+    <path d="M210 330 L210 495 L456 495" stroke="#64748b" marker-end="url(#g)"/>
+    <path d="M760 495 L856 495" stroke="#64748b" marker-end="url(#g)"/>
+  </g>
+  <text x="860" y="362" font-size="20" fill="#475569">path: API-1 → APP-2 → REL-6</text>
+  <text x="380" y="252" font-size="18" fill="#475569">blocks</text><text x="780" y="252" font-size="18" fill="#475569">blocks</text>
+
+  <g font-size="22" fill="#0f172a">
+    <text x="60" y="660" font-weight="700" font-size="26">Rules (stated to the user as assumptions)</text>
+    <text x="60" y="702">1. A "blocks" link: the dependent cannot finish before its blocker.</text>
+    <text x="60" y="740">2. Each dependent keeps its planned gap; its own work does not shrink.</text>
+    <text x="60" y="778">3. Only Jira due dates are used. No due date = Unknown, never safe; unreadable issues are Unknown too.</text>
+    <text x="60" y="816">4. A release is late when one of its issues' new due date is after the release date.</text>
+    <text x="60" y="854">5. At most 50 issues are followed (SLIP_MAX_ISSUES); beyond that the result says it is partial.</text>
+  </g>
+  <text x="60" y="940" font-size="20" fill="#475569">Same input, same output. Sources: packages/simulation-core/src/slip.ts, src/engine/slip-service.ts.</text>
+</svg>
