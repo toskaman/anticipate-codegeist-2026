@@ -47,3 +47,25 @@
 | Validator on gated issue, BLOCK policy | dev, AVT-9 | transition En cours | refused with a reason | PASS ("no ANTICIPATE decision has been recorded") |
 | R18 unreadable issue (403/404) | dev, AVT | reporter-only issue security | 403 path follows policy | NOT REPRODUCIBLE: the app still reads restricted issues on this site; unit tests (6) are the proof |
 | MCP after rollback | dev 6.0.0 | get-passport plan-3d6ca859 | COMPLETED, VERIFIED | PASS |
+
+## Clean-site judge run, 3 Nov 2026, 13:55-14:02 Paris (PRODUCTION, public install link)
+
+Site: anticipate-judge.atlassian.net, created 3 Nov 2026 on the Jira Free plan; no prior data. Project JDG (company-managed Kanban, created empty). Installation f4a739e5 (production environment, from the public link in docs/submission/INSTALL_LINK.md, "Get app" then site selection).
+
+| Step | Expected | Observed |
+|---|---|---|
+| Install via public link | installs on the chosen site | PASS (forge install list: production, Up-to-date) |
+| Open app | Mission Control, no extra consent | PASS (app loaded, "Connected, live mode") |
+| Guided demo, choose project | JDG listed as "empty" | PASS |
+| Preview sample data | 6 issues + 4 links "Will be created", no write | PASS |
+| Confirm creation | 6 tickets and 4 Blocks links created and re-read | PASS: JDG-1..JDG-6, 4 links "Created, verified in Jira" |
+| Re-preview | no duplicates | PASS: all "Already in Jira, reused" |
+| Analyze JDG-1 | Evidence Graph from real links | PASS: 5 records, Confirmed and Inferred |
+| Scenario Lab | 3 options compared | PASS: suggestion "Migrate first" |
+| Decision Firewall | verdict with reasons | PASS: Pass, with the "what-if" warning |
+| Plan | proposed actions with permission and verification | PASS: 1 action (decision comment on JDG-1) |
+| Approval | bound to the plan version | PASS (plan version 9bf0faaa66f1492e) |
+| Execution | written and verified in Jira | PASS: VERIFIED at 14:01 (plan-a0e742f7) |
+| Prevention Passport | Completed, In short, gate | PASS: Completed, 1 of 1 verified, Jira transition reported as refused by the validator |
+
+Not covered on this run: limited-permission users (Jira Free has no custom permission schemes; covered by unit tests), the workflow validator on JDG (not added to the JDG workflow), and print to PDF.
