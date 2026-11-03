@@ -43,7 +43,7 @@ Non-admin tour (Orphee, invited account), to record here:
 |---|---|---|---|
 | J1 | Open ANTICIPATE from the judge site | App loads, "Connected · live mode" | NOT RUN |
 | J2 | Settings | Outage policy shown read-only, no Allow/Block switch, "Only a Jira site administrator can change this setting." | NOT RUN |
-| J3 | Mission Control → recover or open the JDG-1 Passport | Passport loads for a plan the viewer can access | NOT RUN |
-| J4 | Passport JDG-1 | "In short": Completed, 1 of 1 verified; "Jira transition" row with its status | NOT RUN |
+| J3 | Mission Control → recover or open the JDG-1 Passport | Passport loads for a plan the viewer can access | REFUSED AS DESIGNED (3 Nov, Orphee, non-admin, Firefox): `PERMISSION_DENIED: Plans are private to the user who created them.` (request 360c3723…). UX defect found: the guidance said "Check your Jira project permissions", which is wrong for this case. Fixed: the screen now says the record belongs to its creator and how to get your own (unit test `CoreOperationError.test.ts`) |
+| J4 | Passport JDG-1 | "In short": Completed, 1 of 1 verified; "Jira transition" row with its status | NOT APPLICABLE for a non-admin (see J3); CORE verified it as the creator |
 
 Note for J3: plans are private to the person who created them (`docs/STATUS.md`). A non-admin who did not create the JDG-1 plan may be refused; that refusal is the expected behaviour, not a defect.
