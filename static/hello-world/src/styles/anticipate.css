@@ -3334,6 +3334,10 @@ body:has(.ax-app) {
     --ax-success: #14532d;
     --ax-warning: #7a4500;
     --ax-danger: #991b1b;
+    /* Light values so tags and info accents keep contrast on paper whatever
+       the screen theme (axe, ORP-4). */
+    --ax-violet: #5739b5;
+    --ax-info: #2953c7;
     --ax-shadow: none;
     display: block;
     background: #fff;
