@@ -41,7 +41,7 @@ describe('use case 2: service / component decommission', () => {
 describe('Jira workflow validator (Decision Firewall, attestation schema 2)', () => {
   const gated = (links: { typeName: string; direction: string; otherKey: string }[] = []) => ({ labels: ['anticipate-change'], links });
   const now = new Date('2026-11-10T00:00:00Z');
-  const att = (o: Record<string, unknown> = {}) => ({ schema: 3 as const, verdict: 'NEEDS_REVIEW', blockers: 0, allActionsVerified: true, planId: 'p', scenarioId: 'A', status: 'COMPLETED', at: '', issueKey: 'X-1',
+  const att = (o: Record<string, unknown> = {}) => ({ schema: 3 as const, verdict: 'NEEDS_REVIEW', blockers: 0, currentVerdict: 'NEEDS_REVIEW', currentBlockers: 0, allActionsVerified: true, planId: 'p', scenarioId: 'A', status: 'COMPLETED', at: '', issueKey: 'X-1',
     linksDigest: linksDigest([]), validUntil: '2026-11-20T00:00:00Z', ...o });
   it('ungated or unreadable issues always pass; gated issues need a valid attestation', () => {
     expect(decideTransition({ labels: ['other'], links: [] }, undefined, 'X-1', now).result).toBe(true);
