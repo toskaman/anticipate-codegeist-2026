@@ -43,7 +43,8 @@
 | Outage policy, Cancel | dev | Block then Cancel, reload | nothing saved | PASS (still Allow, 12:03) |
 | Outage policy, non-admin | dev | invited account opens Settings | read-only, no control | PASS (Orphee, capture evidence/experience/v4-ux/settings-validator-policy-non-admin-LIVE_FORGE-dev.png) |
 | R17 gate in Passport | dev | MOBL-58 "Migrate first" Passport | Jira transition CLOSED with reason | PASS |
-| Passport "In short" (PR #39) | dev 4.39.0 | MOBL-58 Passport | summary of option, verified actions, gate | PASS; print dialog opened once |
+| Passport "In short" (PR #39) | dev 4.39.0 | MOBL-58 Passport | summary of option, verified actions, gate | PASS |
+| Passport print to PDF (A4) | dev | MOBL-58 Passport, Print or save as PDF | readable A4, gate and reason included | PASS: 2 pages, evidence/core/passport-MOBL-58-LIVE_FORGE-dev-2026-11-03.pdf |
 | Validator on gated issue, BLOCK policy | dev, AVT-9 | transition En cours | refused with a reason | PASS ("no ANTICIPATE decision has been recorded") |
 | R18 unreadable issue (403/404) | dev, AVT | reporter-only issue security | 403 path follows policy | NOT REPRODUCIBLE: the app still reads restricted issues on this site; unit tests (6) are the proof |
 | MCP after rollback | dev 6.0.0 | get-passport plan-3d6ca859 | COMPLETED, VERIFIED | PASS |
