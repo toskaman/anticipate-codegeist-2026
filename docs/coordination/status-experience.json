@@ -21,6 +21,7 @@
   "forgeVerification": "CORE_REPORTED_PRODUCTION_2.1.0_CLEAN_SITE_INSTALL_AND_EMPTY_STATE; NOT_INDEPENDENTLY_VERIFIED_BY_EXPERIENCE",
   "evidenceMode": "MOCK_TRANSPORT/LOCAL only; no real Jira action performed",
   "next": [
+    "CORE: open request R-37 in docs/coordination/EXPERIENCE_TO_CORE_REQUESTS.md (merge PR #37, deploy to dev, hosted checks)",
     "CORE validates the new frontend in an authenticated development installation; no deployment performed here",
     "Review the sample relation label mismatch noted in EXPERIENCE_CONTINUOUS_SAFETY.md"
   ],
@@ -175,5 +176,12 @@
       "creationTimeoutMs": 60000,
       "handoff": "docs/coordination/EXPERIENCE_UI_V3_CORE_FOLLOWUP.md"
     }
+  },
+  "openRequestForCore": {
+    "id": "R-37",
+    "file": "docs/coordination/EXPERIENCE_TO_CORE_REQUESTS.md",
+    "pr": "https://github.com/toskaman/anticipate-codegeist-2026/pull/37",
+    "state": "OPEN",
+    "createdAt": "2026-11-03"
   }
 }
