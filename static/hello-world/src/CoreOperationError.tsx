@@ -9,6 +9,15 @@ export interface OperationFailure {
   details?: Record<string, unknown>;
   context?: "sample";
 }
+/**
+ * Plans, snapshots and decision records are private to their creator (CORE
+ * ownership check). That refusal is not a Jira permission problem.
+ */
+export const PRIVATE_RECORD_GUIDANCE =
+  "This record belongs to the person who created it: ANTICIPATE plans and Passports are private to their creator. Ask them to share the Passport (JSON export or PDF), or start the guided demo to create your own. Your Jira permissions are not the cause.";
+function isPrivateRecord(failure: OperationFailure) {
+  return /private to the user who created/i.test(failure.message);
+}
 export function guidanceFor(failure: OperationFailure) {
   return failure.code === "EVIDENCE_CHANGED"
     ? "Evidence changed since this plan was built. Rebuild the snapshot, re-run comparison and review a new plan. Do not retry or re-approve this plan."
@@ -20,18 +29,20 @@ export function guidanceFor(failure: OperationFailure) {
           ? "The service response could not be verified. Read it again before using its results."
           : failure.code === "RATE_LIMITED"
             ? "Jira limited this request. Wait before trying the read again. No automatic retry was made."
-            : failure.code === "PERMISSION_DENIED"
-              ? "Check your Jira project permissions before trying this request again."
-              : failure.code === "SNAPSHOT_EXPIRED"
-                ? "Read a new snapshot and compare again. Existing plan status and audit can still be recovered."
-                : failure.retryable ||
-                    [
-                      "NETWORK_ERROR",
-                      "TIMEOUT",
-                      "UPSTREAM_UNAVAILABLE",
-                    ].includes(failure.code)
-                  ? "Try this read again when the service is available. No automatic retry was made."
-                  : "Check the selected project and request inputs before trying again.";
+            : failure.code === "PERMISSION_DENIED" && isPrivateRecord(failure)
+              ? PRIVATE_RECORD_GUIDANCE
+              : failure.code === "PERMISSION_DENIED"
+                ? "Check your Jira project permissions before trying this request again."
+                : failure.code === "SNAPSHOT_EXPIRED"
+                  ? "Read a new snapshot and compare again. Existing plan status and audit can still be recovered."
+                  : failure.retryable ||
+                      [
+                        "NETWORK_ERROR",
+                        "TIMEOUT",
+                        "UPSTREAM_UNAVAILABLE",
+                      ].includes(failure.code)
+                    ? "Try this read again when the service is available. No automatic retry was made."
+                    : "Check the selected project and request inputs before trying again.";
 }
 export default function CoreOperationError({
   failure,

@@ -82,6 +82,16 @@ for (const theme of ["light", "dark"] as const)
     // Chrome of the app is hidden; the report fills the page.
     for (const sel of [".ax-sidebar", ".ax-topbar", ".ax-footer", ".ax-btn"])
       await expect(page.locator(sel).first()).toBeHidden();
+    // Evidence counts stay on one row on paper, even in a narrow print
+    // viewport (hosted MOBL-58 PDF wrapped the third card to page 2).
+    const cards = article.locator(".ax-report__ev");
+    if ((await cards.count()) === 3) {
+      await page.setViewportSize({ width: 700, height: 1000 });
+      const tops = await cards.evaluateAll((els) =>
+        els.map((e) => Math.round(e.getBoundingClientRect().top)),
+      );
+      expect(new Set(tops).size).toBe(1);
+    }
     // Print forces the light paper palette whatever the screen theme.
     expect(
       await page.evaluate(
