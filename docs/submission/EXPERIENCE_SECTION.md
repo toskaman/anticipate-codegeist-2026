@@ -4,7 +4,7 @@ Proposed final wording for the Devpost form, to merge with CORE's `DEVPOST_DRAFT
 
 **Name:** ANTICIPATE — The Decision Firewall for Software Teams
 **Tagline:** Test the consequences. Prove the safeguards. Then ship.
-**Category:** Apps for Software Teams · **Bonus:** Rovo Agents, Atlassian MCP (Teamwork Graph only if integrated and demonstrated before submission)
+**Category:** Apps for Software Teams · **Bonus:** Atlassian MCP only (decision of 3 Nov 2026; Teamwork Graph is blocked by allowlisting, ECOHELP-180616)
 
 ## Inspiration
 
@@ -67,9 +67,9 @@ Teamwork Graph sources (pull requests, deployments, Confluence) once available; 
 
 ## Bonus write-ups (use only with the matching hosted proof)
 
-- **Rovo agent:** "ANTICIPATE Decision Reviewer answers retirement and upgrade questions in Rovo chat from the same engine as the app. It is read-only: it explains and links to the decision, and people approve in ANTICIPATE." Proof: LIVE_FORGE on the dev site (Rovo is not available on the production clean site).
+- **Rovo agent (product feature, not claimed as a bonus):** "ANTICIPATE Decision Reviewer answers retirement and upgrade questions in Rovo chat from the same engine as the app. It is read-only: it explains and links to the decision, and people approve in ANTICIPATE." Proof: LIVE_FORGE on the dev site (Rovo is not available on the production clean site).
 - **MCP:** "Five read-only MCP tools (evidence graph, simulate retirement, simulate upgrade, Passport, plan freshness) let an external AI client query the same decisions. Availability depends on the site and an administrator enabling MCP." Proof: external client on dev.
-- **Teamwork Graph:** do not submit this bonus unless a hosted integration shows a real extra relation before the deadline.
+- **Teamwork Graph:** not claimed. Atlassian has not allowlisted the graph scope for this app (ECOHELP-180616, `docs/evidence/TEAMWORK_GRAPH_ALLOWLIST.md`); the app shows it as Not configured.
 
 ## Wording to avoid
 
