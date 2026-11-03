@@ -122,3 +122,6 @@ Found during the hosted judge run on MOBL: option C ("Migrate consumers first") 
 
 ## 3 Nov 2026 - Judge journey on dev (MOBL, build 5e45ed5)
 Guided demo (6 issues, 4 links) → Analyze MOBL-58 → Scenario Lab (A BLOCKED, B NEEDS_REVIEW, C PASS suggested) → Decision Firewall (C: no violation) → plan (1 action) → approve → execute (VERIFIED, MOBL-58 comment) → Passport "Completed 1 of 1": PASS. User without create permission: unit tested only (needs a second account). Passport now exposes the validator decision (`gate`) because "Completed · Pass" alone was misleading for an assumed migration.
+
+## 3 Nov 2026 - R4 remediated: zod 3 → 4.6.7 in backend, contracts and engine
+No code change needed; backend 73, contracts 3, engine 11 green, typecheck and forge lint clean. Remaining `npm audit` items: 5 moderate (glob/minimatch via @forge/api and @forge/manifest; fix requires a breaking @forge/api major) - not exploitable at runtime in our context (build-time globbing of trusted manifest paths), tracked.
