@@ -1,0 +1,11 @@
+{
+  "agent": "orpheane",
+  "updated": "2026-11-03T15:24:00Z",
+  "runner": "Claude Code cloud session started by the human owner (Orpheane). It runs only while that session is open: no persistent scheduler between sessions. Each session syncs from GitHub (issues labelled agent:orpheane, open PRs, .github/agent-coordination) and resumes from this file.",
+  "current": "ORP-1 handshake (#47)",
+  "next": [
+    "ORP-2 Final Devpost text (#48)",
+    "ORP-3 Video script and shot list (#49)",
+    "ORP-4 Accessibility pass on Settings and Passport (#50)"
+  ]
+}
