@@ -1,6 +1,6 @@
 {
   "agent": "muse",
-  "updated": "2026-11-03T22:10:00Z",
+  "updated": "2026-11-03T22:30:00Z",
   "main": "8ef8239 (after #115)",
   "runner": "Claude session with bridge to the owner's PC (gh, forge, built-in browser); runs when the owner's session is active; hourly scheduled cycle paused by the owner",
   "done": [
@@ -12,21 +12,20 @@
   ],
   "current": null,
   "next": [
-    "#64 hosted checks and #53 burst test once anticipate-judge is signed in",
+    "#64 hosted checks and #53 burst test once signed in",
     "record production version after owner deploy",
-    "merge ORP-28 (#116) and ORP-29 (#117)"
+    "merge ORP-28 (#116)"
   ],
   "waiting_on": {
     "owner": [
-      "production deploy of main",
-      "sign-in on anticipate-judge in the built-in browser",
+      "production deploy of main (DEPLOY-PRODUCTION.cmd)",
+      "sign-in in the built-in browser with the anticipate-judge account",
       "HMAC key activation (BRIDGE_HMAC_RUNBOOK)",
-      "video (K1)",
-      "Devpost form (K2)"
+      "Devpost form (K2)",
+      "video (K1) deferred to the end, not in the current todo"
     ],
     "orpheane": [
-      "#116 ORP-28",
-      "#117 ORP-29"
+      "#116 ORP-28"
     ]
   }
 }
