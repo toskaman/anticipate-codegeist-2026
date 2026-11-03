@@ -23,7 +23,7 @@ Status: **ready** (copy as is) · **needs owner** (a person must act or decide) 
 | 13 | Install link (Atlassian sharing link) | `docs/submission/INSTALL_LINK.md` (first link, "Sharing with anyone") | — | ready; re-check it opens on the final build |
 | 14 | Testing instructions (detailed, for judges) | DEVPOST_FINAL → Testing instructions (+ INSTALL_LINK prerequisites and validator/MCP steps) | 191 w / 1,322 c | ready |
 | 15 | Demo video URL (public YouTube, under 5 min, app running, no unlicensed music or trademarks) | Script: `docs/submission/VIDEO_SCRIPT.md` (4:20) | — | **missing** (to record on the hosted judge site; risk K1) |
-| 16 | Screenshots / image gallery | Hosted captures needed. Current repo images are MOCK_TRANSPORT and must be labelled as such if used; `evidence/experience/v4-ux/value-direct-vs-transitive.svg` is a diagram of the sample dataset | — | needs owner (muse captures LIVE_FORGE screens, see #64) |
+| 16 | Screenshots / image gallery | Diagram pack: `docs/submission/gallery/` (cover, architecture, slip propagation; PNG 1500×1000 + SVG, captions and sources in its README). Hosted app screenshots still needed: muse captures LIVE_FORGE screens (#64); repo MOCK_TRANSPORT images must stay labelled if used | 3 images | ready for diagrams; needs owner for live screenshots |
 | 17 | Repository / "try it out" link | `README.md` (public repository) | — | ready (optional field) |
 | 18 | Team members and eligible representative | `docs/compliance/CODEGEIST_COMPLIANCE.md` row "Team" | — | needs owner |
 | 19 | English materials | All submission files are in English | — | ready |
