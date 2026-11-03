@@ -40,10 +40,12 @@ jobs:
       - run: npm run lint
       - run: npm run format:check
       - run: npm test
+      - run: npm run benchmark:graph
+      - run: npm run licenses:inventory
       - run: npm run build
   e2e:
-    # Playwright Chromium (UI journeys, axe, print, UI security). Pull requests only, to keep pushes fast.
-    if: github.event_name == 'pull_request'
+    # Playwright Chromium (UI journeys, axe, print, UI security). PRs and pushes to main; other pushes stay fast.
+    if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
     runs-on: ubuntu-latest
     defaults:
       run:

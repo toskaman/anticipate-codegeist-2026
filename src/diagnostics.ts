@@ -1,11 +1,31 @@
 /**
- * Development-only, READ-ONLY diagnostics web trigger. Verifies the real Jira response shapes the adapters rely on.
- * Never writes. Returns counts/shapes only (no issue text). Remove from the manifest before the jury release.
+ * DEV-ONLY module. NEVER re-export from src/main.ts or src/index.js, and NEVER
+ * reference in manifest.yml (security gate: test/diagnostics-gate.test.ts).
+ * Both triggers below additionally refuse to run when NODE_ENV=production.
  */
 import { createForgeJira } from './forge-adapters';
 import { extractGraph } from './jira/extractor';
+import { AppError } from './core/errors';
 
+/** Reads NODE_ENV without node types (none installed; mirrors the globalThis style used in main.ts). */
+const nodeEnv = (): string | undefined => {
+  const g = globalThis as { process?: { env?: Record<string, string | undefined> } };
+  return g.process?.env?.['NODE_ENV'];
+};
+
+/** Dev-only guard: refuses to run in production even if wired by mistake. */
+const assertDevOnly = (name: string): void => {
+  if (nodeEnv() === 'production') {
+    throw new AppError('UNSUPPORTED', `${name} is dev-only and disabled in production.`);
+  }
+};
+
+/**
+ * Development-only, READ-ONLY diagnostics web trigger. Verifies the real Jira response shapes the adapters rely on.
+ * Never writes. Returns counts/shapes only (no issue text). Remove from the manifest before the jury release.
+ */
 export async function diagnostics(req?: { queryParameters?: Record<string, string[]> }): Promise<{ statusCode: number; headers: Record<string, string[]>; body: string }> {
+  assertDevOnly('diagnostics');
   const jira = createForgeJira(null, 'app');
   const out: Record<string, unknown> = { at: new Date().toISOString() };
   const step = async (name: string, fn: () => Promise<unknown>) => {
@@ -33,6 +53,7 @@ export async function diagnostics(req?: { queryParameters?: Record<string, strin
  * `anticipate-demo-seed` label + a per-role label. Remove from the manifest before the jury release.
  */
 export async function seedDemo(req?: { queryParameters?: Record<string, string[]> }): Promise<{ statusCode: number; headers: Record<string, string[]>; body: string }> {
+  assertDevOnly('seedDemo');
   const jira = createForgeJira(null, 'app');
   const project = req?.queryParameters?.project?.[0];
   const json = (statusCode: number, o: unknown) => ({ statusCode, headers: { 'Content-Type': ['application/json'] }, body: JSON.stringify(o, null, 2) });
