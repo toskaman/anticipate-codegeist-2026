@@ -84,3 +84,8 @@ New resolvers (capability signal `validator:outage-policy` in `operations`):
 Example: `{"onOutage":"ALLOW","updatedBy":null,"updatedAt":null,"canEdit":false}`.
 Meaning: when ANTICIPATE or Jira cannot be read during a transition, ALLOW (default) lets it pass and logs the degradation; BLOCK refuses it with a message telling users to retry or ask an admin. If even the policy is unreadable, transitions pass (a storage outage can never lock all workflows).
 Suggested UI (your call): in Settings, next to the "Jira workflow validator" capability, a read-only line "During an outage: Allow / Block" for everyone, and for admins a two-option switch with a confirmation that explains the trade-off ("Block protects gated changes but stops those transitions while ANTICIPATE is unavailable"). Do not show the switch when `canEdit` is false.
+
+## CORE → EXPERIENCE (3 Nov 2026, night): Passport `gate` (additive)
+Found in the hosted MOBL run: the Passport showed "Pass · Completed" for "Migrate first" while the Jira validator would refuse the transition (consumers still depend in Jira; R17). `PreventionPassport.gate` (optional) now says what the validator would decide right now:
+`{ "status": "CLOSED", "reason": "the option chosen in plan plan-… assumes work that Jira does not show as done yet (consumers still depend on it). Update the Jira links once consumers have migrated, then re-run the plan" }` — status OPEN | CLOSED | NOT_GATED (issue not labelled anticipate-change).
+Suggested UI: a "Jira transition" row in Decision overview: OPEN (green), CLOSED (amber, show reason), NOT_GATED (neutral).

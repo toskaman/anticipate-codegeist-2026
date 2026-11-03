@@ -19,7 +19,7 @@ import { previewSample, createSample } from './sample';
 import { mergeSource, notConfiguredTwg } from '../context/sources';
 import type { EvidenceDrift } from '../../packages/contracts/src/index';
 import { stableHash } from '../../packages/simulation-core/src/index';
-import { ATTESTATION_VALID_DAYS, linksDigest, type DecisionRecord } from '../validator';
+import { ATTESTATION_VALID_DAYS, decideTransition, linksDigest, type DecisionRecord } from '../validator';
 
 export const CHANGE_LABEL = 'anticipate-change';
 export const VALIDATOR_POLICY_KEY = 'config:validator';
@@ -367,9 +367,21 @@ export function createService(d: Deps) {
       const cmp = await d.store.get<CmpRec>(K.cmp(`plan:${input.planId}`));
       if (!cmp) fail('NOT_FOUND', 'Comparison for this plan is missing.');
       const executions = await this.getExecutionStatus(ctx, input);
+      // Same decision the Jira workflow validator would take now (as the reading user; no write).
+      let gate: { status: 'OPEN' | 'CLOSED' | 'NOT_GATED'; reason: string } | undefined;
+      try {
+        const live = await d.jira.getIssue(rec.rootIssueKey);
+        const decision = await d.store.get<DecisionRecord>(`decision:${rec.rootIssueKey}`);
+        if (live.kind === 'ok' && !live.issue.labels.includes(CHANGE_LABEL)) gate = { status: 'NOT_GATED', reason: `${rec.rootIssueKey} is not labelled ${CHANGE_LABEL}; the workflow validator does not gate it.` };
+        else if (live.kind === 'ok') {
+          const dec = decideTransition(live.issue, decision, rec.rootIssueKey, d.now());
+          gate = dec.result ? { status: 'OPEN', reason: 'A valid decision attestation allows the Jira transition.' } : { status: 'CLOSED', reason: (dec.errorMessage ?? '').replace(/^ANTICIPATE Decision Firewall: /, '').slice(0, 500) };
+        }
+      } catch { gate = undefined; }
       const chosen = cmp!.comparison.results.find((r) => r.scenarioId === rec.plan.scenarioId);
       return {
         passportId: `passport-${input.planId}`, mode: ev.mode, snapshotId: rec.plan.snapshotId,
+        gate,
         evidence: ev.prov ? { state: ev.state, capturedAt: ev.prov.capturedAt, expiresAt: ev.prov.expiresAt, nodeCount: ev.prov.nodeCount,
           edgeCount: ev.prov.edgeCount, causalEdgeCount: ev.prov.causalEdges.length, snapshotDigest: ev.prov.snapshotDigest } : undefined,
         change: cmp!.request.change, comparison: cmp!.comparison, plan: rec.plan,

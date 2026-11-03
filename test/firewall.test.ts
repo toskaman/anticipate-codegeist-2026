@@ -73,6 +73,12 @@ describe('Decision Firewall: partial approval cannot authorize a transition (P0)
     const g = await gate(s);
     expect(g.result).toBe(false);
     expect(g.errorMessage).toMatch(/assumes work that Jira does not show as done/);
+    // the Passport tells the reader the same thing (gate status computed like the validator)
+    s.jira.issues.get('PAY-1')!.labels.push('anticipate-change');
+    const pass = await s.svc.getPreventionPassport(alice, { planId: p.planId });
+    expect(pass.plan?.status).toBe('COMPLETED');
+    expect(pass.gate).toMatchObject({ status: 'CLOSED' });
+    expect(pass.gate!.reason).toMatch(/assumes work/);
   });
   it('an empty approval is refused by the service itself', async () => {
     const s = setup();
