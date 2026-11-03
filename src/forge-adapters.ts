@@ -4,7 +4,7 @@ import { kvs } from '@forge/kvs';
 import { AppError } from './core/errors';
 import type { IssueFetch, JiraIssue, JiraPort, Store } from './core/ports';
 
-const FIELDS = 'summary,status,issuetype,issuelinks,components,project,labels,updated';
+const FIELDS = 'summary,status,issuetype,issuelinks,components,project,labels,updated,duedate,fixVersions';
 
 
 async function call(actor: 'user' | 'app', path: ReturnType<typeof route>, init?: { method?: string; body?: unknown }): Promise<Response> {
@@ -28,7 +28,7 @@ async function json<T>(res: Response, what: string): Promise<T> {
 
 interface RawIssue { id: string; key: string; fields: {
   summary?: string; status?: { name?: string; statusCategory?: { key?: string } }; issuetype?: { name?: string }; project?: { id?: string; key?: string }; updated?: string; labels?: string[];
-  components?: { id: string; name: string }[];
+  components?: { id: string; name: string }[]; duedate?: string | null; fixVersions?: { name: string; releaseDate?: string }[];
   issuelinks?: { id: string; type: { name: string; inward: string; outward: string }; inwardIssue?: { key: string }; outwardIssue?: { key: string } }[];
 } }
 
@@ -38,6 +38,7 @@ export function mapIssue(r: RawIssue): JiraIssue {
     id: r.id, key: r.key, summary: f.summary ?? '', status: f.status?.name ?? 'Unknown', statusCategory: f.status?.statusCategory?.key ?? null, issueType: f.issuetype?.name ?? 'Unknown',
     projectId: f.project?.id ?? '', projectKey: f.project?.key ?? r.key.split('-')[0]!, updated: f.updated ?? new Date(0).toISOString(),
     labels: f.labels ?? [], components: (f.components ?? []).map((c) => ({ id: c.id, name: c.name })),
+    due: f.duedate ?? null, versions: (f.fixVersions ?? []).map((v) => ({ name: v.name, releaseDate: v.releaseDate ?? null })),
     links: (f.issuelinks ?? []).flatMap((l): JiraIssue['links'] => {
       const base = { id: l.id, typeName: l.type.name, outward: l.type.outward, inward: l.type.inward };
       // On issue A, `outwardIssue: B` reads as "A <outward phrase> B" (e.g. A blocks B).

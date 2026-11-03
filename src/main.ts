@@ -12,7 +12,7 @@ const service = (req: ResolverRequest) => createService({ jira: createForgeJira(
 type Svc = ReturnType<typeof createService>;
 
 const ops: OperationName[] = ['getCapabilities', 'getPolicies', 'listProjects', 'getChangeCandidates', 'getGraphSnapshot', 'getEvidenceGraph', 'simulateChange',
-  'compareScenarios', 'generatePreventionPlan', 'approvePlan', 'executeApprovedPlan', 'getExecutionStatus', 'getPreventionPassport', 'checkPlanFreshness', 'previewSampleProject', 'createSampleProject', 'getValidatorPolicy', 'setValidatorPolicy'];
+  'compareScenarios', 'generatePreventionPlan', 'approvePlan', 'executeApprovedPlan', 'getExecutionStatus', 'getPreventionPassport', 'checkPlanFreshness', 'previewSampleProject', 'createSampleProject', 'getValidatorPolicy', 'setValidatorPolicy', 'simulateSlip'];
 
 for (const op of ops) {
   resolver.define(op, makeHandler(op, () => 'LIVE', newId, now, (ctx, input, req) => {
@@ -35,6 +35,7 @@ export const rovoSimulateRetirement = rovo.simulateRetirement;
 export const rovoSimulateUpgrade = rovo.simulateUpgrade;
 export const rovoGetPassport = rovo.getPassport;
 export const rovoCheckFreshness = rovo.checkFreshness;
+export const rovoSimulateSlip = rovo.simulateSlip;
 
 export { diagnostics, seedDemo } from './diagnostics';
 

@@ -1,3 +1,4 @@
+import { slipFromJira } from './slip-service';
 /**
  * ANTICIPATE backend use-cases. Pure orchestration over ports (Jira, Store, clock, ids).
  * Every mutation of Jira requires: stored plan, matching approval (plan hash), fresh snapshot, live permission check,
@@ -150,6 +151,8 @@ export function createService(d: Deps) {
 
   return {
     /** Validator outage policy. Default ALLOW (never lock a workflow because ANTICIPATE is down). Only Jira site admins can change it. */
+    /** Read-only what-if: dates and releases that move if an issue slips (see slip-service). */
+    async simulateSlip(ctx: Ctx, input: { issueKey: string; days: number }) { return slipFromJira(d.jira, ctx, input); },
     async getValidatorPolicy(ctx: Ctx) {
       if (!ctx.accountId) fail('PERMISSION_DENIED', 'An authenticated Atlassian user is required.');
       const cur = await d.store.get<{ onOutage: 'ALLOW' | 'BLOCK'; updatedBy: string | null; updatedAt: string | null }>(VALIDATOR_POLICY_KEY);
@@ -469,7 +472,7 @@ export function normalizeDate(s: string): string {
 }
 
 export const OPERATION_NAMES = ['getCapabilities', 'getPolicies', 'listProjects', 'getChangeCandidates', 'getGraphSnapshot', 'getEvidenceGraph', 'simulateChange',
-  'compareScenarios', 'generatePreventionPlan', 'approvePlan', 'executeApprovedPlan', 'getExecutionStatus', 'getPreventionPassport', 'checkPlanFreshness', 'previewSampleProject', 'createSampleProject', 'getValidatorPolicy', 'setValidatorPolicy',
+  'compareScenarios', 'generatePreventionPlan', 'approvePlan', 'executeApprovedPlan', 'getExecutionStatus', 'getPreventionPassport', 'checkPlanFreshness', 'previewSampleProject', 'createSampleProject', 'getValidatorPolicy', 'setValidatorPolicy', 'simulateSlip',
   // capability signals (not resolvers): scenario operations accepted by compareScenarios / generatePreventionPlan
   'scenario:UPGRADE_NODE', 'validator:outage-policy'];
 export { issueNodeId };

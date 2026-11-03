@@ -239,6 +239,15 @@ export type SampleProjectPlan = z.infer<typeof SampleProjectPlan>;
 
 // ---------- operation catalogue ----------
 /** Admin-controlled behaviour of the Jira workflow validator when ANTICIPATE cannot verify a decision (outage). */
+export const SlipSimulation = z.object({
+  issueKey: z.string().max(50), days: z.number().int(), assumptions: z.array(z.string().max(300)).max(10),
+  moved: z.array(z.object({ key: z.string().max(50), oldDue: z.string().max(10), newDue: z.string().max(10), slipDays: z.number().int(), path: z.array(z.string().max(50)).max(60) })).max(60),
+  absorbed: z.array(z.object({ key: z.string().max(50), due: z.string().max(10), path: z.array(z.string().max(50)).max(60) })).max(60),
+  unknown: z.array(z.object({ key: z.string().max(50), reason: z.string().max(200), path: z.array(z.string().max(50)).max(60) })).max(60),
+  releases: z.array(z.object({ name: z.string().max(255), releaseDate: z.string().max(10), lateByDays: z.number().int(), issues: z.array(z.string().max(50)).max(60) })).max(30),
+  unreadable: z.array(z.string().max(50)).max(60), truncated: z.boolean()
+});
+export type SlipSimulation = z.infer<typeof SlipSimulation>;
 export const ValidatorPolicy = z.object({
   onOutage: z.enum(['ALLOW', 'BLOCK']), updatedBy: Id.nullable(), updatedAt: IsoDate.nullable(), canEdit: z.boolean()
 });
@@ -262,6 +271,7 @@ export const OPERATIONS = {
   previewSampleProject: { input: z.object({ projectKey: z.string().regex(/^[A-Z][A-Z0-9_]+$/) }), output: SampleProjectPlan },
   createSampleProject: { input: z.object({ projectKey: z.string().regex(/^[A-Z][A-Z0-9_]+$/), confirm: z.literal(true) }), output: SampleProjectPlan },
   getValidatorPolicy: { input: z.object({}), output: ValidatorPolicy },
+  simulateSlip: { input: z.object({ issueKey: z.string().regex(/^[A-Z][A-Z0-9_]{0,19}-\d{1,9}$/), days: z.number().int().min(1).max(365) }), output: SlipSimulation },
   setValidatorPolicy: { input: z.object({ onOutage: z.enum(['ALLOW', 'BLOCK']) }), output: ValidatorPolicy }
 } as const;
 export type OperationName = keyof typeof OPERATIONS;

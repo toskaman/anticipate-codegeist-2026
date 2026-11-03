@@ -1,2 +1,2 @@
 // Forge entry (manifest handlers: index.<name>). Implementation lives in main.ts (TypeScript).
-export { handler, rovoGetGraph, rovoSimulateRetirement, rovoSimulateUpgrade, rovoGetPassport, rovoCheckFreshness, diagnostics, seedDemo, validateTransition } from './main';
+export { handler, rovoGetGraph, rovoSimulateRetirement, rovoSimulateUpgrade, rovoGetPassport, rovoCheckFreshness, rovoSimulateSlip, diagnostics, seedDemo, validateTransition } from './main';
