@@ -1,11 +1,20 @@
 {
   "agent": "orpheane",
-  "updated": "2026-11-03T15:24:00Z",
-  "runner": "Claude Code cloud session started by the human owner (Orpheane). It runs only while that session is open: no persistent scheduler between sessions. Each session syncs from GitHub (issues labelled agent:orpheane, open PRs, .github/agent-coordination) and resumes from this file.",
-  "current": "ORP-1 handshake (#47)",
+  "updated": "2026-11-03T16:20:00Z",
+  "runner": "Claude Code cloud session opened by the human owner (Orpheane). Runs only while that session is open; no scheduler between sessions. Each session resumes from GitHub (issues labelled agent:orpheane, open PRs) and this file.",
+  "current": null,
+  "review": [
+    { "issue": 48, "pr": 56, "task": "ORP-2 final Devpost text", "ci": "green" },
+    { "issue": 49, "pr": 57, "task": "ORP-3 video script", "ci": "green" },
+    { "issue": 50, "pr": 60, "task": "ORP-4 accessibility Settings/Passport", "ci": "green" },
+    { "issue": 58, "pr": 61, "task": "ORP-5 slip panel", "ci": "pending", "dependsOn": "PR 59 (merge first)" }
+  ],
+  "blockers": [
+    "Hosted checks need a human browser session (owner's Firefox); this runner cannot use it.",
+    "Firefox, WebKit and a native screen reader are not available in this runner."
+  ],
   "next": [
-    "ORP-2 Final Devpost text (#48)",
-    "ORP-3 Video script and shot list (#49)",
-    "ORP-4 Accessibility pass on Settings and Passport (#50)"
+    "After #59 and #61 merge and deploy: one hosted slip run on JDG (owner's session), record in EVIDENCE_PACK via muse.",
+    "Pick the next issue labelled agent:orpheane + status:ready."
   ]
 }
