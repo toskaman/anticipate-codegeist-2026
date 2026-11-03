@@ -23,6 +23,10 @@ describe("EvidenceChangeNotice for INVALIDATED plans (ORP-22)", () => {
     render(
       <EvidenceChangeNotice
         w={workflow("INVALIDATED", [
+          {
+            at: "2026-11-03T09:00:00Z",
+            event: "Plan invalidated: older reason",
+          },
           { at: "2026-11-03T10:00:00Z", event: "Plan approved" },
           { at: "2026-11-03T11:00:00Z", event: reason },
         ])}
@@ -33,6 +37,7 @@ describe("EvidenceChangeNotice for INVALIDATED plans (ORP-22)", () => {
       screen.getByText("Evidence changed — this plan cannot execute"),
     ).toBeTruthy();
     expect(screen.getByText(reason)).toBeTruthy();
+    expect(screen.queryByText("Plan invalidated: older reason")).toBeNull();
     expect(
       screen.getByRole("button", { name: "Rebuild snapshot" }),
     ).toBeTruthy();

@@ -138,10 +138,7 @@ export default function PreventionPlan({ w }: { w: Workflow }) {
   const anyFailed = w.records?.some((r) => r.status === "FAILED");
   const allVerified =
     !!w.records?.length && w.records.every((r) => r.status === "VERIFIED");
-  const evidenceBlocked =
-    plan.status === "EVIDENCE_CHANGED" ||
-    plan.status === "INVALIDATED" ||
-    !!w.evidenceFailure;
+  const evidenceBlocked = isPlanStale(plan.status) || !!w.evidenceFailure;
   const executed = w.attempted || !!w.records?.length;
   const steps: { label: string; state: StepState }[] = [
     {
