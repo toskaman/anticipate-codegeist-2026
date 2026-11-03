@@ -32,3 +32,7 @@ Forge KVS has no cross-key transactions and no server-side query by project; lis
 
 ## Effort and risk
 About 3 to 5 days CORE plus UI. Not a release blocker; build after the judge path is verified on a clean site.
+
+## Prototype status (3 Nov 2026)
+Backend prototype: `src/workspace/workspace.ts`, tests `test/workspace.test.ts` (8 adversarial cases: owner-only sharing, anonymous refusal, separation of duties, permission and plan-hash binding, live access removal, idempotent and concurrent approvals, revocation before execution, expiry, append-only audit). Not wired to resolvers, manifest or UI. Private plans are unchanged; sharing is explicit.
+Before wiring: the live `userHasPermission(accountId, project, permission)` adapter (Jira `POST /rest/api/3/permissions/check` as the app), resolver ops and contracts below, hosted tests with two real accounts.
