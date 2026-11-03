@@ -171,7 +171,7 @@ export function createService(d: Deps) {
       return { ...rec, canEdit: true };
     },
 
-    async previewSampleProject(_ctx: Ctx, input: { projectKey: string }) { return previewSample(d.jira, input.projectKey); },
+    async previewSampleProject(_ctx: Ctx, input: { projectKey: string }) { return previewSample(d.jira, input.projectKey, d.now()); },
 
     async createSampleProject(ctx: Ctx, input: { projectKey: string; confirm: true }) {
       if (!ctx.accountId) fail('PERMISSION_DENIED', 'Creating sample data requires an authenticated Atlassian user.');
@@ -184,7 +184,7 @@ export function createService(d: Deps) {
         if (!(await d.store.setIfAbsent(`lock-takeover:sample:${input.projectKey}:${cur?.token ?? 'missing'}`, lease.token))) fail('CONFLICT', 'Another request is creating sample data.');
         await d.store.set(lockKey, lease);
       }
-      try { return await createSample(d.jira, input.projectKey); }
+      try { return await createSample(d.jira, input.projectKey, d.now()); }
       finally { const held = await d.store.get<typeof lease>(lockKey); if (held?.token === lease.token) await d.store.delete(lockKey); }
     },
 

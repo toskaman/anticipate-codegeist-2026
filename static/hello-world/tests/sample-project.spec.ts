@@ -11,10 +11,15 @@ async function sampleCore(
     | "timeout"
     | "empty"
     | "conflict" = "success",
-  { openPanel = true, selectProject = true } = {},
+  {
+    openPanel = true,
+    selectProject = true,
+    includeDates = true,
+    existingSample = false,
+  } = {},
 ) {
   const calls: { operation: string; input: Record<string, unknown> }[] = [];
-  let created = false;
+  let created = existingSample;
   await page.route("**/__core_test", async (route) => {
     const call = route.request().postDataJSON() as (typeof calls)[number];
     calls.push(call);
@@ -28,6 +33,21 @@ async function sampleCore(
         (role, index) => ({
           role,
           summary: `${role} sample ticket`,
+          ...(includeDates
+            ? {
+                dueDate:
+                  existingSample && role === "api"
+                    ? null
+                    : [
+                        "2026-11-09",
+                        "2026-11-16",
+                        "2026-11-16",
+                        "2026-11-23",
+                        "2026-11-09",
+                        "2026-11-23",
+                      ][index],
+              }
+            : {}),
           issueKey: created ? `ABC-${index === 4 ? 3 : index + 1}` : null,
           status: created
             ? mode === "partial" && role === "test"
@@ -166,6 +186,16 @@ test("sample preparation requires preview and confirmation, then analyzes real J
     .filter({ hasText: "api sample ticket" });
   await expect(apiRow).toContainText("not in Jira yet");
   await expect(apiRow).toContainText("Will be created");
+  await expect(apiRow).toContainText("Planned due: 2026-11-09");
+  await expect(
+    page.getByRole("list", { name: "Sample tickets" }).locator("time"),
+  ).toHaveCount(6);
+  await expect(
+    page
+      .getByRole("list", { name: "Sample tickets" })
+      .getByRole("listitem")
+      .filter({ hasText: "checkout sample ticket" }),
+  ).toContainText("Planned due: 2026-11-16");
   await page
     .getByRole("button", {
       name: "Create missing sample data in Jira",
@@ -188,6 +218,7 @@ test("sample preparation requires preview and confirmation, then analyzes real J
     .click();
   await expect(apiRow).toContainText("ABC-1");
   await expect(apiRow).toContainText("Created · verified in Jira");
+  await expect(apiRow).toContainText("Due: 2026-11-09");
   // Once everything is in Jira, analyzing is the highlighted next step.
   await expect(page.getByText("Sample data is in Jira.")).toBeVisible();
   await expect(
@@ -233,6 +264,51 @@ test("sample preparation requires preview and confirmation, then analyzes real J
   expect(
     calls.find((call) => call.operation === "getGraphSnapshot")?.input,
   ).toMatchObject({ projectId: "100", rootIssueKey: "ABC-1", source: "JIRA" });
+});
+test("sample preview preserves missing Jira dates and supports older backends without due dates", async ({
+  page,
+}) => {
+  const calls = await sampleCore(page, "success", { existingSample: true });
+  await page
+    .getByRole("button", { name: "Preview sample data", exact: true })
+    .click();
+  const rows = page
+    .getByRole("list", { name: "Sample tickets" })
+    .getByRole("listitem");
+  await expect(rows.filter({ hasText: "api sample ticket" })).toContainText(
+    "No due date in Jira",
+  );
+  await expect(
+    rows.filter({ hasText: "api sample ticket" }).locator("time"),
+  ).toHaveCount(0);
+  await expect(
+    rows.filter({ hasText: "checkout sample ticket" }),
+  ).toContainText("Due: 2026-11-16");
+  expect(
+    calls.filter((call) => call.operation === "createSampleProject"),
+  ).toHaveLength(0);
+  await page.unroute("**/__core_test");
+  const legacyCalls = await sampleCore(page, "success", {
+    includeDates: false,
+  });
+  await page
+    .getByRole("button", { name: "Preview sample data", exact: true })
+    .click();
+  await expect(
+    page.getByRole("list", { name: "Sample tickets" }).getByRole("listitem"),
+  ).toHaveCount(6);
+  await expect(
+    page.getByRole("list", { name: "Sample tickets" }).locator("time"),
+  ).toHaveCount(0);
+  await expect(
+    page.getByRole("button", {
+      name: "Create missing sample data in Jira",
+      exact: true,
+    }),
+  ).toBeEnabled();
+  expect(
+    legacyCalls.filter((call) => call.operation === "createSampleProject"),
+  ).toHaveLength(0);
 });
 for (const mode of ["denied", "partial", "timeout", "empty"] as const)
   test(`sample preparation handles ${mode} without hidden writes or automatic retries`, async ({
