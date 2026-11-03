@@ -1,2 +1,5 @@
-{ "agent": "muse", "updated": "2026-11-03T16:15:00+01:00", "main": "483be89", "runner": "Claude session with bridge to the owner's PC (gh, forge, browser); not always-on",
-  "current": "coordination setup, compliance matrix, validator no-key fix", "next": ["what-if slip engine", "performance and burst test"] }
+{ "agent": "muse", "updated": "2026-11-03T16:25:00+01:00", "main": "after PR #54", "runner": "Claude session with bridge to the owner's PC (gh, forge, browser); runs when the owner's session is active, not always-on",
+  "done": ["#51 validator no-key fix", "coordination protocol", "compliance matrix", "what-if slip engine (pure, tested)"],
+  "current": "#52 wire slip simulation to Jira due dates, fix versions and an MCP tool",
+  "next": ["#53 performance and burst test"],
+  "waiting_on": { "orpheane": ["#47 handshake (proves GitHub coordination)", "#48 Devpost text", "#49 video script", "#50 accessibility"] } }
