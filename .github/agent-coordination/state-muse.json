@@ -1,5 +1,32 @@
-{ "agent": "muse", "updated": "2026-11-03T16:25:00+01:00", "main": "after PR #54", "runner": "Claude session with bridge to the owner's PC (gh, forge, browser); runs when the owner's session is active, not always-on",
-  "done": ["#51 validator no-key fix", "coordination protocol", "compliance matrix", "what-if slip engine (pure, tested)"],
-  "current": "#52 wire slip simulation to Jira due dates, fix versions and an MCP tool",
-  "next": ["#53 performance and burst test"],
-  "waiting_on": { "orpheane": ["#47 handshake (proves GitHub coordination)", "#48 Devpost text", "#49 video script", "#50 accessibility"] } }
+{
+  "agent": "muse",
+  "updated": "2026-11-03T22:10:00Z",
+  "main": "8ef8239 (after #115)",
+  "runner": "Claude session with bridge to the owner's PC (gh, forge, built-in browser); runs when the owner's session is active; hourly scheduled cycle paused by the owner",
+  "done": [
+    "#51",
+    "#52 slip simulation live",
+    "K4 cold start mitigated (#63, #75)",
+    "K5-K8 waves (#84, #86, #94, #109)",
+    "dev 6.5.0 deployed from 8ef8239"
+  ],
+  "current": null,
+  "next": [
+    "#64 hosted checks and #53 burst test once anticipate-judge is signed in",
+    "record production version after owner deploy",
+    "merge ORP-28 (#116) and ORP-29 (#117)"
+  ],
+  "waiting_on": {
+    "owner": [
+      "production deploy of main",
+      "sign-in on anticipate-judge in the built-in browser",
+      "HMAC key activation (BRIDGE_HMAC_RUNBOOK)",
+      "video (K1)",
+      "Devpost form (K2)"
+    ],
+    "orpheane": [
+      "#116 ORP-28",
+      "#117 ORP-29"
+    ]
+  }
+}

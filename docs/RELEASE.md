@@ -6,7 +6,7 @@ Validated: 3 Nov 2026, 13:40 Paris (CORE). Versions and test counts refreshed 3 
 |---|---|
 | main | f9ce7a5 (PRs #84 K5, #86 K6, #94 K7, #81–#110) |
 | Forge app id | 39a28f48-c891-4d86-a3cf-c14409cbd29e |
-| Development | v6.3.0 on one-atlas-euza (memoryMB 1024; last version recorded in EVIDENCE_PACK, K4 section) |
+| Development | v6.5.0 on one-atlas-euza, deployed 3 Nov 2026 ~22:00 UTC from main 8ef8239 (K5–K8 included; local gate before deploy: backend 142/142, forge lint clean) |
 | Production | v2.30.0 from main d995021 (memoryMB 1024, slip simulation, ORP-6/7), installs from the public link; recorded in EVIDENCE_PACK "Production 2.30.0" |
 | Scopes | read:jira-work, write:jira-work, read:jira-user, storage:app (no graph scopes) |
 | Feature flags | none; validator outage policy per site (default Allow) |
