@@ -66,7 +66,7 @@ describe('Jira workflow validator (Decision Firewall, attestation schema 2)', ()
     expect(decideTransition(gated([...two].reverse()), att({ linksDigest: linksDigest(two) }), 'X-1', now).result).toBe(true);
   });
   it('verified execution writes an attestation bound to the issue, plan and post-execution links', async () => {
-    const jira = demoJira(); const store = memoryStore(); let n = 0; let t = new Date('2026-11-02T09:00:00Z');
+    const jira = demoJira(); const store = memoryStore(); let n = 0; const t = new Date('2026-11-02T09:00:00Z');
     const svc = createService({ jira, store, now: () => t, newId: () => `v${++n}` });
     const ctx = { requestId: 'r', accountId: 'u', installationId: 'i' };
     const s = await svc.getGraphSnapshot(ctx, { projectId: 'PAY', rootIssueKey: 'PAY-1', source: 'JIRA', maxDepth: 3 });
