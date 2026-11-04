@@ -148,3 +148,26 @@ Each of these is either tested LOCAL only or not observed at all. The browser ch
 | Hosted screenshots for the Devpost gallery | none (gallery has diagrams only) | LIVE_FORGE captures of graph, Scenario Lab, Firewall, Passport |
 | Demo video (K1) | none | Recording per `docs/submission/VIDEO_SCRIPT.md` on the hosted judge site |
 
+
+## 4 Nov 2026 — LIVE_FORGE_DEV: 10-parallel burst (#53) and Decision Radar end to end (#132)
+
+Environment: development v6.10.0 (main 8cd6dc6), then redeployed from main 8782a3f (radar fix #150; version number not captured), site one-atlas-euza, signed in as the site owner in the built-in browser. Requests are the app's own `invokeExtension` calls (captured from the running Custom UI and replayed in the page; same user, same context token). Read-only operation for the load test.
+
+### Burst test, `listProjects` (reads Jira), 14:50:18–14:50:37 UTC
+| Concurrency | Samples | Success | p50 | p95 | max | wall per burst |
+|---|---|---|---|---|---|---|
+| 1 | 1 | 1/1 | 847 ms | 847 ms | 847 ms | 0.85 s |
+| 5 | 5 | 5/5 | 982 ms | 1827 ms | 1827 ms | 1.83 s |
+| 10 (×3 bursts, 2 s apart) | 30 | **30/30** | **757 ms** | **1899 ms** | 1942 ms | 1.84–1.94 s |
+
+No error codes, no RATE_LIMITED (36 identical requests stay under the app's 60-per-window throttle by design). The ~1.8–1.9 s tail matches extra Forge instances starting under concurrency. Limits: one site, one user, one read operation; analysis/compare/execute under load not measured.
+
+### Decision Radar, real Jira events (TD demo project)
+1. Plan `plan-298cc464…` generated from TD-1: radar coverage **8 indexed, 0 unindexed**, state ACTIVE, `lastObservedAt` null.
+2. 14:51:28.2 UTC: real link TD-4 ↔ TD-6 ("Relates") created via Jira REST. Forge log: `radarOnJiraEvent` invoked at **14:51:31.7 (≈3.5 s)** but returned IGNORED: the live payload did not match the documented flat shape. The plan correctly showed **DEGRADED / INVALID_EVENT**, not "all clear". Fixed in #150 (fields accepted flat or under `issueLink`, missing timestamp tolerated, rejected shapes logged as key names only).
+3. 15:07:27.8 UTC: the same link deleted (also cleans up the test data). Event recorded at **15:07:30.96 (≈3.2 s)**: `LINK_DELETED.59324`, issues 66403 / 66405 (TD-4 / TD-6), type Relates; **needsReview: true**.
+4. 15:08:40 UTC: `checkPlanFreshness` → fresh (link created then removed: evidence back to the approved state) → attention cleared, state **ACTIVE**, reasons [].
+Status: Decision Radar first slice is **LIVE_FORGE_DEV** for link events. Not yet observed live: `avi:jira:deleted:issue`; production event delivery.
+
+### Production
+Owner deployed production from main 8cd6dc6 on 4 Nov (~14:40 UTC). Verified on toskaman5962 at ~15:15 UTC: capabilities list `getPlanAttention` and `simulatePortfolio`. Production does not yet include #150 (radar payload fix).
