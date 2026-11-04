@@ -6,6 +6,7 @@ import {
   graph,
   meta,
   response,
+  lockedSharedDecisionsFlag,
 } from "./core-test-data";
 
 // MOCK_TRANSPORT only: checks which scenarios the UI requests; no Jira call.
@@ -64,6 +65,9 @@ async function scenarioLab(page: Page, upgrade: boolean) {
         };
         break;
       }
+      case "getFeatureFlag":
+        data = lockedSharedDecisionsFlag;
+        break;
       default:
         throw new Error(`Unexpected resolver ${call.operation}`);
     }

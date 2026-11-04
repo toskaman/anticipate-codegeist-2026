@@ -181,7 +181,10 @@ export default function Settings({
         </div>
       </Panel>
       <ValidatorPolicyPanel client={w.client} capabilities={caps} />
-      <SharedDecisionAcceptancePanel client={w.client} currentPlanId={w.plan?.planId ?? null} />
+      <SharedDecisionAcceptancePanel
+        client={w.client}
+        currentPlanId={w.plan?.planId ?? null}
+      />
       <Panel
         title="Use ANTICIPATE from Rovo"
         id="rovo-title"

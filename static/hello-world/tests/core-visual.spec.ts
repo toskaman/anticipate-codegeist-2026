@@ -3,7 +3,12 @@
 // Screenshots go to evidence/experience/v3-redesign/visual (see docs/design/UI_VISUAL_QA.md).
 import { test, expect, type Page } from "@playwright/test";
 import type { ExecutionRecord } from "@anticipate/contracts";
-import { response, meta, capabilities } from "./core-test-data";
+import {
+  response,
+  meta,
+  capabilities,
+  lockedSharedDecisionsFlag,
+} from "./core-test-data";
 import {
   showcaseProject,
   showcaseGraph,
@@ -102,6 +107,9 @@ async function showcaseCore(
         break;
       case "getPreventionPassport":
         data = showcasePassport(plan, records);
+        break;
+      case "getFeatureFlag":
+        data = lockedSharedDecisionsFlag;
         break;
       default:
         throw new Error(`Unexpected operation ${operation}`);

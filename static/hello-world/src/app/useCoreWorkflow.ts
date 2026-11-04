@@ -663,7 +663,17 @@ export function useCoreWorkflow(client: ForgeClient) {
 export type Workflow = ReturnType<typeof useCoreWorkflow>;
 
 /** Backend refusals that are decided before any Jira write (never TIMEOUT, NETWORK_ERROR, INVALID_RESPONSE or INTERNAL). */
-const REFUSAL_CODES = new Set(["PERMISSION_DENIED", "CONFLICT", "UNSUPPORTED", "EVIDENCE_CHANGED", "STALE_APPROVAL", "VALIDATION", "NOT_FOUND"]);
+const REFUSAL_CODES = new Set([
+  "PERMISSION_DENIED",
+  "CONFLICT",
+  "UNSUPPORTED",
+  "EVIDENCE_CHANGED",
+  "STALE_APPROVAL",
+  "VALIDATION",
+  "NOT_FOUND",
+]);
 export function isDefinitiveRefusal(e: unknown): e is CoreClientError {
-  return e instanceof CoreClientError && !!e.requestId && REFUSAL_CODES.has(e.code);
+  return (
+    e instanceof CoreClientError && !!e.requestId && REFUSAL_CODES.has(e.code)
+  );
 }

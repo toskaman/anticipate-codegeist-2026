@@ -7,6 +7,7 @@ import {
   passport,
   plan,
   response,
+  lockedSharedDecisionsFlag,
 } from "./core-test-data";
 
 // ORP-4 (#50). MOCK_TRANSPORT only: accessibility of Settings (validator
@@ -53,6 +54,9 @@ async function adminSettings(page: Page, theme: "light" | "dark") {
           updatedAt: meta.generatedAt,
         };
         data = policy;
+        break;
+      case "getFeatureFlag":
+        data = lockedSharedDecisionsFlag;
         break;
       default:
         throw new Error(`Unexpected resolver ${call.operation}`);

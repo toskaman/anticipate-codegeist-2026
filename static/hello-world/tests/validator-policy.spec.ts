@@ -7,6 +7,7 @@ import {
   passport,
   plan,
   response,
+  lockedSharedDecisionsFlag,
 } from "./core-test-data";
 
 // MOCK_TRANSPORT only: validator outage policy (Settings) and Passport gate.
@@ -69,6 +70,8 @@ async function settings(
           updatedAt: meta.generatedAt,
         };
         return route.fulfill({ json: response(policy) });
+      case "getFeatureFlag":
+        return route.fulfill({ json: response(lockedSharedDecisionsFlag) });
       default:
         throw new Error(`Unexpected resolver ${call.operation}`);
     }
