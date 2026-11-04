@@ -164,6 +164,20 @@ Built-in browser pane, owner session. Read-only: nothing written to Jira. Missio
 
 Same outcome as `test/demo2-portfolio-collision.test.ts` (#164). Finding: the conflict reasons showed internal ids (`change-1`, `change-2`) instead of the change names; fixed in the same PR (names substituted in reasons, Playwright assertion added).
 
+## DEMO 3 — the decision that became unsafe (4 Nov 2026, 23:42–23:45 CET) · LIVE_FORGE_DEV, one-atlas-euza 6.20.0
+
+Built-in browser pane, owner session. TD-1 → Scenario Lab (Retain temporarily) → Firewall → plan (5 actions, created 23:42 CET); **one** action approved (decision comment on TD-1), status "Approved · not executed".
+
+| Step | Observed | Result |
+|---|---|---|
+| Jira evidence changes after approval | link 59310 "TD-1 blocks TD-6" deleted via Jira REST at 22:43:37 UTC | — |
+| Decision Radar | ~15 s later, Refresh radar: **Needs review**, "Link deleted · Blocks, occurred 23:43 CET, observed 23:43 CET", monitoring Listening, 8 indexed | PASS (live event → attention) |
+| Re-check evidence | "Evidence changed — this plan cannot execute": Removed relations `issue:TD-6 DEPENDS_ON issue:TD-1 [CONFIRMED]`; added/unknown none; actions marked "Evidence changed"; "This decision is blocked. Rebuild the snapshot and review a new plan." | PASS (plan invalidated before any execution) |
+| Zero writes | TD-1 comments after the run: latest 12:21:37 −05:00 (= 18:21 CET, the earlier verified run); no new comment | PASS |
+| Cleanup | link restored as "TD-6 is blocked by TD-1" (new id) | done |
+
+This completes DEMO 3 end to end on hosted Jira (approval → real Jira change → radar attention → evidence re-check → blocked, 0 writes). The execute-time refusal path itself was shown earlier the same day (plan-522a2808…, EVIDENCE_CHANGED on execute).
+
 ## Hosted (LIVE_FORGE) proofs still missing
 
 Each of these is either tested LOCAL only or not observed at all. The browser checks belong to muse (#64), and the video belongs to the owner.
