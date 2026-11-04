@@ -7,7 +7,7 @@ Validated: 3 Nov 2026, 13:40 Paris (CORE). Versions and test counts refreshed 4 
 | main | 4d937b6 (adds #144 shared-decision execution gate, #145 approval fault tolerance, #146 Decision Radar backend) |
 | Forge app id | 39a28f48-c891-4d86-a3cf-c14409cbd29e |
 | Development | v6.9.0 on one-atlas-euza, 4 Nov 2026 ~04:30 UTC (main 4d937b6) |
-| Production | v2.32.0, 3 Nov 2026 ~22:55 UTC (does NOT include #144–#146; production deploys are owner-only), installs from the public link |
+| Production | deployed by the owner 4 Nov 2026 ~15:40 UTC from main ea3ee7c (includes #144–#151); verified on toskaman5962 |
 | Scopes | read:jira-work, write:jira-work, read:jira-user, storage:app (no graph scopes) |
 | Feature flags | `sharedDecisions`: release-locked (`SHARED_DECISIONS_RELEASED = false`, enabling refused even for site admins) until hosted two-account acceptance; validator outage policy per site (default Allow) |
 | Capabilities | Jira read/write AVAILABLE; workflow validator AVAILABLE; Rovo agent AVAILABLE where Rovo exists; Rovo MCP PERMISSION_REQUIRED (admin toggle); Teamwork Graph NOT_CONFIGURED (allowlist ECOHELP-180616); Confluence NOT_CONFIGURED |

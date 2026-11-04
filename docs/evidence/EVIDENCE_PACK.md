@@ -171,3 +171,15 @@ Status: Decision Radar first slice is **LIVE_FORGE_DEV** for link events. Not ye
 
 ### Production
 Owner deployed production from main 8cd6dc6 on 4 Nov (~14:40 UTC). Verified on toskaman5962 at ~15:15 UTC: capabilities list `getPlanAttention` and `simulatePortfolio`. Production does not yet include #150 (radar payload fix).
+
+### Burst test, `getGraphSnapshot` (3-hop Jira crawl of TD-1, 8 records; writes a snapshot), 4 Nov ~15:43 UTC, LIVE_FORGE_DEV
+| Concurrency | Samples | Success | p50 | p95 | max |
+|---|---|---|---|---|---|
+| 1 | 1 | 1/1 | 1522 ms | 1522 ms | 1522 ms |
+| 5 | 5 | 5/5 | 2369 ms | 2703 ms | 2703 ms |
+| 10 (×2 bursts, 2 s apart) | 20 | **20/20** | **1363 ms** | **2636 ms** | 2690 ms |
+
+Same method as the `listProjects` burst (app's own invocations, one user, development, main ea3ee7c). No error codes, no RATE_LIMITED. Small graph (8 nodes): larger graphs are covered only by the synthetic crawl benchmark, not by this hosted test.
+
+### Production after owner deploy (4 Nov ~15:40 UTC, main ea3ee7c)
+toskaman5962: startup invocations 1644 / 1412 ms (cold), then `getCapabilities` 325 ms; `getPlanAttention` listed.
