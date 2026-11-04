@@ -53,24 +53,35 @@ const NOTE = 'Radar hints come from Jira events, which can be delayed or missed.
 export function normaliseEvent(ev: unknown, observedAt: string): RadarFact | null {
   if (!ev || typeof ev !== 'object') return null;
   const e = ev as Record<string, unknown>;
-  const ts = typeof e.timestamp === 'number' && Number.isFinite(e.timestamp) ? e.timestamp : null;
-  if (ts === null) return null;
-  const occurredAt = new Date(ts).toISOString();
+  const obj = (v: unknown) => (v && typeof v === 'object' ? (v as Record<string, unknown>) : null);
   const str = (v: unknown) => (typeof v === 'number' ? String(v) : typeof v === 'string' ? v : null);
-  if (e.eventType === 'avi:jira:created:issuelink' || e.eventType === 'avi:jira:deleted:issuelink') {
-    const linkId = str(e.id); const a = str(e.sourceIssueId); const b = str(e.destinationIssueId);
+  // Timestamp: documented as epoch ms; tolerate ISO strings and its absence (then the observation time is used and labelled).
+  const rawTs = typeof e.timestamp === 'number' && Number.isFinite(e.timestamp) ? e.timestamp : typeof e.timestamp === 'string' ? Date.parse(e.timestamp) : NaN;
+  const occurredAt = Number.isFinite(rawTs) ? new Date(rawTs).toISOString() : observedAt;
+  const type = str(e.eventType);
+  if (type === 'avi:jira:created:issuelink' || type === 'avi:jira:deleted:issuelink') {
+    // Live payloads (dev, 4 Nov 2026) did not match the flat documented shape: accept the fields flat or under `issueLink`.
+    const l = obj(e.issueLink) ?? e;
+    const linkId = str(l.id); const a = str(l.sourceIssueId); const b = str(l.destinationIssueId);
     if (!linkId || !NUM.test(linkId) || !a || !NUM.test(a) || !b || !NUM.test(b)) return null;
-    const type: RadarFactType = e.eventType === 'avi:jira:created:issuelink' ? 'LINK_CREATED' : 'LINK_DELETED';
-    const lt = e.issueLinkType && typeof e.issueLinkType === 'object' ? str((e.issueLinkType as Record<string, unknown>).name) : null;
-    return { factId: `${type}.${linkId}.${ts}`, type, issueIds: [...new Set([a, b])], linkId, linkType: lt ? lt.slice(0, 60) : null, occurredAt, observedAt };
+    const t: RadarFactType = type === 'avi:jira:created:issuelink' ? 'LINK_CREATED' : 'LINK_DELETED';
+    const lt = obj(l.issueLinkType); const ltName = lt ? str(lt.name) ?? str(lt.outwardName) : null;
+    // A link id is created and deleted once: type + link id is a stable fact id even without a timestamp.
+    return { factId: `${t}.${linkId}`, type: t, issueIds: [...new Set([a, b])], linkId, linkType: ltName ? ltName.slice(0, 60) : null, occurredAt, observedAt };
   }
-  if (e.eventType === 'avi:jira:deleted:issue') {
-    const issue = e.issue && typeof e.issue === 'object' ? (e.issue as Record<string, unknown>) : null;
+  if (type === 'avi:jira:deleted:issue') {
+    const issue = obj(e.issue);
     const id = issue ? str(issue.id) : null;
     if (!id || !NUM.test(id)) return null;
-    return { factId: `ISSUE_DELETED.${id}.${ts}`, type: 'ISSUE_DELETED', issueIds: [id], linkId: null, linkType: null, occurredAt, observedAt };
+    return { factId: `ISSUE_DELETED.${id}`, type: 'ISSUE_DELETED', issueIds: [id], linkId: null, linkType: null, occurredAt, observedAt };
   }
   return null;
+}
+
+/** Shape of an event for diagnostics: key names and value types only, never values (no PII, no content). */
+export function eventShape(ev: unknown, depth = 0): unknown {
+  if (!ev || typeof ev !== 'object' || depth > 2) return typeof ev;
+  return Object.fromEntries(Object.entries(ev as Record<string, unknown>).slice(0, 30).map(([k, v]) => [k.slice(0, 40), eventShape(v, depth + 1)]));
 }
 
 export function createRadar(p: { store: QueryableStore; now: () => Date }) {
