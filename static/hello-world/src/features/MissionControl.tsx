@@ -247,8 +247,8 @@ export default function MissionControl({
           {listing && !w.projects.length && (
             <Notice tone="neutral" title="No Jira projects found">
               <p>
-                No projects available. Check Jira project access; no
-                demonstration project is inserted.
+                No projects available. Check your Jira project access, then
+                reload this page.
               </p>
               <ul className="ax-small ax-steps-list">
                 <li>

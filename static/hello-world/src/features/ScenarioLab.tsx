@@ -121,7 +121,7 @@ export default function ScenarioLab({ w }: { w: Workflow }) {
         step="Step 3 of 6 · Compare options"
         icon="scenarios"
         title="Scenario Lab"
-        lead="Compare up to three ways to make the change, simulated on the same dependency analysis. Deterministic, read-only and reproducible: nothing changes in Jira."
+        lead="Compare possible consequences before choosing an option to review."
         actions={
           selected && (
             <button
@@ -148,7 +148,8 @@ export default function ScenarioLab({ w }: { w: Workflow }) {
             </button>
           }
         >
-          Read a Jira snapshot in Mission Control first.
+          In Mission Control, choose a Jira project and issue, then select
+          Analyze dependencies.
         </EmptyState>
       ) : (
         <>

@@ -107,11 +107,13 @@ export class ForgeClient {
                       ? "Sample preview response not received. No Jira creation was requested."
                       : operation === "simulatePortfolio"
                         ? "Read-only portfolio simulation timed out. No Jira change was requested. Retry explicitly or read fresh evidence."
-                        : operation === "getPlanAttention"
-                          ? "Radar read timed out. No monitoring or freshness state is assumed. Retry explicitly."
-                          : operation === "checkPlanFreshness"
-                            ? "Evidence freshness response not received. No freshness is assumed."
-                            : "Response not received. Recover execution status by planId before another write.",
+                        : operation === "simulateSlip"
+                          ? "Read-only slip simulation timed out. No Jira dates were changed. Select Try again to repeat the calculation."
+                          : operation === "getPlanAttention"
+                            ? "Radar read timed out. No monitoring or freshness state is assumed. Retry explicitly."
+                            : operation === "checkPlanFreshness"
+                              ? "Evidence freshness response not received. No freshness is assumed."
+                              : "Response not received. Recover execution status by planId before another write.",
                 ),
               ),
             this.timeoutMs ??

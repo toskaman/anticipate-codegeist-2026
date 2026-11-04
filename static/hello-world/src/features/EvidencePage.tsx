@@ -17,7 +17,7 @@ export default function EvidencePage({ w }: { w: Workflow }) {
         title="Evidence Graph"
         lead={
           s
-            ? "What depends on this change, and how strong the evidence is. Every link points to the Jira record it came from."
+            ? "Trace the dependencies the app could read and inspect the evidence behind them."
             : "See what depends on a change before you touch it."
         }
         actions={
@@ -77,7 +77,8 @@ export default function EvidencePage({ w }: { w: Workflow }) {
             </button>
           }
         >
-          Choose a Jira change in Mission Control and read its snapshot first.
+          In Mission Control, choose a Jira project and issue, then select
+          Analyze dependencies.
         </EmptyState>
       )}
     </>
