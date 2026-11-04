@@ -25,6 +25,8 @@ import {
   type EvidenceStatus,
 } from "../app/copy";
 
+const PortfolioPanel = React.lazy(() => import("./PortfolioPanel"));
+
 const uncertaintyReason: Record<string, string> = {
   UNKNOWN_EDGE: "Unknown relationship",
   INFERRED_ONLY: "Inferred only",
@@ -460,6 +462,15 @@ export default function ScenarioLab({ w }: { w: Workflow }) {
           )}
         </>
       )}
+      {s &&
+        w.capabilities?.portfolioSimulation === "AVAILABLE" &&
+        w.capabilities.operations.includes("simulatePortfolio") && (
+          <React.Suspense
+            fallback={<p role="status">Loading portfolio tools…</p>}
+          >
+            <PortfolioPanel w={w} />
+          </React.Suspense>
+        )}
       {s && <SlipPanel w={w} />}
     </>
   );

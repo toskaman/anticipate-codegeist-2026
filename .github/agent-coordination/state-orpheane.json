@@ -1,44 +1,28 @@
 {
   "agent": "orpheane",
-  "updated": "2026-11-03T23:50:00Z",
+  "updated": "2026-11-04T10:09:45Z",
   "runner": "EXPERIENCE follow-up currently runs in Codex desktop on feat/product-experience, with a five-minute chat heartbeat. GitHub issues and PRs coordinate with Muse. Local checks use MOCK_TRANSPORT; owner-machine and hosted verification remain with Muse/owner.",
   "current": {
-    "issues": [
-      127,
-      133,
-      137,
-      139
-    ],
+    "issue": 142,
+    "key": "142-202611040014",
     "branch": "feat/product-experience",
-    "phase": "PR #140 open; CI and Muse review pending",
-    "baseline": "39ccc3f",
-    "leases": [
-      "127-202611032325",
-      "133-202611032332",
-      "137-202611032339",
-      "139-202611032343"
-    ],
-    "pr": 140
+    "baseline": "4d937b6",
+    "phase": "Local validation complete; delivery PR for Muse review",
+    "hosted": "Muse after merge/deploy, pending",
+    "validation": "Frontend139 unit, full Chromium123, portfolio10 each Chromium/Firefox/WebKit, typecheck/lint/build/format passed; hosted pending"
   },
-  "review": [
-    {
-      "issue": 136,
-      "pr": 138,
-      "owner": "other Orpheane session",
-      "note": "Do not duplicate competitive landscape; this session contributes only complementary buyer hypotheses."
-    }
-  ],
+  "review": [],
   "blockers": [
-    "Hosted checks for the new first-screen/pair inspector/path focus and dated clean-project slip remain with Muse; LOCAL/MOCK tests do not establish hosted integration.",
-    "Portfolio/shared-decision/radar runtime contracts and hosted acceptance pending: #130/#131/#132, with CORE implementation #134/#135; concepts remain excluded from production.",
-    "Native screen reader, real browser zoom and human value study not performed.",
-    "HMAC activation reported by Muse in #107 comment 6617210214; key-file ACL not applied, rotation/rollback explicitly deferred."
+    "ORP-32 #142 now explicitly authorizes capability-gated UI with hosted acceptance after merge/deploy. Real portfolio deterministic/permission/read-only evidence remains with Muse.",
+    "Shared execution enforcement merged #144, activation locked pending hosted two-account proof; no shared UI exposed. Radar slice1 merged #146, event-to-UI proof pending; no radar UI exposed.",
+    "Hosted #140 first screen/pair/path/refusal, #126 dated-sample/slip, native screen reader, real zoom and human trials remain pending.",
+    "HMAC activation reported in #107 comment6617210214; ACL/rotation/rollback are not completed."
   ],
   "next": [
-    "Open reviewed UX delivery for #127/#133/#137/#139; Muse reviews/merges after CI and performs hosted checklist.",
-    "Track #134/#135 and integrate only a stable authorized capability after required hosted proof.",
-    "Final video recording and Devpost submission remain deferred. The new brief authorized English storyboard/narration/caption preparation only (#139).",
-    "Monitor #107 for Muse response to the personal-task request after comment 6616776571; relay user tasks instead of taking them over."
+    "Muse reviews/merges the #142 delivery after CI, then records hosted acceptance from docs/design/PORTFOLIO_UI_ACCEPTANCE.md.",
+    "Consume only actual portfolioSimulation AVAILABLE plus simulatePortfolio operation, reuse snapshotId and enforce contract input bounds. No invented capability flags.",
+    "Shared AWAITING_APPROVAL copy confirmed on #131 comment6619037384; no share/inbox/role selector until backend gates pass.",
+    "Final video recording/publication and Devpost form stay deferred; monitor #107 for personal tasks to relay to Orpheane."
   ],
   "constraints": [
     "Frontend build, unit tests and Playwright use local MOCK_TRANSPORT and do not establish hosted Jira or bridge behaviour.",
@@ -162,6 +146,31 @@
       "issue": 121,
       "pr": 126,
       "note": "Merged; local backend 151, frontend 122 and Playwright 107 passed. Hosted dated clean-project slip pending Muse."
+    },
+    {
+      "issue": 127,
+      "pr": 140,
+      "note": "Merged with green CI; hosted UI acceptance remains pending."
+    },
+    {
+      "issue": 133,
+      "pr": 140,
+      "note": "Merged with green CI; hosted UI acceptance remains pending."
+    },
+    {
+      "issue": 137,
+      "pr": 140,
+      "note": "Merged with green CI; hosted UI acceptance remains pending."
+    },
+    {
+      "issue": 139,
+      "pr": 140,
+      "note": "Merged with green CI; hosted UI acceptance remains pending."
+    },
+    {
+      "issue": 136,
+      "pr": 138,
+      "note": "Competitive research delivered by the other Orpheane session; merged."
     }
   ]
 }

@@ -105,9 +105,11 @@ export class ForgeClient {
                     ? "Response not received. Sample creation may still be running. Preview sample data in the selected Jira project before any further creation. No result is assumed."
                     : operation === "previewSampleProject"
                       ? "Sample preview response not received. No Jira creation was requested."
-                      : operation === "checkPlanFreshness"
-                        ? "Evidence freshness response not received. No freshness is assumed."
-                        : "Response not received. Recover execution status by planId before another write.",
+                      : operation === "simulatePortfolio"
+                        ? "Read-only portfolio simulation timed out. No Jira change was requested. Retry explicitly or read fresh evidence."
+                        : operation === "checkPlanFreshness"
+                          ? "Evidence freshness response not received. No freshness is assumed."
+                          : "Response not received. Recover execution status by planId before another write.",
                 ),
               ),
             this.timeoutMs ??
