@@ -406,6 +406,21 @@ export const SHARED_DECISION_OPERATIONS = {
 } as const;
 // END shared decision workspace
 
+// Decision Radar (first slice): event-driven "needs review" hints. A hint, never a freshness verdict.
+export const RadarFact = z.object({
+  factId: z.string().max(120), type: z.enum(['LINK_CREATED', 'LINK_DELETED', 'ISSUE_DELETED']), issueIds: z.array(z.string().regex(/^\d{1,20}$/)).max(2),
+  linkId: z.string().max(30).nullable(), linkType: z.string().max(60).nullable(), occurredAt: IsoDate, observedAt: IsoDate
+});
+export const PlanAttention = z.object({
+  planId: Id,
+  monitoring: z.object({ state: z.enum(['NOT_CONFIGURED', 'ACTIVE', 'DEGRADED']),
+    reasons: z.array(z.enum(['NO_QUERY', 'NOT_INDEXED', 'PARTIAL_INDEX', 'INDEX_WRITE_FAILED', 'FANOUT_CAPPED', 'INVALID_EVENT', 'STORAGE_ERROR'])).max(7),
+    lastObservedAt: IsoDate.nullable() }),
+  coverage: z.object({ indexed: z.number().int().min(0), unindexed: z.number().int().min(0) }).nullable(),
+  needsReview: z.boolean(), items: z.array(RadarFact).max(50), truncated: z.boolean(), clearedAt: IsoDate.nullable(), note: z.string().max(400)
+});
+export type PlanAttention = z.infer<typeof PlanAttention>;
+
 export const OPERATIONS = {
   getCapabilities: { input: z.object({}), output: CapabilityAvailability },
   listProjects: { input: z.object({ cursor: z.string().nullable().default(null) }), output: z.object({ items: z.array(ProjectSummary), page: PageInfo }) },
@@ -427,6 +442,7 @@ export const OPERATIONS = {
   simulateSlip: { input: z.object({ issueKey: z.string().regex(/^[A-Z][A-Z0-9_]{0,19}-\d{1,9}$/), days: z.number().int().min(1).max(365) }), output: SlipSimulation },
   setValidatorPolicy: { input: z.object({ onOutage: z.enum(['ALLOW', 'BLOCK']) }), output: ValidatorPolicy },
   simulatePortfolio: { input: SimulatePortfolioRequest, output: SimulatePortfolioResult },
+  getPlanAttention: { input: z.object({ planId: Id }), output: PlanAttention },
   // shared decision workspace (see section above)
   ...SHARED_DECISION_OPERATIONS
 } as const;

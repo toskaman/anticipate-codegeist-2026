@@ -18,7 +18,7 @@ import { actionMarker, buildPlan } from './plans';
 import { diffEvidence } from './drift';
 import { previewSample, createSample } from './sample';
 import { mergeSource, notConfiguredTwg } from '../context/sources';
-import type { EvidenceDrift } from '../../packages/contracts/src/index';
+import type { EvidenceDrift, PlanAttention } from '../../packages/contracts/src/index';
 import { stableHash } from '../../packages/simulation-core/src/index';
 import { simulatePortfolio as runPortfolio, PortfolioError, PORTFOLIO_LIMITS } from '../../packages/simulation-core/src/portfolio';
 import type { SimulatePortfolioRequest, SimulatePortfolioResult, ChangeOperation } from '../../packages/contracts/src/index';
@@ -202,7 +202,17 @@ export function createService(d: Deps) {
         await d.store.set(K.plan(rec.plan.planId), rec);
         await recordDecision(rec);
       }
+      // Only a successful user-run recompute may clear radar attention (the radar itself is monotonic).
+      if (drift.fresh && d.radar) { try { await d.radar.clear(rec.plan.planId); } catch { /* attention stays raised: safe */ } }
       return drift;
+    },
+
+    /** Decision Radar attention for a plan the caller owns. A hint, never a verdict (see src/radar/radar.ts). */
+    async getPlanAttention(ctx: Ctx, input: { planId: string }): Promise<PlanAttention> {
+      const rec = await loadPlan(ctx, input.planId);
+      if (!d.radar) return { planId: rec.plan.planId, monitoring: { state: 'NOT_CONFIGURED', reasons: ['NO_QUERY'], lastObservedAt: null }, coverage: null,
+        needsReview: false, items: [], truncated: false, clearedAt: null, note: 'Decision Radar is not configured on this installation. Run "Re-check evidence" before approving or executing.' };
+      return d.radar.attention(rec.plan.planId);
     },
 
     async getCapabilities(): Promise<CapabilityAvailability> {
@@ -328,6 +338,8 @@ export function createService(d: Deps) {
       await d.store.set<ProvRec>(K.prov(planId), { owner: ctx.accountId, snapshotId: s.snapshot.snapshotId, mode: s.snapshot.mode,
         capturedAt: s.snapshot.createdAt, expiresAt: s.snapshot.expiresAt, nodeCount: s.snapshot.nodes.length, edgeCount: s.snapshot.edges.length,
         causalEdges: causal.slice(0, 300).map((e) => ({ from: e.from, to: e.to, kind: e.kind, status: e.status })), snapshotDigest: stableHash(s.snapshot) });
+      // Decision Radar: index the Jira issue ids of the evidence (best effort; failures surface as DEGRADED coverage).
+      if (d.radar) { try { await d.radar.indexPlan(planId, s.snapshot.nodes); } catch { /* coverage record shows NOT_INDEXED */ } }
       return plan;
     },
 
@@ -555,7 +567,7 @@ export function normalizeDate(s: string): string {
 }
 
 export const OPERATION_NAMES = ['getCapabilities', 'getPolicies', 'listProjects', 'getChangeCandidates', 'getGraphSnapshot', 'getEvidenceGraph', 'simulateChange',
-  'compareScenarios', 'generatePreventionPlan', 'approvePlan', 'executeApprovedPlan', 'getExecutionStatus', 'getPreventionPassport', 'checkPlanFreshness', 'previewSampleProject', 'createSampleProject', 'getValidatorPolicy', 'setValidatorPolicy', 'simulateSlip', 'simulatePortfolio',
+  'compareScenarios', 'generatePreventionPlan', 'approvePlan', 'executeApprovedPlan', 'getExecutionStatus', 'getPreventionPassport', 'checkPlanFreshness', 'previewSampleProject', 'createSampleProject', 'getValidatorPolicy', 'setValidatorPolicy', 'simulateSlip', 'simulatePortfolio', 'getPlanAttention',
   // capability signals (not resolvers): scenario operations accepted by compareScenarios / generatePreventionPlan
   'scenario:UPGRADE_NODE', 'validator:outage-policy'];
 export { issueNodeId };

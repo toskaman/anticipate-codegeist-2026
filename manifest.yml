@@ -148,7 +148,16 @@ modules:
           type: string
           required: true
           description: 'Up to 10 changes separated by ";". Each is REMOVE KEY, DEPRECATE KEY, UPGRADE KEY breaking|compatible or MIGRATE KEY TO KEY. Example: REMOVE MP-5; UPGRADE MP-9 breaking'
+  trigger:
+    - key: anticipate-decision-radar
+      function: radarOnJiraEvent
+      events:
+        - avi:jira:created:issuelink
+        - avi:jira:deleted:issuelink
+        - avi:jira:deleted:issue
   function:
+    - key: radarOnJiraEvent
+      handler: index.radarOnJiraEvent
     - key: rovoSimulatePortfolio
       handler: index.rovoSimulatePortfolio
     - key: rovoSimulateSlip

@@ -4,7 +4,7 @@ import type { IssueFetch, JiraIssue, JiraPort, Store } from '../src/core/ports';
 /** Forge KVS key pattern (docs: keys must match this and be at most 500 characters). */
 export const FORGE_KVS_KEY = /^(?!\s+$)[a-zA-Z0-9:._\s\-#]+$/;
 
-export function memoryStore(): Store & { data: Map<string, unknown> } {
+export function memoryStore() {
   const data = new Map<string, unknown>();
   const clone = <T>(v: T): T => (v === undefined ? v : JSON.parse(JSON.stringify(v)));
   // Enforce the real Forge KVS key contract so storage-key bugs fail in unit tests, not in production
@@ -19,8 +19,15 @@ export function memoryStore(): Store & { data: Map<string, unknown> } {
     async get(k) { check(k); return clone(data.get(k)) as never; },
     async set(k, v) { check(k); data.set(k, clone(v)); },
     async setIfAbsent(k, v) { check(k); if (data.has(k)) return false; data.set(k, clone(v)); return true; },
-    async delete(k) { check(k); data.delete(k); }
-  };
+    async delete(k) { check(k); data.delete(k); },
+    /** Prefix query like KVS beginsWith (limit <= 100, opaque cursor). */
+    async query<T>(prefix: string, limit: number, cursor: string | null) {
+      const keys = [...data.keys()].filter((k) => k.startsWith(prefix)).sort();
+      const start = cursor ? Number(cursor) : 0; const lim = Math.min(Math.max(1, limit), 100);
+      const page = keys.slice(start, start + lim);
+      return { items: page.map((key) => ({ key, value: clone(data.get(key)) as T })), nextCursor: start + lim < keys.length ? String(start + lim) : null };
+    }
+  } as Store & { data: Map<string, unknown>; query<T>(prefix: string, limit: number, cursor: string | null): Promise<{ items: { key: string; value: T }[]; nextCursor: string | null }> };
 }
 
 type Link = { id: string; type: string; outward: string; inward: string; from: string; to: string };
