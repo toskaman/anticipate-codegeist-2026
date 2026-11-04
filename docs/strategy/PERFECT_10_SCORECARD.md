@@ -1,25 +1,25 @@
 # Perfect 10 scorecard (internal, evidence-backed)
 
-Last verified: **4 Nov 2026, ~05:30 Paris** on `main` **4d937b6** (muse). Development v6.9.0, production v2.32.0.
+Last verified: **4 Nov 2026, ~23:00 Paris** on `main` **23b5328** (muse). Development v6.20.0, production v2.36.0.
 Scores are **internal planning estimates**, not predictions of the judges. A score only moves with evidence; anything without hosted proof is `NOT_VERIFIED`. Sources of truth: [RELEASE.md](../RELEASE.md) (versions, test counts), [STATUS.md](../STATUS.md) (capability states), [EVIDENCE_PACK.md](../evidence/EVIDENCE_PACK.md).
 
 | Dimension | Target | Provisional | NOT_VERIFIED items | Top gap (severity) | Next task |
 |---|---|---|---|---|---|
-| Technology | 10 | 8 | Radar issue-deleted event; slip/portfolio MCP tools in an external client | Newest capabilities (#144–#146) are unit-tested and on dev, not yet observed live (HIGH) | #132 live proof, #64 |
-| Design | 10 | 7 | Portfolio and Radar screens (not built yet) | Portfolio UI (#142) and Radar panel (#147) missing; no Firefox/WebKit run (MEDIUM) | #142, #147 |
+| Technology | 10 | 8 | Radar issue-deleted event; slip/portfolio MCP tools in an external client; Firefox/WebKit runs | Radar link events, slip, portfolio, evidence-changed refusal and verified execution observed LIVE_FORGE_DEV (4 Nov, EVIDENCE_PACK); MCP tools not exercised from an external client (HIGH) | external MCP client run on dev |
+| Design | 10 | 8 | Firefox/WebKit; native screen reader | Portfolio panel and Radar panel built and used live on dev (4 Nov); conflict reasons now named (#165). Playwright is Chromium-only; no native screen-reader run (MEDIUM) | cross-browser Playwright projects |
 | Impact | 10 | 6 | Value study not run with real users | Only synthetic benchmark + hosted journeys; no measured comparison vs manual Jira inspection (HIGH) | run `VALUE_STUDY_PROTOCOL.md` on the judge dataset (timed, self-run, labelled as such) |
-| Innovation | 10 | 7 | Multi-change conflict demo on hosted Jira | Conflict intelligence exists in the engine but no reproducible hosted scenario yet (HIGH) | portfolio demo dataset + hosted run |
+| Innovation | 10 | 8 | Collision demo on production | Portfolio collision reproduced live on dev (DEMO 2: EMERGENT_IMPACT + MIGRATE_ONTO_RETIRED, #164/#165); not yet on the judge site (MEDIUM) | DEMO 2 on production sample data |
 | Presentation | 10 | 4 | Video does not exist | Mandatory video (K1) not recorded (owner, deferred by decision); Devpost form not filled (K2) | owner, near submission; script ready (`docs/submission/VIDEO_SCRIPT.md`) |
 | Security | 10 | 8 | Two-account hosted acceptance | Shared-decision bypass **fixed** (#144) and fault-tolerant (#145) but only unit-tested; feature correctly release-locked (MEDIUM) | #131 two-account run |
 | Performance | 10 | 8 | compare/execute under load; large graphs hosted | 10-parallel bursts on dev: listProjects 30/30 (p95 1.9 s), getGraphSnapshot 20/20 (p95 2.6 s); compare/execute and large hosted graphs not load-tested (MEDIUM) | burst on compareScenarios; larger demo graph |
 | Commercial readiness | 10 | 5 | Pricing / buyer journey unvalidated | Positioning brief exists (COMPETITIVE_LANDSCAPE, BUYER_HYPOTHESES); no pricing model or Marketplace identity plan (MEDIUM) | commercial strategy doc |
-| Judge reproducibility | 10 | 8 | Clean-site rerun on current production | Clean-site run passed 3 Nov; production does not yet include #144–#146 (owner deploy) (MEDIUM) | owner prod deploy, then clean-site rerun |
-| Documentation / compliance | 10 | 7 | — | STATUS/RELEASE refreshed 4 Nov; README and Devpost text must be re-checked after the next production deploy (LOW) | re-sync after deploy |
+| Judge reproducibility | 10 | 8 | Clean-site rerun on production 2.36.0 | Production 2.36.0 (4 Nov) includes #144–#165; smoke on toskaman5962 only; anticipate-judge belongs to another account (MEDIUM) | clean-site rerun by the owner |
+| Documentation / compliance | 10 | 8 | — | RELEASE/STATUS/EVIDENCE_PACK re-synced 4 Nov after 2.36.0; MCP tool count guarded by a test (#163). Devpost text must be re-read against the final build (LOW) | re-sync at release freeze |
 
 ## Blockers outside the agents' control
-- **Browser session expired** on the dev site (401): blocks #53, #64, radar live proof. Needs the owner to sign in (agents never type passwords).
+- ~~Browser session expired~~ resolved 4 Nov: the owner session on the dev site works (hosted checks done).
 - **Two test accounts** with access to one project: needed for #131.
-- **Production deploy**: owner-only (`E:\Codegeist2026\DEPLOY-PRODUCTION.cmd`).
+- **Production deploy**: done by muse through the owner-approved bridge (`muse-cmd deploy-prod`), release gates checked; see RELEASE.md.
 - **Teamwork Graph**: allowlisting pending (ECOHELP-180616). Optional.
 - **Video and Devpost submission**: owner, deferred to near the deadline (22 Dec 2026, 21:00 Paris).
 

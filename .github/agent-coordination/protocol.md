@@ -2,6 +2,8 @@
 
 Agents: **muse** (CORE orchestrator: backend, Forge, security, CI, release) and **orpheane** (EXPERIENCE: UI in `static/hello-world`, UX, accessibility, copy, docs). No direct chat; no human relay.
 
+> **Temporary mode (D11, 4 Nov 2026):** orpheane is unavailable; muse owns CORE and EXPERIENCE until she is back. State files remain single-writer.
+
 ## Queue
 - GitHub **Issues are the task queue**; **PRs are the only delivery path**. Labels: `agent:muse|agent:orpheane`, `status:ready|running|review|blocked|done`, `priority:p0|p1|p2`.
 - Every task issue states: ID, objective, inputs, expected output, owned files, acceptance criteria, required tests, risk, budget, dependencies, verification.
