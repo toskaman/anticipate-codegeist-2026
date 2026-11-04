@@ -134,14 +134,29 @@ Built-in browser pane visible, signed in with the judge-site account. Mission Co
 - Fix: `throttleKey` maps disallowed characters to `_`, and the throttle fails open on any storage error (abuse control must never take the app down). 2 regression tests (backend 144/144). Deployed dev 6.6.0 and production 2.32.0 at ~22:55 UTC.
 - After 2.32.0 (#53 partial, built-in browser pane visible, first open right after deploy): "Connected · live mode"; CDN app page 2144 ms, resolver invocations 1220 ms and 1479 ms, data received ~8.4 s. Analyze JDG-1: invocations 1333 ms + 237 ms, graph shown ~2.0 s after the click. 10-parallel burst not run (the browser pane reuses one tab per URL).
 
+## #64 hosted checks on dev (4 Nov 2026, 18:15–19:10 CET) · LIVE_FORGE_DEV, one-atlas-euza
+
+Built-in browser pane, owner session (site admin). Dev 6.18.x until 19:05, then 6.19.0 (main 3668327). Jira writes on TD were authorised by the owner in chat. Pane screenshots (760 px) kept by the owner; not gallery quality.
+
+| Check | Observed | Result |
+|---|---|---|
+| Analyze TD-1 | 8/8 records, TD-4 at 2 hops, TD-5 edge Inferred | PASS |
+| Scenario Lab (retire, no replacement) | suggested Retain temporarily: 4 affected, 0 blockers; Remove now triggers P1 | PASS |
+| What if it slips? — no due dates | "no release would be late, 0 due dates would move, 5 items cannot be assessed", each with its path | PASS |
+| What if it slips? — dated sample (TD-1 11-15, TD-2 11-20, TD-4 11-26 + version "ANTICIPATE demo release 1.0" 11-27) | "1 release would be late, 3 due dates would move, 2 items cannot be assessed"; release late by 9 d because of TD-4; TD-1→11-25, TD-2→11-30, TD-4→12-06 with paths; TD-3/TD-6 unknown | PASS |
+| Evidence-changed refusal in the UI (plan-522a2808…) | approval recorded, then link TD-5 blocks TD-3 added; execute → "Evidence changed — this plan cannot execute", Added relations `issue:TD-3 DEPENDS_ON issue:TD-5 [CONFIRMED]`, removed/unknown none (request 63c50286…); TD-2 labels unchanged (changelog: last change 2 Nov); link removed after | PASS, 0 writes |
+| Clean execution + Passport (plan-2fe13c50…, 1 action) | decision comment on TD-1 Verified (attempt 1, 18:21 CET); Passport timeline ends "Execution finished: 1/1 verified"; limitations list the 4 unexecuted actions | PASS |
+| Decision Radar on new plans | before #158: "Monitoring degraded · An event could not be interpreted" on every plan although the day's link events were RECORDED (forge logs); after #158 on 6.19.0 (19:10 CET): "Listening", 8 indexed | FIXED |
+| Passport PDF, dark theme | print dialog blocks automation | owner (manual) |
+
 ## Hosted (LIVE_FORGE) proofs still missing
 
 Each of these is either tested LOCAL only or not observed at all. The browser checks belong to muse (#64), and the video belongs to the owner.
 
 | Item | Current proof | What is needed |
 |---|---|---|
-| "What if it slips?" panel in the Scenario Lab (PRs #61, #70) | LOCAL (Playwright, MOCK_TRANSPORT) | One run on JDG or MP: late release, moved dates, an issue without a due date ("Nothing to move" / Unknown) |
-| Evidence-changed refusal showing what changed in the UI | LOCAL | Re-run the drift scenario on dev and capture the notice |
+| "What if it slips?" panel in the Scenario Lab (PRs #61, #70) | LIVE_FORGE_DEV 4 Nov (TD), see above | Same run on the production judge site |
+| Evidence-changed refusal showing what changed in the UI | LIVE_FORGE_DEV 4 Nov, see above | — |
 | Passport print with the dark theme selected (PR #60 contrast fix) | LOCAL (axe in print media) | One saved PDF from the hosted site with Dark selected |
 | Judge site, non-admin Settings (J2 in `docs/jury/HOSTED_ACCEPTANCE_PR37.md`) | dev only (one-atlas-euza) | The same check on anticipate-judge with an invited account |
 | R18: unreadable (403/404) gated issue follows the outage policy | LOCAL (6 unit tests) | A site where issue security actually hides the issue from the app |
