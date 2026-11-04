@@ -30,7 +30,7 @@ Cross-cutting:
    - Parity: a unit test imports CORE's `upgradeScenarios`/`standardScenarios` read-only and asserts the frontend request is identical.
 2. **Named open questions** on each scenario card (reason badge + record name, first three, then "+n on Decision Firewall").
 3. **Impact rows** say "Uses the changed record directly / Affected through another record · N hops from PAY-412".
-4. **Settings → Use ANTICIPATE from Rovo**: agent name, the five read-only tools, and why approval/execution stay in the app. Worded conditionally ("depends on your site's Rovo access and administrator settings").
+4. **Settings → Use ANTICIPATE from Rovo**: agent name, the seven read-only tools, and why approval/execution stay in the app. Worded conditionally ("depends on your site's Rovo access and administrator settings").
 
 Before/after: `03-scenario-lab-desktop-light.png` → `v4-ux/scenario-lab-upgrade-light-1440-MOCK_TRANSPORT.png`, `v4-ux/scenario-lab-upgrade-dark-390-MOCK_TRANSPORT.png`; `12-settings-desktop-light.png` → `v4-ux/settings-rovo-*-MOCK_TRANSPORT.png`.
 
