@@ -4294,6 +4294,23 @@ body:has(.ax-app) {
 .ax-slip__error p {
   margin: 0;
 }
+.ax-radar {
+  overflow-wrap: anywhere;
+}
+.ax-radar__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ax-2);
+  margin-top: var(--ax-3);
+}
+.ax-radar__events li + li {
+  margin-top: var(--ax-3);
+}
+@media print {
+  .ax-radar {
+    display: none !important;
+  }
+}
 .ax-portfolio {
   overflow-wrap: anywhere;
 }
