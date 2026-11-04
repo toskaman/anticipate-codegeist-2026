@@ -30,7 +30,7 @@ Firefox/WebKit coverage is limited to core-integration, core-pagination, core-re
 
 Sample preparation uses the v3 Panel/DecisionDialog styles but still previews before explicitly confirming real Jira creation. It cannot create a Jira project. Opening, previewing, cancelling and navigation never execute Jira writes. The local fixture prototype stays isolated.
 
-Settings' static capability column reflects five read-only MCP tools and the Rovo agent declaration in the current manifest. Backend availability remains separate; declarations do not become verification claims.
+Settings' static capability column reflects seven read-only MCP tools and the Rovo agent declaration in the current manifest. Backend availability remains separate; declarations do not become verification claims.
 
 ## Defects corrected during real verification
 

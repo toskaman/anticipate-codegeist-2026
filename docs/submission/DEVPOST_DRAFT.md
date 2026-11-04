@@ -40,5 +40,5 @@ Teamwork Graph sources (PRs, deployments, Confluence) once Atlassian allowlists 
 4. MCP: an org admin enables "Expose tools to MCP-compatible apps" for ANTICIPATE in admin.atlassian.com → site → Connected apps; connect a client to `https://mcp.atlassian.com/forge/39a28f48-c891-4d86-a3cf-c14409cbd29e`.
 
 ## MCP bonus write-up
-Five read-only tools (get-graph, simulate-retirement, simulate-upgrade, get-passport, check-plan-freshness), also used by the Rovo agent, exposed via `rovo:mcp`, running as the invoking user with Jira permissions enforced, deterministic outputs, prompt-injection resistant (Jira text treated as data), no mutations — acting requires explicit human approval inside ANTICIPATE.
+Seven read-only tools (get-graph, simulate-retirement, simulate-upgrade, simulate-slip, simulate-portfolio, get-passport, check-plan-freshness), also used by the Rovo agent, exposed via `rovo:mcp`, running as the invoking user with Jira permissions enforced, deterministic outputs, prompt-injection resistant (Jira text treated as data), no mutations — acting requires explicit human approval inside ANTICIPATE.
 5. Workflow validator: in a test company-managed project, Project settings, Workflows, Edit, add the rule "ANTICIPATE Decision Firewall" to a transition, publish. An issue labelled `anticipate-change` is refused until its plan is COMPLETED; other issues pass.

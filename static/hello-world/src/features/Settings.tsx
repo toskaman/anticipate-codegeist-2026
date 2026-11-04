@@ -33,7 +33,7 @@ const rows: { key: Key; name: string; what: string; inApp: string }[] = [
   {
     key: "rovoMcp",
     name: "Rovo MCP tools",
-    what: "Five read-only tools: get evidence graph, simulate retirement, simulate upgrade, get Prevention Passport and check evidence freshness.",
+    what: "Seven read-only tools: get evidence graph, simulate retirement, simulate upgrade, simulate a slip, simulate several changes, get Prevention Passport and check evidence freshness.",
     inApp: "Declared by the app",
   },
   {
@@ -200,11 +200,13 @@ export default function Settings({
             </p>
           </div>
           <div>
-            <h3 className="ax-h4">Five read-only tools</h3>
+            <h3 className="ax-h4">Seven read-only tools</h3>
             <ul className="ax-small ax-rovo__tools">
               <li>Get evidence graph</li>
               <li>Simulate retirement</li>
               <li>Simulate dependency upgrade</li>
+              <li>Simulate a slip</li>
+              <li>Simulate several changes</li>
               <li>Get prevention passport</li>
               <li>Check plan freshness</li>
             </ul>
