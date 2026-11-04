@@ -39,7 +39,7 @@ function setup() {
   const plans: Record<string, PlanRef> = { p1: { planId: 'p1', owner: 'alice', planHash: 'h1', issueKey: 'JDG-1', projectKey: 'JDG' } };
   const jiraCalls = { perm: 0, global: 0, plan: 0 };
   const opsFor = (account: string | null) => createWorkspaceOps({
-    store: io.store, now: () => t, newId: () => String(++n),
+    store: io.store, now: () => t, newId: () => String(++n), released: true,
     userHasPermission: async (a, proj, perm) => { jiraCalls.perm++; return grants.has(`${a}@${proj}:${perm}`); },
     getPlan: async (id) => { jiraCalls.plan++; return plans[id] ? { ...plans[id]! } : undefined; },
     globalPermissions: async (ps) => { jiraCalls.global++; return Object.fromEntries(ps.map((p) => [p, p === 'ADMINISTER' && !!account && siteAdmins.has(account)])); }
@@ -317,6 +317,19 @@ describe('shared decision ops: Forge wiring', () => {
       globalPermissionsFor: () => async (ps) => Object.fromEntries(ps.map((p) => [p, false])) });
     expect([...defs.keys()]).toEqual([...WORKSPACE_OPERATION_NAMES]);
     const r = await defs.get('getSharedDecision')!({ payload: { id: 'dec-1' }, context: { accountId: 'alice' } });
-    expect(r).toMatchObject({ ok: false, error: { code: 'UNSUPPORTED', details: { reason: 'FEATURE_DISABLED' } } });
+    expect(r).toMatchObject({ ok: false, error: { code: 'UNSUPPORTED', details: { reason: 'NOT_RELEASED' } } });
+  });
+  it('release lock: a flag enabled by an earlier version is ignored, and enabling is refused, even for a site admin', async () => {
+    const defs = new Map<string, (r: unknown) => Promise<unknown>>(); const store = memoryStore();
+    await store.set(SHARED_DECISIONS_FLAG_KEY, { enabled: true, updatedBy: 'root', updatedAt: '2026-11-01T00:00:00Z' });
+    registerWorkspaceResolvers({ define: (n: string, fn: never) => defs.set(n, fn) }, { store, now: () => new Date('2026-11-03T10:00:00Z'), newId: () => 'x',
+      globalPermissionsFor: () => async (ps) => Object.fromEntries(ps.map((p) => [p, true])) });
+    expect(await defs.get('shareDecision')!({ payload: { planId: 'p1' }, context: { accountId: 'root' } }))
+      .toMatchObject({ ok: false, error: { code: 'UNSUPPORTED', details: { reason: 'NOT_RELEASED' } } });
+    expect(await defs.get('setFeatureFlag')!({ payload: { flag: 'sharedDecisions', enabled: true }, context: { accountId: 'root' } }))
+      .toMatchObject({ ok: false, error: { code: 'UNSUPPORTED', details: { reason: 'NOT_RELEASED' } } });
+    expect(await defs.get('getFeatureFlag')!({ payload: { flag: 'sharedDecisions' }, context: { accountId: 'root' } }))
+      .toMatchObject({ ok: true, data: { enabled: false } });
+    expect([...store.data.keys()].filter((k) => k.startsWith('ws:'))).toEqual([]);
   });
 });

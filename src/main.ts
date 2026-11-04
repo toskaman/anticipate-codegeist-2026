@@ -4,13 +4,17 @@ import { makeHandler, type ResolverRequest } from './core/handler';
 import { createStoreThrottle, DEFAULT_THROTTLE } from './core/throttle';
 import { createService } from './engine/service';
 import { createForgeJira, forgeStore } from './forge-adapters';
+import { createWorkspace } from './workspace/workspace';
+import { forgeUserHasPermission, storePlanReader } from './workspace/forge';
 import { registerWorkspaceResolvers } from './workspace/forge';
 
 const resolver = new Resolver();
 const now = () => new Date();
 const newId = () => globalThis.crypto.randomUUID();
 
-const service = (req: ResolverRequest) => createService({ jira: createForgeJira(req.context?.siteUrl ?? null), store: forgeStore, now, newId });
+// Shared-decision execution gate: always wired, whatever the feature flag, so a plan shared earlier stays governed.
+const sharedDecisions = createWorkspace({ store: forgeStore, now, newId, userHasPermission: forgeUserHasPermission, getPlan: storePlanReader(forgeStore) });
+const service = (req: ResolverRequest) => createService({ jira: createForgeJira(req.context?.siteUrl ?? null), store: forgeStore, now, newId, sharedDecisions });
 type Svc = ReturnType<typeof createService>;
 const throttle = createStoreThrottle(forgeStore, DEFAULT_THROTTLE);
 

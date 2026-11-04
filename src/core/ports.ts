@@ -34,6 +34,11 @@ export interface Store {
   delete(key: string): Promise<void>;
 }
 
-export interface Deps { jira: JiraPort; store: Store; now: () => Date; newId: () => string; context?: import('../context/sources').ContextSource; }
+/** Server-side guard for plans shared as a decision (src/workspace/workspace.ts). Wired in production; tests may omit it. */
+export interface SharedDecisionGate {
+  authorizeExecution(ctx: Ctx, decisionId: string, currentPlanHash: string): Promise<void>;
+  stillApproved(decisionId: string, currentPlanHash: string): Promise<boolean>;
+}
+export interface Deps { jira: JiraPort; store: Store; now: () => Date; newId: () => string; context?: import('../context/sources').ContextSource; sharedDecisions?: SharedDecisionGate; }
 
 export interface Ctx { requestId: string; accountId: string | null; installationId: string; }
