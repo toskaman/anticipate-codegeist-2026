@@ -56,7 +56,7 @@ For muse (files outside this task's ownership; proposed values):
 
 | File:line | Says | Other file says | Proposed |
 |---|---|---|---|
-| `docs/submission/VIDEO_SCRIPT.md:38` | "Five read-only tools" | manifest: 6 MCP tools | "Six read-only tools" |
+| `docs/submission/VIDEO_SCRIPT.md:38` | "Five read-only tools" | manifest: 7 MCP tools | fixed 4 Nov: "Seven read-only tools" (guarded by test/mcp-tool-count.test.ts) |
 | `README.md:78` | 68 frontend unit tests on 41e5d2a | 69 on d995021 | refresh counts on the final build (one place: README, DEVPOST_FINAL) |
 | `docs/submission/INSTALL_LINK.md:14` | sample creation "about 15 s"; "tickets" | README.md:26 and DEVPOST_FINAL:75: "about 15–20 s"; "issues" | "about 15–20 s the first time"; "issues" |
 | `manifest.yml:11` (validator description shown to Jira admins) | "until their latest ANTICIPATE prevention plan is COMPLETED (verified)" | README/DEVPOST: also needs live Jira links to agree (R17) | add "and live Jira links agree" |

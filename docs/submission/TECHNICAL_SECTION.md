@@ -14,7 +14,7 @@ Updated 3 Nov 2026 from `docs/STATUS.md` (source of truth). ANTICIPATE is a Forg
 
 **Prevention Passport.** An auditable record of the snapshot, compared alternatives, approvals, attempts, verified outcomes and open questions. It states whether the Jira transition is OPEN, CLOSED (with the reason) or NOT_GATED, and keeps minimized provenance after the snapshot expires.
 
-**Rovo.** A Rovo agent (Decision Reviewer) and six read-only MCP tools (get evidence graph, simulate retirement, simulate dependency upgrade, simulate slip, get Passport, check plan freshness) expose the same deterministic engine to Rovo and external MCP clients. Rovo never approves or executes.
+**Rovo.** A Rovo agent (Decision Reviewer) and seven read-only MCP tools (get evidence graph, simulate retirement, simulate dependency upgrade, simulate slip, simulate several changes, get Passport, check plan freshness) expose the same deterministic engine to Rovo and external MCP clients. Rovo never approves or executes.
 
 **Quality.** Shared zod 4 contracts validate every request and response (payload size capped). 142 backend tests (fake Jira: partial failure, retry, stale approval, expired snapshot, concurrency, cross-user access, partial-approval bypass, outage policy, and a 50-cycle soak test for idempotency, bounded storage and gate stability), plus 4 contract and 16 engine tests, 122 frontend unit tests and 106 Playwright browser tests (counts on main f9ce7a5; source and method: docs/RELEASE.md). GitHub Actions CI on every PR. A 100-node, 3-scenario comparison runs in about 18 ms. Hosted acceptance on a real Jira site is recorded with dated evidence.
 

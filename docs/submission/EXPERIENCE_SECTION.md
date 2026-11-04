@@ -21,7 +21,7 @@ ANTICIPATE turns a proposed change in Jira into an evidence-backed decision.
 - **Refuse stale decisions.** If dependencies change after approval, execution is refused and the app shows what was added, removed or became unknown.
 - **Keep the record.** The Prevention Passport documents evidence, alternatives, approvals, verified outcomes and timeline, as JSON or a printable report.
 - **Enforce it in Jira, optionally.** A workflow validator can stop issues labelled `anticipate-change` from moving forward until their decision is completed and live Jira links agree. "Migrate first" is a simulation assumption, so it never opens the gate on its own; the Passport shows the transition status next to the outcome. Administrators choose what happens during an outage (allow, or block).
-- **Ask from Rovo.** The ANTICIPATE Decision Reviewer agent and five read-only MCP tools answer "what happens if we retire or upgrade X?" with the same engine. They cannot approve or execute.
+- **Ask from Rovo.** The ANTICIPATE Decision Reviewer agent and seven read-only MCP tools answer "what happens if we retire or upgrade X?" with the same engine. They cannot approve or execute.
 
 Detecting a risk is not resolving it: ANTICIPATE shows the gap, proposes preventive actions and records which were actually done.
 
@@ -68,7 +68,7 @@ Teamwork Graph sources (pull requests, deployments, Confluence) once available; 
 ## Bonus write-ups (use only with the matching hosted proof)
 
 - **Rovo agent (product feature, not claimed as a bonus):** "ANTICIPATE Decision Reviewer answers retirement and upgrade questions in Rovo chat from the same engine as the app. It is read-only: it explains and links to the decision, and people approve in ANTICIPATE." Proof: LIVE_FORGE on the dev site (Rovo is not available on the production clean site).
-- **MCP:** "Five read-only MCP tools (evidence graph, simulate retirement, simulate upgrade, Passport, plan freshness) let an external AI client query the same decisions. Availability depends on the site and an administrator enabling MCP." Proof: external client on dev.
+- **MCP:** "Seven read-only MCP tools (evidence graph, simulate retirement, simulate upgrade, simulate slip, simulate portfolio, Passport, plan freshness) let an external AI client query the same decisions. Availability depends on the site and an administrator enabling MCP." Proof: external client on dev.
 - **Teamwork Graph:** not claimed. Atlassian has not allowlisted the graph scope for this app (ECOHELP-180616, `docs/evidence/TEAMWORK_GRAPH_ALLOWLIST.md`); the app shows it as Not configured.
 
 ## Wording to avoid
