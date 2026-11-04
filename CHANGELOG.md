@@ -6,6 +6,10 @@ All notable changes to ANTICIPATE, written for readers who use or judge the app.
 
 ### Added (engine, not yet in the app UI)
 - Portfolio Impact Simulator: simulate up to 10 proposed changes together on one frozen snapshot, with shared impacts, conflicts between changes, a safe order (or the cycle that prevents one), evidence gaps and a reproducible hash. Pure engine and contracts only; not exposed in Jira yet. Design: docs/design-core/PORTFOLIO_SIMULATOR.md.
+- Portfolio Impact Simulator on real Jira data: new read-only `simulatePortfolio` operation on your permission-filtered snapshot (unknown or unreadable issues are rejected, never invented), a `portfolioSimulation` limits block in capabilities, and the read-only Rovo action / MCP tool `anticipate-simulate-portfolio` (e.g. "REMOVE MP-5; UPGRADE MP-9 breaking"). No app UI yet ([#134](https://github.com/toskaman/anticipate-codegeist-2026/issues/134)).
+
+### Added (backend, off by default)
+- Shared decision workspace operations (share, view, approve, reject, revoke, audit) with reason codes for every refused action. Every operation answers "not enabled" until a Jira site administrator switches the feature on; it stays off until a hosted two-account test passes.
 
 ### Fixed
 - Shared decision workspace (prototype, not enabled): two administrators approving at the same time no longer lose an approval; revocation and expiry are recorded once; an approved decision expires after 7 days.

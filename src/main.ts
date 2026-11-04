@@ -4,6 +4,7 @@ import { makeHandler, type ResolverRequest } from './core/handler';
 import { createStoreThrottle, DEFAULT_THROTTLE } from './core/throttle';
 import { createService } from './engine/service';
 import { createForgeJira, forgeStore } from './forge-adapters';
+import { registerWorkspaceResolvers } from './workspace/forge';
 
 const resolver = new Resolver();
 const now = () => new Date();
@@ -14,7 +15,7 @@ type Svc = ReturnType<typeof createService>;
 const throttle = createStoreThrottle(forgeStore, DEFAULT_THROTTLE);
 
 const ops: OperationName[] = ['getCapabilities', 'getPolicies', 'listProjects', 'getChangeCandidates', 'getGraphSnapshot', 'getEvidenceGraph', 'simulateChange',
-  'compareScenarios', 'generatePreventionPlan', 'approvePlan', 'executeApprovedPlan', 'getExecutionStatus', 'getPreventionPassport', 'checkPlanFreshness', 'previewSampleProject', 'createSampleProject', 'getValidatorPolicy', 'setValidatorPolicy', 'simulateSlip'];
+  'compareScenarios', 'generatePreventionPlan', 'approvePlan', 'executeApprovedPlan', 'getExecutionStatus', 'getPreventionPassport', 'checkPlanFreshness', 'previewSampleProject', 'createSampleProject', 'getValidatorPolicy', 'setValidatorPolicy', 'simulateSlip', 'simulatePortfolio'];
 
 for (const op of ops) {
   resolver.define(op, makeHandler(op, () => 'LIVE', newId, now, (ctx, input, req) => {
@@ -22,6 +23,11 @@ for (const op of ops) {
     return svc[op]!(ctx, input);
   }, { throttle }) as never);
 }
+
+// Shared decision workspace: resolver ops exist, but every op refuses with FEATURE_DISABLED until a site admin
+// enables the sharedDecisions flag (decision D3: off until a hosted two-account test passes).
+registerWorkspaceResolvers(resolver, { store: forgeStore, now, newId, throttle,
+  globalPermissionsFor: (req) => (ps) => createForgeJira(req.context?.siteUrl ?? null).globalPermissions(ps) });
 
 export const handler = resolver.getDefinitions();
 export type { Svc };
@@ -35,6 +41,7 @@ export const rovoSimulateUpgrade = rovo.simulateUpgrade;
 export const rovoGetPassport = rovo.getPassport;
 export const rovoCheckFreshness = rovo.checkFreshness;
 export const rovoSimulateSlip = rovo.simulateSlip;
+export const rovoSimulatePortfolio = rovo.simulatePortfolio;
 
 // ---- Jira workflow validator (opt-in per workflow transition) ----
 import { runValidator, type DecisionRecord } from './validator';

@@ -9,13 +9,56 @@ import { issueNodeId } from './jira/extractor';
 import type { Deps } from './core/ports';
 import { AppError } from './core/errors';
 import { slipFromJira, formatSlip } from './engine/slip-service';
+import { portfolioReport, PORTFOLIO_LIMITS } from '../packages/simulation-core/src/portfolio';
+import type { PortfolioChange } from '../packages/contracts/src/index';
 
-interface ActionPayload { days?: number | string; issueKey?: string; replacementIssueKey?: string; planId?: string; context?: { accountId?: string; siteUrl?: string; principal?: { accountId?: string } } }
+interface ActionPayload { days?: number | string; changes?: unknown; issueKey?: string; replacementIssueKey?: string; planId?: string; context?: { accountId?: string; siteUrl?: string; principal?: { accountId?: string } } }
 interface ActionContext { accountId?: string; principal?: { accountId?: string } }
 /** Forge may deliver the invoking user in the payload context or in the second handler argument. */
 export const actorOf = (p: ActionPayload, c?: ActionContext): string | null =>
   p?.context?.accountId ?? p?.context?.principal?.accountId ?? c?.principal?.accountId ?? c?.accountId ?? null;
 const KEY = /^[A-Z][A-Z0-9_]+-[0-9]+$/;
+
+/** Max characters of the Rovo/MCP `changes` text (10 clauses comfortably fit). */
+export const PORTFOLIO_CHANGES_MAX_CHARS = 1000;
+const PORTFOLIO_GRAMMAR = 'REMOVE KEY | DEPRECATE KEY | UPGRADE KEY [breaking|compatible] | MIGRATE KEY TO KEY, separated by ";" (for example "REMOVE MP-5; UPGRADE MP-9 breaking; MIGRATE MP-5 TO MP-7")';
+const ISSUE_KEY = /^[A-Z][A-Z0-9_]{0,19}-[0-9]{1,9}$/;
+
+/**
+ * Strict, bounded parser for the Rovo/MCP portfolio input. The text is data, never instructions: anything that is not
+ * exactly one of the clauses of PORTFOLIO_GRAMMAR is rejected (offending text is not echoed back).
+ * Each clause becomes one change with id c1..cN and its canonical text as label.
+ */
+export function parsePortfolioChanges(text: unknown): PortfolioChange[] {
+  if (typeof text !== 'string' || !text.trim()) throw new AppError('VALIDATION', `changes is required: ${PORTFOLIO_GRAMMAR}`);
+  if (text.length > PORTFOLIO_CHANGES_MAX_CHARS) throw new AppError('VALIDATION', `changes must be at most ${PORTFOLIO_CHANGES_MAX_CHARS} characters`);
+  const clauses = text.split(/[;\n]/).map((c) => c.trim()).filter((c) => c.length > 0);
+  if (clauses.length === 0) throw new AppError('VALIDATION', `changes is required: ${PORTFOLIO_GRAMMAR}`);
+  if (clauses.length > PORTFOLIO_LIMITS.maxChanges) throw new AppError('VALIDATION', `at most ${PORTFOLIO_LIMITS.maxChanges} changes are allowed (got ${clauses.length})`);
+  const bad = (i: number): never => { throw new AppError('VALIDATION', `change ${i + 1} is not understood. Use ${PORTFOLIO_GRAMMAR}`); };
+  const key = (t: string | undefined, i: number) => (t !== undefined && ISSUE_KEY.test(t) ? t : bad(i));
+  return clauses.map((clause, i): PortfolioChange => {
+    const t = clause.split(/[ \t]+/);
+    const verb = t[0]!.toUpperCase();
+    const id = `c${i + 1}`;
+    if ((verb === 'REMOVE' || verb === 'DEPRECATE') && t.length === 2) {
+      const k = key(t[1], i);
+      return { id, label: `${verb} ${k}`, operations: [verb === 'REMOVE' ? { op: 'REMOVE_NODE', nodeId: issueNodeId(k) } : { op: 'DEPRECATE_NODE', nodeId: issueNodeId(k), retainUntil: null }] };
+    }
+    if (verb === 'UPGRADE' && (t.length === 2 || t.length === 3)) {
+      const k = key(t[1], i);
+      const flag = (t[2] ?? 'breaking').toLowerCase();
+      if (flag !== 'breaking' && flag !== 'compatible') bad(i);
+      return { id, label: `UPGRADE ${k} ${flag}`, operations: [{ op: 'UPGRADE_NODE', nodeId: issueNodeId(k), breaking: flag === 'breaking' }] };
+    }
+    if (verb === 'MIGRATE' && t.length === 4 && (t[2]!.toUpperCase() === 'TO' || t[2] === '->')) {
+      const from = key(t[1], i); const to = key(t[3], i);
+      if (from === to) bad(i);
+      return { id, label: `MIGRATE ${from} TO ${to}`, operations: [{ op: 'MIGRATE_DEPENDENTS', fromNodeId: issueNodeId(from), toNodeId: issueNodeId(to), edgeKinds: ['USES', 'DEPENDS_ON'] }] };
+    }
+    return bad(i);
+  });
+}
 
 export function createRovoActions(deps: (p: ActionPayload) => Deps) {
   const ctxOf = (p: ActionPayload, c?: ActionContext) => ({ requestId: deps(p).newId(), accountId: actorOf(p, c), installationId: 'rovo' });
@@ -65,6 +108,20 @@ export function createRovoActions(deps: (p: ActionPayload) => Deps) {
       const days = typeof raw === 'string' ? Number(raw.trim()) : raw;
       if (typeof days !== 'number' || !Number.isInteger(days) || days < 1 || days > 365) throw new AppError('VALIDATION', 'days must be an integer between 1 and 365');
       return formatSlip(await slipFromJira(deps(p).jira, ctxOf(p, c), { issueKey: p.issueKey, days }));
+    }),
+    simulatePortfolio: safe(async (p, c) => {
+      if (!p.issueKey || !KEY.test(p.issueKey)) throw new AppError('VALIDATION', 'issueKey must look like ABC-123');
+      // Parse (strict, bounded) before any auth/service call.
+      const changes = parsePortfolioChanges(p.changes);
+      const r = await createService(deps(p)).simulatePortfolio(ctxOf(p, c), { projectId: p.issueKey.split('-')[0]!, rootIssueKey: p.issueKey, source: 'JIRA',
+        snapshotMaxDepth: 3, snapshotId: null, changes, maxDepth: 6, proposedOrder: null });
+      const comb = r.combined.result;
+      return [`Portfolio what-if around ${p.issueKey} (deterministic, snapshot ${r.snapshot.snapshotId}${r.snapshot.truncated ? ', truncated' : ''}, result hash ${r.resultHash}):`,
+        ...changes.map((x) => `- ${x.id}: ${x.label}`),
+        `Combined verdict: ${comb.verdict}; impacted ${comb.summary.impacted} (${comb.summary.direct} direct); blockers ${comb.summary.blockers}; unknowns ${comb.summary.unknowns}; conflicts ${r.conflicts.length}.`,
+        r.ordering.order ? `Recommended order: ${r.ordering.order.join(' -> ')}` : `No valid order: cyclic constraints ${r.ordering.cycles.map((g) => `{${g.join(', ')}}`).join(' ')}`,
+        '', portfolioReport(r), '',
+        'No Jira changes were made. Structural evidence only; changes require explicit human approval inside the ANTICIPATE app.'].join('\n');
     }),
     checkFreshness: safe(async (p, c) => {
       if (!p.planId) throw new AppError('VALIDATION', 'planId is required');

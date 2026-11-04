@@ -20,6 +20,8 @@ import { previewSample, createSample } from './sample';
 import { mergeSource, notConfiguredTwg } from '../context/sources';
 import type { EvidenceDrift } from '../../packages/contracts/src/index';
 import { stableHash } from '../../packages/simulation-core/src/index';
+import { simulatePortfolio as runPortfolio, PortfolioError, PORTFOLIO_LIMITS } from '../../packages/simulation-core/src/portfolio';
+import type { SimulatePortfolioRequest, SimulatePortfolioResult, ChangeOperation } from '../../packages/contracts/src/index';
 import { ATTESTATION_VALID_DAYS, decideTransition, decisionKey, linksDigest, type DecisionRecord } from '../validator';
 
 export const CHANGE_LABEL = 'anticipate-change';
@@ -210,7 +212,8 @@ export function createService(d: Deps) {
         // "Expose tools to MCP-compatible apps", which the app cannot detect, hence PERMISSION_REQUIRED.
         jiraRead: 'AVAILABLE', jiraWrite: 'AVAILABLE', confluenceRead: 'NOT_CONFIGURED', workflowValidator: 'AVAILABLE',
         rovoAgent: 'AVAILABLE', rovoMcp: 'PERMISSION_REQUIRED', teamworkGraph: 'NOT_CONFIGURED', llm: 'DISABLED_BY_BUDGET',
-        operations: OPERATION_NAMES
+        operations: OPERATION_NAMES,
+        portfolioSimulation: 'AVAILABLE'
       };
     },
 
@@ -256,6 +259,44 @@ export function createService(d: Deps) {
       const s = await loadSnap(ctx, input.snapshotId);
       if (isExpired(s.snapshot)) fail('SNAPSHOT_EXPIRED', 'Snapshot expired; rebuild it from Jira.');
       return s.snapshot;
+    },
+
+    /**
+     * Read-only Portfolio Impact Simulator on a real, permission-filtered Jira snapshot (issue #134).
+     * Builds the snapshot exactly like getGraphSnapshot (as the calling user; stored like any snapshot), or reuses one the caller owns.
+     * Every referenced node must be a node of that snapshot that the user can read: nothing is invented, and unreadable
+     * (forbidden / missing) issues are rejected with the same message as absent ones so their existence is not confirmed.
+     */
+    async simulatePortfolio(ctx: Ctx, input: SimulatePortfolioRequest): Promise<SimulatePortfolioResult> {
+      if (!ctx.accountId && input.source !== 'DEMO_FIXTURE') fail('PERMISSION_DENIED', 'An authenticated Atlassian user is required.');
+      if (input.changes.length > PORTFOLIO_LIMITS.maxChanges) fail('VALIDATION', `At most ${PORTFOLIO_LIMITS.maxChanges} changes are allowed.`);
+      let snapshot: GraphSnapshot; let rootIssueKey: string; let reused = false;
+      if (input.snapshotId) {
+        const s = await loadSnap(ctx, input.snapshotId);
+        if (isExpired(s.snapshot)) fail('SNAPSHOT_EXPIRED', 'Snapshot expired; rebuild it from Jira.');
+        if (s.rootIssueKey !== input.rootIssueKey) fail('VALIDATION', `Snapshot ${input.snapshotId} was not built for ${input.rootIssueKey}.`);
+        snapshot = s.snapshot; rootIssueKey = s.rootIssueKey; reused = true;
+      } else {
+        snapshot = await this.getGraphSnapshot(ctx, { projectId: input.projectId, rootIssueKey: input.rootIssueKey, source: input.source, maxDepth: input.snapshotMaxDepth });
+        rootIssueKey = input.source === 'DEMO_FIXTURE' ? 'PAY-412' : input.rootIssueKey;
+      }
+      const readable = new Set(snapshot.nodes.filter((n) => !(n.status === 'UNKNOWN' && (n.attributes['access'] === 'forbidden' || n.attributes['access'] === 'not_found'))).map((n) => n.id));
+      const opNodes = (op: ChangeOperation) => (op.op === 'MIGRATE_DEPENDENTS' ? [op.fromNodeId, op.toNodeId] : [op.nodeId]);
+      const missing = [...new Set(input.changes.flatMap((c) => c.operations.flatMap(opNodes)).filter((id) => !readable.has(id)))].sort();
+      if (missing.length) {
+        fail('VALIDATION', `Not in your evidence snapshot of ${rootIssueKey} (or not visible to you): ${missing.slice(0, 10).join(', ')}${missing.length > 10 ? ` (+${missing.length - 10} more)` : ''}.`,
+          { unknownNodeIds: missing.slice(0, 50), snapshotId: snapshot.snapshotId });
+      }
+      let result;
+      try {
+        result = runPortfolio(snapshot, input.changes, { maxDepth: input.maxDepth, rules: DEFAULT_POLICIES, proposedOrder: input.proposedOrder });
+      } catch (e) {
+        if (e instanceof PortfolioError) fail(e.code, e.issues.slice(0, 5).join('; ').slice(0, 900), { issues: e.issues.slice(0, 20) });
+        throw e;
+      }
+      return { ...result, snapshot: { snapshotId: snapshot.snapshotId, projectId: snapshot.projectId, rootIssueKey, mode: snapshot.mode, createdAt: snapshot.createdAt,
+        expiresAt: snapshot.expiresAt, truncated: snapshot.truncated, nodeCount: snapshot.nodes.length, edgeCount: snapshot.edges.length, reused,
+        ...(snapshot.coverage ? { coverage: snapshot.coverage } : {}) } };
     },
 
     async simulateChange(ctx: Ctx, req: SimulationRequest) {
@@ -499,7 +540,7 @@ export function normalizeDate(s: string): string {
 }
 
 export const OPERATION_NAMES = ['getCapabilities', 'getPolicies', 'listProjects', 'getChangeCandidates', 'getGraphSnapshot', 'getEvidenceGraph', 'simulateChange',
-  'compareScenarios', 'generatePreventionPlan', 'approvePlan', 'executeApprovedPlan', 'getExecutionStatus', 'getPreventionPassport', 'checkPlanFreshness', 'previewSampleProject', 'createSampleProject', 'getValidatorPolicy', 'setValidatorPolicy', 'simulateSlip',
+  'compareScenarios', 'generatePreventionPlan', 'approvePlan', 'executeApprovedPlan', 'getExecutionStatus', 'getPreventionPassport', 'checkPlanFreshness', 'previewSampleProject', 'createSampleProject', 'getValidatorPolicy', 'setValidatorPolicy', 'simulateSlip', 'simulatePortfolio',
   // capability signals (not resolvers): scenario operations accepted by compareScenarios / generatePreventionPlan
   'scenario:UPGRADE_NODE', 'validator:outage-policy'];
 export { issueNodeId };
