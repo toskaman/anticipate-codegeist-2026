@@ -25,8 +25,10 @@ Updated: 4 Nov 2026, ~16:20 Paris. Owner of this file: CORE (muse).
 | Shared-decision execution gate (server-side) | UNIT_TESTED + deployed dev 6.9.0; feature release-locked | #144: 13 adversarial tests, every refusal asserts zero Jira writes |
 | Approval path under storage faults | UNIT_TESTED | #145: fault injection before/after each write |
 | Shared Decision Workspace (two-account flow) | BLOCKED (hosted two-account acceptance not run) | #131 |
-| Decision Radar (event-driven needs-review hints) | LIVE_FORGE_DEV for link events (4 Nov: real link deleted → needsReview in ≈3.2 s → cleared by checkPlanFreshness); first live event exposed a payload-shape bug, fixed in #150; issue-deleted event and production delivery NOT_VERIFIED | EVIDENCE_PACK 4 Nov; #146, #150; UI #147 |
-| Portfolio Impact Simulator | backend UNIT_TESTED (#141); UI in progress (#142); NOT_VERIFIED hosted | #64 |
+| Decision Radar (event-driven needs-review hints) | LIVE_FORGE_DEV for link events (4 Nov: real link deleted → needsReview in ≈3.2 s → cleared by checkPlanFreshness); first live event exposed a payload-shape bug, fixed in #150; issue-deleted event and production delivery NOT_VERIFIED; 4 Nov: one historical invalid event kept every later plan DEGRADED, fixed in #158 and verified LIVE_FORGE_DEV (new plan shows Listening) | EVIDENCE_PACK 4 Nov; #146, #150; UI #147 |
+| Portfolio Impact Simulator | backend UNIT_TESTED (#141); UI merged (#142); panel reachable on dev (LIVE_FORGE_DEV, 4 Nov, Scenario Lab); a combined-change run with a real interaction NOT_VERIFIED hosted | #64 |
+| Policy-as-code preview engine | UNIT_TESTED only (37 tests, #159); inert: nothing calls it, gates nothing | docs/design-core/POLICY_AS_CODE.md |
+| What-if slip panel | LIVE_FORGE_DEV 4 Nov: late release (by 9 d), 3 moved due dates with paths, unknowns listed | EVIDENCE_PACK 4 Nov |
 | Rovo agent | LIVE_FORGE on dev (site has Rovo); production site has no Rovo |
 | Teamwork Graph | BLOCKED: app not allowlisted | 3 Nov: `read:graph:jira` refused at deploy (restricted scope); `read:graph:issue:jira` deployed on dev (branch exp/teamwork-graph, v5.1.0), but the user consent flow never grants it (the issued code lists only the Jira scopes), so the hosted probe keeps asking for authorization. Atlassian docs: apps must be allowlisted via Atlassian support. Dev rolled back to CORE (v6.0.0, no graph scope); production never changed. Allowlist requested: ECOHELP-180616 (2 Nov 2026); evidence in docs/evidence/TEAMWORK_GRAPH_ALLOWLIST.md. Bonus not claimable until enabled |
 
