@@ -375,6 +375,14 @@ export function createService(d: Deps) {
       if (isExpired(snap.snapshot)) { await this.markExpired(rec); fail('SNAPSHOT_EXPIRED', 'Snapshot expired; regenerate the plan.'); }
       // Continuous Decision Safety: never write on evidence that changed after approval.
       await guardFreshEvidence(rec, snap, 'execution');
+      // Shared decisions: the link is server-side state written at share time, so a client cannot bypass review by omitting an id.
+      // Fail closed: a governed plan without a verifiable gate never writes.
+      const link = await d.store.get<{ decisionId?: string }>(`ws:plan:${input.planId}`);
+      const governedBy = link ? (typeof link.decisionId === 'string' ? link.decisionId : fail('CONFLICT', 'This plan is linked to an unreadable shared decision; regenerate the plan.')) : null;
+      if (governedBy) {
+        if (!d.sharedDecisions) fail('UNSUPPORTED', 'This plan is governed by a shared decision that cannot be verified here.', { decisionId: governedBy });
+        await d.sharedDecisions!.authorizeExecution(ctx, governedBy, rec.plan.planHash);
+      }
 
       // Lease: one executor per plan at a time.
       const lockKey = K.lock(input.planId);
@@ -393,14 +401,21 @@ export function createService(d: Deps) {
         await d.store.set(K.plan(input.planId), rec);
         const perms = await d.jira.myPermissions(rec.projectKey, ['CREATE_ISSUES', 'LINK_ISSUES', 'ADD_COMMENTS', 'EDIT_ISSUES', 'BROWSE_PROJECTS']);
         const out: ExecutionRecord[] = [];
+        let stopped = false;
         for (const action of rec.plan.actions.filter((a) => rec.approvedActionIds.includes(a.actionId))) {
+          // Re-check right before every Jira write: a revocation, rejection or expiry landing mid-run stops further writes.
+          if (governedBy && !(await d.sharedDecisions!.stillApproved(governedBy, rec.plan.planHash))) {
+            rec.timeline.push({ at: iso(), event: `Execution stopped: shared decision ${governedBy} is no longer approved` });
+            stopped = true; break;
+          }
           out.push(await executeOne(rec, action, perms, input.idempotencyKey));
         }
         const verified = out.filter((r) => r.status === 'VERIFIED').length;
         // COMPLETED means EVERY action of the plan was approved and verified. Verifying a subset (e.g. only the
         // decision comment) is PARTIAL and can never produce an attestation that opens the workflow gate.
         const allApproved = rec.plan.actions.every((a) => rec.approvedActionIds.includes(a.actionId));
-        rec.plan = { ...rec.plan, status: verified === out.length && out.length > 0 ? (allApproved ? 'COMPLETED' : 'PARTIAL') : verified === 0 ? 'FAILED' : 'PARTIAL' };
+        rec.plan = { ...rec.plan, status: stopped ? (verified === 0 ? 'FAILED' : 'PARTIAL')
+          : verified === out.length && out.length > 0 ? (allApproved ? 'COMPLETED' : 'PARTIAL') : verified === 0 ? 'FAILED' : 'PARTIAL' };
         rec.timeline.push({ at: iso(), event: `Execution finished: ${verified}/${out.length} verified` });
         await d.store.set(K.plan(input.planId), rec);
         await recordDecision(rec);

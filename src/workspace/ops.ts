@@ -14,6 +14,12 @@ import { createWorkspace, type AuditEntry, type DecisionView, type WorkspacePort
 
 export const SHARED_DECISIONS_FLAG = 'sharedDecisions';
 export const SHARED_DECISIONS_FLAG_KEY = 'config:feature:sharedDecisions';
+/**
+ * Release lock. Stays false until the execution gate has passed the hosted two-account acceptance test
+ * (docs/design-core/ENTERPRISE_WORKSPACE.md). While false, enabling the flag is refused and a flag enabled by an
+ * earlier version is ignored, so a Jira administrator cannot switch on a partially verified feature.
+ */
+export const SHARED_DECISIONS_RELEASED = false;
 /** Op names served by createWorkspaceOps (all present in OPERATIONS of packages/contracts). */
 export const WORKSPACE_OPERATION_NAMES = ['shareDecision', 'getSharedDecision', 'approveSharedDecision', 'rejectSharedDecision', 'revokeSharedDecision',
   'listDecisionAudit', 'getFeatureFlag', 'setFeatureFlag'] as const;
@@ -22,6 +28,8 @@ interface FlagRecord { enabled: boolean; updatedBy: string | null; updatedAt: st
 export interface WorkspaceOpsPorts extends WorkspacePorts {
   /** Global permissions of the CALLER (asUser), e.g. ADMINISTER. */
   globalPermissions: JiraPort['globalPermissions'];
+  /** Overrides SHARED_DECISIONS_RELEASED (tests only). */
+  released?: boolean;
 }
 
 function toContract(v: DecisionView): SharedDecision {
@@ -40,7 +48,9 @@ export function createWorkspaceOps(p: WorkspaceOpsPorts) {
   const ws = createWorkspace(p);
   const readFlag = async () => (await p.store.get<FlagRecord>(SHARED_DECISIONS_FLAG_KEY)) ?? null;
   /** Strictly `enabled === true`: a missing, malformed or partially written record keeps the feature off. */
+  const released = p.released ?? SHARED_DECISIONS_RELEASED;
   const gate = async () => {
+    if (!released) fail('UNSUPPORTED', 'Shared decisions are not released yet.', { feature: SHARED_DECISIONS_FLAG, reason: 'NOT_RELEASED' });
     if ((await readFlag())?.enabled !== true) {
       fail('UNSUPPORTED', 'Shared decisions are not enabled on this site. A Jira administrator can enable them.', { feature: SHARED_DECISIONS_FLAG, reason: 'FEATURE_DISABLED' });
     }
@@ -64,12 +74,13 @@ export function createWorkspaceOps(p: WorkspaceOpsPorts) {
     async getFeatureFlag(ctx: Ctx, input: { flag: string }): Promise<FeatureFlag> {
       requireUser(ctx); checkFlagName(input.flag);
       const cur = await readFlag();
-      return { flag: 'sharedDecisions', enabled: cur?.enabled === true, updatedBy: cur?.updatedBy ?? null, updatedAt: cur?.updatedAt ?? null, canEdit: await isSiteAdmin() };
+      return { flag: 'sharedDecisions', enabled: released && cur?.enabled === true, updatedBy: cur?.updatedBy ?? null, updatedAt: cur?.updatedAt ?? null, canEdit: await isSiteAdmin() };
     },
     async setFeatureFlag(ctx: Ctx, input: { flag: string; enabled: boolean }): Promise<FeatureFlag> {
       requireUser(ctx); checkFlagName(input.flag);
       if (typeof input.enabled !== 'boolean') fail('VALIDATION', 'enabled must be a boolean.');
       if (!(await isSiteAdmin())) fail('PERMISSION_DENIED', 'Only Jira administrators can change feature flags.');
+      if (input.enabled && !released) fail('UNSUPPORTED', 'Shared decisions cannot be enabled yet: they are pending hosted acceptance.', { feature: SHARED_DECISIONS_FLAG, reason: 'NOT_RELEASED' });
       const rec: FlagRecord = { enabled: input.enabled, updatedBy: ctx.accountId, updatedAt: p.now().toISOString() };
       await p.store.set(SHARED_DECISIONS_FLAG_KEY, rec);
       console.warn(JSON.stringify({ app: 'anticipate', op: 'setFeatureFlag', flag: input.flag, enabled: input.enabled, accountId: ctx.accountId }));

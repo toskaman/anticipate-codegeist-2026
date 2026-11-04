@@ -74,6 +74,9 @@ const slotKey = (id: string, n: number) => `ws:slot:${id}:${n}`;
 const markKey = (id: string, acc: string) => `ws:appr:${id}:${acc}`;
 const termKey = (id: string) => `ws:term:${id}`;
 const logKey = (id: string, seq: number) => `ws:log:${id}:${String(seq).padStart(6, '0')}`;
+/** Server-side link plan -> shared decision. Once a plan is shared, execution of that plan is governed by its decision. */
+export const planLinkKey = (planId: string) => `ws:plan:${planId}`;
+export interface PlanLink { decisionId: string; at: string }
 
 export function createWorkspace(p: WorkspacePorts) {
   const who = (ctx: Ctx) => {
@@ -170,6 +173,15 @@ export function createWorkspace(p: WorkspacePorts) {
       const now = p.now();
       const r: DecisionRecord = { id: checkId(`dec-${p.newId()}`), projectKey: plan!.projectKey, issueKey: plan!.issueKey, planId: plan!.planId, planHash: plan!.planHash,
         proposer: acc, createdAt: now.toISOString(), expiresAt: new Date(now.getTime() + APPROVAL_VALID_DAYS * 86400000).toISOString(), requiredApprovals: req };
+      // Link first (fail closed): if the record write below is lost, the plan is blocked rather than executable without review.
+      const link: PlanLink = { decisionId: r.id, at: now.toISOString() };
+      if (!(await p.store.setIfAbsent(planLinkKey(plan!.planId), link))) {
+        const cur = await p.store.get<PlanLink>(planLinkKey(plan!.planId));
+        const prev = cur ? await p.store.get<DecisionRecord>(decKey(cur.decisionId)) : undefined;
+        const prevState = prev ? (await derive(prev)).state : null;
+        if (prevState === 'IN_REVIEW' || prevState === 'APPROVED') fail('CONFLICT', 'This plan is already shared in an open decision.');
+        await p.store.set(planLinkKey(plan!.planId), link); // previous decision is closed (or unreadable): the new one governs
+      }
       if (!(await p.store.setIfAbsent(decKey(r.id), r))) fail('CONFLICT', 'Decision id collision.');
       await append(r.id, acc, 'SHARED', `plan ${r.planId} hash ${r.planHash}, ${req} approval(s) required`);
       return present(acc, await derive(r));
@@ -242,6 +254,23 @@ export function createWorkspace(p: WorkspacePorts) {
       // A concurrent revocation/expiry may have landed while we were checking: re-read the terminal marker last.
       if ((await derive(r)).state !== 'APPROVED') return { ok: false, reason: 'Decision changed during validation.' };
       return { ok: true, reason: null };
+    },
+
+    /**
+     * Server-side execution guard for a shared plan (called by executeApprovedPlan, never by the client).
+     * Only the proposer executes; the decision must be APPROVED on the current plan hash, unexpired, not closed,
+     * with every approver still holding the approver permission and the evidence unchanged. Throws on any failure.
+     */
+    async authorizeExecution(ctx: Ctx, id: string, currentPlanHash: string) {
+      const acc = who(ctx); const r = await loadRecord(id);
+      if (acc !== r.proposer) fail('PERMISSION_DENIED', 'Only the proposer of a shared decision can execute it.');
+      const res = await this.readyToExecute(ctx, id, currentPlanHash);
+      if (!res.ok) fail('STALE_APPROVAL', `Shared decision not executable: ${res.reason}`, { decisionId: id });
+    },
+    /** Cheap re-check before each Jira write (closes the check-then-write window against revocation, rejection or expiry). */
+    async stillApproved(id: string, currentPlanHash: string) {
+      const r = await loadRecord(id); const d = await derive(r);
+      return d.state === 'APPROVED' && currentPlanHash === r.planHash;
     },
 
     /** Full audit (bounded by MAX_LOG). Prefer auditPage for resolvers. */
