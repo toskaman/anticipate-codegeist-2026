@@ -116,14 +116,13 @@ function AttentionReader({
       className="ax-radar"
       description={
         historical
-          ? "Current backend attention, separate from this recorded Passport. It does not change the historical record or its export."
-          : "Backend event hints for this plan. They are not a freshness verdict or authorization to act."
+          ? "Current radar hints, separate from this recorded Passport and its exports."
+          : "Review event hints for this plan; radar reads and evidence re-checks never change Jira."
       }
     >
       <p className="ax-small ax-muted">
-        This screen reads the latest stored hints when opened or refreshed.
-        Event delivery may be delayed; it is not a live connection or complete
-        Jira coverage.
+        Hints update when you open or refresh this panel. They may be delayed or
+        incomplete, so radar is not a freshness check.
       </p>
       <div role="status" aria-live="polite">
         {checking
@@ -136,8 +135,8 @@ function AttentionReader({
         <div role="alert">
           <p className="ax-error-text">{error}</p>
           <p>
-            No radar result is shown. Approval and execution still perform their
-            own server checks.
+            No radar result is shown. Select Retry radar read to try again; this
+            does not approve or execute the plan.
           </p>
         </div>
       )}
@@ -161,12 +160,6 @@ function AttentionReader({
                 ? "Monitoring degraded"
                 : "Radar not available for this plan"}
           </Badge>
-          {state === "ACTIVE" && (
-            <p className="ax-small ax-muted">
-              Listening is the backend's reported monitoring state, not proof of
-              complete event delivery.
-            </p>
-          )}
           {attention.monitoring.reasons.length > 0 && (
             <ul>
               {attention.monitoring.reasons.map((reason) => (
@@ -193,10 +186,10 @@ function AttentionReader({
                   {formatTime(attention.monitoring.lastObservedAt)}
                 </time>
                 {!attention.needsReview &&
-                  " are listed in this response. Absence of alerts does not establish freshness."}
+                  " are listed here. Re-check evidence before approval or execution."}
               </>
             ) : (
-              "No radar observation time supplied. Absence of alerts does not establish freshness."
+              "No radar observation time supplied. Re-check evidence before approval or execution."
             )}
           </p>
           {attention.needsReview ? (
@@ -204,12 +197,7 @@ function AttentionReader({
               Relevant event hints were reported. Re-check the actual evidence
               before reviewing this decision again.
             </Notice>
-          ) : (
-            <p className="ax-muted">
-              No review hints reported in this response. No conclusion about the
-              decision is inferred.
-            </p>
-          )}
+          ) : null}
           {attention.items.length > 0 ? (
             <ol className="ax-radar__events">
               {attention.items.map((item, index) => (

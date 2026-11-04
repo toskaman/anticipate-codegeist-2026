@@ -313,7 +313,7 @@ function PortfolioEditor({
       title="Several changes at once"
       id={`${prefix}-title`}
       className="ax-portfolio"
-      description="Explore combined consequences on the analysed snapshot. Read-only: no approval, execution or Jira changes."
+      description="Optional: explore how several changes interact on the recorded evidence, without changing Jira."
       actions={
         <Badge tone="info" size="sm">
           Simulation
@@ -321,9 +321,9 @@ function PortfolioEditor({
       }
     >
       <p>
-        Build up to {PORTFOLIO_LIMITS.maxChanges} named changes using loaded
-        records. Rows define your proposed order; the backend checks its
-        constraints. This does not change your single-change decision.
+        Add up to {PORTFOLIO_LIMITS.maxChanges} named changes using the records
+        already analysed. Use Move earlier or Move later to try a different
+        order. This does not choose, approve or execute your single-change plan.
       </p>
       {expired && (
         <Notice tone="warning" title="Snapshot expired">
@@ -341,8 +341,8 @@ function PortfolioEditor({
           <legend>Proposed portfolio changes</legend>
           {!rows.length && (
             <p className="ax-muted">
-              No changes added. Start with a change to inspect its combined
-              consequences.
+              No changes added. Select Add change, then choose its action and
+              record to begin.
             </p>
           )}
           {rows.map((row, index) => (
@@ -513,8 +513,9 @@ function PortfolioEditor({
         <div role="alert">
           <p className="ax-error-text">{error}</p>
           <p>
-            No portfolio result is shown. Nothing was changed in Jira. Retry
-            explicitly, or read fresh evidence if the snapshot expired.
+            No portfolio result is shown, and nothing was changed in Jira.
+            Review the changes and try again; for an expired snapshot, return to
+            Mission Control and select Analyze dependencies first.
           </p>
         </div>
       )}

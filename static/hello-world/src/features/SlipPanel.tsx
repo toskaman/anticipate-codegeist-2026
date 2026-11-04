@@ -38,7 +38,7 @@ export default function SlipPanel({ w }: { w: Workflow }) {
       setResult(null);
       setError(
         e instanceof CoreClientError
-          ? `${e.code}: ${e.message}`
+          ? e.message
           : "The slip simulation failed. Nothing was changed in Jira.",
       );
     } finally {
@@ -50,7 +50,7 @@ export default function SlipPanel({ w }: { w: Workflow }) {
     <Panel
       title="What if it slips?"
       id="slip-title"
-      description={`Simulates a delay of ${issueKey} on its Jira due dates, dependencies and fix versions.`}
+      description={`Optional: explore which recorded due dates and releases could move if ${issueKey} is delayed, without changing Jira.`}
       actions={
         <Badge tone="info" icon="scenarios" size="sm">
           Simulation · nothing changed in Jira
@@ -87,9 +87,15 @@ export default function SlipPanel({ w }: { w: Workflow }) {
         >
           {days === null
             ? "Enter a whole number of days from 1 to 365."
-            : "From 1 to 365 days. Uses due dates and fix versions as they are in Jira now."}
+            : "From 1 to 365 days. Uses Jira due dates and release dates; no dates are updated."}
         </p>
       </form>
+      {!view && !busy && !error && (
+        <p className="ax-muted ax-small">
+          Choose a delay, then select Simulate slip to see which dates could
+          move.
+        </p>
+      )}
       <p className="ax-muted ax-small ax-slip__status" role="status">
         {busy
           ? `Simulating a ${days ?? ""}-day slip of ${issueKey}…`
@@ -101,7 +107,9 @@ export default function SlipPanel({ w }: { w: Workflow }) {
         <div className="ax-slip__error" role="alert">
           <p className="ax-error-text">{error}</p>
           <p className="ax-small">
-            No result is shown, and nothing was changed in Jira.
+            No result is shown, and nothing was changed in Jira. Review the
+            delay and select Try again; if Jira access is denied, ask your
+            project administrator for access.
           </p>
           <button
             type="button"
