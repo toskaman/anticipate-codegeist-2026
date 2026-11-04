@@ -58,7 +58,7 @@ export function mockPortfolioResult(
         kind: "MIGRATE_ONTO_RETIRED",
         changeIds: [first, second],
         nodeIds: [graph.nodes[1].id],
-        reason: "The selected replacement is also retired in this portfolio.",
+        reason: `The selected replacement is also retired in this portfolio: ${first} migrates consumers onto a record that ${second} retires.`,
         evidenceGapEdgeIds: ["unreadable-edge"],
       },
     ],
