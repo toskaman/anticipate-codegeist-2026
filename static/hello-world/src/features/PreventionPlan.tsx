@@ -15,6 +15,7 @@ import {
 import EvidencePath from "../components/EvidencePath";
 import DecisionDialog from "../components/DecisionDialog";
 import type { Workflow } from "../app/useCoreWorkflow";
+const RadarAttention = React.lazy(() => import("./RadarAttention"));
 import {
   actionTypeCopy,
   executionCopy,
@@ -233,6 +234,11 @@ export default function PreventionPlan({ w }: { w: Workflow }) {
         )}
       </section>
       <EvidenceChangeNotice w={w} />
+      {w.capabilities?.operations.includes("getPlanAttention") && (
+        <React.Suspense fallback={<p role="status">Loading radar tools…</p>}>
+          <RadarAttention w={w} planId={plan.planId} />
+        </React.Suspense>
+      )}
       {w.allowed("checkPlanFreshness") && (
         <div className="ax-freshness">
           <button

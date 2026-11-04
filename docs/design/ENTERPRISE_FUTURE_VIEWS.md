@@ -2,7 +2,9 @@
 
 Date: 4 November 2026. This extends ENTERPRISE_AND_TWG_UX.md without changing its single-user default or decision D3. These views are not in product navigation and make no Forge requests. Proposed fields below are UX requirements, not shared backend contracts. Any provisional view models/components must stay inside the frontend and carry a fixed concept label until CORE approves the runtime contract.
 
-Runtime update: CORE #141 now supplies the portfolio contract. Assigned ORP-32 (#142) implements the real capability-gated Scenario Lab panel; see [PORTFOLIO_UI_ACCEPTANCE.md](PORTFOLIO_UI_ACCEPTANCE.md). The passive concepts remain outside production. Shared execution enforcement has since merged (#144), but activation stays locked pending two-account hosted acceptance. Radar slice 1 has merged (#146), with event-to-UI acceptance still pending; no shared/radar UI is exposed. This update does not claim hosted portfolio acceptance.
+Runtime update: CORE #141 now supplies the portfolio contract. Assigned ORP-32 (#142) implements the real capability-gated Scenario Lab panel; see [PORTFOLIO_UI_ACCEPTANCE.md](PORTFOLIO_UI_ACCEPTANCE.md). The passive concepts remain outside production. Shared execution enforcement has since merged (#144), but activation stays locked pending two-account hosted acceptance. Radar slice 1 has merged (#146), with event-to-UI acceptance still pending; shared UI remains unexposed and radar display follows the gated assignment below. This update does not claim hosted portfolio acceptance.
+
+Follow-up: ORP-32 merged in #148. Assigned ORP-33 (#147) now consumes the actual `PlanAttention`/`getPlanAttention` contract for a gated, explicitly refreshed plan/Passport panel; see [RADAR_UI_ACCEPTANCE.md](RADAR_UI_ACCEPTANCE.md). It does not enable the continuous/browser-stream concept below. Hosted event-to-UI proof and shared activation remain pending; passive experiments stay outside production.
 
 ## Portfolio Impact Command Center
 

@@ -10,6 +10,7 @@ import {
   SourceLink,
 } from "../components/ui";
 import type { Workflow } from "../app/useCoreWorkflow";
+const RadarAttention = React.lazy(() => import("./RadarAttention"));
 import {
   actionTypeCopy,
   evidenceCopy,
@@ -177,6 +178,11 @@ export default function Passport({ w }: { w: Workflow }) {
           </>
         }
       />
+      {plan && w.capabilities?.operations.includes("getPlanAttention") && (
+        <React.Suspense fallback={<p role="status">Loading radar tools…</p>}>
+          <RadarAttention w={w} planId={plan.planId} historical />
+        </React.Suspense>
+      )}
       <article className="ax-report" aria-labelledby="report-title">
         <header className="ax-report__header">
           <div className="ax-report__brand">
