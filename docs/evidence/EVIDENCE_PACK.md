@@ -149,6 +149,21 @@ Built-in browser pane, owner session (site admin). Dev 6.18.x until 19:05, then 
 | Decision Radar on new plans | before #158: "Monitoring degraded · An event could not be interpreted" on every plan although the day's link events were RECORDED (forge logs); after #158 on 6.19.0 (19:10 CET): "Listening", 8 indexed | FIXED |
 | Passport PDF, dark theme | print dialog blocks automation | owner (manual) |
 
+## DEMO 2 — portfolio collision on dev (4 Nov 2026, 21:08 CET) · LIVE_FORGE_DEV, one-atlas-euza 6.19.0
+
+Built-in browser pane, owner session. Read-only: nothing written to Jira. Mission Control → TD / TD-1 → Analyze → Scenario Lab → Several changes at once:
+- Change 1 "A: move TD-1 consumers to TD-5": Migrate dependents, TD-1 → TD-5.
+- Change 2 "B: breaking upgrade of TD-5": Upgrade · breaking, TD-5.
+
+| Observed | Result |
+|---|---|
+| Combined simulation: **Needs review**; evidence coverage incomplete note (Teamwork Graph not allowlisted) | PASS (honest) |
+| Conflict 1: "issue:TD-2, issue:TD-3, issue:TD-4, issue:TD-6 are impacted only when the changes run together (not by any change alone)" | PASS (EMERGENT_IMPACT) |
+| Conflict 2: "change-1 migrates dependents of issue:TD-1 onto issue:TD-5, but change-2 applies a breaking upgrade to issue:TD-5; the migrated consumers would be impacted again" | PASS (MIGRATE_ONTO_RETIRED) |
+| Suggested order: A → B; shared affected records: none | PASS |
+
+Same outcome as `test/demo2-portfolio-collision.test.ts` (#164). Finding: the conflict reasons showed internal ids (`change-1`, `change-2`) instead of the change names; fixed in the same PR (names substituted in reasons, Playwright assertion added).
+
 ## Hosted (LIVE_FORGE) proofs still missing
 
 Each of these is either tested LOCAL only or not observed at all. The browser checks belong to muse (#64), and the video belongs to the owner.

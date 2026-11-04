@@ -162,6 +162,11 @@ for (const theme of ["light", "dark"]) {
       p.getByRole("heading", { name: "Combined simulation", exact: true }),
     ).toBeVisible();
     await expect(p).toContainText("The selected replacement is also retired");
+    // Backend reasons cite change ids; the panel shows the names the user typed.
+    await expect(p).toContainText(
+      "“Retire API” migrates consumers onto a record that “Retire replacement” retires.",
+    );
+    await expect(p.getByText(/\bchange-[12]\b/)).toHaveCount(0);
     await expect(p).toContainText("Unknown relationship was not migrated");
     await expect(p).toContainText("Unknown");
     await expect(p).toContainText("Inferred");

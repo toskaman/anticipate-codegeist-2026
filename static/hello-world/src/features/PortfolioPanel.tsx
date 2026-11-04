@@ -54,6 +54,23 @@ function PortfolioResultView({
     graph.nodes.find((n) => n.id === id)?.label ?? id;
   const change = (id: string) =>
     r.individual.find((c) => c.changeId === id)?.label ?? id;
+  // Backend reasons cite change ids (e.g. "change-1"); show the names the user typed instead.
+  // Longest ids first so "change-10" is not rewritten as "change-1" + "0".
+  const changeIds = r.individual
+    .map((c) => c.changeId)
+    .sort((a, b) => b.length - a.length);
+  const readable = (text: string) =>
+    changeIds.reduce(
+      (t, id) =>
+        t.replace(
+          new RegExp(
+            `(^|[^A-Za-z0-9_-])${id.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?![A-Za-z0-9_-])`,
+            "g",
+          ),
+          (_m, pre: string) => `${pre}“${change(id)}”`,
+        ),
+      text,
+    );
   const status = (id: string) => {
     const statuses = [
       r.combined.result,
@@ -111,7 +128,7 @@ function PortfolioResultView({
         {(item) => (
           <>
             <strong>{item.changeIds.map(change).join(" + ")}</strong>
-            <p>{item.reason}</p>
+            <p>{readable(item.reason)}</p>
             <p className="ax-small">
               {item.nodeIds.map(node).join(" · ")}
               {item.evidenceGapEdgeIds.length
@@ -143,7 +160,7 @@ function PortfolioResultView({
             <strong>
               {change(item.before)} → {change(item.after)}
             </strong>
-            <p>{item.reason}</p>
+            <p>{readable(item.reason)}</p>
           </>
         )}
       </Limited>
@@ -157,7 +174,7 @@ function PortfolioResultView({
               : "No violated constraints reported. This is not authorization to execute."}
           </p>
           <Limited items={r.ordering.proposed.violatedConstraints}>
-            {(item) => item.reason}
+            {(item) => readable(item.reason)}
           </Limited>
         </>
       )}
