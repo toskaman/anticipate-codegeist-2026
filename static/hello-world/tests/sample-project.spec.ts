@@ -1,6 +1,12 @@
 import { test, expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
-import { capabilities, graph, meta, response } from "./core-test-data";
+import {
+  capabilities,
+  graph,
+  meta,
+  response,
+  lockedSharedDecisionsFlag,
+} from "./core-test-data";
 
 async function sampleCore(
   page: Page,
@@ -151,6 +157,9 @@ async function sampleCore(
       case "getGraphSnapshot":
       case "getEvidenceGraph":
         data = graph;
+        break;
+      case "getFeatureFlag":
+        data = lockedSharedDecisionsFlag;
         break;
       default:
         throw new Error(`Unexpected resolver ${call.operation}`);

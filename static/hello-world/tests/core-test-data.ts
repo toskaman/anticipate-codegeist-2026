@@ -13,6 +13,15 @@ export const meta = {
   generatedAt: "2026-11-02T00:00:00Z",
 };
 export const response = (data: unknown) => ({ ok: true as const, meta, data });
+/** Feature flag as a production install reports it: shared decisions locked (#131). */
+export const lockedSharedDecisionsFlag = {
+  flag: "sharedDecisions" as const,
+  enabled: false,
+  updatedBy: null,
+  updatedAt: null,
+  canEdit: false,
+  released: false,
+};
 export const capabilities = {
   jiraRead: "AVAILABLE",
   jiraWrite: "AVAILABLE",

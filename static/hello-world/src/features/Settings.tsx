@@ -14,6 +14,7 @@ import { AccessibilityControls } from "../components/AccessibilityControls";
 import type { PreferencesApi } from "../app/preferences";
 import PerformancePanel from "../components/PerformancePanel";
 import ValidatorPolicyPanel from "../components/ValidatorPolicyPanel";
+import SharedDecisionAcceptancePanel from "../components/SharedDecisionAcceptancePanel";
 
 type Key = Exclude<keyof CapabilityAvailability, "operations">;
 const rows: { key: Key; name: string; what: string; inApp: string }[] = [
@@ -180,6 +181,10 @@ export default function Settings({
         </div>
       </Panel>
       <ValidatorPolicyPanel client={w.client} capabilities={caps} />
+      <SharedDecisionAcceptancePanel
+        client={w.client}
+        currentPlanId={w.plan?.planId ?? null}
+      />
       <Panel
         title="Use ANTICIPATE from Rovo"
         id="rovo-title"

@@ -42,6 +42,12 @@ function lifecycle(
       detail:
         "Rebuild the snapshot and review a new plan. This action cannot execute from the old plan.",
     };
+  if (w.executionRefusal && w.approvedIds.has(a.actionId))
+    return {
+      label: "Execution refused",
+      tone: "warning",
+      detail: `The server refused execution before any Jira write: ${w.executionRefusal}`,
+    };
   if (w.attempted && w.approvedIds.has(a.actionId))
     return {
       label: "Outcome uncertain",

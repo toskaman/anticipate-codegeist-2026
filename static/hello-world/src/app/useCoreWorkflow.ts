@@ -72,6 +72,10 @@ export function useCoreWorkflow(client: ForgeClient) {
     approvedIds,
   } = usePlanState();
   const [operationBusy, setBusy] = useState("");
+  // Set only when the backend itself answered with a definitive refusal (error envelope with a requestId):
+  // the server checks every execution gate before any Jira write, so nothing was executed.
+  const [executionRefusal, setExecutionRefusal] = useState<string | null>(null);
+  useEffect(() => setExecutionRefusal(null), [plan?.planId]);
   const [sampleBusy, setSampleBusy] = useState(false);
   const busy =
     operationBusy || (sampleBusy ? "Preparing Jira sample data…" : "");
@@ -323,11 +327,18 @@ export function useCoreWorkflow(client: ForgeClient) {
           setAttempted(true);
           const executionKey = crypto.randomUUID();
           rememberExecution(plan.planId, executionKey);
-          const status = await client.request(
-            "executeApprovedPlan",
-            { planId: plan.planId, idempotencyKey: executionKey },
-            signal,
-          );
+          setExecutionRefusal(null);
+          let status;
+          try {
+            status = await client.request(
+              "executeApprovedPlan",
+              { planId: plan.planId, idempotencyKey: executionKey },
+              signal,
+            );
+          } catch (e) {
+            if (isDefinitiveRefusal(e)) setExecutionRefusal(e.message);
+            throw e;
+          }
           if (status.some((r) => !approvedIds.has(r.actionId)))
             throw new CoreClientError(
               "INVALID_RESPONSE",
@@ -633,6 +644,7 @@ export function useCoreWorkflow(client: ForgeClient) {
     recoveryId,
     attempted,
     approvalUncertain,
+    executionRefusal,
     executionMarked,
     confirmation,
     busy,
@@ -649,3 +661,19 @@ export function useCoreWorkflow(client: ForgeClient) {
 }
 
 export type Workflow = ReturnType<typeof useCoreWorkflow>;
+
+/** Backend refusals that are decided before any Jira write (never TIMEOUT, NETWORK_ERROR, INVALID_RESPONSE or INTERNAL). */
+const REFUSAL_CODES = new Set([
+  "PERMISSION_DENIED",
+  "CONFLICT",
+  "UNSUPPORTED",
+  "EVIDENCE_CHANGED",
+  "STALE_APPROVAL",
+  "VALIDATION",
+  "NOT_FOUND",
+]);
+export function isDefinitiveRefusal(e: unknown): e is CoreClientError {
+  return (
+    e instanceof CoreClientError && !!e.requestId && REFUSAL_CODES.has(e.code)
+  );
+}

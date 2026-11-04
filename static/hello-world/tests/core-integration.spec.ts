@@ -10,6 +10,7 @@ import {
   comparison,
   plan,
   passport,
+  lockedSharedDecisionsFlag,
 } from "./core-test-data";
 
 async function mockedCore(
@@ -184,6 +185,9 @@ async function mockedCore(
         break;
       case "getPreventionPassport":
         data = passport(current, records);
+        break;
+      case "getFeatureFlag":
+        data = lockedSharedDecisionsFlag;
         break;
       default:
         throw new Error(`Unexpected test resolver ${call.operation}`);
