@@ -107,8 +107,8 @@ describe('portfolio capability signal', () => {
   it('advertises the operation and its hard limits', async () => {
     const caps = CapabilityAvailability.parse(await setup().svc.getCapabilities());
     expect(caps.operations).toContain('simulatePortfolio');
-    expect(caps.portfolioSimulation).toEqual({ available: true, ...PORTFOLIO_LIMITS });
-    expect(caps.portfolioSimulation?.maxChanges).toBe(10);
+    expect(caps.portfolioSimulation).toBe('AVAILABLE');
+    expect(PORTFOLIO_LIMITS.maxChanges).toBe(10);
   });
 });
 

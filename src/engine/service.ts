@@ -213,7 +213,7 @@ export function createService(d: Deps) {
         jiraRead: 'AVAILABLE', jiraWrite: 'AVAILABLE', confluenceRead: 'NOT_CONFIGURED', workflowValidator: 'AVAILABLE',
         rovoAgent: 'AVAILABLE', rovoMcp: 'PERMISSION_REQUIRED', teamworkGraph: 'NOT_CONFIGURED', llm: 'DISABLED_BY_BUDGET',
         operations: OPERATION_NAMES,
-        portfolioSimulation: { available: true, ...PORTFOLIO_LIMITS }
+        portfolioSimulation: 'AVAILABLE'
       };
     },
 

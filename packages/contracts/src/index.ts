@@ -55,11 +55,8 @@ export const CapabilityAvailability = z.object({
   workflowValidator: CapabilityState, rovoAgent: CapabilityState, rovoMcp: CapabilityState,
   teamworkGraph: CapabilityState, llm: CapabilityState,
   operations: z.array(z.string()),
-  /** Portfolio Impact Simulator exposure and hard bounds (optional, additive; absent on older backends). */
-  portfolioSimulation: z.object({
-    available: z.boolean(), maxChanges: z.number().int().positive(), maxOperationsPerChange: z.number().int().positive(),
-    maxNodes: z.number().int().positive(), maxEdges: z.number().int().positive(), maxDepth: z.number().int().positive()
-  }).optional()
+  /** Portfolio Impact Simulator availability (optional, additive; absent on older backends). Hard bounds: PORTFOLIO_LIMITS. */
+  portfolioSimulation: CapabilityState.optional()
 });
 export type CapabilityAvailability = z.infer<typeof CapabilityAvailability>;
 
