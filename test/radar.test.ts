@@ -83,6 +83,21 @@ describe('radar: event handling', () => {
     expect(a.monitoring).toMatchObject({ state: 'DEGRADED' }); expect(a.monitoring.reasons).toContain('INVALID_EVENT');
     expect(a.needsReview).toBe(false);
   });
+  it('an invalid event recorded before a plan was indexed does not degrade that plan (no sticky global error)', async () => {
+    const s = rig();
+    await s.radar.indexPlan('plan-old', nodes(['100']));
+    s.tick(1000); await s.radar.onEvent({ eventType: 'avi:jira:created:issuelink' });
+    s.tick(1000); await s.radar.indexPlan('plan-new', nodes(['100']));
+    const fresh = await s.radar.attention('plan-new');
+    expect(fresh.monitoring.state).toBe('ACTIVE'); expect(fresh.monitoring.reasons).toEqual([]);
+    const old = await s.radar.attention('plan-old'); // was watched when the event was dropped: still degraded
+    expect(old.monitoring.state).toBe('DEGRADED'); expect(old.monitoring.reasons).toContain('INVALID_EVENT');
+    s.tick(1000); await s.radar.clear('plan-old');
+    expect((await s.radar.attention('plan-old')).monitoring.state).toBe('ACTIVE');
+    s.tick(1000); await s.radar.onEvent({ eventType: 'avi:jira:deleted:issue' });
+    expect((await s.radar.attention('plan-old')).monitoring.reasons).toContain('INVALID_EVENT');
+    expect((await s.radar.attention('plan-new')).monitoring.reasons).toContain('INVALID_EVENT');
+  });
   it('fan-out is capped and reported (FANOUT_CAPPED), never unbounded', async () => {
     const s = rig();
     for (let i = 0; i < RADAR_LIMITS.fanout + 15; i++) await s.store.setIfAbsent(`radar:idx:100:plan-${i}`, { at: 'x' });

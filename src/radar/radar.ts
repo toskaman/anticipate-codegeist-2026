@@ -155,7 +155,11 @@ export function createRadar(p: { store: QueryableStore; now: () => Date }) {
       else {
         if (cov.failed) reasons.push('INDEX_WRITE_FAILED');
         if (cov.unindexed > 0) reasons.push('PARTIAL_INDEX');
-        if (h.lastError && h.lastErrorAt && (!clear || h.lastErrorAt > clear)) reasons.push(h.lastError);
+        // A dropped event can only have mattered to a plan that was already being watched: errors recorded before this
+        // plan was indexed (or before its last successful clear) do not degrade it.
+        // Conservative at the boundary: an error in the same instant as indexing still counts; one at the clear does not.
+        const relevant = (at: string) => (clear && clear >= cov.at ? at > clear : at >= cov.at);
+        if (h.lastError && h.lastErrorAt && relevant(h.lastErrorAt)) reasons.push(h.lastError);
         if (reasons.length) state = 'DEGRADED';
       }
       let items: RadarFact[] = []; let truncated = false;
