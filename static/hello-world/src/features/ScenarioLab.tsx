@@ -2,6 +2,7 @@ import React from "react";
 import type { SimulationResult } from "@anticipate/contracts";
 import Icon from "../components/Icon";
 import SlipPanel from "./SlipPanel";
+import ScenarioDifference from "../components/ScenarioDifference";
 import {
   Badge,
   EmptyState,
@@ -399,6 +400,11 @@ export default function ScenarioLab({ w }: { w: Workflow }) {
                   </article>
                 )}
               </div>
+              <ScenarioDifference
+                key={c.results.map((result) => result.resultHash).join("|")}
+                results={results}
+                graph={s}
+              />
               {selected && (
                 <Panel
                   className="ax-focus"

@@ -75,7 +75,7 @@ Details: [privacy](docs/legal/PRIVACY.md) · [terms](docs/legal/TERMS.md) · [th
 
 ## Tests and CI
 
-Counts on `main` f9ce7a5 (3 Nov 2026; source and counting method: [docs/RELEASE.md](docs/RELEASE.md)): **142 backend tests** (authorization, concurrency, outage policy, a 50-cycle soak), **16 simulation-core tests**, **122 frontend unit tests**, **106 Playwright browser tests** with axe WCAG A/AA checks on light and dark themes, keyboard paths, 320 px reflow and A4 print. CI runs typecheck, lint, formatting, unit tests, Playwright and a security audit on every pull request. Automated accessibility checks are not a certification.
+Current recorded test counts, their source commit, counting method and deployed versions live in [docs/RELEASE.md](docs/RELEASE.md). Coverage includes authorization, concurrency, outage policy, deterministic simulations, light/dark browser journeys, keyboard paths, 320 px reflow and A4 print. CI runs typecheck, lint, formatting, unit tests, Playwright and a security audit on every pull request. Automated accessibility checks are not a certification.
 
 ```bash
 npm ci && npm run typecheck && npm test                 # repository root (backend)
@@ -85,5 +85,7 @@ cd static/hello-world && npm ci && npm run typecheck && npm run lint && npm test
 ## Codegeist 2026
 
 Category: Apps for Software Teams. Bonus claimed: Best app with Atlassian MCP. Built by two people: CORE (backend, engine, Forge, security) and EXPERIENCE (interface, accessibility, presentation).
+
+Product context: [buyer hypotheses](docs/strategy/BUYER_HYPOTHESES.md) · [value-study protocol](docs/strategy/VALUE_STUDY_PROTOCOL.md). Product feedback and pilot questions can be raised through [repository issues](https://github.com/toskaman/anticipate-codegeist-2026/issues); no customer outcomes or commercial offering are implied.
 
 Licence: proprietary, source available. Copyright © 2026 toskaman and Orphee; see [LICENSE](LICENSE).

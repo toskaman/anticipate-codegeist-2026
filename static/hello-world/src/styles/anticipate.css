@@ -4066,6 +4066,93 @@ body:has(.ax-app) {
   font-size: var(--ax-fs-xs);
   color: var(--ax-text-2);
 }
+
+/* Read-only pair inspection, separate from the decision radio cards. */
+.ax-option-diff__selectors,
+.ax-option-diff__notes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--ax-4);
+  margin-bottom: var(--ax-4);
+}
+.ax-option-diff__selectors label {
+  display: grid;
+  gap: var(--ax-2);
+  min-width: 0;
+}
+.ax-option-diff__selectors select {
+  width: 100%;
+  min-width: 0;
+}
+.ax-option-diff__groups {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border-block: 1px solid var(--ax-border);
+  margin-block: var(--ax-4);
+}
+.ax-option-diff__group {
+  padding: var(--ax-4);
+  min-width: 0;
+}
+.ax-option-diff__group + .ax-option-diff__group {
+  border-left: 1px solid var(--ax-border);
+}
+.ax-option-diff h3 {
+  font-size: var(--ax-fs-sm);
+  overflow-wrap: anywhere;
+}
+.ax-option-diff__count {
+  font-family: var(--ax-mono);
+  font-size: var(--ax-fs-lg);
+  font-weight: 600;
+}
+.ax-option-diff__group ul {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: var(--ax-3);
+}
+.ax-option-diff__group li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--ax-2);
+  overflow-wrap: anywhere;
+}
+.ax-option-diff__notes p {
+  font-size: var(--ax-fs-sm);
+}
+.ax-option-diff__assumption {
+  border-left: 2px solid var(--ax-warning);
+  padding-left: var(--ax-3);
+}
+.ax-hero__boundaries {
+  font-size: var(--ax-fs-sm);
+  color: var(--ax-text-2);
+  margin-top: var(--ax-3);
+}
+.ax-graph-path-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ax-3);
+  padding: 0 var(--ax-5) var(--ax-4);
+}
+.ax-graph-path-controls p {
+  flex: 1 1 20rem;
+  margin: 0;
+}
+@media (max-width: 767px) {
+  .ax-option-diff__groups,
+  .ax-option-diff__selectors,
+  .ax-option-diff__notes {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .ax-option-diff__group + .ax-option-diff__group {
+    border-left: none;
+    border-top: 1px solid var(--ax-border);
+  }
+}
 .ax-sample-next {
   display: flex;
   flex-wrap: wrap;
