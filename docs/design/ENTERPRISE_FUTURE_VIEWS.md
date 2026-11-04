@@ -2,6 +2,8 @@
 
 Date: 4 November 2026. This extends ENTERPRISE_AND_TWG_UX.md without changing its single-user default or decision D3. These views are not in product navigation and make no Forge requests. Proposed fields below are UX requirements, not shared backend contracts. Any provisional view models/components must stay inside the frontend and carry a fixed concept label until CORE approves the runtime contract.
 
+Runtime update: CORE #141 now supplies the portfolio contract. Assigned ORP-32 (#142) implements the real capability-gated Scenario Lab panel; see [PORTFOLIO_UI_ACCEPTANCE.md](PORTFOLIO_UI_ACCEPTANCE.md). The passive concepts remain outside production. Shared execution enforcement has since merged (#144), but activation stays locked pending two-account hosted acceptance. Radar slice 1 has merged (#146), with event-to-UI acceptance still pending; no shared/radar UI is exposed. This update does not claim hosted portfolio acceptance.
+
 ## Portfolio Impact Command Center
 
 CORE handoff: [#130](https://github.com/toskaman/anticipate-codegeist-2026/issues/130). Muse's [#129](https://github.com/toskaman/anticipate-codegeist-2026/pull/129) contains a pure engine; that alone does not enable a product feature.

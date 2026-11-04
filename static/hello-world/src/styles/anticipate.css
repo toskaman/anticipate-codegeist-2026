@@ -4294,3 +4294,58 @@ body:has(.ax-app) {
 .ax-slip__error p {
   margin: 0;
 }
+.ax-portfolio {
+  overflow-wrap: anywhere;
+}
+.ax-portfolio fieldset {
+  min-width: 0;
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+.ax-portfolio .ax-portfolio__change {
+  border: 1px solid var(--ax-border);
+  border-radius: var(--ax-r);
+  padding: var(--ax-4);
+  margin: var(--ax-4) 0;
+}
+.ax-portfolio__fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--ax-3);
+}
+.ax-portfolio__fields label {
+  display: grid;
+  gap: var(--ax-1);
+  min-width: 0;
+  font-weight: 600;
+}
+.ax-portfolio__fields input,
+.ax-portfolio__fields select {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+.ax-portfolio__controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ax-2);
+  margin-top: var(--ax-3);
+}
+.ax-portfolio__list {
+  padding-left: var(--ax-5);
+}
+.ax-portfolio__list > li + li {
+  margin-top: var(--ax-3);
+}
+.ax-portfolio__result h3 {
+  margin-top: var(--ax-5);
+}
+.ax-portfolio__result code {
+  word-break: break-all;
+}
+@media (max-width: 767px) {
+  .ax-portfolio__fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
