@@ -1,27 +1,26 @@
 {
   "agent": "orpheane",
-  "updated": "2026-11-04T14:59:29Z",
+  "updated": "2026-11-04T16:03:51Z",
   "runner": "EXPERIENCE follow-up currently runs in Codex desktop on feat/product-experience, with a five-minute chat heartbeat. GitHub issues and PRs coordinate with Muse. Local checks use MOCK_TRANSPORT; owner-machine and hosted verification remain with Muse/owner.",
   "current": {
-    "issue": 147,
-    "key": "147-202611041433",
+    "issue": 154,
+    "key": "154-202611041547",
     "branch": "feat/product-experience",
-    "baseline": "c5040ae",
+    "baseline": "ea3ee7c",
     "phase": "Local validation complete; PR delivery for Muse review",
-    "hosted": "Muse event-to-UI proof after merge/deploy; pending",
-    "validation": "140 unit, full Chromium131; final focus changes reran8 radar cases each Chromium/Firefox/WebKit, build/typecheck/lint/format; hosted pending"
+    "hosted": "Muse first-run acceptance after merge/deploy; pending",
+    "validation": "140 unit; full Chromium135 in one completed run; new first-run4 each Chromium/Firefox/WebKit; typecheck/lint/build/format passed; hosted pending"
   },
   "review": [],
   "blockers": [
     "Portfolio #148 merged; real reused-snapshot/permissions/unchanged-Jira acceptance still pending Muse.",
-    "Shared activation locked pending two-account hosted proof. Radar UI #147 is explicitly assigned against getPlanAttention/PlanAttention; event delivery and hosted proof remain pending, no continuous-browser-connection claim.",
+    "Shared activation locked pending two-account hosted proof. Radar backend/dev link-event slice reported in #152; real #151 UI and production acceptance remain pending Muse.",
     "Hosted #140 first screen/pair/path/refusal, #126 dated-sample/slip, native screen reader, real zoom and human trials remain pending.",
     "HMAC activation reported in #107 comment6617210214; ACL/rotation/rollback are not completed."
   ],
   "next": [
-    "Muse reviews/merges #147 delivery after CI, then records hosted event-to-UI acceptance from docs/design/RADAR_UI_ACCEPTANCE.md.",
-    "Keep radar hints distinct from freshness: use existing workflow checkFreshness to preserve approval/execution guards, then reload attention. Current Passport hints stay outside its report/export/print.",
-    "Preserve older hosted checklists #148/#140/#126; never infer them from MOCK_TRANSPORT.",
+    "Muse reviews the ORP34 first-run copy delivery and checks the real hosted build at 390/1440 in light/dark after merge.",
+    "Preserve hosted radar event-to-UI acceptance in docs/design/RADAR_UI_ACCEPTANCE.md, portfolio #148, #140 UI/refusal and #126 dated-slip checklists. Production deployment is owner-controlled.",
     "Monitor #107 for personal tasks to relay. Final video recording/publication and Devpost submission remain deferred."
   ],
   "constraints": [
@@ -176,6 +175,11 @@
       "issue": 142,
       "pr": 148,
       "note": "Merged with CI41812498764 success; local139/123 and portfolio10 each three browsers passed; hosted portfolio check pending Muse."
+    },
+    {
+      "issue": 147,
+      "pr": 151,
+      "note": "Merged ea3ee7c with green CI41853368321. Local radar UI tests are not hosted acceptance."
     }
   ]
 }

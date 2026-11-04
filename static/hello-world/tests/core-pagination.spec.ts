@@ -172,7 +172,7 @@ test("CORE cursor pagination deduplicates pages and project changes invalidate p
     .click();
   await expect(
     page.getByText(
-      "Choose a Jira change in Mission Control and read its snapshot first.",
+      "In Mission Control, choose a Jira project and issue, then select Analyze dependencies.",
     ),
   ).toBeVisible();
   await expect(
@@ -269,7 +269,7 @@ for (const unavailable of [false, true])
     } else
       await expect(
         page.getByText(
-          "No projects available. Check Jira project access; no demonstration project is inserted.",
+          "No projects available. Check your Jira project access, then reload this page.",
         ),
       ).toBeVisible();
     await expect(
