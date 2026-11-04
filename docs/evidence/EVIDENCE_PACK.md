@@ -178,6 +178,22 @@ Built-in browser pane, owner session. TD-1 → Scenario Lab (Retain temporarily)
 
 This completes DEMO 3 end to end on hosted Jira (approval → real Jira change → radar attention → evidence re-check → blocked, 0 writes). The execute-time refusal path itself was shown earlier the same day (plan-522a2808…, EVIDENCE_CHANGED on execute).
 
+## DEMO 2 on production (5 Nov 2026, 00:00–00:03 CET) · LIVE_FORGE_PRODUCTION, toskaman5962, v2.36.0
+
+Owner session (site admin), built-in browser pane, at the owner's explicit request ("do it yourself").
+1. Created Jira project **ADM "ANTICIPATE Demo"** (company-managed software, Kanban template, lead = owner) via Jira REST: 201, id 10000.
+2. In the app: Mission Control → Demo project preparation → Preview (6 tickets, 4 links, all "Will be created") → confirm → **ADM-1…ADM-6 and 4 links "Created · verified in Jira"** (backend read-back).
+3. Analyze ADM-1 → Scenario Lab → Several changes at once: A = Migrate dependents ADM-1 → ADM-5; B = Upgrade · breaking ADM-5.
+
+| Observed | Result |
+|---|---|
+| Combined simulation **Needs review**; coverage note (Teamwork Graph not allowlisted) | PASS |
+| “ADM-2, ADM-3, ADM-4 are impacted only when the changes run together (not by any change alone)”; reason names “A: move ADM-1 consumers to ADM-5” + “B: breaking upgrade of ADM-5” | PASS (EMERGENT_IMPACT, #165 named reasons live) |
+| “A … migrates dependents of issue:ADM-1 onto issue:ADM-5, but B … applies a breaking upgrade to issue:ADM-5; the migrated consumers would be impacted again” | PASS (MIGRATE_ONTO_RETIRED) |
+| Suggested order A → B | PASS |
+
+Simulation itself wrote nothing to Jira; the only writes were the project creation and the app's labelled sample tickets.
+
 ## Hosted (LIVE_FORGE) proofs still missing
 
 Each of these is either tested LOCAL only or not observed at all. The browser checks belong to muse (#64), and the video belongs to the owner.
