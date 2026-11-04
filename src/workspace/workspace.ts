@@ -72,6 +72,13 @@ const ACCOUNT = /^[A-Za-z0-9:._-]{1,128}$/;
 const decKey = (id: string) => `ws:dec:${id}`;
 const slotKey = (id: string, n: number) => `ws:slot:${id}:${n}`;
 const markKey = (id: string, acc: string) => `ws:appr:${id}:${acc}`;
+const readyKey = (id: string) => `ws:ready:${id}`;
+/**
+ * Slots available to a decision. Slack beyond requiredApprovals absorbs a duplicate slot left by a retried approval
+ * (marker written, slot claim lost or retried concurrently): duplicates are ignored when counting, so they never block others.
+ */
+const SLOT_SLACK = 3;
+const slotCap = (r: { requiredApprovals: number }) => r.requiredApprovals + SLOT_SLACK;
 const termKey = (id: string) => `ws:term:${id}`;
 const logKey = (id: string, seq: number) => `ws:log:${id}:${String(seq).padStart(6, '0')}`;
 /** Server-side link plan -> shared decision. Once a plan is shared, execution of that plan is governed by its decision. */
@@ -101,12 +108,52 @@ export function createWorkspace(p: WorkspacePorts) {
 
   async function readSlots(r: DecisionRecord): Promise<Approval[]> {
     const out: Approval[] = []; const seen = new Set<string>();
-    for (let n = 1; n <= r.requiredApprovals; n++) {
+    for (let n = 1; n <= slotCap(r) && out.length < r.requiredApprovals; n++) {
       const a = await p.store.get<Approval>(slotKey(r.id, n));
       if (!a) break; // slots fill as a prefix: a failed claim on n means n is taken
       if (a.planHash === r.planHash && !seen.has(a.by)) { seen.add(a.by); out.push(a); }
     }
     return out;
+  }
+  /** Every filled slot (duplicates included), for retry checks. */
+  async function readAllSlots(r: DecisionRecord): Promise<Approval[]> {
+    const out: Approval[] = [];
+    for (let n = 1; n <= slotCap(r); n++) { const a = await p.store.get<Approval>(slotKey(r.id, n)); if (!a) break; out.push(a); }
+    return out;
+  }
+  /** Bounded scan of the audit log (same bounds as audit()). */
+  async function scanLog(id: string): Promise<AuditEntry[]> {
+    const out: AuditEntry[] = [];
+    for (let s = 1, empty = 0; s <= MAX_LOG && empty < LOG_GAP; s++) {
+      const e = await p.store.get<AuditEntry>(logKey(id, s));
+      if (e) { out.push(e); empty = 0; } else empty++;
+    }
+    return out;
+  }
+  /**
+   * Appends an audit event exactly once per marker, surviving a crash at any step: the marker records whether the
+   * entry was written; a marker left unlogged by a dead attempt is reconciled against the log before appending.
+   */
+  async function logOnce(marker: string, id: string, by: string, event: AuditEvent, detail?: string) {
+    const won = await p.store.setIfAbsent(marker, { by, logged: false });
+    if (!won) {
+      const cur = await p.store.get<{ logged?: boolean }>(marker);
+      if (cur?.logged) return;
+      if ((await scanLog(id)).some((e) => e.event === event && e.by === by)) { await p.store.set(marker, { by, logged: true }); return; }
+    }
+    await append(id, by, event, detail);
+    await p.store.set(marker, { by, logged: true });
+  }
+  const ensureApprovedLogged = (r: DecisionRecord, acc: string) => logOnce(`ws:auditappr:${r.id}:${acc}`, r.id, acc, 'APPROVED', `plan hash ${r.planHash}`);
+  /** READY exactly once, by whoever first observes the decision complete. */
+  async function ensureReady(r: DecisionRecord, acc: string) {
+    if ((await readSlots(r)).length < r.requiredApprovals) return;
+    const won = await p.store.setIfAbsent(readyKey(r.id), { by: acc, logged: false });
+    const cur = won ? null : await p.store.get<{ by?: string; logged?: boolean }>(readyKey(r.id));
+    if (cur?.logged) return;
+    if (!won && (await scanLog(r.id)).some((e) => e.event === 'READY')) { await p.store.set(readyKey(r.id), { by: cur?.by ?? acc, logged: true }); return; }
+    await append(r.id, acc, 'READY');
+    await p.store.set(readyKey(r.id), { by: acc, logged: true });
   }
   /** Derives the authoritative state; never trusts a mutable stored state. */
   async function derive(r: DecisionRecord): Promise<SharedDecision> {
@@ -201,14 +248,18 @@ export function createWorkspace(p: WorkspacePorts) {
       if (!(await isApprover(acc, r))) fail('PERMISSION_DENIED', 'Approving needs the project administrator permission.');
       if (input.planHash !== r.planHash) fail('CONFLICT', 'The plan changed since it was shared; review the current version.');
       if (await evidenceChanged(r)) fail('EVIDENCE_CHANGED', 'The plan behind this decision changed or was invalidated since it was shared; it can no longer be approved.');
-      // One slot per approver, atomically (concurrent double clicks or two tabs cannot count twice).
-      if (!(await p.store.setIfAbsent(markKey(r.id, acc), { at: p.now().toISOString() }))) return present(acc, await derive(r));
+      // The marker dedups concurrent clicks. It is NOT proof of approval: only a slot is. A retry after a lost slot claim
+      // (marker written, slot write failed) must be able to finish, so an existing marker without a slot falls through.
+      const fresh = await p.store.setIfAbsent(markKey(r.id, acc), { at: p.now().toISOString() });
+      const holds = async () => (await readAllSlots(r)).some((a) => a.by === acc && a.planHash === r.planHash);
+      if (!fresh && (await holds())) { await ensureApprovedLogged(r, acc); await ensureReady(r, acc); return present(acc, await derive(r)); }
+      if (d.approvals.length >= r.requiredApprovals) fail('CONFLICT', 'Decision already has all required approvals.');
       const approval: Approval = { by: acc, at: p.now().toISOString(), planHash: r.planHash };
       let claimed = 0;
-      for (let n = 1; n <= r.requiredApprovals && !claimed; n++) if (await p.store.setIfAbsent(slotKey(r.id, n), approval)) claimed = n;
+      for (let n = 1; n <= slotCap(r) && !claimed; n++) if (await p.store.setIfAbsent(slotKey(r.id, n), approval)) claimed = n;
       if (!claimed) fail('CONFLICT', 'Decision already has all required approvals.');
-      await append(r.id, acc, 'APPROVED', `plan hash ${r.planHash}`);
-      if (claimed === r.requiredApprovals) await append(r.id, acc, 'READY');
+      await ensureApprovedLogged(r, acc);
+      await ensureReady(r, acc);
       return present(acc, await derive(r));
     },
 
