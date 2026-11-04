@@ -4,7 +4,7 @@ import { makeHandler, type ResolverRequest } from './core/handler';
 import { createStoreThrottle, DEFAULT_THROTTLE } from './core/throttle';
 import { createService } from './engine/service';
 import { createForgeJira, forgeQueryStore, forgeStore } from './forge-adapters';
-import { createRadar } from './radar/radar';
+import { createRadar, eventShape } from './radar/radar';
 import { createWorkspace } from './workspace/workspace';
 import { forgeUserHasPermission, storePlanReader } from './workspace/forge';
 import { registerWorkspaceResolvers } from './workspace/forge';
@@ -21,7 +21,8 @@ const service = (req: ResolverRequest) => createService({ jira: createForgeJira(
 /** Forge trigger (Decision Radar): Jira issue-link created/deleted and issue deleted. Runs as the app, no Jira call. */
 export async function radarOnJiraEvent(event: unknown) {
   const r = await radar.onEvent(event);
-  console.log(JSON.stringify({ app: 'anticipate', op: 'radarOnJiraEvent', status: r.status, plans: r.plans, capped: r.capped }));
+  console.log(JSON.stringify({ app: 'anticipate', op: 'radarOnJiraEvent', status: r.status, plans: r.plans, capped: r.capped,
+    ...(r.status === 'IGNORED' ? { shape: eventShape(event) } : {}) }));
   return r;
 }
 type Svc = ReturnType<typeof createService>;

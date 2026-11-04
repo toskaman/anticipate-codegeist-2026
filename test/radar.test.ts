@@ -2,7 +2,7 @@
  * Decision Radar first slice: event normalisation, dedupe, fan-out, honesty states, monotonic attention,
  * owner-only reads through the service, and clearing only by a fresh user-run recompute.
  */
-import { createRadar, normaliseEvent, RADAR_LIMITS } from '../src/radar/radar';
+import { createRadar, eventShape, normaliseEvent, RADAR_LIMITS } from '../src/radar/radar';
 import { createService } from '../src/engine/service';
 import type { Store } from '../src/core/ports';
 import { demoJira, memoryStore } from './fakes';
@@ -28,10 +28,19 @@ describe('radar: event normalisation', () => {
     expect(normaliseEvent(link('created', 7, 100, 200), at)).toMatchObject({ type: 'LINK_CREATED', issueIds: ['100', '200'], linkId: '7', linkType: 'Blocks' });
     expect(normaliseEvent(link('deleted', 7, 100, 200), at)?.type).toBe('LINK_DELETED');
     expect(normaliseEvent(issueDeleted(100), at)).toMatchObject({ type: 'ISSUE_DELETED', issueIds: ['100'] });
-    for (const bad of [null, 'x', {}, { ...link('created', 7, 1, 2), timestamp: undefined }, { ...link('created', 7, 1, 2), sourceIssueId: 'PAY-1' },
+    for (const bad of [null, 'x', {}, { ...link('created', 7, 1, 2), sourceIssueId: 'PAY-1' },
       { ...link('created', 7, 1, 2), id: '../x' }, { eventType: 'avi:jira:updated:issue', issue: { id: '1' }, timestamp: T0 }, { ...issueDeleted(1), issue: {} }]) {
       expect(normaliseEvent(bad, at)).toBeNull();
     }
+  });
+  it('live shape: link fields nested under issueLink, no timestamp (dev 4 Nov) -> accepted, occurredAt = observation time', () => {
+    const at = '2026-11-04T14:51:31.732Z';
+    const f = normaliseEvent({ eventType: 'avi:jira:created:issuelink', issueLink: { id: '50123', sourceIssueId: '66403', destinationIssueId: '66405', issueLinkType: { name: 'Relates' } } }, at);
+    expect(f).toMatchObject({ factId: 'LINK_CREATED.50123', issueIds: ['66403', '66405'], linkType: 'Relates', occurredAt: at });
+    expect(normaliseEvent({ eventType: 'avi:jira:created:issuelink', issueLink: { id: 'x' } }, at)).toBeNull();
+  });
+  it('eventShape logs key names and types only, never values', () => {
+    expect(JSON.stringify(eventShape({ eventType: 'a', issueLink: { id: 5, secret: 'PII' } }))).not.toContain('PII');
   });
   it('fact ids are valid Forge KVS keys', () => {
     const f = normaliseEvent(link('created', 123, 4, 5), 'x')!;
