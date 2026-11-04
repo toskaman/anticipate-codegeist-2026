@@ -77,7 +77,7 @@ export function createWorkspaceOps(p: WorkspaceOpsPorts) {
     async getFeatureFlag(ctx: Ctx, input: { flag: string }): Promise<FeatureFlag> {
       requireUser(ctx); checkFlagName(input.flag);
       const cur = await readFlag();
-      return { flag: 'sharedDecisions', enabled: released && cur?.enabled === true, updatedBy: cur?.updatedBy ?? null, updatedAt: cur?.updatedAt ?? null, canEdit: await isSiteAdmin() };
+      return { flag: 'sharedDecisions', enabled: released && cur?.enabled === true, updatedBy: cur?.updatedBy ?? null, updatedAt: cur?.updatedAt ?? null, canEdit: await isSiteAdmin(), released };
     },
     async setFeatureFlag(ctx: Ctx, input: { flag: string; enabled: boolean }): Promise<FeatureFlag> {
       requireUser(ctx); checkFlagName(input.flag);
@@ -87,7 +87,7 @@ export function createWorkspaceOps(p: WorkspaceOpsPorts) {
       const rec: FlagRecord = { enabled: input.enabled, updatedBy: ctx.accountId, updatedAt: p.now().toISOString() };
       await p.store.set(SHARED_DECISIONS_FLAG_KEY, rec);
       console.warn(JSON.stringify({ app: 'anticipate', op: 'setFeatureFlag', flag: input.flag, enabled: input.enabled, accountId: ctx.accountId }));
-      return { flag: 'sharedDecisions', ...rec, canEdit: true };
+      return { flag: 'sharedDecisions', ...rec, canEdit: true, released };
     }
   };
 }

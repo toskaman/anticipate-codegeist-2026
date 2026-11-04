@@ -388,7 +388,9 @@ export const SharedDecisionAuditEvent = z.object({
 export type SharedDecisionAuditEvent = z.infer<typeof SharedDecisionAuditEvent>;
 export const SHARED_DECISION_AUDIT_PAGE_MAX = 100;
 export const FeatureFlagName = z.enum(['sharedDecisions']);
-export const FeatureFlag = z.object({ flag: FeatureFlagName, enabled: z.boolean(), updatedBy: Id.nullable(), updatedAt: IsoDate.nullable(), canEdit: z.boolean() });
+export const FeatureFlag = z.object({ flag: FeatureFlagName, enabled: z.boolean(), updatedBy: Id.nullable(), updatedAt: IsoDate.nullable(), canEdit: z.boolean(),
+  /** True only where the feature may be enabled (release lock lifted, or the development-only acceptance unlock). */
+  released: z.boolean().optional() });
 export type FeatureFlag = z.infer<typeof FeatureFlag>;
 
 export const SHARED_DECISION_OPERATIONS = {
