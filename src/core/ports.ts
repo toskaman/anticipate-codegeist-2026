@@ -24,6 +24,11 @@ export interface JiraPort {
   getCommentsText(issueKey: string): Promise<string[]>;
   addLabel(issueKey: string, label: string): Promise<void>;
   issueTypes(projectKey: string): Promise<string[]>;
+  /**
+   * Live project permission of ANY account (checked as the app; fails closed on any non-200). Used only by the shared decision
+   * execution gate to re-validate approvers; optional so ports without it refuse to execute shared plans (never assume a grant).
+   */
+  userHasPermission?(accountId: string, projectKey: string, permission: string): Promise<boolean>;
 }
 
 export interface Store {
@@ -32,6 +37,11 @@ export interface Store {
   /** Atomic create; returns false if the key already exists. */
   setIfAbsent<T>(key: string, value: T): Promise<boolean>;
   delete(key: string): Promise<void>;
+  /**
+   * Optional prefix query (Forge KVS `beginsWith` on the key, the only supported condition). One page per call:
+   * at most `limit` (1..100) entries plus an opaque cursor that must not be persisted (KVS docs). Callers bound the pages.
+   */
+  listByPrefix?<T>(prefix: string, cursor?: string | null, limit?: number): Promise<{ items: { key: string; value: T }[]; nextCursor: string | null }>;
 }
 
 export interface Deps { jira: JiraPort; store: Store; now: () => Date; newId: () => string; context?: import('../context/sources').ContextSource; }

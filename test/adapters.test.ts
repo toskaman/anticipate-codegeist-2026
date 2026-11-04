@@ -10,9 +10,12 @@ vi.mock('@forge/api', () => {
   return { default: { asUser: () => ({ requestJira }), asApp: () => ({ requestJira }) }, route: (s: TemplateStringsArray, ...v: unknown[]) => s.reduce((a, p, i) => a + p + (i < v.length ? encodeURIComponent(String(v[i])) : ''), '') };
 });
 const kv = new Map<string, unknown>();
+const kvOpts = new Map<string, unknown>();
+let kvDown: number | null = null;
+const kvFail = () => { if (kvDown !== null) throw Object.assign(new Error(`KVS ${kvDown}`), { responseDetails: { status: kvDown } }); };
 vi.mock('@forge/kvs', () => ({ kvs: {
-  get: async (k: string) => kv.get(k),
-  set: async (k: string, v: unknown, o?: { keyPolicy?: string }) => { if (o?.keyPolicy === 'FAIL_IF_EXISTS' && kv.has(k)) throw new Error('KEY_EXISTS'); kv.set(k, v); },
+  get: async (k: string) => { kvFail(); return kv.get(k); },
+  set: async (k: string, v: unknown, o?: { keyPolicy?: string }) => { kvFail(); if (o?.keyPolicy === 'FAIL_IF_EXISTS' && kv.has(k)) throw new Error('KEY_EXISTS'); kv.set(k, v); kvOpts.set(k, o); },
   delete: async (k: string) => { kv.delete(k); }
 } }));
 
@@ -70,6 +73,24 @@ describe('Forge Jira adapter (mocked transport)', () => {
     expect(retentionFor('snap:x')).toEqual({ value: 2, unit: 'DAYS' });
     expect(retentionFor('lock:p')).toEqual({ value: 1, unit: 'DAYS' });
     expect(retentionFor('plan:p')).toEqual({ value: 90, unit: 'DAYS' });
+  });
+  it('the shared-decision back-reference and config never expire; other keys keep their TTL', async () => {
+    expect(await forgeStore.setIfAbsent('ws:plan:p1', 'dec-1')).toBe(true);
+    expect(kvOpts.get('ws:plan:p1')).toEqual({ keyPolicy: 'FAIL_IF_EXISTS' });
+    await forgeStore.set('config:validator', { onOutage: 'ALLOW' });
+    expect(kvOpts.get('config:validator')).toBeUndefined();
+    expect(await forgeStore.setIfAbsent('ws:dec:dec-1', {})).toBe(true);
+    expect(kvOpts.get('ws:dec:dec-1')).toEqual({ keyPolicy: 'FAIL_IF_EXISTS', ttl: { value: 90, unit: 'DAYS' } });
+  });
+  it('KVS outages surface as retryable AppErrors; a KVS 4xx stays an unexpected error', async () => {
+    kvDown = 503;
+    await expect(forgeStore.get('plan:p')).rejects.toMatchObject({ code: 'UPSTREAM_UNAVAILABLE', retryable: true });
+    await expect(forgeStore.setIfAbsent('lock:p', 1)).rejects.toMatchObject({ code: 'UPSTREAM_UNAVAILABLE', retryable: true });
+    kvDown = 429;
+    await expect(forgeStore.set('plan:p', 1)).rejects.toMatchObject({ code: 'RATE_LIMITED', retryable: true });
+    kvDown = 400;
+    await expect(forgeStore.get('plan:p')).rejects.not.toHaveProperty('code', 'UPSTREAM_UNAVAILABLE');
+    kvDown = null;
   });
   it('setIfAbsent is atomic via FAIL_IF_EXISTS', async () => {
     expect(await forgeStore.setIfAbsent('k', 1)).toBe(true);

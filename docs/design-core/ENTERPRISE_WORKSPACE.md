@@ -71,7 +71,33 @@ reserved to the proposer, who owns the private plan); `readyToExecute` re-valida
 Audit event: `id = "<decisionId>:<seq>"` (stable), `decisionId, seq, at, by, event (SHARED | APPROVED | READY | REJECTED | REVOKED | EXPIRED), detail | null`.
 REJECTED / REVOKED carry the explicit reason as `detail` (free text typed by the user: the only non-id content in the audit).
 
+## Execution gate (implemented)
+Sharing first claims a write-once back-reference `ws:plan:<planId>` → decision id (`setIfAbsent`), then writes the decision.
+A plan is shared at most once (a second share is `CONFLICT`: generate a new plan). If the decision write fails after the claim,
+the plan can never execute (fail closed); the reverse order could have left a shared decision whose plan executes unreviewed.
+
+`executeApprovedPlan` (src/engine/service.ts) runs every existing check (owner, status, engine approval bound to the plan hash,
+snapshot expiry, evidence freshness, per-plan lease), then, **under the lease and before any status change or Jira write**, calls the
+workspace `executionGate`:
+- No back-reference: unchanged behaviour (one KVS read, no Jira call). Plans never shared are not affected.
+- Back-reference present: the executor must be the **proposer** (decision: the proposer executes after approvals; approvers review but
+  never run the proposer's private plan; anyone else is `PERMISSION_DENIED`). Then `readyToExecute(ctx, decisionId, currentPlanHash)`
+  must be ok: decision `APPROVED`, not expired, plan hash unchanged and plan not invalidated, every approver still holding
+  `ADMINISTER_PROJECTS` live (otherwise the decision becomes `REVOKED`), terminal marker re-read last.
+- Refusals: `PERMISSION_DENIED` when an approver lost the permission (`details.reasonCode = MISSING_PERMISSION`), `CONFLICT` otherwise
+  (`details = {decisionId, reason, reasonCode}` with reasonCode `AWAITING_APPROVAL | REJECTED | REVOKED | EXPIRED | EVIDENCE_CHANGED`).
+  A missing decision record is `NOT_FOUND`; a malformed back-reference or one naming another plan's decision is `CONFLICT`. The lease
+  is released and the plan status is unchanged; zero Jira writes.
+- The executor still needs the Jira write permissions live (existing per-action `mypermissions` check). Concurrent executions keep
+  the lease + per-action idempotency (one run, no duplicate writes).
+- Approver permissions are checked with `JiraPort.userHasPermission` (asApp permission search, `createForgeJira`). A port without it
+  refuses shared plans (`UNSUPPORTED`): no grant is ever assumed.
+- The gate ignores the `sharedDecisions` flag: switching the flag off never releases a shared plan from review.
+- `ws:plan:*` keys never expire (forgeStore `neverExpires`): a plan record's TTL is renewed on every write, so an expiring
+  back-reference could silently release a long-lived shared plan. Other `ws:*` keys follow the 90-day default; decisions expire after 7 days.
+Tests: test/shared-execution.test.ts.
+
 ## Remaining before enabling
-- Hosted two-account test (rule above), including the asApp `GET /rest/api/3/user/permission/search?accountId&projectKey&permissions` adapter.
-- `executeApprovedPlan` does not yet consult `readyToExecute` for shared decisions (engine change, separate issue).
-- `ws:*` keys follow the 90-day default retention; the decision expiry is 7 days.
+- Hosted two-account test (rule above), including the asApp `GET /rest/api/3/user/permission/search?accountId&projectKey&permissions` adapter
+  and a live shared execution (proposer executes after an approval; approver loses `ADMINISTER_PROJECTS` → refused, `REVOKED`).
+- The engine's own `approvePlan` remains a separate step by the plan owner; it is not tied to the workspace approval (the gate is at execution).

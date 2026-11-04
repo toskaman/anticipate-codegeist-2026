@@ -1,8 +1,10 @@
 /** Live Forge implementations of the ports. All Jira calls run asUser() so Jira enforces the caller's permissions. */
 import api, { route } from '@forge/api';
-import { kvs } from '@forge/kvs';
+import { kvs, WhereConditions } from '@forge/kvs';
 import { AppError } from './core/errors';
 import type { IssueFetch, JiraIssue, JiraPort, Store } from './core/ports';
+import { forgeUserHasPermission } from './workspace/forge';
+import { withStorageErrors } from './core/storage';
 
 const FIELDS = 'summary,status,issuetype,issuelinks,components,project,labels,updated,duedate,fixVersions';
 
@@ -106,7 +108,9 @@ export function createForgeJira(siteUrl: string | null, actor: 'user' | 'app' = 
       const r = await json<{ issueTypes?: { name: string; subtask?: boolean }[]; values?: { name: string; subtask?: boolean }[] }>(
         await call2(route`/rest/api/3/issue/createmeta/${projectKey}/issuetypes?maxResults=50`), 'create metadata');
       return (r.issueTypes ?? r.values ?? []).filter((t) => !t.subtask).map((t) => t.name);
-    }
+    },
+    // Any account's project permission, always asApp (the caller cannot query other users); used by the shared decision gate.
+    userHasPermission: forgeUserHasPermission
   };
 }
 
@@ -123,16 +127,32 @@ export function retentionFor(key: string): { value: number; unit: 'DAYS' } {
   if (key.startsWith('snap:')) return { value: 2, unit: 'DAYS' };
   if (key.startsWith('lock:') || key.startsWith('lock-takeover:')) return { value: 1, unit: 'DAYS' };
   if (key.startsWith('idem:')) return { value: 7, unit: 'DAYS' };
+  if (key.startsWith('radar:evt:')) return { value: 7, unit: 'DAYS' }; // Decision Radar dedupe marks
   return { value: 90, unit: 'DAYS' }; // plan:, exec:, cmp: (audit)
 }
 
-export const forgeStore: Store = {
+/**
+ * Keys that never expire: admin configuration, and the shared-decision back-reference ws:plan:<planId>. The back-reference is
+ * what subjects a plan to the shared decision execution gate; a plan record's TTL is renewed on every write, so a back-reference
+ * with a fixed TTL could expire before its plan and silently release a shared plan from review. It is one short string per shared plan.
+ */
+export const neverExpires = (key: string) => key.startsWith('config:') || key.startsWith('ws:plan:');
+
+const rawForgeStore: Store = {
   get: (k) => kvs.get(k),
-  // Admin configuration never expires; everything else follows the documented retention.
-  set: (k, v) => (k.startsWith('config:') ? kvs.set(k, v) : kvs.set(k, v, { ttl: retentionFor(k) })),
+  set: (k, v) => (neverExpires(k) ? kvs.set(k, v) : kvs.set(k, v, { ttl: retentionFor(k) })),
   async setIfAbsent(k, v) {
-    try { await kvs.set(k, v, { keyPolicy: 'FAIL_IF_EXISTS', ttl: retentionFor(k) }); return true; }
+    try { await kvs.set(k, v, neverExpires(k) ? { keyPolicy: 'FAIL_IF_EXISTS' } : { keyPolicy: 'FAIL_IF_EXISTS', ttl: retentionFor(k) }); return true; }
     catch (e) { if ((await kvs.get(k)) !== undefined) return false; throw e; }
   },
-  delete: (k) => kvs.delete(k)
+  delete: (k) => kvs.delete(k),
+  // @forge/kvs 2.1.1: kvs.query().where('key', WhereConditions.beginsWith(p)).limit(n).cursor(c).getMany() -> { results, nextCursor? }.
+  async listByPrefix<T>(prefix: string, cursor?: string | null, limit = 100) {
+    let q = kvs.query().where('key', WhereConditions.beginsWith(prefix)).limit(Math.min(100, Math.max(1, Math.floor(limit))));
+    if (cursor) q = q.cursor(cursor);
+    const r = await q.getMany<T>();
+    return { items: r.results.map((x) => ({ key: x.key, value: x.value })), nextCursor: r.nextCursor ?? null };
+  }
 };
+/** KVS outages surface as retryable UPSTREAM_UNAVAILABLE / RATE_LIMITED instead of INTERNAL (src/core/storage.ts). */
+export const forgeStore: Store = withStorageErrors(rawForgeStore);

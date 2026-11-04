@@ -1,0 +1,188 @@
+{
+  "label": "LOCAL",
+  "kind": "synthetic-engine-microbenchmark",
+  "notHosted": "Measured on a developer machine in plain Node.js. No Forge runtime, no Jira API calls, no network. Not a production or hosted measurement.",
+  "noExtrapolation": "Synthetic random graphs; results say nothing about real Jira sites or companies.",
+  "generatedAt": "2026-11-04T00:40:31.759Z",
+  "commit": "9ef51c464ef4db5090ad1284d6d994277e98ea65",
+  "workingTreeDirty": true,
+  "environment": {
+    "node": "v22.23.4",
+    "platform": "linux-x64",
+    "cpu": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+    "cpus": 2
+  },
+  "method": {
+    "samplesPerStep": 50,
+    "warmupPerStep": 5,
+    "timer": "performance.now()",
+    "percentiles": "nearest-rank",
+    "maxDepth": 10,
+    "rules": "DEFAULT_POLICIES (P1-P4)",
+    "generator": "seeded LCG as in test/benchmark.test.ts: ~1.6 edges/node, 4 edge kinds, ~15% UNKNOWN / ~25% INFERRED, cycles allowed; slip \"blocks\" kept acyclic",
+    "steps": {
+      "snapshotToSimulation": "simulate(snapshot, REMOVE hub)",
+      "compareScenarios3": "compareScenarios with remove / deprecate / migrate+remove",
+      "slip": "simulateSlip 10 days from the hub",
+      "portfolio10": "simulatePortfolio with 10 single-operation changes on the 10 largest hubs"
+    }
+  },
+  "results": [
+    {
+      "nodes": 50,
+      "edges": 78,
+      "seed": 1000,
+      "rootNodeId": "n1",
+      "workload": {
+        "impactedByRemoval": 13,
+        "portfolioChanges": 10,
+        "portfolioConflicts": 8,
+        "slipBlocksEdges": 23,
+        "slipMoved": 3
+      },
+      "stepsMs": {
+        "snapshotToSimulation": {
+          "samples": 50,
+          "p50": 0.407,
+          "p95": 2.899,
+          "max": 3.611
+        },
+        "compareScenarios3": {
+          "samples": 50,
+          "p50": 0.69,
+          "p95": 1.439,
+          "max": 3.716
+        },
+        "slip": {
+          "samples": 50,
+          "p50": 0.04,
+          "p95": 0.077,
+          "max": 0.092
+        },
+        "portfolio10": {
+          "samples": 50,
+          "p50": 4.083,
+          "p95": 8.91,
+          "max": 11.421
+        }
+      }
+    },
+    {
+      "nodes": 100,
+      "edges": 159,
+      "seed": 1001,
+      "rootNodeId": "n30",
+      "workload": {
+        "impactedByRemoval": 7,
+        "portfolioChanges": 10,
+        "portfolioConflicts": 1,
+        "slipBlocksEdges": 47,
+        "slipMoved": 5
+      },
+      "stepsMs": {
+        "snapshotToSimulation": {
+          "samples": 50,
+          "p50": 0.176,
+          "p95": 0.339,
+          "max": 0.685
+        },
+        "compareScenarios3": {
+          "samples": 50,
+          "p50": 0.38,
+          "p95": 0.664,
+          "max": 1.448
+        },
+        "slip": {
+          "samples": 50,
+          "p50": 0.047,
+          "p95": 0.104,
+          "max": 0.135
+        },
+        "portfolio10": {
+          "samples": 50,
+          "p50": 5.89,
+          "p95": 13.123,
+          "max": 21.978
+        }
+      }
+    },
+    {
+      "nodes": 200,
+      "edges": 318,
+      "seed": 1002,
+      "rootNodeId": "n31",
+      "workload": {
+        "impactedByRemoval": 9,
+        "portfolioChanges": 10,
+        "portfolioConflicts": 6,
+        "slipBlocksEdges": 66,
+        "slipMoved": 5
+      },
+      "stepsMs": {
+        "snapshotToSimulation": {
+          "samples": 50,
+          "p50": 0.278,
+          "p95": 0.489,
+          "max": 1.533
+        },
+        "compareScenarios3": {
+          "samples": 50,
+          "p50": 0.7,
+          "p95": 1.15,
+          "max": 4.255
+        },
+        "slip": {
+          "samples": 50,
+          "p50": 0.05,
+          "p95": 0.105,
+          "max": 0.336
+        },
+        "portfolio10": {
+          "samples": 50,
+          "p50": 7.359,
+          "p95": 11.641,
+          "max": 21.806
+        }
+      }
+    },
+    {
+      "nodes": 1000,
+      "edges": 1599,
+      "seed": 1003,
+      "rootNodeId": "n286",
+      "workload": {
+        "impactedByRemoval": 10,
+        "portfolioChanges": 10,
+        "portfolioConflicts": 1,
+        "slipBlocksEdges": 433,
+        "slipMoved": 5
+      },
+      "stepsMs": {
+        "snapshotToSimulation": {
+          "samples": 50,
+          "p50": 0.639,
+          "p95": 1.086,
+          "max": 6.364
+        },
+        "compareScenarios3": {
+          "samples": 50,
+          "p50": 1.819,
+          "p95": 2.557,
+          "max": 5.098
+        },
+        "slip": {
+          "samples": 50,
+          "p50": 0.176,
+          "p95": 0.238,
+          "max": 0.487
+        },
+        "portfolio10": {
+          "samples": 50,
+          "p50": 31.414,
+          "p95": 54.095,
+          "max": 69.433
+        }
+      }
+    }
+  ]
+}

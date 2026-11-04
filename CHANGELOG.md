@@ -7,11 +7,18 @@ All notable changes to ANTICIPATE, written for readers who use or judge the app.
 ### Added (engine, not yet in the app UI)
 - Portfolio Impact Simulator: simulate up to 10 proposed changes together on one frozen snapshot, with shared impacts, conflicts between changes, a safe order (or the cycle that prevents one), evidence gaps and a reproducible hash. Pure engine and contracts only; not exposed in Jira yet. Design: docs/design-core/PORTFOLIO_SIMULATOR.md.
 - Portfolio Impact Simulator on real Jira data: new read-only `simulatePortfolio` operation on your permission-filtered snapshot (unknown or unreadable issues are rejected, never invented), a `portfolioSimulation` limits block in capabilities, and the read-only Rovo action / MCP tool `anticipate-simulate-portfolio` (e.g. "REMOVE MP-5; UPGRADE MP-9 breaking"). No app UI yet ([#134](https://github.com/toskaman/anticipate-codegeist-2026/issues/134)).
+- Policy preview engine (policy-as-code, preview only): a versioned, declarative policy set with six fixed rule types (dependency review for breaking changes, independent approval, confirmed blockers, verified tests, evidence change, incomplete plan) that explains PASS / NEEDS_REVIEW / BLOCK per rule; unknown evidence is never PASS. Nothing is enforced and nothing in the app uses it yet; built-in rules and the workflow validator are unchanged. Design: docs/design-core/POLICY_AS_CODE.md.
+- Local engine benchmark script (`node scripts/bench-local.mjs`) with a recorded LOCAL synthetic run in evidence/perf (not a hosted measurement). See docs/evidence/BENCHMARK.md.
 
 ### Added (backend, off by default)
+- Decision Radar (slice 1): Jira link created/deleted and issue deleted events flag your prevention plans whose evidence touches those issues as "needs review" (new read-only `getDecisionAttention` operation and `decisionRadar` capability). Hints only: it never changes, approves or executes a plan, and a freshness check stays required. No new permissions; not yet in the app UI and not yet verified on a hosted site. Design: docs/design-core/DECISION_RADAR.md.
 - Shared decision workspace operations (share, view, approve, reject, revoke, audit) with reason codes for every refused action. Every operation answers "not enabled" until a Jira site administrator switches the feature on; it stays off until a hosted two-account test passes.
+- Shared decision execution gate: a plan shared as a decision can be executed only by its proposer once the decision is approved, the plan is unchanged and every approver still holds the approver permission; otherwise execution is refused before any Jira write (an approver who lost the permission revokes the decision). A plan can be shared once. Plans never shared work as before.
+- Failure-injection tests: storage outages and Jira 429 / 5xx / 403 / slow answers during analysis, execution and the workflow validator.
 
 ### Fixed
+- When app storage is briefly unavailable, requests now fail with a retryable "temporarily unavailable" error instead of "Unexpected server error".
+- A plan whose execution was interrupted (Jira or storage error before it finished, or a timed-out run) is no longer stuck in "Executing": it is marked as where it stopped and can be resumed without duplicate Jira writes.
 - Shared decision workspace (prototype, not enabled): two administrators approving at the same time no longer lose an approval; revocation and expiry are recorded once; an approved decision expires after 7 days.
 - Tests now reject storage keys that Forge would reject, so a fault like the 2.31.0 outage fails in CI.
 

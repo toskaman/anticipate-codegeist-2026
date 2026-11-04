@@ -56,7 +56,9 @@ export const CapabilityAvailability = z.object({
   teamworkGraph: CapabilityState, llm: CapabilityState,
   operations: z.array(z.string()),
   /** Portfolio Impact Simulator availability (optional, additive; absent on older backends). Hard bounds: PORTFOLIO_LIMITS. */
-  portfolioSimulation: CapabilityState.optional()
+  portfolioSimulation: CapabilityState.optional(),
+  /** Decision Radar (Jira link/issue events -> "needs review" hints). Optional, additive; a CapabilityState like every other key. */
+  decisionRadar: CapabilityState.optional()
 });
 export type CapabilityAvailability = z.infer<typeof CapabilityAvailability>;
 
@@ -406,6 +408,40 @@ export const SHARED_DECISION_OPERATIONS = {
 } as const;
 // END shared decision workspace
 
+// ---------- Decision Radar (slice 1, docs/design-core/DECISION_RADAR.md) ----------
+/** ACTIVE never means "fresh": only "listening, no known faults". checkPlanFreshness stays the only freshness verdict. */
+export const MonitoringState = z.enum(['NOT_CONFIGURED', 'ACTIVE', 'DEGRADED']);
+export const RadarReason = z.enum(['LINK_CREATED', 'LINK_DELETED', 'ISSUE_DELETED']);
+export const RadarFault = z.enum(['PARTIAL_INDEX', 'INDEX_WRITE_FAILED', 'FANOUT_CAPPED', 'HANDLER_ERROR', 'MALFORMED_EVENT', 'LEGACY_PLAN_NOT_INDEXED', 'PREFIX_QUERY_UNAVAILABLE']);
+export const RADAR_ATTENTION_MAX_ITEMS = 100;
+export const DecisionAttentionItem = z.object({
+  planId: Id,
+  /** Distinct reasons, in the order first observed. A reason never cancels another (a delete does not undo a create). */
+  reasons: z.array(RadarReason).max(3),
+  /** When the radar first flagged this plan. */
+  observedAt: IsoDate,
+  lastSignalAt: IsoDate,
+  signalCount: z.number().int().nonnegative(),
+  /** Only keys already in this plan's own evidence; the other end of a link is never identified. */
+  evidenceIssueKeys: z.array(z.string().max(50)).max(50),
+  externalEndpoint: z.boolean(),
+  /** More signals arrived than are kept; the first ones are retained. */
+  truncated: z.boolean(),
+  monitoring: MonitoringState,
+  faults: z.array(RadarFault).max(10)
+});
+export type DecisionAttentionItem = z.infer<typeof DecisionAttentionItem>;
+export const DecisionAttention = z.object({
+  monitoring: MonitoringState,
+  faults: z.array(RadarFault).max(10),
+  /** Installation-wide: when the radar last processed a Jira event (null = never observed one). */
+  lastObservedAt: IsoDate.nullable(),
+  items: z.array(DecisionAttentionItem).max(RADAR_ATTENTION_MAX_ITEMS),
+  truncated: z.boolean(),
+  disclaimer: z.literal('Radar alerts are hints; only a freshness check confirms evidence.')
+});
+export type DecisionAttention = z.infer<typeof DecisionAttention>;
+
 export const OPERATIONS = {
   getCapabilities: { input: z.object({}), output: CapabilityAvailability },
   listProjects: { input: z.object({ cursor: z.string().nullable().default(null) }), output: z.object({ items: z.array(ProjectSummary), page: PageInfo }) },
@@ -427,6 +463,8 @@ export const OPERATIONS = {
   simulateSlip: { input: z.object({ issueKey: z.string().regex(/^[A-Z][A-Z0-9_]{0,19}-\d{1,9}$/), days: z.number().int().min(1).max(365) }), output: SlipSimulation },
   setValidatorPolicy: { input: z.object({ onOutage: z.enum(['ALLOW', 'BLOCK']) }), output: ValidatorPolicy },
   simulatePortfolio: { input: SimulatePortfolioRequest, output: SimulatePortfolioResult },
+  /** Read-only, owner-only. planId = one plan you own; omitted = your own flagged plans (bounded). Never writes; not a freshness verdict. */
+  getDecisionAttention: { input: z.object({ planId: Id.optional() }), output: DecisionAttention },
   // shared decision workspace (see section above)
   ...SHARED_DECISION_OPERATIONS
 } as const;

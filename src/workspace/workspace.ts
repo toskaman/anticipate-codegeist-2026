@@ -23,6 +23,12 @@
  *   a losing reject/revoke gets CONFLICT) and the terminal marker overrides any slot state, so a lost or late write cannot
  *   resurrect a decision. Expiry is also derived on read from the clock.
  * - The audit log is read by probing sequence keys forward until a bounded run of empty keys, never via a stored counter.
+ * - Sharing first claims a write-once back-reference ws:plan:<planId> -> decision id (setIfAbsent), THEN writes the decision.
+ *   A plan is shared at most once. If the decision write fails after the claim, the back-reference points to nothing and the
+ *   plan can never execute (fail closed); the reverse order could leave a shared decision whose plan executes unreviewed.
+ * Execution gate (executionGate, called by executeApprovedPlan in src/engine/service.ts inside the per-plan lease, before any
+ * Jira write): a plan with a back-reference executes only if its proposer runs it and readyToExecute is ok. Plans never shared
+ * are not affected. The gate applies whatever the sharedDecisions flag says: switching the flag off never releases a shared plan.
  */
 import type { Ctx, Store } from '../core/ports';
 import { fail } from '../core/errors';
@@ -74,6 +80,22 @@ const slotKey = (id: string, n: number) => `ws:slot:${id}:${n}`;
 const markKey = (id: string, acc: string) => `ws:appr:${id}:${acc}`;
 const termKey = (id: string) => `ws:term:${id}`;
 const logKey = (id: string, seq: number) => `ws:log:${id}:${String(seq).padStart(6, '0')}`;
+const PLAN_ID = /^[A-Za-z0-9_-]{1,100}$/;
+/** Write-once back-reference from a shared plan to its decision id. */
+export const sharedPlanKey = (planId: string) => `ws:plan:${planId}`;
+export type ReadyResult = { ok: true; reason: null; reasonCode: null } | { ok: false; reason: string; reasonCode: ReasonCode };
+export type ExecutionGate = { shared: false } | ({ shared: true; decisionId: string } & ReadyResult);
+
+/** Reads the engine's private plan record (plan:<id>, written by src/engine/service.ts); ownership is checked by the workspace. */
+export function storePlanReader(store: Store) {
+  return async (planId: string): Promise<PlanRef | undefined> => {
+    if (typeof planId !== 'string' || !PLAN_ID.test(planId)) return undefined;
+    const rec = await store.get<{ plan?: { planId?: string; planHash?: string; status?: string }; owner?: string | null; rootIssueKey?: string; projectKey?: string }>(`plan:${planId}`);
+    if (!rec?.plan?.planId || !rec.plan.planHash || !rec.owner || !rec.rootIssueKey || !rec.projectKey) return undefined;
+    return { planId: rec.plan.planId, owner: rec.owner, planHash: rec.plan.planHash, issueKey: rec.rootIssueKey, projectKey: rec.projectKey,
+      evidenceChanged: rec.plan.status === 'EVIDENCE_CHANGED' || rec.plan.status === 'INVALIDATED' };
+  };
+}
 
 export function createWorkspace(p: WorkspacePorts) {
   const who = (ctx: Ctx) => {
@@ -158,18 +180,21 @@ export function createWorkspace(p: WorkspacePorts) {
     } };
   }
 
-  return {
+  const api = {
     async share(ctx: Ctx, input: { planId: string; requiredApprovals?: number }) {
       const acc = who(ctx);
       const plan = await p.getPlan(input.planId);
       if (!plan || plan.owner !== acc) fail('PERMISSION_DENIED', 'Only the owner of a plan can share it.');
       if (!KEY.test(plan!.projectKey)) fail('VALIDATION', 'Invalid project.');
+      if (!PLAN_ID.test(plan!.planId)) fail('VALIDATION', 'Invalid plan.');
       if (plan!.evidenceChanged) fail('EVIDENCE_CHANGED', 'This plan was invalidated by an evidence change; regenerate it before sharing.');
       if (!(await p.userHasPermission(acc, plan!.projectKey, 'BROWSE_PROJECTS'))) fail('PERMISSION_DENIED', 'You cannot share into a project you cannot browse.');
       const req = Math.min(Math.max(Math.trunc(Number(input.requiredApprovals ?? 1)) || 1, 1), MAX_APPROVALS);
       const now = p.now();
       const r: DecisionRecord = { id: checkId(`dec-${p.newId()}`), projectKey: plan!.projectKey, issueKey: plan!.issueKey, planId: plan!.planId, planHash: plan!.planHash,
         proposer: acc, createdAt: now.toISOString(), expiresAt: new Date(now.getTime() + APPROVAL_VALID_DAYS * 86400000).toISOString(), requiredApprovals: req };
+      // Back-reference first (see header): one decision per plan, and never a decision whose plan could execute unreviewed.
+      if (!(await p.store.setIfAbsent(sharedPlanKey(r.planId), r.id))) fail('CONFLICT', 'This plan was already shared as a decision; generate a new plan to share it again.');
       if (!(await p.store.setIfAbsent(decKey(r.id), r))) fail('CONFLICT', 'Decision id collision.');
       await append(r.id, acc, 'SHARED', `plan ${r.planId} hash ${r.planHash}, ${req} approval(s) required`);
       return present(acc, await derive(r));
@@ -227,21 +252,39 @@ export function createWorkspace(p: WorkspacePorts) {
     },
 
     /** Called right before execution: re-validates every approval live. Returns ok=false and revokes on any loss. */
-    async readyToExecute(ctx: Ctx, id: string, currentPlanHash: string) {
+    async readyToExecute(ctx: Ctx, id: string, currentPlanHash: string): Promise<ReadyResult> {
       const { acc, r } = await guardedView(ctx, id);
       const d = await derive(r);
-      if (d.state === 'EXPIRED') { await terminate(r.id, 'EXPIRED', acc, 'approval window elapsed before execution'); return { ok: false, reason: 'Decision is EXPIRED.' }; }
-      if (d.state !== 'APPROVED') return { ok: false, reason: `Decision is ${d.state}.` };
-      if (currentPlanHash !== r.planHash || (await evidenceChanged(r))) return { ok: false, reason: 'The plan changed after approval.' };
+      const notOpen = (s: DecisionState): ReasonCode => (s === 'IN_REVIEW' ? 'AWAITING_APPROVAL' : s === 'APPROVED' ? 'AWAITING_APPROVAL' : s);
+      if (d.state === 'EXPIRED') { await terminate(r.id, 'EXPIRED', acc, 'approval window elapsed before execution'); return { ok: false, reason: 'Decision is EXPIRED.', reasonCode: 'EXPIRED' }; }
+      if (d.state !== 'APPROVED') return { ok: false, reason: `Decision is ${d.state}.`, reasonCode: notOpen(d.state) };
+      if (currentPlanHash !== r.planHash || (await evidenceChanged(r))) return { ok: false, reason: 'The plan changed after approval.', reasonCode: 'EVIDENCE_CHANGED' };
       for (const a of d.approvals) {
         if (!(await p.userHasPermission(a.by, r.projectKey, APPROVER_PERMISSION))) {
           await terminate(r.id, 'REVOKED', acc, `approver ${a.by} lost ${APPROVER_PERMISSION}`);
-          return { ok: false, reason: 'An approver no longer holds the required permission; the approval was revoked.' };
+          return { ok: false, reason: 'An approver no longer holds the required permission; the approval was revoked.', reasonCode: 'MISSING_PERMISSION' };
         }
       }
       // A concurrent revocation/expiry may have landed while we were checking: re-read the terminal marker last.
-      if ((await derive(r)).state !== 'APPROVED') return { ok: false, reason: 'Decision changed during validation.' };
-      return { ok: true, reason: null };
+      const last = (await derive(r)).state;
+      if (last !== 'APPROVED') return { ok: false, reason: 'Decision changed during validation.', reasonCode: notOpen(last) };
+      return { ok: true, reason: null, reasonCode: null };
+    },
+
+    /**
+     * Execution gate for a plan (see header). Not shared = { shared: false } after one store read (no Jira call).
+     * Shared: only the proposer may execute (approvers review, they never run the proposer's private plan), the back-reference
+     * must name a readable decision for this plan, and readyToExecute decides. Anything malformed fails closed.
+     */
+    async executionGate(ctx: Ctx, planId: string, currentPlanHash: string): Promise<ExecutionGate> {
+      const ref = await p.store.get<unknown>(sharedPlanKey(planId));
+      if (ref === undefined || ref === null) return { shared: false };
+      if (typeof ref !== 'string' || !ID.test(ref)) fail('CONFLICT', 'This plan has an unreadable shared-decision reference; execution is refused.');
+      const acc = who(ctx);
+      const r = await loadRecord(ref as string);
+      if (r.planId !== planId) fail('CONFLICT', 'The shared decision recorded for this plan belongs to another plan; execution is refused.');
+      if (acc !== r.proposer) fail('PERMISSION_DENIED', 'Only the proposer executes a shared decision, after the required approvals.');
+      return { shared: true, decisionId: r.id, ...(await api.readyToExecute(ctx, r.id, currentPlanHash)) };
     },
 
     /** Full audit (bounded by MAX_LOG). Prefer auditPage for resolvers. */
@@ -271,4 +314,5 @@ export function createWorkspace(p: WorkspacePorts) {
       return { items, nextCursor: more ? items[items.length - 1]!.seq : null };
     }
   };
+  return api;
 }

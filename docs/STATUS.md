@@ -1,6 +1,6 @@
 # ANTICIPATE - source of truth (dated)
 
-Updated: 3 Nov 2026, ~12:40 Paris. Owner of this file: CORE.
+Updated: 4 Nov 2026, ~02:00 Paris (capabilities table extended by muse, wave 3). Owner of this file: CORE.
 
 | Item | Value |
 |---|---|
@@ -21,13 +21,19 @@ Updated: 3 Nov 2026, ~12:40 Paris. Owner of this file: CORE.
 | Sample data (guided demo), CONFLICT guard | LIVE_FORGE | MP, AVT, MOBL; CONFLICT logged, no duplicates |
 | Dependency upgrade + compatibility evidence | LIVE_FORGE | MP-5 via UI and MCP |
 | Prevention Passport, historical record after snapshot expiry | UNIT_TESTED (expiry), LIVE_FORGE (live passport + PDF print) | retention tests |
-| MCP tools (5, read-only) | LIVE_FORGE | external Claude client on dev |
+| MCP tools (6 hosted, read-only; 7th `anticipate-simulate-portfolio` deployed on dev 6.8.0, not yet exercised hosted) | LIVE_FORGE for the original tools | external Claude client on dev |
 | Rovo agent | LIVE_FORGE on dev (site has Rovo); production site has no Rovo |
+| What-if slip simulation | LIVE_FORGE (judge site, production) | EVIDENCE_PACK "Slip panel on the judge site" |
+| Portfolio Impact Simulator (up to 10 changes) | UNIT_TESTED; UI op + Rovo/MCP deployed on dev, not hosted-tested; no UI yet (ORP-32) | #129, #141; docs/design-core/PORTFOLIO_SIMULATOR.md |
+| Shared decision workspace | UNIT_TESTED; ops deployed but OFF (flag `sharedDecisions`); execution gate implemented; needs hosted two-account test | #129, #141, wave 3; docs/design-core/ENTERPRISE_WORKSPACE.md |
+| Decision radar slice 1 (issue-link / issue-deleted triggers -> NEEDS_REVIEW attention) | UNIT_TESTED; trigger payload field names unverified hosted | wave 3; docs/design-core/DECISION_RADAR.md |
+| Policy-as-code (declarative v1, preview only) | UNIT_TESTED engine only; nothing enforced | wave 3; docs/design-core/POLICY_AS_CODE.md |
+| Storage-contract regression suite (Forge KVS key rules, fault injection) | UNIT_TESTED | #129, wave 3; test/fault-injection.test.ts |
 | Teamwork Graph | BLOCKED: app not allowlisted | 3 Nov: `read:graph:jira` refused at deploy (restricted scope); `read:graph:issue:jira` deployed on dev (branch exp/teamwork-graph, v5.1.0), but the user consent flow never grants it (the issued code lists only the Jira scopes), so the hosted probe keeps asking for authorization. Atlassian docs: apps must be allowlisted via Atlassian support. Dev rolled back to CORE (v6.0.0, no graph scope); production never changed. Allowlist requested: ECOHELP-180616 (2 Nov 2026); evidence in docs/evidence/TEAMWORK_GRAPH_ALLOWLIST.md. Bonus not claimable until enabled |
 
 ## Known limitations
 - Clean-site judge run: PASS on 3 Nov 2026 (anticipate-judge, Jira Free, production install from the public link; full journey to a Completed Passport; docs/evidence/EVIDENCE_PACK.md). Limited-permission roles cannot be configured on Jira Free (unit tests cover them).
-- Plans are private to their creator (shared workspace: design only, docs/design-core/ENTERPRISE_WORKSPACE.md).
+- Plans are private to their creator. Shared-decision operations exist but answer FEATURE_DISABLED until a site admin enables them (kept off until a hosted two-account test passes).
 - zod 4.6.7 everywhere (high advisory remediated). 5 moderate advisories remain in Forge tooling (breaking @forge/api major needed).
 - Cold start to usable app about 8 to 11 s (LIVE_FORGE timings in evidence/experience/v4-ux).
 - MOCK_TRANSPORT screenshots are UI evidence only, not production proof.

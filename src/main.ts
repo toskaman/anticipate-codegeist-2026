@@ -5,17 +5,19 @@ import { createStoreThrottle, DEFAULT_THROTTLE } from './core/throttle';
 import { createService } from './engine/service';
 import { createForgeJira, forgeStore } from './forge-adapters';
 import { registerWorkspaceResolvers } from './workspace/forge';
+import { handleRadarEvent, withRadar } from './radar/radar';
 
 const resolver = new Resolver();
 const now = () => new Date();
 const newId = () => globalThis.crypto.randomUUID();
 
-const service = (req: ResolverRequest) => createService({ jira: createForgeJira(req.context?.siteUrl ?? null), store: forgeStore, now, newId });
+// Decision Radar composes one read-only op + its capability onto the engine service (src/radar/radar.ts).
+const service = (req: ResolverRequest) => withRadar(createService({ jira: createForgeJira(req.context?.siteUrl ?? null), store: forgeStore, now, newId }), forgeStore, now);
 type Svc = ReturnType<typeof createService>;
 const throttle = createStoreThrottle(forgeStore, DEFAULT_THROTTLE);
 
 const ops: OperationName[] = ['getCapabilities', 'getPolicies', 'listProjects', 'getChangeCandidates', 'getGraphSnapshot', 'getEvidenceGraph', 'simulateChange',
-  'compareScenarios', 'generatePreventionPlan', 'approvePlan', 'executeApprovedPlan', 'getExecutionStatus', 'getPreventionPassport', 'checkPlanFreshness', 'previewSampleProject', 'createSampleProject', 'getValidatorPolicy', 'setValidatorPolicy', 'simulateSlip', 'simulatePortfolio'];
+  'compareScenarios', 'generatePreventionPlan', 'approvePlan', 'executeApprovedPlan', 'getExecutionStatus', 'getPreventionPassport', 'checkPlanFreshness', 'previewSampleProject', 'createSampleProject', 'getValidatorPolicy', 'setValidatorPolicy', 'simulateSlip', 'simulatePortfolio', 'getDecisionAttention'];
 
 for (const op of ops) {
   resolver.define(op, makeHandler(op, () => 'LIVE', newId, now, (ctx, input, req) => {
@@ -60,4 +62,12 @@ export async function validateTransition(args: { issue?: { key?: string } }) {
     readPolicy: () => forgeStore.get<{ onOutage?: string }>(VALIDATOR_POLICY_KEY),
     log: (f) => console.warn(JSON.stringify(f))
   });
+}
+
+// ---- Decision Radar trigger (avi:jira:created|deleted:issuelink, avi:jira:deleted:issue) ----
+// Runs as the app system user. No Jira calls, no Jira writes, never executes: it only records "needs review" hints.
+// Errors are recorded in radar:status (monitoring DEGRADED) instead of thrown, so a bad event cannot cause a retry loop.
+export async function radarOnJiraEvent(event: unknown) {
+  const r = await handleRadarEvent(forgeStore, event, now);
+  return { result: r.result, flagged: r.flaggedPlans.length };
 }

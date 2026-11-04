@@ -1,9 +1,25 @@
 # Decision Radar: event-driven "needs review" signals for prevention plans
 
-Status: design proposal answering contract request #132. Nothing here is implemented yet.
+Status: design proposal answering contract request #132. **Slice 1 is implemented** (see "Implemented slice 1" below); the rest of this document is the original design.
 Docs accessed: 2026-11-03. Repo state: `main` at `39ccc3f`.
 
 Note: I could not open the text of issue #132 from this session (GitHub API access to the repo was not enabled). Section (e) is based on the field list in the brief: monitoring availability, `lastObservedAt`, events with stable ids, reasons and cursor. Check it against the issue before implementing.
+
+## Implemented slice 1 (2026-11-04)
+
+Code: `src/radar/radar.ts` (index, trigger handler, read op), `test/radar.test.ts`, `test/radar-adapter.test.ts`.
+
+- **Manifest:** `trigger` `anticipate-decision-radar` on `avi:jira:created:issuelink`, `avi:jira:deleted:issuelink`, `avi:jira:deleted:issue` -> function `radarOnJiraEvent` (`index.radarOnJiraEvent`). `permissions.scopes` unchanged. No `filter` block (so dev/unlicensed installs still receive events; see d).
+- **Index:** the extractor keeps `attributes.jiraId` on readable issue nodes. `generatePreventionPlan` stores `radar: { evidenceIssueIds, indexedCount, unindexedCount, faults, indexedAt }` on the plan record and writes `radar:idx:<issueId>:<planId>` = `{ planId, owner, issueKey }` plus `radar:own:<accountId>:<planId>`. Unreadable / not-crawled nodes count as unindexed (`PARTIAL_INDEX` -> `DEGRADED`). Demo-fixture and legacy plans are `NOT_CONFIGURED`. Index failures never fail plan creation (`INDEX_WRITE_FAILED`).
+- **Store port:** optional `listByPrefix(prefix, cursor?, limit?)`; Forge: `kvs.query().where('key', WhereConditions.beginsWith(prefix)).limit(<=100).cursor(c).getMany()` (@forge/kvs 2.1.1); in-memory fake enforces the KVS key rules.
+- **Handler:** validates payload shape (numeric ids only, unknown event types ignored, malformed known types -> `MALFORMED_EVENT`), dedupes on `radar:evt:<linkId|issueId>:<eventType>` (7 d TTL; checked first, written with `setIfAbsent` **after** the attention writes = at-least-once, appends idempotent per event key), looks up plans by prefix (max 5 pages x 100 keys per issue, max 50 plans per event, else `FANOUT_CAPPED`), appends to `radar:att:<planId>` (first 20 signals kept, later ones only bump `signalCount` + `truncated`). Signals hold only this plan's evidence ids/keys and `externalEndpoint: boolean`; the other end of a link is never stored. Records `radar:status` `{ lastObservedAt, lastError? }`; a fault keeps monitoring `DEGRADED` for 24 h. No Jira port is passed to the handler (no Jira reads or writes), plan status is never changed, nothing executes. Errors are recorded, not thrown.
+- **Contract:** additive `getDecisionAttention({ planId? })` -> `{ monitoring, faults, lastObservedAt, items[{ planId, reasons[], observedAt, lastSignalAt, signalCount, evidenceIssueKeys, externalEndpoint, truncated, monitoring, faults }], truncated, disclaimer }`; capability `decisionRadar: CapabilityState` (optional). Owner-only: another user's plan and a missing plan give the same `NOT_FOUND`; the owner listing re-checks every plan record. Reading never writes. Composed onto the resolver service in `src/main.ts` (`withRadar`), so the engine's `getCapabilities` is unchanged.
+
+Deviations from the design below: op name `getDecisionAttention` (not `getPlanAttention`), no cursor (bounded to 100 plans, `truncated` flag); status key `radar:status` (not `radar:health`); dedupe key is readable (`radar:evt:...`), not a sha256 `radar:seen:` id; fan-out cap 50 (not 200); `linkTypeName`, `occurredAt` ordering and per-plan `lastEvaluatedAt` are not exposed.
+
+Not done in slice 1: `checkPlanFreshness` does **not** clear `radar:att` (compare `observedAt` with the last freshness check); index keys are not deleted on terminal plan states (90 d TTL is the only cleanup); no UI; no queue or scheduled sweep. Attention appends are read-modify-write (KVS has no compare-and-set), so two events for the same plan processed concurrently can lose one signal.
+
+**Not verified on a hosted site:** that the trigger deploys and fires on this app; the real payload field names and types (`id`, `sourceIssueId`, `destinationIssueId`, `issue.id`, `timestamp`; a nested `issueLink` object is accepted defensively); delivery latency, duplicates and ordering; whether a thrown/returned value affects retries; KVS `beginsWith` ordering/consistency under load; whether adding the trigger needs admin re-consent. Items 14-18 of the test plan remain open.
 
 ## Summary
 

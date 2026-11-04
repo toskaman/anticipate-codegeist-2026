@@ -22,6 +22,8 @@ import type { EvidenceDrift } from '../../packages/contracts/src/index';
 import { stableHash } from '../../packages/simulation-core/src/index';
 import { simulatePortfolio as runPortfolio, PortfolioError, PORTFOLIO_LIMITS } from '../../packages/simulation-core/src/portfolio';
 import type { SimulatePortfolioRequest, SimulatePortfolioResult, ChangeOperation } from '../../packages/contracts/src/index';
+import { createWorkspace, storePlanReader } from '../workspace/workspace';
+import { indexPlanForRadar, type RadarPlanInfo } from '../radar/radar';
 import { ATTESTATION_VALID_DAYS, decideTransition, decisionKey, linksDigest, type DecisionRecord } from '../validator';
 
 export const CHANGE_LABEL = 'anticipate-change';
@@ -33,7 +35,9 @@ const MAX_ATTEMPTS = 5;
 interface SnapRec { snapshot: GraphSnapshot; owner: string | null; rootIssueKey: string; projectKey: string; }
 interface CmpRec { request: SimulationRequest; comparison: ScenarioComparison; }
 interface PlanRec { plan: PreventionPlan; owner: string | null; rootIssueKey: string; projectKey: string; approvedActionIds: string[];
-  approvals: { accountId: string | null; at: string; actionIds: string[]; planHash: string }[]; timeline: { at: string; event: string }[]; }
+  approvals: { accountId: string | null; at: string; actionIds: string[]; planHash: string }[]; timeline: { at: string; event: string }[];
+  /** Decision Radar: evidence issue ids + index coverage (absent on legacy plans = not monitored). */
+  radar?: RadarPlanInfo; }
 
 /**
  * Minimized provenance kept for the plan's retention period (90 days) so a Prevention Passport stays reviewable after the
@@ -321,7 +325,9 @@ export function createService(d: Deps) {
       if (!result) fail('NOT_FOUND', `Scenario ${input.scenarioId} was not part of the comparison.`);
       const planId = `plan-${d.newId()}`;
       const plan = buildPlan({ planId, snapshot: s.snapshot, result: result!, rootIssueKey: s.rootIssueKey, projectKey: s.projectKey, createdAt: iso() });
-      await d.store.set<PlanRec>(K.plan(planId), { plan, owner: ctx.accountId, rootIssueKey: s.rootIssueKey, projectKey: s.projectKey, approvedActionIds: [], approvals: [],
+      // Decision Radar index (never throws; failures are recorded as monitoring faults on the plan).
+      const radar = await indexPlanForRadar(d.store, { planId, owner: ctx.accountId, snapshot: s.snapshot, at: iso() });
+      await d.store.set<PlanRec>(K.plan(planId), { plan, owner: ctx.accountId, rootIssueKey: s.rootIssueKey, projectKey: s.projectKey, approvedActionIds: [], approvals: [], radar,
         timeline: [{ at: s.snapshot.createdAt, event: `Snapshot ${s.snapshot.snapshotId} captured` }, { at: iso(), event: `Plan generated for scenario ${input.scenarioId}` }] });
       await d.store.set(K.cmp(`plan:${planId}`), c);
       const causal = s.snapshot.edges.filter((e) => ['DEPENDS_ON', 'USES', 'BLOCKS', 'AFFECTS', 'VERIFIED_BY'].includes(e.kind));
@@ -365,10 +371,12 @@ export function createService(d: Deps) {
     },
 
     async executeApprovedPlan(ctx: Ctx, input: { planId: string; idempotencyKey: string }): Promise<ExecutionRecord[]> {
-      const rec = await loadPlan(ctx, input.planId);
+      let rec = await loadPlan(ctx, input.planId);
       if (rec.plan.snapshotId === FIXTURE_SNAPSHOT.snapshotId) fail('UNSUPPORTED', 'Demo-fixture plans can never write to Jira.');
       if (rec.plan.status === 'INVALIDATED') fail('CONFLICT', 'This plan was invalidated because the evidence changed after approval. Re-run the comparison and review a new plan.');
-      if (!['APPROVED', 'PARTIAL', 'FAILED'].includes(rec.plan.status)) fail('CONFLICT', `Plan is ${rec.plan.status}; approve it first.`);
+      // EXECUTING is resumable: the per-plan lease below refuses while another executor holds it, and every action is reconciled
+      // idempotently. Without this, an executor that crashed or timed out mid-run left the plan stuck in EXECUTING forever.
+      if (!['APPROVED', 'PARTIAL', 'FAILED', 'EXECUTING'].includes(rec.plan.status)) fail('CONFLICT', `Plan is ${rec.plan.status}; approve it first.`);
       const latest = rec.approvals[rec.approvals.length - 1];
       if (!latest || latest.planHash !== rec.plan.planHash) fail('STALE_APPROVAL', 'No valid approval for the current plan.');
       const snap = await loadSnap(ctx, rec.plan.snapshotId);
@@ -388,11 +396,21 @@ export function createService(d: Deps) {
         if (!(await d.store.setIfAbsent(claim, { by: lease.token, at: iso() }))) fail('CONFLICT', 'Another executor is taking over this plan.');
         await d.store.set(lockKey, lease);
       }
+      let before = rec.plan.status === 'EXECUTING' ? 'FAILED' : rec.plan.status;
+      const out: ExecutionRecord[] = [];
       try {
+        // Re-read under the lease: another executor may have finished (or changed approvals) between our first read and
+        // acquiring the lease. Acting on the stale record would re-run actions and overwrite its timeline (red-team W3-1).
+        rec = await loadPlan(ctx, input.planId);
+        before = rec.plan.status === 'EXECUTING' ? 'FAILED' : rec.plan.status;
+        if (!['APPROVED', 'PARTIAL', 'FAILED', 'EXECUTING'].includes(rec.plan.status)) fail('CONFLICT', `Plan is ${rec.plan.status}; nothing to execute.`);
+        const latestNow = rec.approvals[rec.approvals.length - 1];
+        if (!latestNow || latestNow.planHash !== rec.plan.planHash) fail('STALE_APPROVAL', 'No valid approval for the current plan.');
+        // Shared decision gate (docs/design-core/ENTERPRISE_WORKSPACE.md): checked under the lease, before any write or status change.
+        await sharedDecisionGate(ctx, rec);
         rec.plan = { ...rec.plan, status: 'EXECUTING' };
         await d.store.set(K.plan(input.planId), rec);
         const perms = await d.jira.myPermissions(rec.projectKey, ['CREATE_ISSUES', 'LINK_ISSUES', 'ADD_COMMENTS', 'EDIT_ISSUES', 'BROWSE_PROJECTS']);
-        const out: ExecutionRecord[] = [];
         for (const action of rec.plan.actions.filter((a) => rec.approvedActionIds.includes(a.actionId))) {
           out.push(await executeOne(rec, action, perms, input.idempotencyKey));
         }
@@ -405,9 +423,23 @@ export function createService(d: Deps) {
         await d.store.set(K.plan(input.planId), rec);
         await recordDecision(rec);
         return out;
+      } catch (e) {
+        // An unexpected failure mid-run (Jira 5xx/429 on the permission check, KVS outage) must not leave the plan EXECUTING:
+        // best effort, record where it stopped (PARTIAL once any action ran) and rethrow the original, retryable, error.
+        if (rec.plan.status === 'EXECUTING') {
+          try {
+            rec.plan = { ...rec.plan, status: out.length ? 'PARTIAL' : before };
+            rec.timeline.push({ at: iso(), event: `Execution interrupted after ${out.length} action(s): ${e instanceof AppError ? e.code : 'error'}` });
+            await d.store.set(K.plan(input.planId), rec);
+          } catch { /* storage still down: the EXECUTING status stays resumable once the lease expires */ }
+        }
+        throw e;
       } finally {
-        const held = await d.store.get<typeof lease>(lockKey);
-        if (held?.token === lease.token) await d.store.delete(lockKey); // never release someone else's lease
+        // Best effort (never mask the original error); an unreleased lease expires after LEASE_MS.
+        try {
+          const held = await d.store.get<typeof lease>(lockKey);
+          if (held?.token === lease.token) await d.store.delete(lockKey); // never release someone else's lease
+        } catch { /* storage unavailable */ }
       }
     },
 
@@ -450,6 +482,23 @@ export function createService(d: Deps) {
       };
     }
   };
+
+  /**
+   * A plan shared as a decision (back-reference ws:plan:<planId>) executes only if its proposer runs it and the workspace's
+   * readyToExecute is ok (approved, same plan hash, every approver still holds the approver permission, not closed). Refusals:
+   * PERMISSION_DENIED when an approver lost the permission (the decision is then REVOKED), CONFLICT otherwise, with the reason
+   * in details. Plans never shared cost one store read. Without a live any-account permission check the gate fails closed.
+   */
+  async function sharedDecisionGate(ctx: Ctx, rec: PlanRec) {
+    const ws = createWorkspace({ store: d.store, now: d.now, newId: d.newId, getPlan: storePlanReader(d.store),
+      userHasPermission: (a, p, perm) => (d.jira.userHasPermission
+        ? d.jira.userHasPermission(a, p, perm)
+        : fail('UNSUPPORTED', 'This plan was shared as a decision, and approver permissions cannot be re-validated here; execution is refused.')) });
+    const g = await ws.executionGate(ctx, rec.plan.planId, rec.plan.planHash);
+    if (!g.shared || g.ok) return;
+    fail(g.reasonCode === 'MISSING_PERMISSION' ? 'PERMISSION_DENIED' : 'CONFLICT', `Shared decision ${g.decisionId} is not ready to execute: ${g.reason}`,
+      { decisionId: g.decisionId, reason: g.reason, reasonCode: g.reasonCode });
+  }
 
   async function executeOne(rec: PlanRec, a: ProposedAction, perms: Record<string, boolean>, idem: string): Promise<ExecutionRecord> {
     const key = K.exec(rec.plan.planId, a.actionId);
