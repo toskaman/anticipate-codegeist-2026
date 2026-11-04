@@ -3,7 +3,8 @@ import type { OperationName } from '../packages/contracts/src/index';
 import { makeHandler, type ResolverRequest } from './core/handler';
 import { createStoreThrottle, DEFAULT_THROTTLE } from './core/throttle';
 import { createService } from './engine/service';
-import { createForgeJira, forgeStore } from './forge-adapters';
+import { createForgeJira, forgeQueryStore, forgeStore } from './forge-adapters';
+import { createRadar } from './radar/radar';
 import { createWorkspace } from './workspace/workspace';
 import { forgeUserHasPermission, storePlanReader } from './workspace/forge';
 import { registerWorkspaceResolvers } from './workspace/forge';
@@ -14,12 +15,20 @@ const newId = () => globalThis.crypto.randomUUID();
 
 // Shared-decision execution gate: always wired, whatever the feature flag, so a plan shared earlier stays governed.
 const sharedDecisions = createWorkspace({ store: forgeStore, now, newId, userHasPermission: forgeUserHasPermission, getPlan: storePlanReader(forgeStore) });
-const service = (req: ResolverRequest) => createService({ jira: createForgeJira(req.context?.siteUrl ?? null), store: forgeStore, now, newId, sharedDecisions });
+const radar = createRadar({ store: forgeQueryStore, now });
+const service = (req: ResolverRequest) => createService({ jira: createForgeJira(req.context?.siteUrl ?? null), store: forgeStore, now, newId, sharedDecisions, radar });
+
+/** Forge trigger (Decision Radar): Jira issue-link created/deleted and issue deleted. Runs as the app, no Jira call. */
+export async function radarOnJiraEvent(event: unknown) {
+  const r = await radar.onEvent(event);
+  console.log(JSON.stringify({ app: 'anticipate', op: 'radarOnJiraEvent', status: r.status, plans: r.plans, capped: r.capped }));
+  return r;
+}
 type Svc = ReturnType<typeof createService>;
 const throttle = createStoreThrottle(forgeStore, DEFAULT_THROTTLE);
 
 const ops: OperationName[] = ['getCapabilities', 'getPolicies', 'listProjects', 'getChangeCandidates', 'getGraphSnapshot', 'getEvidenceGraph', 'simulateChange',
-  'compareScenarios', 'generatePreventionPlan', 'approvePlan', 'executeApprovedPlan', 'getExecutionStatus', 'getPreventionPassport', 'checkPlanFreshness', 'previewSampleProject', 'createSampleProject', 'getValidatorPolicy', 'setValidatorPolicy', 'simulateSlip', 'simulatePortfolio'];
+  'compareScenarios', 'generatePreventionPlan', 'approvePlan', 'executeApprovedPlan', 'getExecutionStatus', 'getPreventionPassport', 'checkPlanFreshness', 'previewSampleProject', 'createSampleProject', 'getValidatorPolicy', 'setValidatorPolicy', 'simulateSlip', 'simulatePortfolio', 'getPlanAttention'];
 
 for (const op of ops) {
   resolver.define(op, makeHandler(op, () => 'LIVE', newId, now, (ctx, input, req) => {

@@ -1,6 +1,6 @@
 /** Live Forge implementations of the ports. All Jira calls run asUser() so Jira enforces the caller's permissions. */
 import api, { route } from '@forge/api';
-import { kvs } from '@forge/kvs';
+import { kvs, WhereConditions } from '@forge/kvs';
 import { AppError } from './core/errors';
 import type { IssueFetch, JiraIssue, JiraPort, Store } from './core/ports';
 
@@ -123,6 +123,7 @@ export function retentionFor(key: string): { value: number; unit: 'DAYS' } {
   if (key.startsWith('snap:')) return { value: 2, unit: 'DAYS' };
   if (key.startsWith('lock:') || key.startsWith('lock-takeover:')) return { value: 1, unit: 'DAYS' };
   if (key.startsWith('idem:')) return { value: 7, unit: 'DAYS' };
+  if (key.startsWith('radar:seen:')) return { value: 7, unit: 'DAYS' }; // dedupe window for retried Jira events
   return { value: 90, unit: 'DAYS' }; // plan:, exec:, cmp: (audit)
 }
 
@@ -135,4 +136,15 @@ export const forgeStore: Store = {
     catch (e) { if ((await kvs.get(k)) !== undefined) return false; throw e; }
   },
   delete: (k) => kvs.delete(k)
+};
+
+/** forgeStore + prefix query (KVS: beginsWith on key only, limit <= 100, cursors are not persisted). Used by the Decision Radar. */
+export const forgeQueryStore = {
+  ...forgeStore,
+  async query<T>(prefix: string, limit: number, cursor: string | null) {
+    let q = kvs.query().where('key', WhereConditions.beginsWith(prefix)).limit(Math.min(Math.max(1, Math.trunc(limit)), 100));
+    if (cursor) q = q.cursor(cursor);
+    const r = await q.getMany<T>();
+    return { items: r.results.map((x) => ({ key: x.key, value: x.value as T })), nextCursor: r.nextCursor ?? null };
+  }
 };

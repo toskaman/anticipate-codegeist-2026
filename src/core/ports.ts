@@ -39,6 +39,6 @@ export interface SharedDecisionGate {
   authorizeExecution(ctx: Ctx, decisionId: string, currentPlanHash: string): Promise<void>;
   stillApproved(decisionId: string, currentPlanHash: string): Promise<boolean>;
 }
-export interface Deps { jira: JiraPort; store: Store; now: () => Date; newId: () => string; context?: import('../context/sources').ContextSource; sharedDecisions?: SharedDecisionGate; }
+export interface Deps { jira: JiraPort; store: Store; now: () => Date; newId: () => string; context?: import('../context/sources').ContextSource; sharedDecisions?: SharedDecisionGate; radar?: import('../radar/radar').Radar; }
 
 export interface Ctx { requestId: string; accountId: string | null; installationId: string; }

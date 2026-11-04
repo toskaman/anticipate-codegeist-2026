@@ -20,6 +20,7 @@ const { fakeStore, createCalls } = vi.hoisted(() => {
 });
 vi.mock('../src/forge-adapters', () => ({
   forgeStore: fakeStore,
+  forgeQueryStore: fakeStore,
   createForgeJira: () => { createCalls.createForgeJira++; throw new Error('no live Jira in wiring test'); },
 }));
 
