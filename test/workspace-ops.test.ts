@@ -319,6 +319,18 @@ describe('shared decision ops: Forge wiring', () => {
     const r = await defs.get('getSharedDecision')!({ payload: { id: 'dec-1' }, context: { accountId: 'alice' } });
     expect(r).toMatchObject({ ok: false, error: { code: 'UNSUPPORTED', details: { reason: 'NOT_RELEASED' } } });
   });
+  const env = (globalThis as unknown as { process: { env: Record<string, string | undefined> } }).process.env;
+  it('acceptance unlock: only the exact env value "true" unlocks (development acceptance), anything else stays locked', async () => {
+    for (const [val, unlocked] of [['true', true], ['TRUE', false], ['1', false], [undefined, false]] as const) {
+      if (val === undefined) delete env.ANTICIPATE_SHARED_DECISIONS_ACCEPTANCE; else env.ANTICIPATE_SHARED_DECISIONS_ACCEPTANCE = val;
+      const defs = new Map<string, (r: unknown) => Promise<unknown>>(); const store = memoryStore();
+      registerWorkspaceResolvers({ define: (n: string, fn: never) => defs.set(n, fn) }, { store, now: () => new Date('2026-11-03T10:00:00Z'), newId: () => 'x',
+        globalPermissionsFor: () => async (ps) => Object.fromEntries(ps.map((p) => [p, true])) });
+      const r = await defs.get('setFeatureFlag')!({ payload: { flag: 'sharedDecisions', enabled: true }, context: { accountId: 'root' } }) as { ok: boolean };
+      expect(r.ok).toBe(unlocked);
+    }
+    delete env.ANTICIPATE_SHARED_DECISIONS_ACCEPTANCE;
+  });
   it('release lock: a flag enabled by an earlier version is ignored, and enabling is refused, even for a site admin', async () => {
     const defs = new Map<string, (r: unknown) => Promise<unknown>>(); const store = memoryStore();
     await store.set(SHARED_DECISIONS_FLAG_KEY, { enabled: true, updatedBy: 'root', updatedAt: '2026-11-01T00:00:00Z' });

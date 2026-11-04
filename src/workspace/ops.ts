@@ -48,7 +48,10 @@ export function createWorkspaceOps(p: WorkspaceOpsPorts) {
   const ws = createWorkspace(p);
   const readFlag = async () => (await p.store.get<FlagRecord>(SHARED_DECISIONS_FLAG_KEY)) ?? null;
   /** Strictly `enabled === true`: a missing, malformed or partially written record keeps the feature off. */
-  const released = p.released ?? SHARED_DECISIONS_RELEASED;
+  // Per-environment unlock for hosted acceptance only: a Forge environment variable set on DEVELOPMENT
+  // (forge variables set -e development ANTICIPATE_SHARED_DECISIONS_ACCEPTANCE true). Never set in production.
+  const envUnlock = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env?.ANTICIPATE_SHARED_DECISIONS_ACCEPTANCE === 'true';
+  const released = p.released ?? (SHARED_DECISIONS_RELEASED || envUnlock);
   const gate = async () => {
     if (!released) fail('UNSUPPORTED', 'Shared decisions are not released yet.', { feature: SHARED_DECISIONS_FLAG, reason: 'NOT_RELEASED' });
     if ((await readFlag())?.enabled !== true) {
