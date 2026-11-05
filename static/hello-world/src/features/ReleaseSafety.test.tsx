@@ -24,7 +24,7 @@ const result = {
   verdict: "NEEDS_REVIEW",
   verdictReasons: [
     "1 interaction(s) between changes need a combined review.",
-    "1 change(s) NEEDS_REVIEW.",
+    "1 change(s) needing review.",
   ],
   counts: {
     BLOCKED: 0,

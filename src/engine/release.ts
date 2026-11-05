@@ -18,6 +18,8 @@ import type { DecisionRecord } from '../validator';
 export const VERDICT_ORDER: ReleaseVerdict[] = ['BLOCKED', 'EVIDENCE_INCOMPLETE', 'NEEDS_REVIEW', 'EXECUTION_PARTIAL', 'APPROVED_NOT_EXECUTED', 'VERIFIED_FOR_RECORDED_SCOPE'];
 const rank = (v: ReleaseVerdict) => VERDICT_ORDER.indexOf(v);
 const worst = (a: ReleaseVerdict, b: ReleaseVerdict) => (rank(a) <= rank(b) ? a : b);
+const LABEL: Record<ReleaseVerdict, string> = { BLOCKED: 'blocked', EVIDENCE_INCOMPLETE: 'with incomplete evidence', NEEDS_REVIEW: 'needing review',
+  EXECUTION_PARTIAL: 'partially executed', APPROVED_NOT_EXECUTED: 'approved but not executed', VERIFIED_FOR_RECORDED_SCOPE: 'verified for the recorded scope' };
 
 export interface ReleaseInput {
   projectKey: string; fixVersion: string | null; jql: string; evaluatedAt: string;
@@ -104,7 +106,7 @@ export function aggregateRelease(input: ReleaseInput): ReleaseSafety {
   if (items.length === 0) { verdict = 'EVIDENCE_INCOMPLETE'; verdictReasons.push(input.fixVersion ? `No change issues found in ${input.projectKey} for release "${input.fixVersion}".` : `No change issues found in ${input.projectKey}.`); }
   if (input.truncated) { verdict = worst(verdict, 'EVIDENCE_INCOMPLETE'); verdictReasons.push('Change list truncated: the verdict cannot cover the whole release.'); }
   if (interactions.length && rank(verdict) > rank('NEEDS_REVIEW')) { verdict = 'NEEDS_REVIEW'; verdictReasons.push(`${allPairs.length} interaction(s) between changes need a combined review.`); }
-  for (const v of VERDICT_ORDER) if (counts[v]) verdictReasons.push(`${counts[v]} change(s) ${v}.`);
+  for (const v of VERDICT_ORDER) if (counts[v]) verdictReasons.push(`${counts[v]} change(s) ${LABEL[v]}.`);
   if (verdict === 'VERIFIED_FOR_RECORDED_SCOPE') verdictReasons.push('Verified only for the recorded scope of each decision; this is not a guarantee that the release is safe.');
 
   return {

@@ -14,8 +14,8 @@ function releaseResult(fixVersion: string | null) {
     verdict: "NEEDS_REVIEW",
     verdictReasons: [
       "1 interaction(s) between changes need a combined review.",
-      "1 change(s) NEEDS_REVIEW.",
-      "1 change(s) VERIFIED_FOR_RECORDED_SCOPE.",
+      "1 change(s) needing review.",
+      "1 change(s) verified for the recorded scope.",
     ],
     counts: {
       BLOCKED: 0,

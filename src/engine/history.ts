@@ -43,7 +43,8 @@ export function buildHistory(i: HistoryInput): DecisionHistory {
   const statusReason = can ? 'Approved and no recorded check found changed evidence since. Evidence is still re-checked live before any Jira write.'
     : invalidating ? `Cannot authorize execution: evidence changed (${invalidating.reason.slice(0, 200)}).`
       : i.plan.status === 'COMPLETED' ? 'Executed; actions were verified in Jira at the time.'
-        : `Status ${i.plan.status}: not an executable approval.`;
+        : i.plan.status === 'PENDING_APPROVAL' || i.plan.status === 'DRAFT' ? 'Awaiting approval: nothing can be executed yet.'
+          : `Status ${i.plan.status.toLowerCase().replace(/_/g, ' ')}: not an executable approval.`;
 
   const radarText: Record<string, string> = { LINK_CREATED: 'Jira link created', LINK_DELETED: 'Jira link deleted', ISSUE_DELETED: 'Jira issue deleted' };
   const events = [

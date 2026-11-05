@@ -111,7 +111,7 @@ export default function DecisionTimeMachine({
             title={
               h.invalidation
                 ? "Why this decision is blocked now"
-                : `Status: ${h.status}`
+                : `Status: ${h.status.toLowerCase().replace(/_/g, " ")}`
             }
           >
             {h.statusReason}

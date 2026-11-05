@@ -58,13 +58,13 @@ export function composeSafeChanges(snapshot: GraphSnapshot, changes: readonly Po
   const breaking = base.flatMap((c) => c.operations.filter((o) => o.op === 'UPGRADE_NODE' && o.breaking).map((o) => ({ changeId: c.id, op: o })));
   for (const r of removals.slice(0, COMPOSER_LIMITS.maxTransformsPerKind)) {
     const nodeId = (r.op as { nodeId: string }).nodeId;
-    drafts.push({ kind: 'RETAIN_OLD', name: `Retain ${nodeId.replace(/^issue:/, '')} temporarily`, why: `Deprecate instead of removing ${nodeId}, so its current consumers keep working.`,
+    drafts.push({ kind: 'RETAIN_OLD', name: `Retain ${nodeId.replace(/^issue:/, '')} temporarily`, why: `Deprecate instead of removing ${nodeId.replace(/^issue:/, '')}, so its current consumers keep working.`,
       transformations: [{ changeId: r.changeId, before: r.op, after: { op: 'DEPRECATE_NODE', nodeId, retainUntil: null } }],
       assumptions: [`${nodeId} stays operational until a later, separately approved removal.`] });
   }
   for (const b of breaking.slice(0, COMPOSER_LIMITS.maxTransformsPerKind)) {
     const nodeId = (b.op as { nodeId: string }).nodeId;
-    drafts.push({ kind: 'COMPATIBLE_UPGRADE', name: `Compatibility phase for ${nodeId.replace(/^issue:/, '')}`, why: `Ship the upgrade of ${nodeId} behind a compatibility layer (non-breaking) first.`,
+    drafts.push({ kind: 'COMPATIBLE_UPGRADE', name: `Compatibility phase for ${nodeId.replace(/^issue:/, '')}`, why: `Ship the upgrade of ${nodeId.replace(/^issue:/, '')} behind a compatibility layer (non-breaking) first.`,
       transformations: [{ changeId: b.changeId, before: b.op, after: { op: 'UPGRADE_NODE', nodeId, breaking: false } }],
       assumptions: [`A compatibility layer keeps the old contract of ${nodeId}. This is an assumption, not proof of compatibility.`] });
   }
