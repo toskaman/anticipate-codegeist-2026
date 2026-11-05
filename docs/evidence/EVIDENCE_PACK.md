@@ -19,6 +19,22 @@ Screens captured with MOCK_TRANSPORT are never hosted proof, even when they show
 | Rovo agent | dev 4.13.0+ | one-atlas-euza · LIVE_FORGE | — | 2026-11-02 | Jira issue → Agents → search | agent listed | NOT FOUND yet ("check the agent is enabled in Studio"); **superseded the same day: the agent answered in Rovo chat on dev, see "Hosted verification, 2 Nov 2026" below** | needs Rovo Studio enablement by admin |
 | Teamwork Graph | exp/teamwork-graph | dev 5.0.0-5.1.0 (one-atlas-euza) · LIVE_FORGE attempt | MOBL-58 | 2026-11-03 | deploy with graph scopes, consent, probe | graph relations | BLOCKED: restricted scope, consent grants no graph scope; ECOHELP-180616 | docs/evidence/TEAMWORK_GRAPH_ALLOWLIST.md |
 
+## Production 2.37.0: Release Safety, release overview, Safe Change Composer, Decision Time Machine (5 Nov 2026, 13:13–13:17 UTC) · LIVE_FORGE_PRODUCTION, toskaman5962
+
+Source: main 8262f88 (after #177), deployed through the bridge `deploy-prod`. The manifest is unchanged since 2.36.0, so there is no re-consent. Site: toskaman5962 (site admin = owner account), dedicated sample project ADM. Opened at `/apps/full-page/<installation-id>/hello-world/`; the installation id comes from the GraphQL `ecosystem.appInstallationsByApp` query.
+
+| Feature | Procedure | Expected | Observed | Screenshot |
+|---|---|---|---|---|
+| Release overview (#177) | Mission Control → ADM → "Show all releases needing attention" | ADM change issues grouped by fixVersion | 1 group "No release (unscheduled)", Needs review, 1 change, 0 interactions | hosted-2026-11-05/release-overview-ADM-prod-2.37.0.jpg |
+| Release Safety (#173) | Click the group | Per-change state + Jira link + unknowns | ADM-1 Needs review, "No ANTICIPATE decision of yours is recorded"; link to ADM-1; "What this check cannot know (2)" | hosted-2026-11-05/release-safety-ADM-prod-2.37.0.jpg |
+| Portfolio (existing) | Scenario Lab, Change 1 = migrate ADM-1 → ADM-5, Change 2 = breaking upgrade ADM-5 | DEMO 2 collision | EMERGENT_IMPACT on ADM-2/3/4 + MIGRATE_ONTO_RETIRED | hosted-2026-11-05/portfolio-ADM-prod-2.37.0.jpg |
+| Safe Change Composer (#176) | "Compose safer alternatives" | Compatibility phase ranked first | #1 "Compatibility phase for ADM-5": blockers 0, conflicts 0, impacted 0, assumption stated; #2 As proposed: conflicts 2, impacted 3; #3 Split: conflicts 2 | hosted-2026-11-05/composer-ADM-prod-2.37.0.jpg |
+| Decision Time Machine (#174) | Compare options → Retain temporarily → generate plan → "Check evidence freshness" → Passport | Recorded checkpoints | "Evidence captured 13:14 UTC" + "Re-check 13:16 UTC", both unchanged; status pending approval; no recorded difference | hosted-2026-11-05/time-machine-ADM-prod-2.37.0.jpg |
+
+Jira writes in this session: none. Plan generation and the freshness check are app storage only; nothing was approved or executed.
+Not shown hosted: Time Machine **invalidation** (it needs a Jira link change after approval). It is covered by the DEMO 3 shape in `test/decision-history.test.ts`, and the invalidation itself was LIVE_FORGE_DEV on 4 Nov (DEMO 3).
+Text polish found during this run (fixed in the following PR): raw enums in reasons ("NEEDS_REVIEW", "PENDING_APPROVAL") and "issue:ADM-5" in a Composer sentence.
+
 ## Hosted verification, 2 Nov 2026 (main fda93de + CORE fixes) · LIVE_FORGE
 
 - Production 2.7.0 deployed from main (includes EXPERIENCE PR #9). Judges' clean site (toskaman5962) loads Mission Control with the "Sample Jira data" panel.

@@ -6,7 +6,7 @@
       "candidateId": "cand-1",
       "kind": "COMPATIBLE_UPGRADE",
       "name": "Compatibility phase for TD-5",
-      "why": "Ship the upgrade of issue:TD-5 behind a compatibility layer (non-breaking) first.",
+      "why": "Ship the upgrade of TD-5 behind a compatibility layer (non-breaking) first.",
       "transformations": [
         {
           "changeId": "B-break-v2",
