@@ -470,6 +470,18 @@ export function useCoreWorkflow(client: ForgeClient) {
           });
           setSelected([]);
           setConfirmation(null);
+          // The backend may have invalidated an APPROVED plan: re-read its recorded state instead of showing a stale badge.
+          try {
+            const report = await readPassport(plan, signal);
+            setPassport(report);
+            if (report.plan) setPlan(report.plan);
+          } catch {
+            setPlan((current) =>
+              current && current.status === "APPROVED"
+                ? { ...current, status: "INVALIDATED" }
+                : current,
+            );
+          }
         }
         setNotice(
           `${drift.fresh ? "FRESH" : "CHANGED"} at ${drift.checkedAt}. ${drift.reason} Approval and execution revalidate on the server.`,
