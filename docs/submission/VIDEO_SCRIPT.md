@@ -24,6 +24,25 @@ A small corner tag tells viewers what kind of information they see:
 - MCP scene: an MCP client connected to the app (dev site is acceptable; say so on screen).
 - Note the build version from Settings → Performance or the release record; write it in the video description.
 
+## Script v2 (5 Nov 2026): main story under 3:00 with the production-verified new modules
+
+Every new scene was observed on production 2.37.0 (toskaman5962, ADM sample project; docs/evidence/EVIDENCE_PACK.md, 5 Nov). The v1 script below stays valid for the validator and MCP scenes.
+
+| Time | Shot | Narration | Subtitle | Tag |
+|---|---|---|---|---|
+| 0:00–0:15 | Jira ADM-1 "Legacy Auth API v1" and its links; ADM-4 two links away. | "Retiring an old API looks safe in the ticket. One consumer is two links away." | A small change. A hidden dependency. | OBSERVED IN JIRA |
+| 0:15–0:35 | Mission Control → Analyze ADM-1 → Evidence Graph, select ADM-4, path + Jira source. | "ANTICIPATE reads the links you can access and shows the path. Unreadable means unknown, never safe." | Evidence, not guesses. | OBSERVED IN JIRA |
+| 0:35–0:55 | Scenario Lab: Remove now (Blocked) vs Retain temporarily (Needs review); Decision Firewall reason chain. | "It simulates decisions on the same evidence, and explains why one is blocked." | Compare decisions, not tickets. | SIMULATION |
+| 0:55–1:20 | Several changes at once: migrate ADM-1 → ADM-5, plus a breaking upgrade of ADM-5. The conflict list shows the emergent impact on ADM-2/3/4. | "Two changes that look harmless alone collide: the consumers we migrate land on an API that is about to break." | Harmless alone. Dangerous together. | SIMULATION |
+| 1:20–1:45 | Compose safer alternatives: #1 Compatibility phase for ADM-5 (0 conflicts, assumption shown), #2 As proposed (2 conflicts), Split (still 2). | "The Composer re-simulates bounded alternatives. A compatibility phase removes the collision. It says what it assumes, and splitting alone fixes nothing." | Alternatives with their assumptions. | SIMULATION |
+| 1:45–2:05 | Mission Control → Show all releases needing attention → click a release → per-change states, Jira links, "What this check cannot know". | "For a release manager: which releases need attention, which change is blocked, and what is still unknown." | Can this release ship? | OBSERVED IN JIRA |
+| 2:05–2:30 | Plan → approve → a Jira link is added → Re-check → Decision Time Machine: invalidating checkpoint, added relation. | "Approved yesterday, blocked today. The Time Machine shows exactly which Jira relation changed, and execution is refused." | Stale approvals cannot act. | OBSERVED IN JIRA (captured on production 5 Nov: EVIDENCE_PACK) |
+| 2:30–2:50 | Passport + validator refusal (from v1). | "Every decision keeps its record, and Jira enforces it at transition time." | Done is not the same as allowed. | OBSERVED IN JIRA |
+| 2:50–3:00 | Closing card. | "ANTICIPATE: test the consequences, prove the safeguards, then ship." | — | — |
+| 3:00+ | MCP client + Rovo (v1 scene 2:55–3:20), Settings. | as v1 | | |
+
+All v2 scenes were observed on production 5 Nov. To re-record from a clean state: delete link #10004 on ADM-1, generate and approve a new plan, then add the link again.
+
 ## Script
 
 | Time | Shot | Narration | Subtitle / on-screen text | Tag |

@@ -32,7 +32,15 @@ Source: main 8262f88 (after #177), deployed through the bridge `deploy-prod`. Th
 | Decision Time Machine (#174) | Compare options → Retain temporarily → generate plan → "Check evidence freshness" → Passport | Recorded checkpoints | "Evidence captured 13:14 UTC" + "Re-check 13:16 UTC", both unchanged; status pending approval; no recorded difference | hosted-2026-11-05/time-machine-ADM-prod-2.37.0.jpg |
 
 Jira writes in this session: none. Plan generation and the freshness check are app storage only; nothing was approved or executed.
-Not shown hosted: Time Machine **invalidation** (it needs a Jira link change after approval). It is covered by the DEMO 3 shape in `test/decision-history.test.ts`, and the invalidation itself was LIVE_FORGE_DEV on 4 Nov (DEMO 3).
+**Invalidation, same plan (plan-43328562…), 13:21–13:23 UTC · LIVE_FORGE_PRODUCTION**
+1. Approved 1 action (approval only, 0 Jira writes) → checkpoint "Check at approval 13:21 UTC", evidence unchanged.
+2. Added a Jira link on the dedicated sample project, as the owner account, through Jira REST: link #10004, ADM-1 ↔ ADM-6 "Blocks", 13:22:03 UTC. This is the only Jira write of the session.
+3. **Decision Radar in production**: "Link created · Blocks, occurred 14:22 CET, observed 14:22 CET", Needs review. This is the first production observation of Radar event delivery (radar-link-created-ADM-prod-2.37.0.jpg).
+4. Re-check → "CHANGED … 1 new dependency relation(s)". The plan cannot execute; the added relation is listed: `issue:ADM-1 DEPENDS_ON issue:ADM-6 [CONFIRMED]` (plan-invalidated-ADM-prod-2.37.0.jpg).
+5. Passport → Decision Time Machine: "Why this decision is blocked now", 4 checkpoints (captured, re-check, check at approval, re-check **Evidence changed** 13:22 UTC); comparing captured with the last check shows **Added: ADM-1 depends on ADM-6** (time-machine-invalidated-ADM-prod-2.37.0.jpg).
+
+UI defect found: after the re-check, the plan and Passport header badges still showed "Approved · not executed" although the backend had invalidated the plan (the Time Machine, read from the backend, was correct). Fixed in the following PR: a CHANGED re-check now re-reads the recorded plan.
+Cleanup: link #10004 is kept as demo data for the video. Remove it to reset ADM.
 Text polish found during this run (fixed in the following PR): raw enums in reasons ("NEEDS_REVIEW", "PENDING_APPROVAL") and "issue:ADM-5" in a Composer sentence.
 
 ## Hosted verification, 2 Nov 2026 (main fda93de + CORE fixes) · LIVE_FORGE
