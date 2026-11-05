@@ -1,0 +1,113 @@
+{
+  "snapshotId": "snap-td-demo2",
+  "baselineCandidateId": "cand-0",
+  "candidates": [
+    {
+      "candidateId": "cand-1",
+      "kind": "COMPATIBLE_UPGRADE",
+      "name": "Compatibility phase for TD-5",
+      "why": "Ship the upgrade of issue:TD-5 behind a compatibility layer (non-breaking) first.",
+      "transformations": [
+        {
+          "changeId": "B-break-v2",
+          "before": {
+            "op": "UPGRADE_NODE",
+            "nodeId": "issue:TD-5",
+            "breaking": true
+          },
+          "after": {
+            "op": "UPGRADE_NODE",
+            "nodeId": "issue:TD-5",
+            "breaking": false
+          }
+        }
+      ],
+      "assumptions": [
+        "A compatibility layer keeps the old contract of issue:TD-5. This is an assumption, not proof of compatibility."
+      ],
+      "phases": [["A-migrate-to-v2", "B-break-v2"]],
+      "order": ["A-migrate-to-v2", "B-break-v2"],
+      "cycles": [],
+      "verdict": "NEEDS_REVIEW",
+      "blockers": 0,
+      "unknowns": 0,
+      "impacted": 0,
+      "conflicts": 0,
+      "conflictKinds": [],
+      "requiredReviews": [],
+      "resolvedConflicts": [
+        "EMERGENT_IMPACT:A-migrate-to-v2+B-break-v2",
+        "MIGRATE_ONTO_RETIRED:A-migrate-to-v2+B-break-v2"
+      ],
+      "remainingConflicts": [],
+      "rank": 1,
+      "dominatedBy": null,
+      "resultHash": "06f85debf3225dcb"
+    },
+    {
+      "candidateId": "cand-0",
+      "kind": "AS_PROPOSED",
+      "name": "As proposed",
+      "why": "The changes exactly as planned, in the order the dependency constraints require.",
+      "transformations": [],
+      "assumptions": [],
+      "phases": [["A-migrate-to-v2", "B-break-v2"]],
+      "order": ["A-migrate-to-v2", "B-break-v2"],
+      "cycles": [],
+      "verdict": "NEEDS_REVIEW",
+      "blockers": 0,
+      "unknowns": 0,
+      "impacted": 4,
+      "conflicts": 2,
+      "conflictKinds": ["EMERGENT_IMPACT", "MIGRATE_ONTO_RETIRED"],
+      "requiredReviews": [
+        "Policy P3: Each impacted item must have a verifying test. Affected: issue:TD-2, issue:TD-3, issue:TD-6, issue:TD-4."
+      ],
+      "resolvedConflicts": [],
+      "remainingConflicts": [
+        "EMERGENT_IMPACT:A-migrate-to-v2+B-break-v2",
+        "MIGRATE_ONTO_RETIRED:A-migrate-to-v2+B-break-v2"
+      ],
+      "rank": 2,
+      "dominatedBy": null,
+      "resultHash": "890093e4b116f2f3"
+    },
+    {
+      "candidateId": "cand-2",
+      "kind": "SPLIT_PHASES",
+      "name": "Split into separate phases",
+      "why": "Ship interacting changes in separate releases, each reviewed on its own evidence.",
+      "transformations": [],
+      "assumptions": [
+        "The end state after all phases equals the combined result: splitting resolves no conflict by itself. It lets each phase be approved and re-checked on fresh evidence."
+      ],
+      "phases": [["A-migrate-to-v2"], ["B-break-v2"]],
+      "order": ["A-migrate-to-v2", "B-break-v2"],
+      "cycles": [],
+      "verdict": "NEEDS_REVIEW",
+      "blockers": 0,
+      "unknowns": 0,
+      "impacted": 4,
+      "conflicts": 2,
+      "conflictKinds": ["EMERGENT_IMPACT", "MIGRATE_ONTO_RETIRED"],
+      "requiredReviews": [
+        "Policy P3: Each impacted item must have a verifying test. Affected: issue:TD-2, issue:TD-3, issue:TD-6, issue:TD-4."
+      ],
+      "resolvedConflicts": [],
+      "remainingConflicts": [
+        "EMERGENT_IMPACT:A-migrate-to-v2+B-break-v2",
+        "MIGRATE_ONTO_RETIRED:A-migrate-to-v2+B-break-v2"
+      ],
+      "rank": 3,
+      "dominatedBy": null,
+      "resultHash": "890093e4b116f2f3"
+    }
+  ],
+  "truncated": false,
+  "limits": [
+    "Candidates are proposals: nothing is executed or approved, and Jira is unchanged.",
+    "A retained or compatible variant is an assumption to verify, never proof that consumers keep working.",
+    "Consumer migrations are only ordered, never invented: a \"migrate first\" step needs a migration already in the plan."
+  ],
+  "readOnly": true
+}

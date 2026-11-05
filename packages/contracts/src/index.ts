@@ -498,6 +498,23 @@ export function compareCheckpoints(baseline: HistEdgeT[], a: DecisionCheckpoint,
 }
 
 
+// Safe Change Composer (read-only): bounded candidate strategies evaluated by the portfolio engine. Proposals only.
+const ComposerCandidate = z.object({
+  candidateId: z.string().max(20), kind: z.enum(['AS_PROPOSED', 'RETAIN_OLD', 'COMPATIBLE_UPGRADE', 'RETAIN_ALL_COMPAT', 'SPLIT_PHASES']),
+  name: z.string().max(120), why: z.string().max(300),
+  transformations: z.array(z.object({ changeId: Id, before: ChangeOperation, after: ChangeOperation })).max(40),
+  assumptions: z.array(z.string().max(300)).max(4), phases: z.array(z.array(Id)).max(10), order: z.array(Id).nullable(), cycles: z.array(z.array(Id)),
+  verdict: SimulationResult.shape.verdict, blockers: z.number().int().min(0), unknowns: z.number().int().min(0), impacted: z.number().int().min(0),
+  conflicts: z.number().int().min(0), conflictKinds: z.array(z.string().max(40)), requiredReviews: z.array(z.string().max(200)).max(10),
+  resolvedConflicts: z.array(z.string().max(300)), remainingConflicts: z.array(z.string().max(300)),
+  rank: z.number().int().min(1), dominatedBy: z.string().max(20).nullable(), resultHash: z.string()
+});
+export const ComposeSafeChangesResult = z.object({
+  snapshotId: Id, baselineCandidateId: z.string().max(20), candidates: z.array(ComposerCandidate).min(1).max(8), truncated: z.boolean(),
+  limits: z.array(z.string().max(300)).max(6), readOnly: z.literal(true)
+});
+export type ComposeSafeChangesResult = z.infer<typeof ComposeSafeChangesResult>;
+
 export const OPERATIONS = {
   getCapabilities: { input: z.object({}), output: CapabilityAvailability },
   listProjects: { input: z.object({ cursor: z.string().nullable().default(null) }), output: z.object({ items: z.array(ProjectSummary), page: PageInfo }) },
@@ -520,6 +537,7 @@ export const OPERATIONS = {
   setValidatorPolicy: { input: z.object({ onOutage: z.enum(['ALLOW', 'BLOCK']) }), output: ValidatorPolicy },
   simulatePortfolio: { input: SimulatePortfolioRequest, output: SimulatePortfolioResult },
   getPlanAttention: { input: z.object({ planId: Id }), output: PlanAttention },
+  composeSafeChanges: { input: SimulatePortfolioRequest.omit({ proposedOrder: true }), output: ComposeSafeChangesResult },
   getDecisionHistory: { input: z.object({ planId: Id }), output: DecisionHistory },
   getReleaseSafety: { input: z.object({ projectKey: z.string().regex(/^[A-Z][A-Z0-9_]{1,19}$/), fixVersion: z.string().min(1).max(255).regex(/^[^"\\\n\r]+$/).nullable().default(null) }), output: ReleaseSafety },
   // shared decision workspace (see section above)

@@ -14,6 +14,7 @@ import {
 import { useExpired } from "../app/useExpiry";
 import { evidenceCopy, formatTime, verdictCopy } from "../app/copy";
 import { Badge, Notice, Panel, TechDetails } from "../components/ui";
+import SafeChangeComposer, { COMPOSER_CAPABILITY } from "./SafeChangeComposer";
 
 function Limited<T>({
   items,
@@ -249,11 +250,13 @@ function PortfolioEditor({
   graph,
   rootIssueKey,
   workflowBusy,
+  composer = false,
 }: {
   client: ForgeClient;
   graph: GraphSnapshot;
   rootIssueKey: string;
   workflowBusy: boolean;
+  composer?: boolean;
 }) {
   const [rows, setRows] = useState<PortfolioDraft[]>([]);
   const [busy, setBusy] = useState(false);
@@ -539,6 +542,18 @@ function PortfolioEditor({
       <section aria-busy={busy} aria-label="Portfolio simulation output">
         {result && <PortfolioResultView result={result} graph={graph} />}
       </section>
+      {result && composer && changes && (
+        <SafeChangeComposer
+          client={client}
+          request={{
+            projectId: graph.projectId,
+            rootIssueKey,
+            source: graph.mode === "DEMO_FIXTURE" ? "DEMO_FIXTURE" : "JIRA",
+            snapshotId: graph.snapshotId,
+            changes,
+          }}
+        />
+      )}
     </Panel>
   );
 }
@@ -565,6 +580,7 @@ export default function PortfolioPanel({
       graph={w.snapshot}
       rootIssueKey={w.rootIssueKey}
       workflowBusy={!!w.busy}
+      composer={w.capabilities.operations.includes(COMPOSER_CAPABILITY)}
     />
   );
 }
