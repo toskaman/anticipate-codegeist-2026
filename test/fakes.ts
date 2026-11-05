@@ -33,23 +33,25 @@ export function memoryStore() {
 type Link = { id: string; type: string; outward: string; inward: string; from: string; to: string };
 
 /** Minimal JQL subset the app emits. Anything else is rejected like Jira would (HTTP 400 → UPSTREAM_UNAVAILABLE). */
-function parseJql(jql: string): { project: string | null; labels: string[] | null } {
+function parseJql(jql: string): { project: string | null; labels: string[] | null; fixVersion: string | null } {
   const reject = (why: string): never => { throw new AppError('UPSTREAM_UNAVAILABLE', `Jira issue search rejected (HTTP 400): invalid JQL (${why}).`, false); };
   if (typeof jql !== 'string' || !jql.trim()) reject('empty query');
   const where = jql.replace(/(^|\s+)ORDER\s+BY\s+[A-Za-z_][\w\s,]*(\s+(ASC|DESC))?\s*$/i, '').trim();
-  if (!where) return { project: null, labels: null };
+  if (!where) return { project: null, labels: null, fixVersion: null };
   let project: string | null = null;
   let labels: string[] | null = null;
+  let fixVersion: string | null = null;
   for (const clause of where.split(/\s+AND\s+/i)) {
     const c = clause.trim();
     let m: RegExpExecArray | null;
     if ((m = /^\s*project\s*=\s*"?([A-Za-z0-9_]+)"?\s*$/i.exec(c))) project = m[1]!;
     else if ((m = /^\s*labels\s*=\s*"([^"]+)"\s*$/i.exec(c))) labels = [m[1]!];
     else if (/^\s*labels\s+in\s*\(\s*"[^"]+"(\s*,\s*"[^"]+")*\s*\)\s*$/i.test(c)) labels = [...c.matchAll(/"([^"]+)"/g)].map((x) => x[1]!);
+    else if ((m = /^\s*fixVersion\s*=\s*"([^"]+)"\s*$/i.exec(c))) fixVersion = m[1]!;
     else if (/^\s*issueLinkType\s+is\s+(not\s+)?empty\s*$/i.test(c)) { /* accepted; link presence is not modelled as a filter */ }
     else reject(`unsupported clause ${JSON.stringify(c.slice(0, 80))}`);
   }
-  return { project, labels };
+  return { project, labels, fixVersion };
 }
 
 function parsePageToken(token: string | null | undefined): number {
@@ -87,7 +89,8 @@ export class FakeJira implements JiraPort {
     const offset = parsePageToken(nextPageToken);
     const items = [...this.issues.values()]
       .filter((i) => (!where.project || i.projectKey.toUpperCase() === where.project.toUpperCase() || i.projectId === where.project)
-        && (!where.labels || i.labels.some((l) => where.labels!.includes(l))))
+        && (!where.labels || i.labels.some((l) => where.labels!.includes(l)))
+        && (!where.fixVersion || (i.versions ?? []).some((v) => v.name === where.fixVersion)))
       .map((i) => this.view(i));
     if (offset > items.length) throw new AppError('UPSTREAM_UNAVAILABLE', 'Jira issue search rejected (HTTP 400): unknown nextPageToken.', false);
     const page = items.slice(offset, offset + max);
