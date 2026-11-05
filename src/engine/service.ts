@@ -1,6 +1,8 @@
 import { slipFromJira } from './slip-service';
 import { aggregateRelease } from './release';
 import { buildHistory } from './history';
+import { composeSafeChanges } from '../../packages/simulation-core/src/composer';
+import type { ComposeSafeChangesResult } from '../../packages/contracts/src/index';
 import { DECISION_HISTORY_LIMITS, type DecisionCheckpoint, type DecisionHistory } from '../../packages/contracts/src/index';
 import { RELEASE_SAFETY_LIMITS, type ReleaseSafety } from '../../packages/contracts/src/index';
 /**
@@ -181,7 +183,7 @@ export function createService(d: Deps) {
     throw new AppError('EVIDENCE_CHANGED', drift.reason, false, { addedEdges: drift.addedEdges, removedEdges: drift.removedEdges, becameUnknown: drift.becameUnknown });
   }
 
-  return {
+  const svc = {
     /** Validator outage policy. Default ALLOW (never lock a workflow because ANTICIPATE is down). Only Jira site admins can change it. */
     /** Read-only what-if: dates and releases that move if an issue slips (see slip-service). */
     async simulateSlip(ctx: Ctx, input: { issueKey: string; days: number }) { return slipFromJira(d.jira, ctx, input); },
@@ -318,7 +320,8 @@ export function createService(d: Deps) {
      * Every referenced node must be a node of that snapshot that the user can read: nothing is invented, and unreadable
      * (forbidden / missing) issues are rejected with the same message as absent ones so their existence is not confirmed.
      */
-    async simulatePortfolio(ctx: Ctx, input: SimulatePortfolioRequest): Promise<SimulatePortfolioResult> {
+    /** Snapshot + node validation shared by simulatePortfolio and composeSafeChanges (same rules, one implementation). */
+    async portfolioSnapshot(ctx: Ctx, input: Omit<SimulatePortfolioRequest, 'proposedOrder'>): Promise<{ snapshot: GraphSnapshot; rootIssueKey: string; reused: boolean }> {
       if (!ctx.accountId && input.source !== 'DEMO_FIXTURE') fail('PERMISSION_DENIED', 'An authenticated Atlassian user is required.');
       if (input.changes.length > PORTFOLIO_LIMITS.maxChanges) fail('VALIDATION', `At most ${PORTFOLIO_LIMITS.maxChanges} changes are allowed.`);
       let snapshot: GraphSnapshot; let rootIssueKey: string; let reused = false;
@@ -328,7 +331,7 @@ export function createService(d: Deps) {
         if (s.rootIssueKey !== input.rootIssueKey) fail('VALIDATION', `Snapshot ${input.snapshotId} was not built for ${input.rootIssueKey}.`);
         snapshot = s.snapshot; rootIssueKey = s.rootIssueKey; reused = true;
       } else {
-        snapshot = await this.getGraphSnapshot(ctx, { projectId: input.projectId, rootIssueKey: input.rootIssueKey, source: input.source, maxDepth: input.snapshotMaxDepth });
+        snapshot = await svc.getGraphSnapshot(ctx, { projectId: input.projectId, rootIssueKey: input.rootIssueKey, source: input.source, maxDepth: input.snapshotMaxDepth });
         rootIssueKey = input.source === 'DEMO_FIXTURE' ? 'PAY-412' : input.rootIssueKey;
       }
       const readable = new Set(snapshot.nodes.filter((n) => !(n.status === 'UNKNOWN' && (n.attributes['access'] === 'forbidden' || n.attributes['access'] === 'not_found'))).map((n) => n.id));
@@ -338,6 +341,22 @@ export function createService(d: Deps) {
         fail('VALIDATION', `Not in your evidence snapshot of ${rootIssueKey} (or not visible to you): ${missing.slice(0, 10).join(', ')}${missing.length > 10 ? ` (+${missing.length - 10} more)` : ''}.`,
           { unknownNodeIds: missing.slice(0, 50), snapshotId: snapshot.snapshotId });
       }
+      return { snapshot, rootIssueKey, reused };
+    },
+
+    /** Safe Change Composer: read-only, bounded candidate strategies on the same snapshot rules and portfolio engine. Proposals only. */
+    async composeSafeChanges(ctx: Ctx, input: Omit<SimulatePortfolioRequest, 'proposedOrder'>): Promise<ComposeSafeChangesResult> {
+      const { snapshot } = await svc.portfolioSnapshot(ctx, input);
+      try {
+        return { ...composeSafeChanges(snapshot, input.changes, { maxDepth: input.maxDepth, rules: DEFAULT_POLICIES }), readOnly: true };
+      } catch (e) {
+        if (e instanceof PortfolioError) fail(e.code, e.issues.slice(0, 5).join('; ').slice(0, 900), { issues: e.issues.slice(0, 20) });
+        throw e;
+      }
+    },
+
+    async simulatePortfolio(ctx: Ctx, input: SimulatePortfolioRequest): Promise<SimulatePortfolioResult> {
+      const { snapshot, rootIssueKey, reused } = await svc.portfolioSnapshot(ctx, input);
       let result;
       try {
         result = runPortfolio(snapshot, input.changes, { maxDepth: input.maxDepth, rules: DEFAULT_POLICIES, proposedOrder: input.proposedOrder });
@@ -547,6 +566,7 @@ export function createService(d: Deps) {
       };
     }
   };
+  return svc;
 
   async function executeOne(rec: PlanRec, a: ProposedAction, perms: Record<string, boolean>, idem: string): Promise<ExecutionRecord> {
     const key = K.exec(rec.plan.planId, a.actionId);
@@ -637,7 +657,7 @@ export function normalizeDate(s: string): string {
 }
 
 export const OPERATION_NAMES = ['getCapabilities', 'getPolicies', 'listProjects', 'getChangeCandidates', 'getGraphSnapshot', 'getEvidenceGraph', 'simulateChange',
-  'compareScenarios', 'generatePreventionPlan', 'approvePlan', 'executeApprovedPlan', 'getExecutionStatus', 'getPreventionPassport', 'checkPlanFreshness', 'previewSampleProject', 'createSampleProject', 'getValidatorPolicy', 'setValidatorPolicy', 'simulateSlip', 'simulatePortfolio', 'getPlanAttention', 'getReleaseSafety', 'getDecisionHistory',
+  'compareScenarios', 'generatePreventionPlan', 'approvePlan', 'executeApprovedPlan', 'getExecutionStatus', 'getPreventionPassport', 'checkPlanFreshness', 'previewSampleProject', 'createSampleProject', 'getValidatorPolicy', 'setValidatorPolicy', 'simulateSlip', 'simulatePortfolio', 'getPlanAttention', 'getReleaseSafety', 'getDecisionHistory', 'composeSafeChanges',
   // capability signals (not resolvers): scenario operations accepted by compareScenarios / generatePreventionPlan
   'scenario:UPGRADE_NODE', 'validator:outage-policy'];
 export { issueNodeId };
