@@ -1,5 +1,6 @@
 import { slipFromJira } from './slip-service';
-import { aggregateRelease } from './release';
+import { aggregateRelease, overviewReleases } from './release';
+import type { ReleaseOverview } from '../../packages/contracts/src/index';
 import { buildHistory } from './history';
 import { composeSafeChanges } from '../../packages/simulation-core/src/composer';
 import type { ComposeSafeChangesResult } from '../../packages/contracts/src/index';
@@ -373,7 +374,8 @@ export function createService(d: Deps) {
      * Release Safety Control Plane (read-only, no Jira or storage writes): change issues of a project/release as the
      * calling user, joined with the caller's own latest decision per issue. See src/engine/release.ts for the rules.
      */
-    async getReleaseSafety(ctx: Ctx, input: { projectKey: string; fixVersion: string | null }): Promise<ReleaseSafety> {
+    /** Shared read of a release scope: permission check, bounded paged search, the caller's own decisions. */
+    async readReleaseScope(ctx: Ctx, input: { projectKey: string; fixVersion: string | null }) {
       if (!ctx.accountId) fail('PERMISSION_DENIED', 'An authenticated Atlassian user is required.');
       if (!/^[A-Z][A-Z0-9_]{1,19}$/.test(input.projectKey)) fail('VALIDATION', 'projectKey must look like ABC.');
       if (input.fixVersion !== null && !/^[^"\\\n\r]{1,255}$/.test(input.fixVersion)) fail('VALIDATION', 'fixVersion contains unsupported characters.');
@@ -394,8 +396,20 @@ export function createService(d: Deps) {
         // Plans are private: only the caller's own decision is used; anyone else's counts as "none visible".
         chunk.forEach((x, j) => { const r = recs[j]; decisions[x.key] = r && r.owner === ctx.accountId ? r : undefined; });
       }
-      return aggregateRelease({ projectKey: input.projectKey, fixVersion: input.fixVersion, jql, evaluatedAt: iso(), issues: bounded, truncated,
-        siteUrl: d.jira.siteUrl(), decisions });
+      return { jql, issues: bounded, truncated, decisions };
+    },
+
+    async getReleaseSafety(ctx: Ctx, input: { projectKey: string; fixVersion: string | null }): Promise<ReleaseSafety> {
+      const r = await svc.readReleaseScope(ctx, input);
+      return aggregateRelease({ projectKey: input.projectKey, fixVersion: input.fixVersion, jql: r.jql, evaluatedAt: iso(), issues: r.issues,
+        truncated: r.truncated, siteUrl: d.jira.siteUrl(), decisions: r.decisions });
+    },
+
+    /** Release overview: every fixVersion of the project's change issues, worst first. Same rules as getReleaseSafety. */
+    async listReleaseSafety(ctx: Ctx, input: { projectKey: string }): Promise<ReleaseOverview> {
+      const r = await svc.readReleaseScope(ctx, { projectKey: input.projectKey, fixVersion: null });
+      return overviewReleases({ projectKey: input.projectKey, jql: r.jql, evaluatedAt: iso(), issues: r.issues, truncated: r.truncated,
+        siteUrl: d.jira.siteUrl(), decisions: r.decisions });
     },
 
     async simulateChange(ctx: Ctx, req: SimulationRequest) {
@@ -657,7 +671,7 @@ export function normalizeDate(s: string): string {
 }
 
 export const OPERATION_NAMES = ['getCapabilities', 'getPolicies', 'listProjects', 'getChangeCandidates', 'getGraphSnapshot', 'getEvidenceGraph', 'simulateChange',
-  'compareScenarios', 'generatePreventionPlan', 'approvePlan', 'executeApprovedPlan', 'getExecutionStatus', 'getPreventionPassport', 'checkPlanFreshness', 'previewSampleProject', 'createSampleProject', 'getValidatorPolicy', 'setValidatorPolicy', 'simulateSlip', 'simulatePortfolio', 'getPlanAttention', 'getReleaseSafety', 'getDecisionHistory', 'composeSafeChanges',
+  'compareScenarios', 'generatePreventionPlan', 'approvePlan', 'executeApprovedPlan', 'getExecutionStatus', 'getPreventionPassport', 'checkPlanFreshness', 'previewSampleProject', 'createSampleProject', 'getValidatorPolicy', 'setValidatorPolicy', 'simulateSlip', 'simulatePortfolio', 'getPlanAttention', 'getReleaseSafety', 'listReleaseSafety', 'getDecisionHistory', 'composeSafeChanges',
   // capability signals (not resolvers): scenario operations accepted by compareScenarios / generatePreventionPlan
   'scenario:UPGRADE_NODE', 'validator:outage-policy'];
 export { issueNodeId };

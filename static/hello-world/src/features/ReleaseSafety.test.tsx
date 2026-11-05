@@ -190,3 +190,68 @@ it("rejects quote-bearing release names client-side and hides when unsupported",
   );
   expect(container.innerHTML).toBe("");
 });
+
+it("release overview lists releases worst first and opens one with a single click", async () => {
+  const calls: unknown[] = [];
+  const overview = {
+    projectKey: "REL",
+    evaluatedAt: "2026-11-05T12:00:00.000Z",
+    jql: "q",
+    releases: [
+      {
+        fixVersion: "Winter",
+        releaseDate: "2026-12-08",
+        verdict: "NEEDS_REVIEW",
+        counts: result.counts,
+        changes: 2,
+        interactions: 1,
+        topReasons: [
+          "1 interaction(s) between changes need a combined review.",
+        ],
+      },
+      {
+        fixVersion: null,
+        releaseDate: null,
+        verdict: "VERIFIED_FOR_RECORDED_SCOPE",
+        counts: result.counts,
+        changes: 1,
+        interactions: 0,
+        topReasons: [],
+      },
+    ],
+    truncated: false,
+    releasesTruncated: false,
+    unknowns: ["Release membership comes from fixVersions."],
+    readOnly: true,
+  };
+  const client = new ForgeClient(async (op, input) => {
+    calls.push([op, input]);
+    return response(op === "listReleaseSafety" ? overview : result);
+  }, 5000);
+  render(
+    <ReleaseSafety
+      client={client}
+      supported
+      overviewSupported
+      projectKey="REL"
+    />,
+  );
+  await act(async () => {
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Show all releases needing attention",
+      }),
+    );
+  });
+  expect(
+    screen.getByRole("button", { name: "No release (unscheduled)" }),
+  ).toBeTruthy();
+  await act(async () => {
+    fireEvent.click(screen.getByRole("button", { name: "Winter" }));
+  });
+  expect(calls).toEqual([
+    ["listReleaseSafety", { projectKey: "REL" }],
+    ["getReleaseSafety", { projectKey: "REL", fixVersion: "Winter" }],
+  ]);
+  expect(screen.getByText(/both touch SVC-1/)).toBeTruthy();
+});

@@ -29,5 +29,8 @@ These are structural signals: two release changes that are linked to each other 
 - The decision mirror is last-writer-wins per issue. If someone else decided after you, your decision is not found and the change shows as NEEDS_REVIEW (fail-safe direction).
 - Dependency evidence is limited to the change issues' direct links; the full graph is analysed per change in Scenario Lab.
 
+## Release overview
+`listReleaseSafety({ projectKey })` reads the same bounded scope once and groups it by fixVersion (plus "unscheduled"). It runs the same aggregation per release and sorts worst verdict first, then earliest release date. The UI button "Show all releases needing attention" lists them; one click opens the release. Tests check that the overview verdict equals `getReleaseSafety` for the same release.
+
 ## Next
 Hosted dev proof on the ADM project (DEMO 2 shape), then one-click Portfolio simulation from an interaction.

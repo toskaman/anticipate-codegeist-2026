@@ -1,4 +1,7 @@
-import ReleaseSafety, { RELEASE_CAPABILITY } from "./ReleaseSafety";
+import ReleaseSafety, {
+  OVERVIEW_CAPABILITY,
+  RELEASE_CAPABILITY,
+} from "./ReleaseSafety";
 import React, { useEffect, useState } from "react";
 import SampleProjectSetup from "../SampleProjectSetup";
 import type { ProjectSummary } from "@anticipate/contracts";
@@ -480,6 +483,9 @@ export default function MissionControl({
           w.capabilities?.operations.includes(RELEASE_CAPABILITY) ?? false
         }
         projectKey={project?.key ?? null}
+        overviewSupported={
+          w.capabilities?.operations.includes(OVERVIEW_CAPABILITY) ?? false
+        }
       />
     </>
   );
