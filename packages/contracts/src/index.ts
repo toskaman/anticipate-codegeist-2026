@@ -423,6 +423,36 @@ export const PlanAttention = z.object({
 });
 export type PlanAttention = z.infer<typeof PlanAttention>;
 
+// Release Safety Control Plane (read-only): release-level decision states over the caller's own recorded decisions.
+export const RELEASE_SAFETY_LIMITS = { maxIssues: 100, pageSize: 50, maxItems: 100, maxInteractions: 50 } as const;
+export const ReleaseVerdict = z.enum(['BLOCKED', 'EVIDENCE_INCOMPLETE', 'NEEDS_REVIEW', 'EXECUTION_PARTIAL', 'APPROVED_NOT_EXECUTED', 'VERIFIED_FOR_RECORDED_SCOPE']);
+export type ReleaseVerdict = z.infer<typeof ReleaseVerdict>;
+export const ReleaseSafetyItem = z.object({
+  issue: z.object({ key: z.string().max(40), summary: z.string().max(1000), status: z.string().max(100), url: z.string().url().nullable() }),
+  state: ReleaseVerdict,
+  reasons: z.array(z.string().max(300)).max(6),
+  decision: z.object({ planId: Id, status: z.string().max(40), verdict: z.string().max(40), currentVerdict: z.string().max(40).nullable(),
+    recordedAt: IsoDate, allActionsVerified: z.boolean() }).nullable(),
+  linkedKeys: z.array(z.string().max(40)).max(50)
+});
+export const ReleaseInteraction = z.object({
+  kind: z.enum(['DIRECT_LINK', 'SHARED_DEPENDENCY']), changes: z.tuple([z.string().max(40), z.string().max(40)]), via: z.string().max(40).nullable(),
+  note: z.string().max(300)
+});
+export const ReleaseSafety = z.object({
+  scope: z.object({ projectKey: z.string().max(20), fixVersion: z.string().max(255).nullable(), jql: z.string().max(500), evaluatedAt: IsoDate }),
+  verdict: ReleaseVerdict,
+  verdictReasons: z.array(z.string().max(300)).max(8),
+  counts: z.record(ReleaseVerdict, z.number().int().min(0)),
+  items: z.array(ReleaseSafetyItem).max(RELEASE_SAFETY_LIMITS.maxItems),
+  interactions: z.array(ReleaseInteraction).max(RELEASE_SAFETY_LIMITS.maxInteractions),
+  coverage: z.object({ issuesRead: z.number().int().min(0), truncated: z.boolean(), interactionsTruncated: z.boolean(),
+    decisionsVisible: z.number().int().min(0), unknowns: z.array(z.string().max(300)).max(8) }),
+  readOnly: z.literal(true)
+});
+export type ReleaseSafety = z.infer<typeof ReleaseSafety>;
+export type ReleaseSafetyItem = z.infer<typeof ReleaseSafetyItem>;
+
 export const OPERATIONS = {
   getCapabilities: { input: z.object({}), output: CapabilityAvailability },
   listProjects: { input: z.object({ cursor: z.string().nullable().default(null) }), output: z.object({ items: z.array(ProjectSummary), page: PageInfo }) },
@@ -445,6 +475,7 @@ export const OPERATIONS = {
   setValidatorPolicy: { input: z.object({ onOutage: z.enum(['ALLOW', 'BLOCK']) }), output: ValidatorPolicy },
   simulatePortfolio: { input: SimulatePortfolioRequest, output: SimulatePortfolioResult },
   getPlanAttention: { input: z.object({ planId: Id }), output: PlanAttention },
+  getReleaseSafety: { input: z.object({ projectKey: z.string().regex(/^[A-Z][A-Z0-9_]{1,19}$/), fixVersion: z.string().min(1).max(255).regex(/^[^"\\\n\r]+$/).nullable().default(null) }), output: ReleaseSafety },
   // shared decision workspace (see section above)
   ...SHARED_DECISION_OPERATIONS
 } as const;

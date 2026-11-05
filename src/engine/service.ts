@@ -1,4 +1,6 @@
 import { slipFromJira } from './slip-service';
+import { aggregateRelease } from './release';
+import { RELEASE_SAFETY_LIMITS, type ReleaseSafety } from '../../packages/contracts/src/index';
 /**
  * ANTICIPATE backend use-cases. Pure orchestration over ports (Jira, Store, clock, ids).
  * Every mutation of Jira requires: stored plan, matching approval (plan hash), fresh snapshot, live permission check,
@@ -309,6 +311,35 @@ export function createService(d: Deps) {
         ...(snapshot.coverage ? { coverage: snapshot.coverage } : {}) } };
     },
 
+    /**
+     * Release Safety Control Plane (read-only, no Jira or storage writes): change issues of a project/release as the
+     * calling user, joined with the caller's own latest decision per issue. See src/engine/release.ts for the rules.
+     */
+    async getReleaseSafety(ctx: Ctx, input: { projectKey: string; fixVersion: string | null }): Promise<ReleaseSafety> {
+      if (!ctx.accountId) fail('PERMISSION_DENIED', 'An authenticated Atlassian user is required.');
+      if (!/^[A-Z][A-Z0-9_]{1,19}$/.test(input.projectKey)) fail('VALIDATION', 'projectKey must look like ABC.');
+      if (input.fixVersion !== null && !/^[^"\\\n\r]{1,255}$/.test(input.fixVersion)) fail('VALIDATION', 'fixVersion contains unsupported characters.');
+      const perms = await d.jira.myPermissions(input.projectKey, ['BROWSE_PROJECTS']);
+      if (!perms['BROWSE_PROJECTS']) fail('PERMISSION_DENIED', `You cannot browse project ${input.projectKey}.`);
+      const jql = `project = ${input.projectKey} AND labels = "${CHANGE_LABEL}"${input.fixVersion ? ` AND fixVersion = "${input.fixVersion}"` : ''} ORDER BY key ASC`;
+      const issues: JiraIssue[] = []; let token: string | null = null; let truncated = false;
+      do {
+        const page = await d.jira.searchIssues(jql, token, RELEASE_SAFETY_LIMITS.pageSize);
+        issues.push(...page.items); token = page.nextPageToken;
+        if (issues.length >= RELEASE_SAFETY_LIMITS.maxIssues) { truncated = token !== null || issues.length > RELEASE_SAFETY_LIMITS.maxIssues; break; }
+      } while (token);
+      const bounded = issues.slice(0, RELEASE_SAFETY_LIMITS.maxIssues);
+      const decisions: Record<string, DecisionRecord | undefined> = {};
+      for (let i = 0; i < bounded.length; i += 10) {
+        const chunk = bounded.slice(i, i + 10);
+        const recs = await Promise.all(chunk.map((x) => d.store.get<DecisionRecord>(`decision:${x.key}`)));
+        // Plans are private: only the caller's own decision is used; anyone else's counts as "none visible".
+        chunk.forEach((x, j) => { const r = recs[j]; decisions[x.key] = r && r.owner === ctx.accountId ? r : undefined; });
+      }
+      return aggregateRelease({ projectKey: input.projectKey, fixVersion: input.fixVersion, jql, evaluatedAt: iso(), issues: bounded, truncated,
+        siteUrl: d.jira.siteUrl(), decisions });
+    },
+
     async simulateChange(ctx: Ctx, req: SimulationRequest) {
       const s = await loadSnap(ctx, req.snapshotId);
       if (isExpired(s.snapshot)) fail('SNAPSHOT_EXPIRED', 'Snapshot expired; rebuild it from Jira.');
@@ -567,7 +598,7 @@ export function normalizeDate(s: string): string {
 }
 
 export const OPERATION_NAMES = ['getCapabilities', 'getPolicies', 'listProjects', 'getChangeCandidates', 'getGraphSnapshot', 'getEvidenceGraph', 'simulateChange',
-  'compareScenarios', 'generatePreventionPlan', 'approvePlan', 'executeApprovedPlan', 'getExecutionStatus', 'getPreventionPassport', 'checkPlanFreshness', 'previewSampleProject', 'createSampleProject', 'getValidatorPolicy', 'setValidatorPolicy', 'simulateSlip', 'simulatePortfolio', 'getPlanAttention',
+  'compareScenarios', 'generatePreventionPlan', 'approvePlan', 'executeApprovedPlan', 'getExecutionStatus', 'getPreventionPassport', 'checkPlanFreshness', 'previewSampleProject', 'createSampleProject', 'getValidatorPolicy', 'setValidatorPolicy', 'simulateSlip', 'simulatePortfolio', 'getPlanAttention', 'getReleaseSafety',
   // capability signals (not resolvers): scenario operations accepted by compareScenarios / generatePreventionPlan
   'scenario:UPGRADE_NODE', 'validator:outage-policy'];
 export { issueNodeId };
