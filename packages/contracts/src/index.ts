@@ -453,6 +453,51 @@ export const ReleaseSafety = z.object({
 export type ReleaseSafety = z.infer<typeof ReleaseSafety>;
 export type ReleaseSafetyItem = z.infer<typeof ReleaseSafetyItem>;
 
+// Decision Time Machine (read-only): how a decision's evidence evolved. Only retained records; nothing reconstructed from today's Jira.
+export const DECISION_HISTORY_LIMITS = { maxCheckpoints: 20, maxEdgesPerCheckpoint: 100, maxBaselineEdges: 300, maxEvents: 60 } as const;
+const HistEdge = z.object({ from: Id, to: Id, kind: EdgeKind, status: EvidenceStatus });
+export const DecisionCheckpoint = z.object({
+  id: z.string().max(40), at: IsoDate, kind: z.enum(['BASELINE', 'CHECK']), stage: z.enum(['snapshot', 'freshness', 'approval', 'execution']),
+  fresh: z.boolean(), added: z.array(HistEdge).max(100), removed: z.array(HistEdge).max(100), becameUnknown: z.array(Id).max(100),
+  truncated: z.boolean(), reason: z.string().max(1000)
+});
+export const DecisionHistory = z.object({
+  planId: Id, rootIssueKey: z.string().max(40), scenarioId: Id, status: PreventionPlan.shape.status,
+  canAuthorizeExecution: z.boolean(), statusReason: z.string().max(400),
+  baseline: z.object({ snapshotId: Id, capturedAt: IsoDate, evidenceState: z.enum(['LIVE', 'EXPIRED_SNAPSHOT', 'ARCHIVED']),
+    edges: z.array(HistEdge).max(300), edgesTruncated: z.boolean(), scope: z.literal('CAUSAL_EDGES') }),
+  checkpoints: z.array(DecisionCheckpoint).max(21), droppedCheckpoints: z.number().int().min(0),
+  events: z.array(z.object({ at: IsoDate, event: z.string().max(200), source: z.enum(['PLAN_TIMELINE', 'APPROVAL', 'RADAR']) })).max(60),
+  invalidation: z.object({ checkpointId: z.string().max(40), at: IsoDate, reason: z.string().max(1000) }).nullable(),
+  limits: z.array(z.string().max(300)).max(6), readOnly: z.literal(true)
+});
+export type DecisionHistory = z.infer<typeof DecisionHistory>;
+export type DecisionCheckpoint = z.infer<typeof DecisionCheckpoint>;
+type HistEdgeT = DecisionCheckpoint['added'][number];
+const edgeId = (e: HistEdgeT) => `${e.from}|${e.kind}|${e.to}`;
+const byEdge = (a: HistEdgeT, b: HistEdgeT) => edgeId(a).localeCompare(edgeId(b));
+
+/** Edge set recorded at a checkpoint: baseline plus that check's delta (every check is a diff against the baseline). */
+export function edgesAt(baseline: HistEdgeT[], cp: DecisionCheckpoint): HistEdgeT[] {
+  const m = new Map(baseline.map((e) => [edgeId(e), e]));
+  for (const e of cp.removed) m.delete(edgeId(e));
+  for (const e of cp.added) m.set(edgeId(e), e);
+  return [...m.values()].sort(byEdge);
+}
+
+/** Deterministic comparison of two recorded checkpoints. */
+export function compareCheckpoints(baseline: HistEdgeT[], a: DecisionCheckpoint, b: DecisionCheckpoint) {
+  const A = new Map(edgesAt(baseline, a).map((e) => [edgeId(e), e]));
+  const B = new Map(edgesAt(baseline, b).map((e) => [edgeId(e), e]));
+  const added = [...B.entries()].filter(([k]) => !A.has(k)).map(([, e]) => e).sort(byEdge);
+  const removed = [...A.entries()].filter(([k]) => !B.has(k)).map(([, e]) => e).sort(byEdge);
+  const changedStatus = [...B.entries()].filter(([k, e]) => A.has(k) && A.get(k)!.status !== e.status)
+    .map(([k, e]) => ({ edge: e, before: A.get(k)!.status, after: e.status })).sort((x, y) => byEdge(x.edge, y.edge));
+  const unknownNew = b.becameUnknown.filter((n) => !a.becameUnknown.includes(n)).sort();
+  return { added, removed, changedStatus, unknownNew, partial: a.truncated || b.truncated };
+}
+
+
 export const OPERATIONS = {
   getCapabilities: { input: z.object({}), output: CapabilityAvailability },
   listProjects: { input: z.object({ cursor: z.string().nullable().default(null) }), output: z.object({ items: z.array(ProjectSummary), page: PageInfo }) },
@@ -475,6 +520,7 @@ export const OPERATIONS = {
   setValidatorPolicy: { input: z.object({ onOutage: z.enum(['ALLOW', 'BLOCK']) }), output: ValidatorPolicy },
   simulatePortfolio: { input: SimulatePortfolioRequest, output: SimulatePortfolioResult },
   getPlanAttention: { input: z.object({ planId: Id }), output: PlanAttention },
+  getDecisionHistory: { input: z.object({ planId: Id }), output: DecisionHistory },
   getReleaseSafety: { input: z.object({ projectKey: z.string().regex(/^[A-Z][A-Z0-9_]{1,19}$/), fixVersion: z.string().min(1).max(255).regex(/^[^"\\\n\r]+$/).nullable().default(null) }), output: ReleaseSafety },
   // shared decision workspace (see section above)
   ...SHARED_DECISION_OPERATIONS

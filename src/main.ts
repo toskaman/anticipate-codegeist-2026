@@ -29,7 +29,7 @@ type Svc = ReturnType<typeof createService>;
 const throttle = createStoreThrottle(forgeStore, DEFAULT_THROTTLE);
 
 const ops: OperationName[] = ['getCapabilities', 'getPolicies', 'listProjects', 'getChangeCandidates', 'getGraphSnapshot', 'getEvidenceGraph', 'simulateChange',
-  'compareScenarios', 'generatePreventionPlan', 'approvePlan', 'executeApprovedPlan', 'getExecutionStatus', 'getPreventionPassport', 'checkPlanFreshness', 'previewSampleProject', 'createSampleProject', 'getValidatorPolicy', 'setValidatorPolicy', 'simulateSlip', 'simulatePortfolio', 'getPlanAttention', 'getReleaseSafety'];
+  'compareScenarios', 'generatePreventionPlan', 'approvePlan', 'executeApprovedPlan', 'getExecutionStatus', 'getPreventionPassport', 'checkPlanFreshness', 'previewSampleProject', 'createSampleProject', 'getValidatorPolicy', 'setValidatorPolicy', 'simulateSlip', 'simulatePortfolio', 'getPlanAttention', 'getReleaseSafety', 'getDecisionHistory'];
 
 for (const op of ops) {
   resolver.define(op, makeHandler(op, () => 'LIVE', newId, now, (ctx, input, req) => {
