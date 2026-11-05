@@ -27,7 +27,7 @@ ANTICIPATE turns a proposed change in Jira into an evidence-backed decision.
 - **Refuse stale decisions.** If the dependencies change after approval, the plan is marked Invalidated, execution is refused with zero writes, and the app shows what changed.
 - **Guard the Jira transition.** An optional workflow validator stops issues labelled `anticipate-change` until their decision is completed and the live Jira links agree. A completed "migrate first" plan does not open the gate while consumers still depend on the change in Jira; once they have really migrated, it does. Administrators choose whether transitions pass or are blocked if ANTICIPATE is unavailable.
 - **Keep the record.** The Prevention Passport opens with a short answer (option chosen, verified actions, transition status, open questions), then the evidence, alternatives, approvals, verified outcomes and timeline. It exports to JSON and prints as an A4 report. It is an audit-style record, not a legal or cryptographic certificate.
-- **Ask from Rovo or any MCP client.** Six MCP tools that never write to Jira and the "ANTICIPATE Decision Reviewer" Rovo agent answer "what happens if we retire, upgrade or delay X?" with the same engine. They cannot approve or execute.
+- **Ask from Rovo or any MCP client.** Seven MCP tools that never write to Jira and the "ANTICIPATE Decision Reviewer" Rovo agent answer "what happens if we retire, upgrade or delay X?" with the same engine. They cannot approve or execute.
 - **Try it in a minute.** A guided demo previews, then creates, six labelled sample issues and four links in a project you choose. Opening or previewing never writes to Jira.
 
 Who it helps: engineering managers reviewing risky changes, platform teams retiring or upgrading shared services, release governance, and API lifecycle owners.
@@ -79,7 +79,7 @@ The valuable part is not the graph, it is the decision: comparing options on the
 
 ## Bonus write-up: Best app with Atlassian MCP
 
-ANTICIPATE exposes six tools through `rovo:mcp` that never write to Jira: get evidence graph, simulate retirement, simulate upgrade, simulate slip, get Prevention Passport and check plan freshness. An engineer can ask an MCP client "what breaks if we retire this API?" and get the same deterministic answer as the app, grounded in the Jira links they can read.
+ANTICIPATE exposes seven tools through `rovo:mcp` that never write to Jira: get evidence graph, simulate retirement, simulate upgrade, simulate slip, simulate portfolio, get Prevention Passport and check plan freshness. An engineer can ask an MCP client "what breaks if we retire this API?" and get the same deterministic answer as the app, grounded in the Jira links they can read.
 
 - Tools run as the invoking user, so Jira permissions apply.
 - Outputs are deterministic and cite Jira records; Jira text is treated as data, not instructions.

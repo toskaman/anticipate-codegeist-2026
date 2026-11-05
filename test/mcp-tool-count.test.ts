@@ -27,4 +27,16 @@ describe('MCP tool count in jury-facing copy', () => {
       for (const s of stated) expect(s).toBe(n);
     });
   }
+  // Free-form copy ("Six tools that never write", "seven MCP tools"): every count stated near
+  // MCP/rovo:mcp in current-facing docs must equal the manifest. Gallery captions describe
+  // already-rendered images and the checklist is a change log, so they are excluded.
+  for (const file of ['README.md', 'docs/submission/DEVPOST_FINAL.md']) {
+    it(`${file} free-form MCP tool counts equal ${n}`, () => {
+      const lines = read(file).split('\n').filter((l) => /mcp/i.test(l));
+      const stated = lines.flatMap((l) => [...l.matchAll(/\b(one|two|three|four|five|six|seven|eight|nine|ten) (?:MCP |read-only )?tools\b/gi)])
+        .map((x) => WORDS.indexOf((x[1] ?? '').toLowerCase()));
+      expect(stated.length).toBeGreaterThan(0);
+      for (const s of stated) expect(s).toBe(n);
+    });
+  }
 });
