@@ -149,3 +149,29 @@ describe('Release Safety Control Plane', () => {
     expect(() => OPERATIONS.getReleaseSafety.output.parse(r)).not.toThrow();
   });
 });
+
+describe('Release overview (listReleaseSafety)', () => {
+  it('one entry per fixVersion plus unscheduled, worst first, schema-valid, zero writes', async () => {
+    const { j, store, s } = svc();
+    j.add('REL-5', 'Unscheduled change', { labels: CH });
+    await store.set('decision:REL-4', dec({ planId: 'plan-4' }));
+    await store.set('decision:REL-1', dec({ status: 'EVIDENCE_CHANGED' }));
+    const r = OPERATIONS.listReleaseSafety.output.parse(await s.listReleaseSafety(ctx, { projectKey: 'REL' }));
+    expect(r.releases.map((x) => [x.fixVersion, x.verdict, x.changes])).toEqual([
+      ['Winter', 'BLOCKED', 3], [null, 'NEEDS_REVIEW', 1], ['Spring', 'VERIFIED_FOR_RECORDED_SCOPE', 1]]);
+    expect(r.releases[0]!.interactions).toBe(1);
+    expect(j.writes).toEqual({ create: 0, link: 0, comment: 0, label: 0 });
+  });
+  it('agrees with getReleaseSafety for the same release', async () => {
+    const { store, s } = svc();
+    await store.set('decision:REL-3', dec({ planId: 'plan-3' }));
+    const ov = await s.listReleaseSafety(ctx, { projectKey: 'REL' });
+    const one = await s.getReleaseSafety(ctx, { projectKey: 'REL', fixVersion: 'Winter' });
+    const w = ov.releases.find((x) => x.fixVersion === 'Winter')!;
+    expect([w.verdict, w.counts]).toEqual([one.verdict, one.counts]);
+  });
+  it('refuses unbrowsable projects', async () => {
+    const { j, s } = svc(); j.perms.BROWSE_PROJECTS = false;
+    await expect(s.listReleaseSafety(ctx, { projectKey: 'REL' })).rejects.toMatchObject({ code: 'PERMISSION_DENIED' });
+  });
+});

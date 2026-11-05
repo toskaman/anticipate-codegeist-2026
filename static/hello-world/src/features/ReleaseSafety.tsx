@@ -1,11 +1,15 @@
 import React, { useEffect, useId, useMemo, useRef, useState } from "react";
-import type { ReleaseSafety as ReleaseSafetyResult } from "@anticipate/contracts";
+import type {
+  ReleaseOverview,
+  ReleaseSafety as ReleaseSafetyResult,
+} from "@anticipate/contracts";
 import { CoreClientError } from "../api/ForgeClient";
 import { Badge, Metric, Notice, Panel, SourceLink } from "../components/ui";
 import type { Tone } from "../app/copy";
 import type { ForgeClient } from "../api/ForgeClient";
 
 export const RELEASE_CAPABILITY = "getReleaseSafety";
+export const OVERVIEW_CAPABILITY = "listReleaseSafety";
 type Verdict = ReleaseSafetyResult["verdict"];
 
 /** Worst first; the same order as the backend (src/engine/release.ts). */
@@ -27,6 +31,7 @@ export interface ReleaseSafetyProps {
   client: Pick<ForgeClient, "request">;
   supported: boolean;
   projectKey: string | null;
+  overviewSupported?: boolean;
 }
 
 /**
@@ -37,17 +42,21 @@ export default function ReleaseSafety({
   client,
   supported,
   projectKey,
+  overviewSupported = false,
 }: ReleaseSafetyProps) {
   const [fixVersion, setFixVersion] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState<ReleaseSafetyResult | null>(null);
   const [filter, setFilter] = useState<Verdict | "ALL">("ALL");
+  const [overview, setOverview] = useState<ReleaseOverview | null>(null);
+  const [ovBusy, setOvBusy] = useState(false);
   const seq = useRef(0);
   const id = useId();
   useEffect(() => {
     seq.current++;
     setResult(null);
+    setOverview(null);
     setError("");
   }, [projectKey]);
   const visible = useMemo(
@@ -62,15 +71,15 @@ export default function ReleaseSafety({
     ? "Release names with quotes or backslashes are not supported."
     : "";
 
-  async function run() {
-    if (!projectKey || busy || versionError) return;
+  async function run(version?: string | null) {
+    if (!projectKey || busy || (version === undefined && versionError)) return;
     const mine = ++seq.current;
     setBusy(true);
     setError("");
     try {
       const r = await client.request("getReleaseSafety", {
         projectKey,
-        fixVersion: fixVersion.trim() || null,
+        fixVersion: version !== undefined ? version : fixVersion.trim() || null,
       });
       if (mine === seq.current) {
         setResult(r);
@@ -87,6 +96,38 @@ export default function ReleaseSafety({
     } finally {
       if (mine === seq.current) setBusy(false);
     }
+  }
+
+  async function loadOverview() {
+    if (!projectKey || ovBusy) return;
+    const mine = ++seq.current;
+    setOvBusy(true);
+    setError("");
+    try {
+      const r = await client.request("listReleaseSafety", { projectKey });
+      if (mine !== seq.current) return;
+      if (r.projectKey !== projectKey)
+        throw new CoreClientError(
+          "INVALID_RESPONSE",
+          "Release overview belongs to another project.",
+        );
+      setOverview(r);
+    } catch (e) {
+      if (mine !== seq.current) return;
+      setOverview(null);
+      setError(
+        e instanceof CoreClientError
+          ? e.message
+          : "The release overview failed. Nothing was changed in Jira.",
+      );
+    } finally {
+      if (mine === seq.current) setOvBusy(false);
+    }
+  }
+
+  function openRelease(name: string | null) {
+    setFixVersion(name ?? "");
+    void run(name);
   }
 
   const meta = result ? verdictMeta(result.verdict) : null;
@@ -138,6 +179,77 @@ export default function ReleaseSafety({
               "Leave empty to evaluate every change in the project (up to 100)."}
           </p>
         </form>
+      )}
+      {projectKey && overviewSupported && (
+        <div className="ax-release-ov">
+          <button
+            type="button"
+            className="ax-btn"
+            onClick={() => void loadOverview()}
+            disabled={ovBusy}
+          >
+            {ovBusy
+              ? "Reading releases…"
+              : "Show all releases needing attention"}
+          </button>
+          {overview && (
+            <>
+              <table className="ax-table">
+                <caption className="ax-sr">
+                  Releases of {overview.projectKey}, worst first
+                </caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Release</th>
+                    <th scope="col">State</th>
+                    <th scope="col">Changes</th>
+                    <th scope="col">Interactions</th>
+                    <th scope="col">Why</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {overview.releases.map((r) => {
+                    const m = verdictMeta(r.verdict);
+                    return (
+                      <tr key={r.fixVersion ?? "(unscheduled)"}>
+                        <th scope="row">
+                          <button
+                            type="button"
+                            className="ax-link-btn"
+                            onClick={() => openRelease(r.fixVersion)}
+                          >
+                            {r.fixVersion ?? "No release (unscheduled)"}
+                          </button>
+                          {r.releaseDate && (
+                            <div className="ax-muted">{r.releaseDate}</div>
+                          )}
+                        </th>
+                        <td>
+                          <Badge tone={m.tone} size="sm">
+                            {m.label}
+                          </Badge>
+                        </td>
+                        <td>{r.changes}</td>
+                        <td>{r.interactions}</td>
+                        <td>{r.topReasons[0] ?? ""}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+              {overview.releases.length === 0 && (
+                <p className="ax-muted">
+                  No change issues in {overview.projectKey}.
+                </p>
+              )}
+              <ul className="ax-muted">
+                {overview.unknowns.map((u) => (
+                  <li key={u}>{u}</li>
+                ))}
+              </ul>
+            </>
+          )}
+        </div>
       )}
       {error && (
         <Notice tone="danger" role="alert" title="Release check failed">

@@ -1,6 +1,6 @@
 # ANTICIPATE - source of truth (dated)
 
-Updated: 4 Nov 2026, ~16:20 Paris. Owner of this file: CORE (muse).
+Updated: 5 Nov 2026 (new rows for #173/#174/#176 and the release overview); earlier rows as of 4 Nov 2026, ~16:20 Paris. Owner of this file: CORE (muse).
 
 | Item | Value |
 |---|---|
@@ -27,6 +27,11 @@ Updated: 4 Nov 2026, ~16:20 Paris. Owner of this file: CORE (muse).
 | Shared Decision Workspace (two-account flow) | BLOCKED (hosted two-account acceptance not run) | #131 |
 | Decision Radar (event-driven needs-review hints) | LIVE_FORGE_DEV for link events (4 Nov: real link deleted → needsReview in ≈3.2 s → cleared by checkPlanFreshness); first live event exposed a payload-shape bug, fixed in #150; issue-deleted event and production delivery NOT_VERIFIED; DEMO 3 (approved plan → link deleted → Needs review → re-check → blocked, 0 writes) LIVE_FORGE_DEV 4 Nov 23:43 CET; 4 Nov: one historical invalid event kept every later plan DEGRADED, fixed in #158 and verified LIVE_FORGE_DEV (new plan shows Listening) | EVIDENCE_PACK 4 Nov; #146, #150; UI #147 |
 | Portfolio Impact Simulator | backend UNIT_TESTED (#141); UI merged (#142); panel reachable on dev (LIVE_FORGE_DEV, 4 Nov, Scenario Lab); DEMO 2 combined run with a real interaction LIVE_FORGE_DEV 4 Nov (TD) and **LIVE_FORGE_PRODUCTION 5 Nov** (toskaman5962, ADM sample, v2.36.0) | #64 |
+| Release Safety Control Plane (`getReleaseSafety`, Mission Control) | UNIT_TESTED + MOCK_TRANSPORT; deployed to dev 6.21.0+; NOT hosted-verified | #173; docs/product/RELEASE_SAFETY.md |
+| Release overview (`listReleaseSafety`: every fixVersion, worst first) | UNIT_TESTED + MOCK_TRANSPORT (this branch) | docs/product/RELEASE_SAFETY.md |
+| Decision Time Machine (`getDecisionHistory`, Passport) | UNIT_TESTED + MOCK_TRANSPORT; deployed to dev 6.22.0+; NOT hosted-verified; plans older than 6.22.0 get checkpoints only from their next re-check | #174; docs/product/DECISION_TIME_MACHINE.md |
+| Safe Change Composer (`composeSafeChanges`, Scenario Lab) | UNIT_TESTED + MOCK_TRANSPORT; deployed to dev 6.23.0; NOT hosted-verified | #176; docs/product/SAFE_CHANGE_COMPOSER.md |
+| KVS transactions | Decision: keep setIfAbsent design (ADR) | #175; docs/design-core/ADR-KVS-TRANSACTIONS.md |
 | Policy-as-code preview engine | UNIT_TESTED only (37 tests, #159); inert: nothing calls it, gates nothing | docs/design-core/POLICY_AS_CODE.md |
 | What-if slip panel | LIVE_FORGE_DEV 4 Nov: late release (by 9 d), 3 moved due dates with paths, unknowns listed | EVIDENCE_PACK 4 Nov |
 | Rovo agent | LIVE_FORGE on dev (site has Rovo); production site has no Rovo |

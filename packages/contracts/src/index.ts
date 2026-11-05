@@ -453,6 +453,17 @@ export const ReleaseSafety = z.object({
 export type ReleaseSafety = z.infer<typeof ReleaseSafety>;
 export type ReleaseSafetyItem = z.infer<typeof ReleaseSafetyItem>;
 
+export const ReleaseOverview = z.object({
+  projectKey: z.string().max(20), evaluatedAt: IsoDate, jql: z.string().max(500),
+  releases: z.array(z.object({
+    fixVersion: z.string().max(255).nullable(), releaseDate: z.string().max(10).nullable(), verdict: ReleaseVerdict,
+    counts: z.record(ReleaseVerdict, z.number().int().min(0)), changes: z.number().int().min(0), interactions: z.number().int().min(0),
+    topReasons: z.array(z.string().max(300)).max(3)
+  })).max(50),
+  truncated: z.boolean(), releasesTruncated: z.boolean(), unknowns: z.array(z.string().max(300)).max(6), readOnly: z.literal(true)
+});
+export type ReleaseOverview = z.infer<typeof ReleaseOverview>;
+
 // Decision Time Machine (read-only): how a decision's evidence evolved. Only retained records; nothing reconstructed from today's Jira.
 export const DECISION_HISTORY_LIMITS = { maxCheckpoints: 20, maxEdgesPerCheckpoint: 100, maxBaselineEdges: 300, maxEvents: 60 } as const;
 const HistEdge = z.object({ from: Id, to: Id, kind: EdgeKind, status: EvidenceStatus });
@@ -539,6 +550,7 @@ export const OPERATIONS = {
   getPlanAttention: { input: z.object({ planId: Id }), output: PlanAttention },
   composeSafeChanges: { input: SimulatePortfolioRequest.omit({ proposedOrder: true }), output: ComposeSafeChangesResult },
   getDecisionHistory: { input: z.object({ planId: Id }), output: DecisionHistory },
+  listReleaseSafety: { input: z.object({ projectKey: z.string().regex(/^[A-Z][A-Z0-9_]{1,19}$/) }), output: ReleaseOverview },
   getReleaseSafety: { input: z.object({ projectKey: z.string().regex(/^[A-Z][A-Z0-9_]{1,19}$/), fixVersion: z.string().min(1).max(255).regex(/^[^"\\\n\r]+$/).nullable().default(null) }), output: ReleaseSafety },
   // shared decision workspace (see section above)
   ...SHARED_DECISION_OPERATIONS

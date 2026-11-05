@@ -9,7 +9,7 @@
  *   Portfolio simulation, they never claim one.
  * - Decisions owned by someone else are not visible here (plans are private), exactly like the rest of the app.
  */
-import type { ReleaseSafety, ReleaseSafetyItem, ReleaseVerdict } from '../../packages/contracts/src/index';
+import type { ReleaseOverview, ReleaseSafety, ReleaseSafetyItem, ReleaseVerdict } from '../../packages/contracts/src/index';
 import { RELEASE_SAFETY_LIMITS } from '../../packages/contracts/src/index';
 import type { JiraIssue } from '../core/ports';
 import type { DecisionRecord } from '../validator';
@@ -114,4 +114,27 @@ export function aggregateRelease(input: ReleaseInput): ReleaseSafety {
       decisionsVisible: items.filter((i) => i.decision).length, unknowns: unknowns.slice(0, 8) },
     readOnly: true
   };
+}
+
+/**
+ * Release overview: one aggregateRelease per fixVersion (and one for unscheduled changes), worst verdict first, then
+ * earliest release date, then name. A change in several versions counts in each. Same truncation honesty as one release.
+ */
+export function overviewReleases(i: Omit<ReleaseInput, 'fixVersion'>): ReleaseOverview {
+  const groups = new Map<string, { name: string | null; date: string | null; issues: JiraIssue[] }>();
+  for (const issue of i.issues) {
+    const vs = issue.versions ?? [];
+    if (!vs.length) { const g = groups.get('\u0000') ?? { name: null, date: null, issues: [] }; g.issues.push(issue); groups.set('\u0000', g); }
+    for (const v of vs) { const g = groups.get(v.name) ?? { name: v.name, date: v.releaseDate, issues: [] }; g.issues.push(issue); groups.set(v.name, g); }
+  }
+  const all = [...groups.values()].map((g) => {
+    const r = aggregateRelease({ ...i, fixVersion: g.name, issues: g.issues });
+    return { fixVersion: g.name, releaseDate: g.date, verdict: r.verdict, counts: r.counts, changes: r.items.length, interactions: r.interactions.length,
+      topReasons: r.verdictReasons.slice(0, 3) };
+  }).sort((a, b) => rank(a.verdict) - rank(b.verdict) || (a.releaseDate ?? '9999').localeCompare(b.releaseDate ?? '9999')
+    || (a.fixVersion ?? '\uffff').localeCompare(b.fixVersion ?? '\uffff'));
+  const unknowns = ['Release membership comes from the fixVersions of change issues you can read; releases without such issues are not listed.'];
+  if (i.truncated) unknowns.push(`Search stopped at ${RELEASE_SAFETY_LIMITS.maxIssues} change issues: every release verdict here is at best EVIDENCE_INCOMPLETE.`);
+  return { projectKey: i.projectKey, evaluatedAt: i.evaluatedAt, jql: i.jql.slice(0, 500), releases: all.slice(0, 50), truncated: i.truncated,
+    releasesTruncated: all.length > 50, unknowns, readOnly: true };
 }
