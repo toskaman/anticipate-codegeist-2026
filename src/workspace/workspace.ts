@@ -14,7 +14,9 @@
  *   reason and is terminal (REVOKED).
  * - Execution readiness re-validates every approval: an approver who lost the permission revokes the decision.
  * - Every state change appends an audit entry under a new sequence key (setIfAbsent): history cannot be overwritten.
- * Concurrency (Forge KVS has no transactions): nothing that must not be lost is written with get-modify-set.
+ * Concurrency: nothing that must not be lost is written with get-modify-set. @forge/kvs 2.1.1 has kvs.transact(), but its
+ *   sets take no keyPolicy (no FAIL_IF_EXISTS) and its checks need Custom Entities, so it cannot replace the setIfAbsent
+ *   claims below on plain keys (decision: docs/design-core/ADR-KVS-TRANSACTIONS.md).
  * - The decision record is written once (setIfAbsent) and only holds immutable fields.
  * - Approvals claim numbered slots ws:slot:<id>:<n> (n = 1..requiredApprovals) with setIfAbsent; slots fill as a prefix.
  *   A per-approver marker (setIfAbsent) prevents one approver from claiming two slots. The approval list and the APPROVED
