@@ -11,6 +11,7 @@ import {
 } from "../components/ui";
 import type { Workflow } from "../app/useCoreWorkflow";
 const RadarAttention = React.lazy(() => import("./RadarAttention"));
+const DecisionTimeMachine = React.lazy(() => import("./DecisionTimeMachine"));
 import {
   actionTypeCopy,
   evidenceCopy,
@@ -181,6 +182,13 @@ export default function Passport({ w }: { w: Workflow }) {
       {plan && w.capabilities?.operations.includes("getPlanAttention") && (
         <React.Suspense fallback={<p role="status">Loading radar tools…</p>}>
           <RadarAttention w={w} planId={plan.planId} historical />
+        </React.Suspense>
+      )}
+      {plan && w.capabilities?.operations.includes("getDecisionHistory") && (
+        <React.Suspense
+          fallback={<p role="status">Loading decision history…</p>}
+        >
+          <DecisionTimeMachine client={w.client} planId={plan.planId} />
         </React.Suspense>
       )}
       <article className="ax-report" aria-labelledby="report-title">

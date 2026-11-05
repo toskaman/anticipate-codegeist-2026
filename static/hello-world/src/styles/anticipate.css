@@ -4436,3 +4436,56 @@ body:has(.ax-app) {
   flex-basis: 100%;
   margin: 0;
 }
+
+/* Decision Time Machine */
+.ax-tm {
+  display: grid;
+  gap: 16px;
+}
+.ax-tm__line {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 16px;
+  border-left: 2px solid var(--ax-border);
+  display: grid;
+  gap: 10px;
+}
+.ax-tm__cp {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  align-items: baseline;
+}
+.ax-tm__cp::before {
+  content: "";
+  position: absolute;
+  left: -22px;
+  top: 6px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--ax-success);
+}
+.ax-tm__cp.is-stale::before {
+  background: var(--ax-danger);
+}
+.ax-tm__cp[aria-current="step"] {
+  font-weight: 600;
+}
+.ax-tm__diff ul,
+.ax-tm__events {
+  margin: 0;
+  padding-left: 1.1em;
+  display: grid;
+  gap: 4px;
+}
+.ax-tm fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+.ax-tm legend {
+  font-weight: 600;
+  flex-basis: 100%;
+}

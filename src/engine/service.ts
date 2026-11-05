@@ -1,5 +1,7 @@
 import { slipFromJira } from './slip-service';
 import { aggregateRelease } from './release';
+import { buildHistory } from './history';
+import { DECISION_HISTORY_LIMITS, type DecisionCheckpoint, type DecisionHistory } from '../../packages/contracts/src/index';
 import { RELEASE_SAFETY_LIMITS, type ReleaseSafety } from '../../packages/contracts/src/index';
 /**
  * ANTICIPATE backend use-cases. Pure orchestration over ports (Jira, Store, clock, ids).
@@ -41,12 +43,16 @@ interface PlanRec { plan: PreventionPlan; owner: string | null; rootIssueKey: st
  * Minimized provenance kept for the plan's retention period (90 days) so a Prevention Passport stays reviewable after the
  * full snapshot (2 days) is gone. It holds only identifiers, counts and the causal edges reviewed; no issue text.
  */
+/** Decision Time Machine: bounded record of every evidence re-check of a plan (newest kept). Identifiers only. */
+interface HistRec { owner: string | null; dropped: number; items: DecisionCheckpoint[]; }
+
 interface ProvRec { owner: string | null; snapshotId: string; mode: GraphSnapshot['mode']; capturedAt: string; expiresAt: string;
   nodeCount: number; edgeCount: number; causalEdges: { from: string; to: string; kind: string; status: string }[]; snapshotDigest: string; }
 
 const K = {
   prov: (planId: string) => `prov:${planId}`,
   snap: (id: string) => `snap:${id}`, cmp: (id: string) => `cmp:${id}`, plan: (id: string) => `plan:${id}`,
+  hist: (planId: string) => `hist:${planId}`,
   exec: (p: string, a: string) => `exec:${p}:${a}`, lock: (p: string) => `lock:${p}`, idem: (k: string) => `idem:${k}`
 };
 
@@ -127,7 +133,27 @@ export function createService(d: Deps) {
   }
 
   /** Re-extract the plan's evidence neighbourhood live and diff it (Continuous Decision Safety). */
-  async function evidenceDrift(rec: PlanRec, snap: SnapRec): Promise<EvidenceDrift> {
+  async function evidenceDrift(rec: PlanRec, snap: SnapRec, stage: DecisionCheckpoint['stage']): Promise<EvidenceDrift> {
+    const drift = await computeDrift(rec, snap);
+    await recordCheckpoint(rec, drift, stage);
+    return drift;
+  }
+
+  /** Best effort: history must never block or weaken the safety check that produced it. */
+  async function recordCheckpoint(rec: PlanRec, drift: EvidenceDrift, stage: DecisionCheckpoint['stage']) {
+    try {
+      const L = DECISION_HISTORY_LIMITS.maxEdgesPerCheckpoint;
+      const h = (await d.store.get<HistRec>(K.hist(rec.plan.planId))) ?? { owner: rec.owner, dropped: 0, items: [] };
+      const cp: DecisionCheckpoint = { id: `cp-${h.dropped + h.items.length + 1}`, at: drift.checkedAt, kind: 'CHECK', stage, fresh: drift.fresh,
+        added: drift.addedEdges.slice(0, L), removed: drift.removedEdges.slice(0, L), becameUnknown: drift.becameUnknown.slice(0, L),
+        truncated: drift.addedEdges.length > L || drift.removedEdges.length > L || drift.becameUnknown.length > L, reason: drift.reason.slice(0, 1000) };
+      const items = [...h.items, cp];
+      const over = Math.max(0, items.length - DECISION_HISTORY_LIMITS.maxCheckpoints);
+      await d.store.set<HistRec>(K.hist(rec.plan.planId), { owner: rec.owner, dropped: h.dropped + over, items: items.slice(over) });
+    } catch { /* the drift result itself is still returned and enforced */ }
+  }
+
+  async function computeDrift(rec: PlanRec, snap: SnapRec): Promise<EvidenceDrift> {
     const checkedAt = iso();
     if (snap.snapshot.mode !== 'LIVE') return diffEvidence({ planId: rec.plan.planId, before: snap.snapshot, after: snap.snapshot, planArtifactIssueKeys: [], checkedAt });
     const after = await extractGraph(d.jira, snap.rootIssueKey, { maxDepth: snap.snapshot.limits.maxDepth, maxNodes: snap.snapshot.limits.maxNodes,
@@ -146,7 +172,7 @@ export function createService(d: Deps) {
   }
 
   async function guardFreshEvidence(rec: PlanRec, snap: SnapRec, stage: 'approval' | 'execution') {
-    const drift = await evidenceDrift(rec, snap);
+    const drift = await evidenceDrift(rec, snap, stage);
     if (drift.fresh) return;
     rec.plan = { ...rec.plan, status: 'EVIDENCE_CHANGED' };
     rec.timeline.push({ at: iso(), event: `Evidence changed before ${stage}: ${drift.reason}`.slice(0, 200) });
@@ -195,7 +221,7 @@ export function createService(d: Deps) {
     async checkPlanFreshness(ctx: Ctx, input: { planId: string }): Promise<EvidenceDrift> {
       const rec = await loadPlan(ctx, input.planId);
       const snap = await loadSnap(ctx, rec.plan.snapshotId);
-      const drift = await evidenceDrift(rec, snap);
+      const drift = await evidenceDrift(rec, snap, 'freshness');
       // Active invalidation (TOP9): an APPROVED plan whose evidence changed must never execute. Mark it
       // INVALIDATED now (persisted + attested); any other status stays read-only here.
       if (!drift.fresh && rec.plan.status === 'APPROVED') {
@@ -207,6 +233,19 @@ export function createService(d: Deps) {
       // Only a successful user-run recompute may clear radar attention (the radar itself is monotonic).
       if (drift.fresh && d.radar) { try { await d.radar.clear(rec.plan.planId); } catch { /* attention stays raised: safe */ } }
       return drift;
+    },
+
+    /** Decision Time Machine (read-only): retained evidence checkpoints of a plan the caller owns. No Jira read, no write. */
+    async getDecisionHistory(ctx: Ctx, input: { planId: string }): Promise<DecisionHistory> {
+      const rec = await loadPlan(ctx, input.planId);
+      const ev = await loadEvidence(ctx, rec);
+      const prov = ev.prov ?? await d.store.get<ProvRec>(K.prov(rec.plan.planId));
+      const h = await d.store.get<HistRec>(K.hist(rec.plan.planId));
+      let radar: Awaited<ReturnType<NonNullable<typeof d.radar>['attention']>> | null = null;
+      if (d.radar) { try { radar = await d.radar.attention(rec.plan.planId); } catch { radar = null; } }
+      return buildHistory({ plan: rec.plan, rootIssueKey: rec.rootIssueKey, timeline: rec.timeline, approvals: rec.approvals,
+        baseline: prov ? { snapshotId: prov.snapshotId, capturedAt: prov.capturedAt, edges: prov.causalEdges, edgeCount: prov.edgeCount } : null,
+        evidenceState: ev.state, history: h && h.owner === rec.owner ? h : null, radarItems: radar?.items ?? null });
     },
 
     /** Decision Radar attention for a plan the caller owns. A hint, never a verdict (see src/radar/radar.ts). */
@@ -598,7 +637,7 @@ export function normalizeDate(s: string): string {
 }
 
 export const OPERATION_NAMES = ['getCapabilities', 'getPolicies', 'listProjects', 'getChangeCandidates', 'getGraphSnapshot', 'getEvidenceGraph', 'simulateChange',
-  'compareScenarios', 'generatePreventionPlan', 'approvePlan', 'executeApprovedPlan', 'getExecutionStatus', 'getPreventionPassport', 'checkPlanFreshness', 'previewSampleProject', 'createSampleProject', 'getValidatorPolicy', 'setValidatorPolicy', 'simulateSlip', 'simulatePortfolio', 'getPlanAttention', 'getReleaseSafety',
+  'compareScenarios', 'generatePreventionPlan', 'approvePlan', 'executeApprovedPlan', 'getExecutionStatus', 'getPreventionPassport', 'checkPlanFreshness', 'previewSampleProject', 'createSampleProject', 'getValidatorPolicy', 'setValidatorPolicy', 'simulateSlip', 'simulatePortfolio', 'getPlanAttention', 'getReleaseSafety', 'getDecisionHistory',
   // capability signals (not resolvers): scenario operations accepted by compareScenarios / generatePreventionPlan
   'scenario:UPGRADE_NODE', 'validator:outage-policy'];
 export { issueNodeId };
