@@ -1,29 +1,60 @@
 {
   "agent": "muse",
-  "updated": "2026-11-03T22:40:00Z",
-  "main": "8ef8239 (after #115)",
+  "updated": "2026-11-05T02:55:00Z",
+  "main": "135c0fb (after #171)",
   "runner": "Claude session with bridge to the owner's PC (gh, forge, built-in browser); runs when the owner's session is active; hourly scheduled cycle paused by the owner",
+  "deployed": {
+    "production": "2.36.0 (source: main after #165)",
+    "development": "6.20.0 (source: main after #165)"
+  },
+  "bridge": "HMAC=LEGACY-NO-KEY, owner-accepted (K9, #167)",
   "done": [
-    "#51",
-    "#52 slip simulation live",
-    "K4 cold start mitigated (#63, #75)",
-    "K5-K8 waves (#84, #86, #94, #109)",
-    "dev 6.5.0 deployed from 8ef8239",
-    "bridge HMAC activated (#107)"
+    "#156-#171 merged",
+    "DEMO 2 live on dev and production (ADM)",
+    "DEMO 3 live on dev",
+    "cross-browser e2e (#168)"
   ],
-  "current": null,
+  "current": "Wave 0 doc/state drift (MCP count 7, RELEASE, scorecard)",
   "next": [
-    "#64 hosted checks and #53 burst test once signed in",
-    "record production version after owner deploy",
-    "merge ORP-28 (#116)"
+    "external MCP client run for slip/portfolio tools (needs owner OAuth consent)",
+    "#64 remaining hosted checks",
+    "KVS transact() spike",
+    "Release Safety Control Plane vertical slice"
   ],
-  "waiting_on": {
+  "blocked": {
     "owner": [
-      "production deploy of main (DEPLOY-PRODUCTION.cmd)",
-      "video (K1) and Devpost form (K2): deferred to the end, before submission"
+      "external MCP OAuth consent",
+      "video and Devpost submission"
     ],
-    "orpheane": [
-      "#121 ORP-30 sample due dates"
+    "external": [
+      "#131 needs a second real account",
+      "Teamwork Graph allowlist ECOHELP-180616"
     ]
+  },
+  "history_2026-11-03": {
+    "updated": "2026-11-03T22:40:00Z",
+    "main": "8ef8239 (after #115)",
+    "done": [
+      "#51",
+      "#52 slip simulation live",
+      "K4 cold start mitigated (#63, #75)",
+      "K5-K8 waves (#84, #86, #94, #109)",
+      "dev 6.5.0 deployed from 8ef8239",
+      "bridge HMAC activated (#107)"
+    ],
+    "next": [
+      "#64 hosted checks and #53 burst test once signed in",
+      "record production version after owner deploy",
+      "merge ORP-28 (#116)"
+    ],
+    "waiting_on": {
+      "owner": [
+        "production deploy of main (DEPLOY-PRODUCTION.cmd)",
+        "video (K1) and Devpost form (K2): deferred to the end, before submission"
+      ],
+      "orpheane": [
+        "#121 ORP-30 sample due dates"
+      ]
+    }
   }
 }

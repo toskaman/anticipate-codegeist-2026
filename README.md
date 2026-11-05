@@ -43,7 +43,7 @@ Playwright captures of the real UI with a **mock backend transport (MOCK_TRANSPO
 | `global:fullPage` | The ANTICIPATE app (Custom UI) |
 | `jira:workflowValidator` | "ANTICIPATE Decision Firewall" transition rule |
 | `rovo:agent` | "ANTICIPATE Decision Reviewer" (read-only) |
-| `rovo:mcp` | Six tools that never write to Jira: get graph, simulate retirement, simulate upgrade, simulate slip, get Passport, check plan freshness (which can mark a stale approved plan Invalidated in ANTICIPATE) |
+| `rovo:mcp` | Seven tools that never write to Jira: get graph, simulate retirement, simulate upgrade, simulate slip, simulate portfolio, get Passport, check plan freshness (which can mark a stale approved plan Invalidated in ANTICIPATE) |
 | `action` | The actions behind the agent and MCP tools |
 
 Scopes: `read:jira-work`, `write:jira-work` (only for actions a person approved), `read:jira-user`, `storage:app`. The manifest declares no external egress.

@@ -1,10 +1,13 @@
 # Release record (source of truth for the jury build)
 
-Validated: 3 Nov 2026, 13:40 Paris (CORE). Versions and test counts refreshed 4 Nov 2026, ~19:30 Paris (muse, from runner output on a clean checkout of main 3668327). **This file is the single source for versions and test counts**; other documents link here instead of repeating them.
+Validated: 3 Nov 2026, 13:40 Paris (CORE). Main/deploy-source rows re-checked 5 Nov 2026 ~03:50 Paris (muse). Versions and test counts refreshed 4 Nov 2026, ~19:30 Paris (muse, from runner output on a clean checkout of main 3668327). **This file is the single source for versions and test counts**; other documents link here instead of repeating them.
 
 | Item | Value |
 |---|---|
-| main | 3668327 (adds #156 first-run copy, #157 shared-decisions acceptance panel (dev only) + refused-execution display, #158 radar sticky-error fix, #159 inert policy-as-code preview engine) |
+| GitHub main (current) | 135c0fb (5 Nov 2026, after #171; #166–#171 are docs/evidence/CI only, no deployed code change since the production source below) |
+| Source of development deploy | main after #165 → v6.20.0 |
+| Source of production deploy | main after #165 → v2.36.0 (a docs-only commit on main is not a new deployment) |
+| main at test-count refresh | 3668327 (adds #156 first-run copy, #157 shared-decisions acceptance panel (dev only) + refused-execution display, #158 radar sticky-error fix, #159 inert policy-as-code preview engine) |
 | Forge app id | 39a28f48-c891-4d86-a3cf-c14409cbd29e |
 | Development | v6.20.0 on one-atlas-euza, 4 Nov 2026 ~20:35 UTC (main after #165) |
 | Production | **v2.36.0** deployed 4 Nov 2026 ~20:40 UTC from main after #165 (portfolio conflict reasons show change names; manifest unchanged); smoke on toskaman5962: loads "Connected · live mode". Previous: v2.35.0 deployed 4 Nov 2026 ~19:55 UTC from main 030e576 (= 3668327 + docs #160) via the bridge (Forge CLI session of the app owner); minor version, manifest unchanged since ea3ee7c, so both installs (toskaman5962, anticipate-judge) upgrade without re-consent. Smoke on toskaman5962 (owner, LIVE_FORGE_PRODUCTION): app loads "Connected · live mode", Settings shows no shared-decisions acceptance panel (release lock holds). anticipate-judge not re-checked after this deploy (owned by another account). Rollback reference: previous production 2.32.0+ from ea3ee7c |
