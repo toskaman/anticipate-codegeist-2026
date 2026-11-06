@@ -1,6 +1,6 @@
 # ANTICIPATE - source of truth (dated)
 
-Updated: 5 Nov 2026 (new rows for #173/#174/#176 and the release overview); earlier rows as of 4 Nov 2026, ~16:20 Paris. Owner of this file: CORE (muse).
+Updated: 5 Nov 2026 (new rows for #173/#174/#176 and the release overview); earlier rows as of 4 Nov 2026, ~16:20 Paris. 6 Nov: TITAN rows (Explorer, Command Center, retention notice), dev v6.28.0 pointer. Owner of this file: CORE (muse).
 
 | Item | Value |
 |---|---|
@@ -21,7 +21,7 @@ Updated: 5 Nov 2026 (new rows for #173/#174/#176 and the release overview); earl
 | Sample data (guided demo), CONFLICT guard | LIVE_FORGE | MP, AVT, MOBL; CONFLICT logged, no duplicates |
 | Dependency upgrade + compatibility evidence | LIVE_FORGE | MP-5 via UI and MCP |
 | Prevention Passport, historical record after snapshot expiry | UNIT_TESTED (expiry), LIVE_FORGE (live passport + PDF print) | retention tests |
-| MCP tools (read-only; see manifest `rovo:mcp` for the current list) | LIVE_FORGE for the original 5; newer tools (slip, portfolio) NOT_VERIFIED in an external client | external Claude client on dev |
+| MCP tools (read-only; see manifest `rovo:mcp` for the current list) | LIVE_FORGE for the original 5; newer tools (slip, portfolio) NOT_VERIFIED in an external client (#190; dev v6.28.0 carries all 7 tools) | external Claude client on dev |
 | Shared-decision execution gate (server-side) | UNIT_TESTED + deployed dev 6.9.0; feature release-locked | #144: 13 adversarial tests, every refusal asserts zero Jira writes |
 | Approval path under storage faults | UNIT_TESTED | #145: fault injection before/after each write |
 | Shared Decision Workspace (two-account flow) | BLOCKED (hosted two-account acceptance not run) | #131 |
@@ -31,6 +31,9 @@ Updated: 5 Nov 2026 (new rows for #173/#174/#176 and the release overview); earl
 | Release overview (`listReleaseSafety`: every fixVersion, worst first) | **LIVE_FORGE_PRODUCTION** 5 Nov (2.37.0, ADM) | docs/product/RELEASE_SAFETY.md |
 | Decision Time Machine (`getDecisionHistory`, Passport) | **LIVE_FORGE_PRODUCTION** 5 Nov including invalidation (approved → real Jira link → Radar → re-check → "Added: ADM-1 depends on ADM-6"); plans older than 6.22.0 get checkpoints only from their next re-check | #174; docs/product/DECISION_TIME_MACHINE.md |
 | Safe Change Composer (`composeSafeChanges`, Scenario Lab) | **LIVE_FORGE_PRODUCTION** 5 Nov (2.37.0, ADM: compatibility phase #1, 0 conflicts) | #176; docs/product/SAFE_CHANGE_COMPOSER.md |
+| Causal Collision Explorer (per-conflict causal explanation) | UNIT_TESTED + LOCAL mock-e2e (axe-clean); hosted exercise pending (#191); ships in dev v6.28.0 | #188 |
+| Release Command Center (read-only release digest + next action) | UNIT_TESTED + LOCAL mock-e2e (axe-clean); hosted exercise pending (#191); ships in dev v6.28.0 | #188 |
+| Time Machine retention notice (dropped checkpoints, baseline state) | UNIT_TESTED; hosted exercise pending (#191) | #188 |
 | KVS transactions | Decision: keep setIfAbsent design (ADR) | #175; docs/design-core/ADR-KVS-TRANSACTIONS.md |
 | Policy-as-code preview engine | UNIT_TESTED only (37 tests, #159); inert: nothing calls it, gates nothing | docs/design-core/POLICY_AS_CODE.md |
 | What-if slip panel | LIVE_FORGE_DEV 4 Nov: late release (by 9 d), 3 moved due dates with paths, unknowns listed | EVIDENCE_PACK 4 Nov |

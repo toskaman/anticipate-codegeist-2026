@@ -5,9 +5,9 @@ Source: https://codegeist2026.devpost.com/rules (read 3 Nov 2026). Deadline: **2
 | Requirement | Mandatory | Status | Evidence | Remediation / owner |
 |---|---|---|---|---|
 | Runs on Forge, integrates Jira/Confluence/JSM/Bitbucket/TWG/Rovo | yes | PASS | manifest.yml (Jira, Rovo agent, rovo:mcp, workflow validator) | — |
-| Installable by judges via an install link ("start sharing your app") | yes | PASS | docs/submission/INSTALL_LINK.md; clean-site install 3 Nov (EVIDENCE_PACK) | — |
+| Installable by judges via an install link ("start sharing your app") | yes | PASS | docs/submission/INSTALL_LINK.md; clean-site install 3 Nov (EVIDENCE_PACK); install page HTTP 200 re-verified 6 Nov | — |
 | Runs consistently and as described | yes | PASS (current build) | clean-site journey + validator, 3 Nov | re-run on final SHA (muse) |
-| Demo video < 5 min, YouTube public, shows the app running | yes | FAIL (not produced) | — | owner + orpheane; script by muse |
+| Demo video < 5 min, YouTube public, shows the app running | yes | FAIL (not produced) | — | owner records (word-for-word script v3 + checklist ready); tracked in #189 |
 | No third-party trademarks or copyrighted music in video | yes | NOT VERIFIED | — | check at video review |
 | Judge instructions (config, integrations) | yes | PASS | INSTALL_LINK.md (install, Free plan notes, validator steps) | keep in sync with final build |
 | Text description incl. how it meets the tech requirement | yes | NOT VERIFIED (final text ready, form not filled) | docs/submission/DEVPOST_FINAL.md, TECHNICAL_SECTION.md | owner pastes at submission; re-read against final build |
