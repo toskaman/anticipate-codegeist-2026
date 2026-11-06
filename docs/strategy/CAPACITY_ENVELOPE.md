@@ -12,6 +12,9 @@ would resolve it). No 10,000-request claim is made.
 | getGraphSnapshot burst, 10 parallel, dev | 20/20 pass, p95 2.6 s | EVIDENCE_PACK, 4 Nov |
 | First open, production 2.30.0 | ~2.6 s warm, ~3.9 s backend-cold, ~9.3 s post-deploy | EVIDENCE_PACK, 3 Nov (STALE for 2.38.0 — re-measure per JUDGE_RERUN_CHECKLIST) |
 | Engine: 100-node, 3-scenario comparison | ~18 ms | TECHNICAL_SECTION (method: local run) |
+| Engine ladder, 100 nodes, 2 changes (LOCAL) | simulatePortfolio 11 ms, composeSafeChanges 5 ms, heap +1 MB | `test/engine-scale.test.ts`, 6 Nov, Windows vitest run |
+| Engine ladder, 500 nodes, 2 changes (LOCAL) | 2 ms / 4 ms, heap +4 MB | same run (heap deltas are noisy point samples) |
+| Engine ladder, 2000 nodes, 2 changes (LOCAL) | 5 ms / 15 ms, heap +0 MB | same run — engine compute is negligible vs Jira I/O + cold starts |
 
 ## Code bounds (enforced, tested)
 

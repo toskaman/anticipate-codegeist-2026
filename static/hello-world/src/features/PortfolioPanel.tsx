@@ -16,6 +16,7 @@ import { useExpired } from "../app/useExpiry";
 import { evidenceCopy, formatTime, verdictCopy } from "../app/copy";
 import { Badge, Notice, Panel, TechDetails } from "../components/ui";
 import SafeChangeComposer, { COMPOSER_CAPABILITY } from "./SafeChangeComposer";
+import CollisionExplorer from "./CollisionExplorer";
 
 function Limited<T>({
   items,
@@ -47,9 +48,11 @@ function Limited<T>({
 
 function PortfolioResultView({
   result: r,
+  composerAvailable,
   graph,
 }: {
   result: SimulatePortfolioResult;
+  composerAvailable: boolean;
   graph: GraphSnapshot;
 }) {
   const node = (id: string) =>
@@ -138,6 +141,17 @@ function PortfolioResultView({
                 : ""}
             </p>
           </>
+        )}
+      </Limited>
+      <h3>Collision explanations</h3>
+      <Limited items={r.conflicts}>
+        {(item) => (
+          <CollisionExplorer
+            result={r}
+            graph={graph}
+            conflict={item}
+            composerAvailable={composerAvailable}
+          />
         )}
       </Limited>
       <h3>Ordering constraints</h3>
@@ -541,7 +555,13 @@ function PortfolioEditor({
         </div>
       )}
       <section aria-busy={busy} aria-label="Portfolio simulation output">
-        {result && <PortfolioResultView result={result} graph={graph} />}
+        {result && (
+          <PortfolioResultView
+            result={result}
+            graph={graph}
+            composerAvailable={composer}
+          />
+        )}
       </section>
       {result && composer && changes && (
         <SafeChangeComposer

@@ -2,6 +2,7 @@ import ReleaseSafety, {
   OVERVIEW_CAPABILITY,
   RELEASE_CAPABILITY,
 } from "./ReleaseSafety";
+import ReleaseCommandCenter from "./ReleaseCommandCenter";
 import React, { useEffect, useState } from "react";
 import SampleProjectSetup from "../SampleProjectSetup";
 import type { ProjectSummary } from "@anticipate/contracts";
@@ -477,6 +478,20 @@ export default function MissionControl({
           </Panel>
         </div>
       </div>
+      <ReleaseCommandCenter
+        client={w.client}
+        projectKey={project?.key ?? null}
+        supported={
+          w.capabilities?.operations.includes(OVERVIEW_CAPABILITY) ?? false
+        }
+        safetySupported={
+          w.capabilities?.operations.includes(RELEASE_CAPABILITY) ?? false
+        }
+        onReview={(key) => {
+          w.actions.chooseCandidate(key);
+          void w.actions.analyze();
+        }}
+      />
       <ReleaseSafety
         client={w.client}
         supported={
