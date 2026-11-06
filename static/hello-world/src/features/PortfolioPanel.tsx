@@ -10,6 +10,7 @@ import {
   portfolioActions,
   portfolioChanges,
   type PortfolioDraft,
+  applyCandidate,
 } from "../app/portfolio";
 import { useExpired } from "../app/useExpiry";
 import { evidenceCopy, formatTime, verdictCopy } from "../app/copy";
@@ -552,6 +553,7 @@ function PortfolioEditor({
             snapshotId: graph.snapshotId,
             changes,
           }}
+          onSelect={(c) => update(applyCandidate(rows, c.transformations))}
         />
       )}
     </Panel>
