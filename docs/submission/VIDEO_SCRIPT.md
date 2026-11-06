@@ -43,6 +43,67 @@ Every new scene was observed on production 2.37.0 (toskaman5962, ADM sample proj
 
 All v2 scenes were observed on production 5 Nov. To re-record from a clean state: delete link #10004 on ADM-1, generate and approve a new plan, then add the link again.
 
+## Script v3 (6 Nov 2026): surgical 3:00 arc, word-for-word
+
+Rules: every scene below was observed on production (2.37.0 ADM session, 5 Nov, EVIDENCE_PACK)
+or on the judge site (validator, 3 Nov). No MOCK_TRANSPORT frames. First 3:00 standalone;
+3:00–4:20 optional extension. Strongest visual lands at ~0:50. Record narration verbatim.
+
+### 0:00–0:20 — Pain hook
+
+| Time | Shot | Narration (verbatim) | Tag |
+|---|---|---|---|
+| 0:00–0:08 | Jira ADM-1 "Legacy Auth API v1", its links; slow push-in on ADM-4 two links away. | "Two changes. Each one looks safe in its own ticket." | OBSERVED IN JIRA |
+| 0:08–0:20 | Split view: Change 1 "move consumers to API v2", Change 2 "breaking upgrade of v2". | "One moves consumers to API version two. The other ships a breaking upgrade of version two. Nobody reviews them together — until production does." | OBSERVED IN JIRA |
+
+### 0:20–1:15 — Live climax
+
+| Time | Shot | Narration (verbatim) | Tag |
+|---|---|---|---|
+| 0:20–0:35 | Mission Control → Analyze ADM-1 → Evidence Graph; select ADM-4, path + Jira source visible. | "ANTICIPATE reads the Jira links you can access and builds an evidence graph. Every relation keeps its Jira source — and anything unreadable stays unknown, never safe." | OBSERVED IN JIRA |
+| 0:35–0:55 | Several changes at once: add both changes, simulate. Conflict list appears: EMERGENT_IMPACT on ADM-2/3/4 + MIGRATE_ONTO_RETIRED. Hold 3 s. | "Simulated together, they collide. The migrated consumers land on an API that is about to break — an impact neither change shows alone." | SIMULATION |
+| 0:55–1:15 | Compose safer alternatives: #1 Compatibility phase (0 conflicts, assumption shown), #2 As proposed (2 conflicts). Open the reason chain. | "The Composer re-simulates bounded alternatives on the same evidence. A compatibility phase removes the collision — and it states its assumption instead of hiding it." | SIMULATION |
+
+### 1:15–1:55 — Defensibility and business
+
+| Time | Shot | Narration (verbatim) | Tag |
+|---|---|---|---|
+| 1:15–1:35 | Scenario Lab verdicts + result hash; Time Machine checkpoint list. | "Verdicts are computed, not generated: the same evidence always gives the same answer, reproducible by hash. And every decision keeps its record of what was known, and when." | SIMULATION |
+| 1:35–1:55 | Release Safety: releases needing attention → per-change states → "What this check cannot know". | "Release managers see which releases need attention and what is still unknown — inside the Jira workflow their teams already use, for every release, not just incidents." | OBSERVED IN JIRA |
+
+### 1:55–2:35 — Atlassian integration
+
+| Time | Shot | Narration (verbatim) | Tag |
+|---|---|---|---|
+| 1:55–2:10 | Jira → Apps → ANTICIPATE; Forge app loading with live Jira data. | "It runs on Forge, reads Jira with your own permissions, and writes only after your explicit approval." | OBSERVED IN JIRA |
+| 2:10–2:25 | Validator refusal on the JDG transition (judge-site capture, 3 Nov). | "The Decision Firewall guards the Jira transition itself: assumed work is refused; only verified reality opens the gate." | EXECUTED + VERIFIED |
+| 2:25–2:35 | MCP client answer + Rovo chat answer, both citing Jira records. | "The same engine answers from any MCP client and from Rovo — read-only. Agents explain; people decide." | OBSERVED IN JIRA |
+
+### 2:35–3:00 — Evidence and final vision
+
+| Time | Shot | Narration (verbatim) | Tag |
+|---|---|---|---|
+| 2:35–2:50 | Approve 1 action → Jira link added → Re-check CHANGED → Time Machine "Added: ADM-1 depends on ADM-6" → execution refused, 0 writes. | "Approved yesterday, blocked today. The evidence moved, so the approval can no longer act — with zero writes." | OBSERVED IN JIRA |
+| 2:50–3:00 | Passport "In short" + verified actions; closing card. | "Most tools show you what changed. ANTICIPATE helps you decide what should change, proves what was authorized, and stops yesterday's approval from becoming tomorrow's incident." | — |
+
+### 3:00–4:20 — Optional extension (judges need not watch)
+
+| Time | Shot | Narration (verbatim) |
+|---|---|---|
+| 3:00–3:25 | MCP tools list (7 tools) + freshness-check invalidation demo. | "Seven read-only tools, one engine. The freshness check can only invalidate a stale plan — never approve one." |
+| 3:25–3:45 | Architecture card: Forge resolvers as user, frozen snapshots, zod contracts, leases + idempotency keys. | "Snapshots freeze the evidence. Contracts validate every call. Leases and idempotency keys make retries safe." |
+| 3:45–4:05 | CI run + test counts from RELEASE.md; synthetic benchmark note with its label. | "Tested on every change, with the engine checked against an independent oracle on two hundred generated graphs — a consistency check, not a field claim." |
+| 4:05–4:20 | Roadmap card: shared approvals, policy packs, Teamwork Graph after allowlisting. Closing tagline. | "Next: shared approvals with separation of duties, team policy packs, and richer evidence once Atlassian allowlists the app. Test the consequences. Prove the safeguards. Then ship." |
+
+### v3 capture checklist (recording day)
+
+- [ ] ADM reset: link #10004 removed; generate + approve a fresh plan before the invalidation scene.
+- [ ] Note Settings build version for the video description + `docs/submission/VIDEO_PUBLISHED.md`.
+- [ ] Collision close-up readable at 1080p (conflict names + impacted nodes legible).
+- [ ] No personal data, tokens, or non-Atlassian logos in any frame; subtitles match narration.
+- [ ] Total ≤ 4:45; first 3:00 coherent with the extension removed.
+- [ ] Publish unlisted YouTube link + build version; both owners agree before Devpost paste.
+
 ## Script
 
 | Time | Shot | Narration | Subtitle / on-screen text | Tag |
