@@ -113,7 +113,7 @@ ANTICIPATE exposes seven tools through `rovo:mcp` that never write to Jira: get 
 | MCP from an external client | EVIDENCE_PACK: "MCP (external client)" (get-graph, simulate-retirement, get-passport, 2 Nov), "MCP after rollback"; simulate-upgrade + check-freshness via mcp.atlassian.com 3 Nov (ENGINEERING_REPORT). 5/7 tools externally verified; slip + portfolio pending an admin-enabled session (STATUS.md) |
 | Rovo agent answers | EVIDENCE_PACK: "Hosted verification, 2 Nov" (Rovo chat), "Dependency upgrade use case" |
 | Sample data, idempotent | EVIDENCE_PACK: "Hosted verification, 2 Nov"; clean-site run "Re-preview" |
-| Test counts | docs/RELEASE.md (single source): backend 295, simulation-core 75, contracts 8, frontend unit 151, Playwright 182 listed (main 4fa2cc4, 5 Nov cloud runner; #177+ deltas to recount at freeze) |
+| Test counts | docs/RELEASE.md (single source): backend 306, simulation-core 75, contracts 12, frontend unit 175, Playwright 186 listed in 30 files (main 96ad19b, 6 Nov recount; confirm against cloud runner at freeze) |
 | Benchmark | `docs/evidence/BENCHMARK.md` (synthetic, 200 graphs) |
 | Teamwork Graph not integrated | `docs/evidence/TEAMWORK_GRAPH_ALLOWLIST.md`, `.github/agent-coordination/decisions.md` D1 |
 | Shared workspace prototype | `.github/agent-coordination/decisions.md` D3 |
