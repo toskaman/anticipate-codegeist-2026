@@ -2,6 +2,10 @@
 
 **How to read this pack.** Every result carries one label:
 - **LIVE_FORGE**: observed on a deployed Forge app on a real Jira Cloud site. The row or section names the site (`one-atlas-euza` = development, `toskaman5962` and `anticipate-judge` = production installs) and the date.
+- **LIVE_FORGE_DEV**: LIVE_FORGE observed specifically on the development site (`one-atlas-euza`).
+- **LIVE_FORGE_PRODUCTION**: LIVE_FORGE observed specifically on a production install (`toskaman5962` or `anticipate-judge`).
+- **UNIT_TESTED**: covered by automated unit tests only; not observed on any hosted site.
+- **NOT_VERIFIED**: built but not yet demonstrated in the stated scope (e.g. an external MCP client run, a hosted event).
 - **LOCAL**: unit tests, synthetic benchmarks or Playwright with a mock backend (MOCK_TRANSPORT). This is proof of logic or UI behaviour, not of a hosted result.
 
 Screens captured with MOCK_TRANSPORT are never hosted proof, even when they show "live mode" (the harness labels them on screen). Hosted proofs still missing are listed at the end.

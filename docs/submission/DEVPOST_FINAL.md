@@ -105,12 +105,16 @@ ANTICIPATE exposes seven tools through `rovo:mcp` that never write to Jira: get 
 | Validator refuses assumed migration, opens after real one | EVIDENCE_PACK: "Workflow validator on the clean judge site", 3 Nov 15:00–15:06 |
 | Outage policy (admin) | EVIDENCE_PACK: hosted verification 3 Nov, outage policy rows |
 | Passport short answer, transition status, A4 print | EVIDENCE_PACK: "Passport In short", "Passport print to PDF" |
+| Portfolio collision (two harmless-alone changes flagged together) | EVIDENCE_PACK: production 2.37.0 session, 5 Nov (ADM DEMO 2: EMERGENT_IMPACT + MIGRATE_ONTO_RETIRED) |
+| Safe Change Composer ranking | EVIDENCE_PACK: production 2.37.0 session, 5 Nov (compatibility phase #1, 0 conflicts); test/composer.test.ts (DEMO 2, UNIT_TESTED) |
+| Release Safety + release overview | EVIDENCE_PACK: production 2.37.0 session, 5 Nov (ADM group + per-change state + unknowns) |
+| Decision Time Machine replay | EVIDENCE_PACK: production 2.37.0 session, 5 Nov (invalidation replay "Added: ADM-1 depends on ADM-6") |
 | Clean-site judge journey from the public link | EVIDENCE_PACK: "Clean-site judge run, 3 Nov 2026" |
-| MCP from an external client | EVIDENCE_PACK: "MCP (external client)", "MCP after rollback" |
+| MCP from an external client | EVIDENCE_PACK: "MCP (external client)" (get-graph, simulate-retirement, get-passport, 2 Nov), "MCP after rollback"; simulate-upgrade + check-freshness via mcp.atlassian.com 3 Nov (ENGINEERING_REPORT). 5/7 tools externally verified; slip + portfolio pending an admin-enabled session (STATUS.md) |
 | Rovo agent answers | EVIDENCE_PACK: "Hosted verification, 2 Nov" (Rovo chat), "Dependency upgrade use case" |
 | Sample data, idempotent | EVIDENCE_PACK: "Hosted verification, 2 Nov"; clean-site run "Re-preview" |
-| Test counts | Local run on main f9ce7a5, 3 Nov 2026: backend 142, simulation-core 16, frontend unit 122 (method: docs/RELEASE.md) |
+| Test counts | docs/RELEASE.md (single source): backend 295, simulation-core 75, contracts 8, frontend unit 151, Playwright 182 listed (main 4fa2cc4, 5 Nov cloud runner; #177+ deltas to recount at freeze) |
 | Benchmark | `docs/evidence/BENCHMARK.md` (synthetic, 200 graphs) |
-| Teamwork Graph not integrated | `docs/evidence/TEAMWORK_GRAPH_ALLOWLIST.md`, decisions.md D1 |
-| Shared workspace prototype | decisions.md D3 |
+| Teamwork Graph not integrated | `docs/evidence/TEAMWORK_GRAPH_ALLOWLIST.md`, `.github/agent-coordination/decisions.md` D1 |
+| Shared workspace prototype | `.github/agent-coordination/decisions.md` D3 |
 | Slip simulation, sixth MCP tool | EVIDENCE_PACK: "What-if slip simulation, hosted on dev" (3 Nov, dev 6.2.0); manifest.yml `rovo:mcp` tools; PRs #59, #61, #70 |

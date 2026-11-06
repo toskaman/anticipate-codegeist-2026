@@ -42,7 +42,7 @@ None of the sources above showed the full chain in one Jira-native flow: from ev
 | Invalidated plans: changed evidence blocks execution | Merged ([#94](https://github.com/toskaman/anticipate-codegeist-2026/pull/94)) | [CHANGELOG](../../CHANGELOG.md) |
 | **What if it slips?**: due dates moved along "blocks", late releases, "cannot be assessed" | Shipped. Hosted as a Rovo action and as the Scenario Lab panel on the judge site | [EVIDENCE_PACK, slip sections](../evidence/EVIDENCE_PACK.md) |
 | Guided demo sample data with staggered due dates, so a slip shows moved dates | Merged ([#126](https://github.com/toskaman/anticipate-codegeist-2026/pull/126)); hosted check pending | [#121](https://github.com/toskaman/anticipate-codegeist-2026/issues/121) |
-| Portfolio simulator | **Engine only**, merged ([#129](https://github.com/toskaman/anticipate-codegeist-2026/pull/129), `packages/simulation-core/src/portfolio.ts`). **Not in the UI.** Do not demo it or claim it as a feature | — |
+| Portfolio Impact Simulator (combined collision simulation) | Shipped, hosted: engine merged ([#129](https://github.com/toskaman/anticipate-codegeist-2026/pull/129)), exposed as UI panel + `simulatePortfolio` op + MCP tool `anticipate-simulate-portfolio` (decisions.md D8 supersedes the D5 "not yet exposed" note). DEMO 2 collision reproduced on production 5 Nov | [STATUS.md](../STATUS.md), [EVIDENCE_PACK](../evidence/EVIDENCE_PACK.md) (production 2.37.0 session) |
 
 Versions, scopes and test counts: [docs/RELEASE.md](../RELEASE.md) only.
 
