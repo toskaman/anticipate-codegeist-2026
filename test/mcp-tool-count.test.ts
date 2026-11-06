@@ -10,7 +10,7 @@ const read = (p: string) => readFileSync(`${root}/${p}`, 'utf8');
 const WORDS = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'];
 
 function declaredTools(): string[] {
-  const m = read('manifest.yml');
+  const m = read('manifest.yml').replace(/\r\n/g, '\n'); // CRLF checkouts (Windows) must parse like CI's LF ones
   const block = m.split(/\n  rovo:mcp:\n/)[1]?.split(/\n  [a-z]/)[0] ?? '';
   const tools = block.split(/\n\s+tools:\n/)[1] ?? '';
   return [...tools.matchAll(/^\s+- (anticipate-[a-z-]+)\s*$/gm)].map((x) => x[1] ?? "");
