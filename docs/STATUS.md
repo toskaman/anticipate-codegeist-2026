@@ -5,7 +5,7 @@ Updated: 5 Nov 2026 (new rows for #173/#174/#176 and the release overview); earl
 | Item | Value |
 |---|---|
 | Repository | github.com/toskaman/anticipate-codegeist-2026 (public, proprietary source-available license, 50/50 toskaman and Orphee) |
-| Versions, deployed builds, test counts | single source: [RELEASE.md](RELEASE.md) (refreshed 4 Nov, main 4d937b6) |
+| Versions, deployed builds, test counts | single source: [RELEASE.md](RELEASE.md) |
 | Forge app id | 39a28f48-c891-4d86-a3cf-c14409cbd29e (unchanged) |
 
 ## Capabilities actually available

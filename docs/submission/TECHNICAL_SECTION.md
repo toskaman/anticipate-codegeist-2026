@@ -1,6 +1,6 @@
 # Devpost — "How we built it" (CORE input for the EXPERIENCE-owned submission text)
 
-Updated 3 Nov 2026 from `docs/STATUS.md` (source of truth). ANTICIPATE is a Forge app (`global:fullPage` Custom UI + Node.js 24 resolvers, Forge KVS storage, a Rovo agent, a `rovo:mcp` module and a Jira workflow validator) built for Jira Cloud.
+Updated 6 Nov 2026 from `docs/STATUS.md` and `docs/RELEASE.md` (sources of truth). ANTICIPATE is a Forge app (`global:fullPage` Custom UI + Node.js 24 resolvers, Forge KVS storage, a Rovo agent, a `rovo:mcp` module and a Jira workflow validator) built for Jira Cloud.
 
 **Real Atlassian integration.** All user-initiated Jira reads and writes run `asUser()`, so Jira enforces the viewer's own permissions. The backend reads projects, JQL search, issues, issue links and components, and checks `mypermissions` right before any write. Every private operation requires an authenticated account; anonymous calls are refused.
 
@@ -16,6 +16,6 @@ Updated 3 Nov 2026 from `docs/STATUS.md` (source of truth). ANTICIPATE is a Forg
 
 **Rovo.** A Rovo agent (Decision Reviewer) and seven read-only MCP tools (get evidence graph, simulate retirement, simulate dependency upgrade, simulate slip, simulate several changes, get Passport, check plan freshness) expose the same deterministic engine to Rovo and external MCP clients. Rovo never approves or executes.
 
-**Quality.** Shared zod 4 contracts validate every request and response (payload size capped). 142 backend tests (fake Jira: partial failure, retry, stale approval, expired snapshot, concurrency, cross-user access, partial-approval bypass, outage policy, and a 50-cycle soak test for idempotency, bounded storage and gate stability), plus 4 contract and 16 engine tests, 122 frontend unit tests and 106 Playwright browser tests (counts on main f9ce7a5; source and method: docs/RELEASE.md). GitHub Actions CI on every PR. A 100-node, 3-scenario comparison runs in about 18 ms. Hosted acceptance on a real Jira site is recorded with dated evidence.
+**Quality.** Shared zod 4 contracts validate every request and response (payload size capped). 295 backend tests (fake Jira: partial failure, retry, stale approval, expired snapshot, concurrency, cross-user access, partial-approval bypass, outage policy, and a 50-cycle soak test for idempotency, bounded storage and gate stability), plus 8 contract and 75 engine tests, 151 frontend unit tests and 182 Playwright browser tests (current counts and method: docs/RELEASE.md, the single source). GitHub Actions CI on every PR. A 100-node, 3-scenario comparison runs in about 18 ms. Hosted acceptance on a real Jira site is recorded with dated evidence.
 
-**Known limitations.** Plans are private to their creator (shared workspace is a design). Teamwork Graph is a prototype adapter, not wired in. `global:fullPage` and `rovo:mcp` are Preview modules. Cold start to a usable app takes about 8 to 11 s.
+**Known limitations.** Plans are private to their creator (the shared workspace is an implemented backend prototype, release-locked until hosted two-account acceptance passes, #131). Teamwork Graph is a prototype adapter, not wired in. `global:fullPage` and `rovo:mcp` are Preview modules. First open: ~2.6 s warm, ~3.9 s backend-cold, up to ~9.3 s right after a deploy (cold CDN); see docs/RELEASE.md.
