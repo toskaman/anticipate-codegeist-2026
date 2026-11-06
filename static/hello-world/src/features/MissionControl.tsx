@@ -483,6 +483,10 @@ export default function MissionControl({
           w.capabilities?.operations.includes(RELEASE_CAPABILITY) ?? false
         }
         projectKey={project?.key ?? null}
+        onReview={(key) => {
+          w.actions.chooseCandidate(key);
+          void w.actions.analyze();
+        }}
         overviewSupported={
           w.capabilities?.operations.includes(OVERVIEW_CAPABILITY) ?? false
         }

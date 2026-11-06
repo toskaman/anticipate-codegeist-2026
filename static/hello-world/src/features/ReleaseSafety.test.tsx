@@ -255,3 +255,26 @@ it("release overview lists releases worst first and opens one with a single clic
   ]);
   expect(screen.getByText(/both touch SVC-1/)).toBeTruthy();
 });
+
+it("an interaction offers to start the normal analysis of the first change", async () => {
+  const keys: string[] = [];
+  const client = new ForgeClient(async () => response(result), 5000);
+  render(
+    <ReleaseSafety
+      client={client}
+      supported
+      projectKey="REL"
+      onReview={(k) => keys.push(k)}
+    />,
+  );
+  fireEvent.change(screen.getByLabelText(/Release \(fixVersion\)/), {
+    target: { value: "Winter" },
+  });
+  await act(async () => {
+    fireEvent.click(screen.getByRole("button", { name: "Check release" }));
+  });
+  fireEvent.click(
+    screen.getByRole("button", { name: /Analyze REL-1, then add REL-2/ }),
+  );
+  expect(keys).toEqual(["REL-1"]);
+});

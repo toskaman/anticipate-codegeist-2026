@@ -32,6 +32,8 @@ export interface ReleaseSafetyProps {
   supported: boolean;
   projectKey: string | null;
   overviewSupported?: boolean;
+  /** Starts the normal analysis of a change (Evidence Graph → Scenario Lab → portfolio + Composer). */
+  onReview?(issueKey: string): void;
 }
 
 /**
@@ -43,6 +45,7 @@ export default function ReleaseSafety({
   supported,
   projectKey,
   overviewSupported = false,
+  onReview,
 }: ReleaseSafetyProps) {
   const [fixVersion, setFixVersion] = useState("");
   const [busy, setBusy] = useState(false);
@@ -315,7 +318,17 @@ export default function ReleaseSafety({
               <ul>
                 {result.interactions.map((x) => (
                   <li key={`${x.changes.join("|")}|${x.via ?? ""}`}>
-                    {x.note}
+                    {x.note}{" "}
+                    {onReview && (
+                      <button
+                        type="button"
+                        className="ax-link-btn"
+                        onClick={() => onReview(x.changes[0])}
+                      >
+                        Analyze {x.changes[0]}, then add {x.changes[1]} in
+                        Scenario Lab
+                      </button>
+                    )}
                   </li>
                 ))}
               </ul>
