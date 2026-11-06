@@ -69,3 +69,21 @@ export function portfolioChanges(
   }
   return changes;
 }
+
+type Op = PortfolioChange["operations"][number];
+/** Applies a Composer candidate's transformations to the editable rows (one operation per row). Nothing else changes. */
+export function applyCandidate(
+  rows: PortfolioDraft[],
+  transformations: { changeId: string; after: Op }[],
+): PortfolioDraft[] {
+  return rows.map((row) => {
+    const t = transformations.find((x) => x.changeId === row.id);
+    if (!t) return row;
+    const a = t.after;
+    if (a.op === "DEPRECATE_NODE" && a.nodeId === row.nodeId)
+      return { ...row, action: "retain" };
+    if (a.op === "UPGRADE_NODE" && a.nodeId === row.nodeId)
+      return { ...row, action: a.breaking ? "breaking" : "compatible" };
+    return row;
+  });
+}

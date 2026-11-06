@@ -72,3 +72,33 @@ describe("portfolio input boundaries", () => {
     ).toBe("Retire API");
   });
 });
+
+import { applyCandidate } from "./portfolio";
+describe("applyCandidate", () => {
+  it("turns a breaking upgrade into a compatible one and a removal into retain, leaving other rows alone", () => {
+    const rows: PortfolioDraft[] = [
+      { ...row, id: "a", action: "remove" },
+      { ...row, id: "b", action: "breaking" },
+      { ...row, id: "c", action: "migrate", toNodeId: "x" },
+    ];
+    const out = applyCandidate(rows, [
+      {
+        changeId: "a",
+        after: { op: "DEPRECATE_NODE", nodeId: row.nodeId, retainUntil: null },
+      },
+      {
+        changeId: "b",
+        after: { op: "UPGRADE_NODE", nodeId: row.nodeId, breaking: false },
+      },
+      {
+        changeId: "c",
+        after: { op: "UPGRADE_NODE", nodeId: "other", breaking: false },
+      },
+    ]);
+    expect(out.map((r) => r.action)).toEqual([
+      "retain",
+      "compatible",
+      "migrate",
+    ]);
+  });
+});
