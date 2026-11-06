@@ -234,7 +234,9 @@ Each of these is either tested LOCAL only or not observed at all. The browser ch
 | Judge site, non-admin Settings (J2 in `docs/jury/HOSTED_ACCEPTANCE_PR37.md`) | dev only (one-atlas-euza) | The same check on anticipate-judge with an invited account |
 | R18: unreadable (403/404) gated issue follows the outage policy | LOCAL (6 unit tests) | A site where issue security actually hides the issue from the app |
 | Hosted screenshots for the Devpost gallery | none (gallery has diagrams only) | LIVE_FORGE captures of graph, Scenario Lab, Firewall, Passport |
-| Demo video (K1) | none | Recording per `docs/submission/VIDEO_SCRIPT.md` on the hosted judge site |
+| Demo video (K1) | none | Recording per `docs/submission/VIDEO_SCRIPT.md` v3 on the hosted judge site (#189) |
+| MCP slip + portfolio from an external client (5/7 → 7/7) | UNIT_TESTED + LOCAL rovo tests; dev v6.28.0 carries all 7 tools | One admin-enabled session per `MCP_EXTERNAL_RUNBOOK.md` (#190) |
+| Clean-site judge re-run on the shipping build | Judge PASS 3 Nov on an older build; new Explorer/Command Center UI UNIT_TESTED + LOCAL mock-e2e only | `JUDGE_RERUN_CHECKLIST.md` on anticipate-judge incl. new-UI exercise (#191) |
 
 
 ## 4 Nov 2026 — LIVE_FORGE_DEV: 10-parallel burst (#53) and Decision Radar end to end (#132)
