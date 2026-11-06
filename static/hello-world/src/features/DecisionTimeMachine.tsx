@@ -134,6 +134,17 @@ export default function DecisionTimeMachine({
               </li>
             ))}
           </ol>
+          {(h.droppedCheckpoints > 0 ||
+            h.baseline.evidenceState !== "LIVE") && (
+            <p className="ax-muted">
+              Retention:{" "}
+              {h.droppedCheckpoints > 0
+                ? `${h.droppedCheckpoints} older checkpoint(s) dropped at the storage bound. `
+                : ""}
+              Baseline evidence is{" "}
+              {h.baseline.evidenceState.toLowerCase().replace("_", " ")}.
+            </p>
+          )}
           <fieldset className="ax-inline-form">
             <legend>Compare two recorded checkpoints</legend>
             <label htmlFor={`${id}-a`}>Before</label>
