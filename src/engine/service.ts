@@ -27,6 +27,7 @@ import { previewSample, createSample } from './sample';
 import { mergeSource, notConfiguredTwg } from '../context/sources';
 import type { EvidenceDrift, PlanAttention } from '../../packages/contracts/src/index';
 import { stableHash } from '../../packages/simulation-core/src/index';
+import { payloadBytes, warnIfNearCap } from '../core/payloads';
 import { simulatePortfolio as runPortfolio, PortfolioError, PORTFOLIO_LIMITS } from '../../packages/simulation-core/src/portfolio';
 import type { SimulatePortfolioRequest, SimulatePortfolioResult, ChangeOperation } from '../../packages/contracts/src/index';
 import { ATTESTATION_VALID_DAYS, decideTransition, decisionKey, linksDigest, type DecisionRecord } from '../validator';
@@ -37,7 +38,7 @@ const SNAPSHOT_TTL_HOURS = 24;
 const LEASE_MS = 120_000;
 const MAX_ATTEMPTS = 5;
 
-interface SnapRec { snapshot: GraphSnapshot; owner: string | null; rootIssueKey: string; projectKey: string; }
+interface SnapRec { snapshot: GraphSnapshot; owner: string | null; rootIssueKey: string; projectKey: string; bytes: number; }
 interface CmpRec { request: SimulationRequest; comparison: ScenarioComparison; }
 interface PlanRec { plan: PreventionPlan; owner: string | null; rootIssueKey: string; projectKey: string; approvedActionIds: string[];
   approvals: { accountId: string | null; at: string; actionIds: string[]; planHash: string }[]; timeline: { at: string; event: string }[]; }
@@ -50,7 +51,7 @@ interface PlanRec { plan: PreventionPlan; owner: string | null; rootIssueKey: st
 interface HistRec { owner: string | null; dropped: number; items: DecisionCheckpoint[]; }
 
 interface ProvRec { owner: string | null; snapshotId: string; mode: GraphSnapshot['mode']; capturedAt: string; expiresAt: string;
-  nodeCount: number; edgeCount: number; causalEdges: { from: string; to: string; kind: string; status: string }[]; snapshotDigest: string; }
+  nodeCount: number; edgeCount: number; causalEdges: { from: string; to: string; kind: string; status: string }[]; snapshotDigest: string; bytes: number; }
 
 const K = {
   prov: (planId: string) => `prov:${planId}`,
@@ -63,7 +64,10 @@ export function createService(d: Deps) {
   const iso = () => d.now().toISOString();
 
   async function loadSnap(ctx: Ctx, snapshotId: string): Promise<SnapRec> {
-    if (snapshotId === FIXTURE_SNAPSHOT.snapshotId) return { snapshot: FIXTURE_SNAPSHOT, owner: null, rootIssueKey: 'PAY-412', projectKey: 'DEMO' };
+    if (snapshotId === FIXTURE_SNAPSHOT.snapshotId) {
+      const rec = { snapshot: FIXTURE_SNAPSHOT, owner: null, rootIssueKey: 'PAY-412', projectKey: 'DEMO' };
+      return { ...rec, bytes: payloadBytes(rec) };
+    }
     if (!ctx.accountId) fail('PERMISSION_DENIED', 'An authenticated Atlassian user is required.');
     const r = await d.store.get<SnapRec>(K.snap(snapshotId));
     if (!r) fail('NOT_FOUND', `Snapshot ${snapshotId} not found.`);
@@ -104,7 +108,18 @@ export function createService(d: Deps) {
           const live = await extractGraph(d.jira, rec.rootIssueKey, { maxDepth: 3, maxNodes: 200, snapshotId: `${rec.plan.snapshotId}~attest`,
             projectId: rec.projectKey, now: d.now(), ttlHours: SNAPSHOT_TTL_HOURS });
           const creates = rec.plan.actions.filter((a) => a.type === 'CREATE_ISSUE');
-          const artifacts = creates.length ? (await d.jira.searchIssues(`labels in (${creates.map((a) => `"${actionMarker(rec.plan.planId, a.actionId)}"`).join(', ')})`, null, 50)).items.map((i) => `issue:${i.key}`) : [];
+          let artifacts: string[] = [];
+          if (creates.length) {
+            const labels = creates.map((a) => `"${actionMarker(rec.plan.planId, a.actionId)}"`).join(', ');
+            const hits = (await d.jira.searchIssues(`labels in (${labels})`, null, 50)).items;
+            const records = await Promise.all(rec.plan.actions.map((a) => d.store.get<ExecutionRecord>(K.exec(rec.plan.planId, a.actionId))));
+            const snap = await d.store.get<SnapRec>(K.snap(rec.plan.snapshotId));
+            const baselineKeys = new Set((snap?.snapshot.nodes ?? []).filter((n) => n.id.startsWith('issue:')).map((n) => n.id.slice('issue:'.length)));
+            const markerAction = new Map(creates.map((a) => [actionMarker(rec.plan.planId, a.actionId), a.actionId]));
+            artifacts = hits.filter(markerArtifactFilter(rec, records, baselineKeys, markerAction)).map((i) => `issue:${i.key}`);
+          }
+
+
           const g = { ...live, edges: live.edges.filter((e) => !artifacts.includes(e.from) && !artifacts.includes(e.to)) };
           const now = simulate(g, { scenarioId: `${rec.plan.scenarioId}~as-is`, label: 'change on current evidence', operations: direct }, DEFAULT_POLICIES);
           r.currentVerdict = now.verdict; r.currentBlockers = now.summary.blockers;
@@ -133,6 +148,21 @@ export function createService(d: Deps) {
     if (owner !== ctx.accountId) fail('PERMISSION_DENIED', 'Decision records are private to the user who created them.');
     if (snap) return { mode: snap.snapshot.mode, state: isExpired(snap.snapshot) ? 'EXPIRED_SNAPSHOT' as const : 'LIVE' as const, prov };
     return { mode: prov!.mode, state: 'ARCHIVED' as const, prov };
+  }
+
+  /** Marker corroboration shared by drift and attestation: a marker hit is a plan artifact only when its action's execution record points at THIS issue, or — once the plan executed — when the issue postdates the baseline (pre-existing issues are never artifacts). Residual: an owner creating brand-new post-plan issues with copied markers; noisy and auditable in Jira. */
+  function markerArtifactFilter(rec: PlanRec, records: (ExecutionRecord | undefined)[], baselineKeys: Set<string>, markerAction: Map<string, string>) {
+    const recordFor = new Map<string, ExecutionRecord>();
+    rec.plan.actions.forEach((_a, i) => { const r = records[i]; if (r) recordFor.set(r.actionId, r); });
+    const executedBefore = rec.plan.status === 'EXECUTING' || rec.plan.status === 'COMPLETED' || rec.plan.status === 'PARTIAL' || rec.plan.status === 'FAILED'
+      || records.some(Boolean) || rec.timeline.some((t) => t.event.startsWith('Execution '));
+    return (issue: { key: string; labels: string[] }): boolean => {
+      const aids = issue.labels.map((l) => markerAction.get(l)).filter((a): a is string => a !== undefined);
+      if (!aids.length) return false;
+      if (aids.some((a) => recordFor.get(a)?.resultRef?.issueKey === issue.key)) return true;
+      if (!executedBefore) return false;
+      return !baselineKeys.has(issue.key);
+    };
   }
 
   /** Re-extract the plan's evidence neighbourhood live and diff it (Continuous Decision Safety). */
@@ -164,11 +194,15 @@ export function createService(d: Deps) {
     const records = await Promise.all(rec.plan.actions.map((a) => d.store.get<ExecutionRecord>(K.exec(rec.plan.planId, a.actionId))));
     const creates = rec.plan.actions.filter((a) => a.type === 'CREATE_ISSUE');
     const fromRecords = records.filter((r) => r?.resultRef?.issueKey && creates.some((a) => a.actionId === r.actionId)).map((r) => r!.resultRef!.issueKey!);
-    // Bookkeeping can be lost (timeouts); marker labels on created issues are the durable source of truth.
+    // Bookkeeping can be lost (timeouts); marker labels on created issues are the durable fallback, corroborated so a
+    // pasted marker cannot blind the gate (pre-execution hits and pre-existing issues stay ordinary evidence).
+    const markerAction = new Map(creates.map((a) => [actionMarker(rec.plan.planId, a.actionId), a.actionId]));
+    const baselineKeys = new Set(snap.snapshot.nodes.filter((n) => n.id.startsWith('issue:')).map((n) => n.id.slice('issue:'.length)));
+    const isArtifact = markerArtifactFilter(rec, records, baselineKeys, markerAction);
     let fromMarkers: string[] = [];
     if (creates.length) {
       const labels = creates.map((a) => `"${actionMarker(rec.plan.planId, a.actionId)}"`).join(', ');
-      fromMarkers = (await d.jira.searchIssues(`labels in (${labels})`, null, 50)).items.map((i) => i.key);
+      fromMarkers = (await d.jira.searchIssues(`labels in (${labels})`, null, 50)).items.filter(isArtifact).map((i) => i.key);
     }
     const artifacts = [...new Set([...fromRecords, ...fromMarkers])].sort();
     return diffEvidence({ planId: rec.plan.planId, before: snap.snapshot, after, planArtifactIssueKeys: artifacts, checkedAt });
@@ -305,7 +339,10 @@ export function createService(d: Deps) {
       const extra = await source.fetch(keys).catch((e) => ({ state: 'UNAVAILABLE' as const, detail: `Teamwork Graph error: ${e instanceof Error ? e.message.slice(0, 200) : 'unknown'}`, objects: [], relations: [] }));
       const snapshot = mergeSource(jiraOnly, extra);
       const projectKey = root.kind === 'ok' ? root.issue.projectKey : input.projectId;
-      await d.store.set<SnapRec>(K.snap(snapshotId), { snapshot, owner: ctx.accountId, rootIssueKey: input.rootIssueKey, projectKey });
+      const snapRec = { snapshot, owner: ctx.accountId, rootIssueKey: input.rootIssueKey, projectKey };
+      const snapBytes = payloadBytes(snapRec);
+      warnIfNearCap('snapshot', snapshotId, snapBytes);
+      await d.store.set<SnapRec>(K.snap(snapshotId), { ...snapRec, bytes: snapBytes });
       return snapshot;
     },
 
@@ -438,9 +475,12 @@ export function createService(d: Deps) {
         timeline: [{ at: s.snapshot.createdAt, event: `Snapshot ${s.snapshot.snapshotId} captured` }, { at: iso(), event: `Plan generated for scenario ${input.scenarioId}` }] });
       await d.store.set(K.cmp(`plan:${planId}`), c);
       const causal = s.snapshot.edges.filter((e) => ['DEPENDS_ON', 'USES', 'BLOCKS', 'AFFECTS', 'VERIFIED_BY'].includes(e.kind));
-      await d.store.set<ProvRec>(K.prov(planId), { owner: ctx.accountId, snapshotId: s.snapshot.snapshotId, mode: s.snapshot.mode,
+      const provRec = { owner: ctx.accountId, snapshotId: s.snapshot.snapshotId, mode: s.snapshot.mode,
         capturedAt: s.snapshot.createdAt, expiresAt: s.snapshot.expiresAt, nodeCount: s.snapshot.nodes.length, edgeCount: s.snapshot.edges.length,
-        causalEdges: causal.slice(0, 300).map((e) => ({ from: e.from, to: e.to, kind: e.kind, status: e.status })), snapshotDigest: stableHash(s.snapshot) });
+        causalEdges: causal.slice(0, 300).map((e) => ({ from: e.from, to: e.to, kind: e.kind, status: e.status })), snapshotDigest: stableHash(s.snapshot) };
+      const provBytes = payloadBytes(provRec);
+      warnIfNearCap('provenance', planId, provBytes);
+      await d.store.set<ProvRec>(K.prov(planId), { ...provRec, bytes: provBytes });
       // Decision Radar: index the Jira issue ids of the evidence (best effort; failures surface as DEGRADED coverage).
       if (d.radar) { try { await d.radar.indexPlan(planId, s.snapshot.nodes); } catch { /* coverage record shows NOT_INDEXED */ } }
       return plan;
@@ -490,6 +530,8 @@ export function createService(d: Deps) {
       if (isExpired(snap.snapshot)) { await this.markExpired(rec); fail('SNAPSHOT_EXPIRED', 'Snapshot expired; regenerate the plan.'); }
       // Continuous Decision Safety: never write on evidence that changed after approval.
       await guardFreshEvidence(rec, snap, 'execution');
+      const baselineKeys = new Set(snap.snapshot.nodes.filter((n) => n.id.startsWith('issue:')).map((n) => n.id.slice('issue:'.length)));
+      const priorStatus = rec.plan.status;
       // Shared decisions: the link is server-side state written at share time, so a client cannot bypass review by omitting an id.
       // Fail closed: a governed plan without a verifiable gate never writes.
       const link = await d.store.get<{ decisionId?: string }>(`ws:plan:${input.planId}`);
@@ -523,7 +565,7 @@ export function createService(d: Deps) {
             rec.timeline.push({ at: iso(), event: `Execution stopped: shared decision ${governedBy} is no longer approved` });
             stopped = true; break;
           }
-          out.push(await executeOne(rec, action, perms, input.idempotencyKey));
+          out.push(await executeOne(rec, action, perms, input.idempotencyKey, baselineKeys));
         }
         const verified = out.filter((r) => r.status === 'VERIFIED').length;
         // COMPLETED means EVERY action of the plan was approved and verified. Verifying a subset (e.g. only the
@@ -535,6 +577,15 @@ export function createService(d: Deps) {
         await d.store.set(K.plan(input.planId), rec);
         await recordDecision(rec);
         return out;
+      } catch (e) {
+        // An unexpected failure (permissions/store outage) must not brick the plan in EXECUTING: restore the prior
+        // status so the user can retry. Only restores when still EXECUTING (a finished FAILED/PARTIAL stays).
+        if (rec.plan.status === 'EXECUTING') {
+          rec.plan = { ...rec.plan, status: priorStatus };
+          rec.timeline.push({ at: iso(), event: `Execution interrupted (${e instanceof Error ? e.message.slice(0, 120) : 'error'}); status restored to ${priorStatus}` });
+          await d.store.set(K.plan(input.planId), rec);
+        }
+        throw e;
       } finally {
         const held = await d.store.get<typeof lease>(lockKey);
         if (held?.token === lease.token) await d.store.delete(lockKey); // never release someone else's lease
@@ -582,7 +633,7 @@ export function createService(d: Deps) {
   };
   return svc;
 
-  async function executeOne(rec: PlanRec, a: ProposedAction, perms: Record<string, boolean>, idem: string): Promise<ExecutionRecord> {
+  async function executeOne(rec: PlanRec, a: ProposedAction, perms: Record<string, boolean>, idem: string, baselineKeys: Set<string>): Promise<ExecutionRecord> {
     const key = K.exec(rec.plan.planId, a.actionId);
     const prev = await d.store.get<ExecutionRecord>(key);
     if (prev?.status === 'VERIFIED') return prev;
@@ -598,8 +649,9 @@ export function createService(d: Deps) {
       let issueKey: string | null = null;
       if (a.type === 'CREATE_ISSUE') {
         const p = a.payload as { summary: string; description: string; blocksIssueKey: string; linkType: string };
-        const found = await d.jira.searchIssues(`project = ${a.targetProjectKey} AND labels = "${marker}"`, null, 2);
-        issueKey = found.items[0]?.key ?? null;
+        const found = await d.jira.searchIssues(`project = ${a.targetProjectKey} AND labels = "${marker}"`, null, 50);
+        // Reconciliation must not adopt a pre-existing issue carrying a pasted marker: only post-baseline hits are ours.
+        issueKey = found.items.map((i) => i.key).find((k) => !baselineKeys.has(k)) ?? null;
         if (!issueKey) {
           const types = await d.jira.issueTypes(a.targetProjectKey);
           const t = types.find((x) => x === 'Task') ?? types.find((x) => !/epic|sub/i.test(x)) ?? types[0];
@@ -607,11 +659,11 @@ export function createService(d: Deps) {
           issueKey = (await d.jira.createIssue({ projectKey: a.targetProjectKey, summary: p.summary, description: p.description, issueType: t, labels: ['anticipate', marker] })).key;
         }
         const cur = await d.jira.getIssue(issueKey);
-        const linked = cur.kind === 'ok' && cur.issue.links.some((l) => l.otherKey === p.blocksIssueKey && l.typeName === p.linkType);
+        const linked = cur.kind === 'ok' && cur.issue.links.some((l) => l.otherKey === p.blocksIssueKey && l.typeName === p.linkType && l.direction === 'outward');
         if (!linked) await d.jira.createLink({ typeName: p.linkType, outwardKey: issueKey, inwardKey: p.blocksIssueKey });
         await save({ ...base, status: 'SUBMITTED', resultRef: ref(issueKey), error: null, updatedAt: iso() });
         const v = await d.jira.getIssue(issueKey);
-        const ok = v.kind === 'ok' && v.issue.labels.includes(marker) && v.issue.links.some((l) => l.otherKey === p.blocksIssueKey);
+        const ok = v.kind === 'ok' && v.issue.labels.includes(marker) && v.issue.links.some((l) => l.otherKey === p.blocksIssueKey && l.typeName === p.linkType && l.direction === 'outward');
         if (!ok) throw new AppError('UPSTREAM_UNAVAILABLE', 'Write submitted but verification did not observe the expected issue + link.', true);
       } else if (a.type === 'ADD_LABEL') {
         issueKey = a.targetIssueKey!;
@@ -635,11 +687,11 @@ export function createService(d: Deps) {
           const typeName = p.type; const inwardKey = p.inward; const outwardKey = p.outward;
           issueKey = a.targetIssueKey ?? outwardKey;
           const cur = await d.jira.getIssue(outwardKey);
-          const linked = cur.kind === 'ok' && cur.issue.links.some((l) => l.otherKey === inwardKey && l.typeName === typeName);
+          const linked = cur.kind === 'ok' && cur.issue.links.some((l) => l.otherKey === inwardKey && l.typeName === typeName && l.direction === 'outward');
           if (!linked) await d.jira.createLink({ typeName, outwardKey, inwardKey });
           await save({ ...base, status: 'SUBMITTED', resultRef: ref(issueKey), error: null, updatedAt: iso() });
           const v = await d.jira.getIssue(outwardKey);
-          if (!(v.kind === 'ok' && v.issue.links.some((l) => l.otherKey === inwardKey && l.typeName === typeName))) throw new AppError('UPSTREAM_UNAVAILABLE', 'Link not observed after write.', true);
+          if (!(v.kind === 'ok' && v.issue.links.some((l) => l.otherKey === inwardKey && l.typeName === typeName && l.direction === 'outward'))) throw new AppError('UPSTREAM_UNAVAILABLE', 'Link not observed after write.', true);
         } else {
           throw new AppError('UNSUPPORTED', `Action type ${a.type} not implemented.`);
         }

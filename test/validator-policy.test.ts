@@ -1,5 +1,5 @@
 import { createService } from '../src/engine/service';
-import { runValidator, linksDigest } from '../src/validator';
+import { runValidator, linksDigest, _resetPolicyCacheForTests } from '../src/validator';
 import { ValidatorPolicy } from '../packages/contracts/src/index';
 import { demoJira, memoryStore } from './fakes';
 
@@ -9,6 +9,7 @@ const admin = { requestId: 'r', accountId: 'admin', installationId: 'i' };
 const dev = { requestId: 'r', accountId: 'dev', installationId: 'i' };
 
 describe('validator outage policy', () => {
+  beforeEach(() => _resetPolicyCacheForTests());
   it('defaults to ALLOW; only Jira administrators can switch it; the change is recorded', async () => {
     const jira = demoJira(); const store = memoryStore();
     const svc = createService({ jira, store, now: () => new Date('2026-11-03T00:00:00Z'), newId: () => 'x' });
@@ -47,6 +48,7 @@ describe('validator outage policy', () => {
 });
 
 describe('validator: unreadable issue (R18)', () => {
+  beforeEach(() => _resetPolicyCacheForTests());
   const dec = { schema: 3 as const, planId: 'p', scenarioId: 'B', status: 'COMPLETED', at: '', issueKey: 'X-1', verdict: 'PASS', blockers: 0, currentVerdict: 'PASS', currentBlockers: 0,
     allActionsVerified: true, linksDigest: linksDigest([]), validUntil: '2026-12-01T00:00:00Z' };
   const run = (kind: string, policy?: string, logs: unknown[] = []) => runValidator('X-1', { readIssue: async () => ({ kind }), readDecision: async () => dec,

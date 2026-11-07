@@ -55,11 +55,20 @@ export interface ThrottleVerdict {
   remaining: number;
 }
 
-/** Stable store key: budget is per (installation, user, operation). */
+/** FNV-1a 32-bit hex: stable, dependency-free, Forge-KVS-safe. */
+function fnv1aHex(s: string): string {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193); }
+  return (h >>> 0).toString(16).padStart(8, '0');
+}
+
+/** Stable store key: budget is per (installation, user, operation). Identities are hashed (not sanitized) so distinct ARIs/accounts can never share one budget through a character collision; the operation is app-controlled and stays readable. */
 export function throttleKey(installationId: string, accountId: string | null, operation: string): string {
   // Forge KVS keys only accept [a-zA-Z0-9:._ -#]. installContext is an ARI such as
   // "ari:cloud:jira::site/<cloudId>": the "/" made every kvs call throw (production 2.31.0 outage).
-  return `throttle:${installationId}:${accountId ?? 'anon'}:${operation}`.replace(/[^a-zA-Z0-9:._\s#-]/g, '_').slice(0, 500);
+  // Note: keys written before hashed identities simply expire unused; budgets reset once on deploy.
+  const op = operation.replace(/[^a-zA-Z0-9:._\s#-]/g, '_');
+  return `throttle:${fnv1aHex(installationId)}:${fnv1aHex(accountId ?? 'anon')}:${op}`.slice(0, 500);
 }
 
 type ThrottleState = number[]; // epoch-ms of allowed requests, ascending

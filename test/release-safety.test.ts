@@ -71,13 +71,13 @@ describe('Release Safety Control Plane', () => {
     void s;
   });
 
-  it('stale (EVIDENCE_CHANGED) or BLOCK decisions block the release', async () => {
+  it('stale (EVIDENCE_CHANGED) or BLOCKED decisions block the release', async () => {
     const { store, s } = svc();
     await store.set('decision:REL-1', dec({ status: 'EVIDENCE_CHANGED' }));
     let r = parse(await s.getReleaseSafety(ctx, { projectKey: 'REL', fixVersion: 'Winter' }));
     expect(r.verdict).toBe('BLOCKED');
     expect(r.items[0]!.reasons[0]).toMatch(/cannot authorize execution/);
-    await store.set('decision:REL-1', dec({ currentVerdict: 'BLOCK', currentBlockers: 2 }));
+    await store.set('decision:REL-1', dec({ currentVerdict: 'BLOCKED', currentBlockers: 2 }));
     r = parse(await s.getReleaseSafety(ctx, { projectKey: 'REL', fixVersion: 'Winter' }));
     expect(r.items[0]!.state).toBe('BLOCKED');
   });
