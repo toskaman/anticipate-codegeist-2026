@@ -102,7 +102,7 @@ or on the judge site (validator, 3 Nov). No MOCK_TRANSPORT frames. First 3:00 st
 - [ ] Collision close-up readable at 1080p (conflict names + impacted nodes legible).
 - [ ] No personal data, tokens, or non-Atlassian logos in any frame; subtitles match narration.
 - [ ] Total ≤ 4:45; first 3:00 coherent with the extension removed.
-- [ ] Publish unlisted YouTube link + build version; both owners agree before Devpost paste.
+- [ ] Publish public (listed, per official rules — not unlisted) YouTube link + build version; both owners agree before Devpost paste.
 
 ## Script
 
