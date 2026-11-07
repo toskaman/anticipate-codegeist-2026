@@ -90,9 +90,9 @@ test("display menu closes on outside pointer press", async ({ page }) => {
   const button = menuButton(page);
   await button.click();
   await expect(menuDialog(page)).toBeVisible();
-  await page
-    .getByRole("heading", { name: "Mission Control", exact: true })
-    .click();
+  // The harness banner is sticky, topmost (z-index 1000) and outside the
+  // panel, so this click can never be intercepted by the open dialog itself.
+  await page.getByText("MOCK TRANSPORT TEST ONLY").click();
   await expect(menuDialog(page)).toHaveCount(0);
 });
 
