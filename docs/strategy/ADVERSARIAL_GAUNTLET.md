@@ -443,7 +443,7 @@ shown colliding the instant they are simulated together (EMERGENT_IMPACT + MIGRA
 on ADM, hosted 5 Nov on 2.37.0 with screenshots). Record `docs/submission/VIDEO_SCRIPT.md` v2
 (4:20 plan, production-observed scenes) with the collision inside the first 15 seconds and the
 visual climax near 0:50; keep the first 3 minutes standalone per the rules. Verify: published
-unlisted YouTube link + shot checklist, all footage from the shipping build.
+public (listed, per official rules — not unlisted) YouTube link + shot checklist, all footage from the shipping build.
 
 **C. Ten-Second Rebuttal.** "Two safe changes, one screen, instant collision — the first fifteen
 seconds are the product, not a pitch."
