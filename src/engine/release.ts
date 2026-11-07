@@ -36,7 +36,7 @@ export function classify(issue: JiraIssue, d: DecisionRecord | undefined, now: D
   if (d.status === 'EXPIRED' || d.status === 'FAILED')
     return { state: 'NEEDS_REVIEW', reasons: [`Decision ${d.planId} is ${d.status}; a new decision is required.`] };
   const verdict = d.currentVerdict ?? d.verdict ?? 'UNKNOWN';
-  if (verdict === 'BLOCK') return { state: 'BLOCKED', reasons: [`Policy verdict BLOCK${d.currentVerdict ? ' on live evidence at completion' : ''} (${d.currentBlockers ?? d.blockers ?? '?'} blocker(s)).`] };
+  if (verdict === 'BLOCKED') return { state: 'BLOCKED', reasons: [`Policy verdict BLOCKED${d.currentVerdict ? ' on live evidence at completion' : ''} (${d.currentBlockers ?? d.blockers ?? '?'} blocker(s)).`] };
   if (verdict === 'UNKNOWN') reasons.push('Policy verdict is UNKNOWN: evidence was incomplete when the decision was made.');
   if (d.status === 'COMPLETED' && d.validUntil && new Date(d.validUntil).getTime() < now.getTime())
     return { state: 'NEEDS_REVIEW', reasons: [`Attestation for ${d.planId} expired on ${d.validUntil.slice(0, 10)}.`] };

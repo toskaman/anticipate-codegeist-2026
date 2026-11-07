@@ -6,13 +6,21 @@ import type { IssueFetch, JiraIssue, JiraPort, Store } from './core/ports';
 
 const FIELDS = 'summary,status,issuetype,issuelinks,components,project,labels,updated,duedate,fixVersions';
 
+/** Single-retry backoff for idempotent GETs on transient faults (429/5xx). Mutations are never auto-retried. */
+const GET_RETRY_AFTER_MS = 1000;
+
 
 async function call(actor: 'user' | 'app', path: ReturnType<typeof route>, init?: { method?: string; body?: unknown }): Promise<Response> {
-  const res = await (actor === 'app' ? api.asApp() : api.asUser()).requestJira(path, {
+  const once = () => (actor === 'app' ? api.asApp() : api.asUser()).requestJira(path, {
     method: init?.method ?? 'GET',
     headers: { Accept: 'application/json', ...(init?.body ? { 'Content-Type': 'application/json' } : {}) },
     body: init?.body ? JSON.stringify(init.body) : undefined
   });
+  let res = await once();
+  if ((init?.method ?? 'GET') === 'GET' && (res.status === 429 || res.status >= 500)) {
+    await new Promise((r) => setTimeout(r, GET_RETRY_AFTER_MS));
+    res = await once();
+  }
   if (res.status === 429) throw new AppError('RATE_LIMITED', 'Jira rate limit reached; try again shortly.', true);
   if (res.status === 401) throw new AppError('PERMISSION_DENIED', 'Jira access not authorized for this user (consent may be required).');
   return res as unknown as Response;

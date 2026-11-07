@@ -4,7 +4,7 @@
  * A gated issue may transition only if its latest ANTICIPATE prevention plan is COMPLETED (all approved actions
  * verified in Jira). No graph crawl happens during a transition: it reads one stored decision record + the labels.
  * Availability policy: if ANTICIPATE storage/Jira is unreachable the validator FAILS OPEN (allows) and logs, so our
- * outage can never lock a team's workflow; this is documented and visible in logs.
+ * outage can never lock a team's workflow, unless an admin chose BLOCK and that choice is cached from a successful read; this is documented and visible in logs.
  * Removal: delete the validator from the transition in the workflow editor.
  * Attestations are scoped per owner+plan (decision:owner:issueKey:planId); legacy decision:issueKey
  * records are honored only when the caller expects no scope.
@@ -26,6 +26,11 @@ export interface DecisionRecord {
   currentVerdict?: string; currentBlockers?: number | null; planHash?: string; snapshotId?: string; linksDigest?: string | null; validUntil?: string | null;
 }
 export const ATTESTATION_VALID_DAYS = 14;
+
+/** Last successfully read outage policy (warm-isolate memory). A BLOCK an admin chose keeps binding during a policy-read outage instead of silently degrading to ALLOW. */
+let lastKnownPolicy: { onOutage: 'ALLOW' | 'BLOCK'; at: string } | null = null;
+/** Test seam: Forge isolates are long-lived; tests reset the cache between cases. */
+export function _resetPolicyCacheForTests(): void { lastKnownPolicy = null; }
 
 /**
  * Scoped attestation keys (TOP7). Plans are private per owner, so attestations are too:
@@ -84,7 +89,7 @@ export function decideTransition(issue: { labels: string[]; links: Link[] } | nu
  * Full validator run with an explicit outage policy. Any failure to read the issue or the decision is an outage, including a 403/404 issue read (R18).
  * Policy ALLOW (default): the transition passes and the degradation is logged. Policy BLOCK (opt-in by a Jira admin):
  * the transition is refused with a message that names the outage and the recovery path. If even the policy cannot be
- * read, ALLOW applies, so a full storage outage can never lock every gated workflow.
+ * read, ALLOW applies unless a BLOCK was cached from a previous successful read, so a full storage outage with no known policy can never lock every gated workflow.
  * When expectedScope is given, the decision must belong to that owner+plan (scoped attestations, TOP7).
  */
 export async function runValidator(key: string, io: {
@@ -95,10 +100,12 @@ export async function runValidator(key: string, io: {
   now?: Date;
 }, expectedScope?: DecisionScope): Promise<{ result: boolean; errorMessage?: string }> {
   const outage = async (reason: string, detail: string) => {
-    let policy = 'ALLOW';
-    try { policy = (await io.readPolicy())?.onOutage === 'BLOCK' ? 'BLOCK' : 'ALLOW'; } catch { policy = 'ALLOW'; }
-    io.log({ app: 'anticipate', op: 'validateTransition', outage: true, policy, reason, detail: detail.slice(0, 200) });
-    if (policy === 'BLOCK') return { result: false, errorMessage: `ANTICIPATE Decision Firewall: ${key} cannot be verified right now (ANTICIPATE or Jira is unavailable) and your administrator chose to block transitions during outages. Try again in a few minutes, or ask a Jira administrator to switch the outage policy to Allow in ANTICIPATE Settings.` };
+    let policy: 'ALLOW' | 'BLOCK' = 'ALLOW';
+    let policySource: 'store' | 'cache' | 'default' = 'default';
+    let cachedAt: string | null = null;
+    try { policy = (await io.readPolicy())?.onOutage === 'BLOCK' ? 'BLOCK' : 'ALLOW'; policySource = 'store'; lastKnownPolicy = { onOutage: policy, at: new Date().toISOString() }; } catch { if (lastKnownPolicy?.onOutage === 'BLOCK') { policy = 'BLOCK'; policySource = 'cache'; cachedAt = lastKnownPolicy.at; } }
+    io.log({ app: 'anticipate', op: 'validateTransition', outage: true, policy, policySource, ...(cachedAt ? { cachedAt } : {}), reason, detail: detail.slice(0, 200) });
+    if (policy === 'BLOCK') return { result: false, errorMessage: policySource === 'cache' ? `ANTICIPATE Decision Firewall: ${key} cannot be verified right now (ANTICIPATE or Jira is unavailable) and your administrator's last known outage policy is Block${cachedAt ? ` (recorded ${cachedAt.slice(0, 10)})` : ''}. Try again in a few minutes, or ask a Jira administrator to switch the outage policy to Allow in ANTICIPATE Settings once the outage is over.` : `ANTICIPATE Decision Firewall: ${key} cannot be verified right now (ANTICIPATE or Jira is unavailable) and your administrator chose to block transitions during outages. Try again in a few minutes, or ask a Jira administrator to switch the outage policy to Allow in ANTICIPATE Settings.` };
     return { result: true };
   };
   try {
