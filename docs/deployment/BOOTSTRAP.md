@@ -7,10 +7,10 @@ npm install -g @forge/cli --prefix E:\Codegeist2026\tools\forge-cli
 forge login            # NEW token from id.atlassian.com; never paste it in files/chat
 forge whoami
 
-cd E:\Codegeist2026\ANTICIPATE-CORE
+cd E:\Codegeist2026\ANTICIPATE
 npm install            # root: Forge backend deps + vitest/typescript
 npm run typecheck
-npm test               # backend 12 tests
+npm test               # backend 326 tests (main c9284ae)
 npx vitest run --root packages/contracts
 npx vitest run --root packages/simulation-core
 cd static\hello-world; npm install; npm run build; cd ..\..

@@ -43,7 +43,7 @@ Who it helps: engineering managers reviewing risky changes, platform teams retir
 - **Deterministic engine:** a pure TypeScript simulation package applies each option to an isolated copy of a frozen snapshot, traces impact through reverse dependencies with causal paths, evaluates policies and returns a reproducible hash. No probabilities or invented savings.
 - **Safe execution:** approval is bound to the plan version and expires with the snapshot. Execution takes a per-plan lease, uses idempotency keys and marker reconciliation so retries never create duplicates, and only reports Verified after re-reading Jira. Partial outcomes are reported as Partial.
 - **Shared contracts:** zod schemas validate every request and response on both sides.
-- **Quality:** 295 backend tests (including authorization, concurrency, outage policy, a 50-cycle soak test and storage-failure injection), 75 simulation-engine tests, 8 contract tests, 151 frontend unit tests and 182 Playwright tests (Chromium, Firefox and WebKit) with automated accessibility checks on light and dark themes. Counts are for main on 5 Nov 2026; see docs/RELEASE.md. CI runs typecheck, lint, formatting, unit tests, Playwright and a security audit on every pull request.
+- **Quality:** 326 backend tests (including authorization, concurrency, outage policy, a 50-cycle soak test and storage-failure injection), 75 simulation-engine tests, 12 contract tests, 201 frontend unit tests and 186 Playwright cases listed in 30 files (Chromium, Firefox and WebKit) including automated accessibility checks on light and dark themes. Counts are for main c9284ae on 7 Nov 2026; see docs/RELEASE.md. CI runs typecheck, lint, formatting, unit tests, Playwright and a security audit on every pull request.
 - **Two-person team:** one owner on backend, engine, Forge and security; one on interface, accessibility and presentation, coordinating through written contracts in the repository.
 
 ## Challenges we ran into
@@ -113,7 +113,7 @@ ANTICIPATE exposes seven tools through `rovo:mcp` that never write to Jira: get 
 | MCP from an external client | EVIDENCE_PACK: "MCP (external client)" (get-graph, simulate-retirement, get-passport, 2 Nov), "MCP after rollback"; simulate-upgrade + check-freshness via mcp.atlassian.com 3 Nov (ENGINEERING_REPORT). 5/7 tools externally verified; slip + portfolio pending an admin-enabled session (STATUS.md) |
 | Rovo agent answers | EVIDENCE_PACK: "Hosted verification, 2 Nov" (Rovo chat), "Dependency upgrade use case" |
 | Sample data, idempotent | EVIDENCE_PACK: "Hosted verification, 2 Nov"; clean-site run "Re-preview" |
-| Test counts | docs/RELEASE.md (single source): backend 306, simulation-core 75, contracts 12, frontend unit 175, Playwright 186 listed in 30 files (main 96ad19b, 6 Nov recount; confirm against cloud runner at freeze) |
+| Test counts | docs/RELEASE.md (single source): backend 326, simulation-core 75, contracts 12, frontend unit 201, Playwright 186 listed in 30 files (main c9284ae, 7 Nov recount; confirm against cloud runner at freeze) |
 | Benchmark | `docs/evidence/BENCHMARK.md` (synthetic, 200 graphs) |
 | Teamwork Graph not integrated | `docs/evidence/TEAMWORK_GRAPH_ALLOWLIST.md`, `.github/agent-coordination/decisions.md` D1 |
 | Shared workspace prototype | `.github/agent-coordination/decisions.md` D3 |

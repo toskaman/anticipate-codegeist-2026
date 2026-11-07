@@ -17,7 +17,7 @@
     <rect x="440" y="760" width="230" height="64" rx="32" fill="#132036" stroke="#334155"/>
     <text x="555" y="802" text-anchor="middle">Rovo agent</text>
     <rect x="690" y="760" width="340" height="64" rx="32" fill="#132036" stroke="#334155"/>
-    <text x="860" y="802" text-anchor="middle">6 read-only MCP tools</text>
+    <text x="860" y="802" text-anchor="middle">7 read-only MCP tools</text>
     <rect x="1050" y="760" width="330" height="64" rx="32" fill="#132036" stroke="#334155"/>
     <text x="1215" y="802" text-anchor="middle">Jira workflow validator</text>
   </g>
