@@ -71,19 +71,46 @@ export function portfolioChanges(
 }
 
 type Op = PortfolioChange["operations"][number];
+export type CandidatePrefill = {
+  rows: PortfolioDraft[];
+  applied: string[];
+  skipped: string[];
+};
+/**
+ * Applies a Composer candidate's transformations to the editable rows (one
+ * operation per row), reporting which changes prefilled and which need manual
+ * review (unsupported operation, retargeted record or unknown change id).
+ * Nothing else changes.
+ */
+export function applyCandidateReport(
+  rows: PortfolioDraft[],
+  transformations: { changeId: string; after: Op }[],
+): CandidatePrefill {
+  const applied: string[] = [];
+  const skipped: string[] = [];
+  const next: PortfolioDraft[] = rows.map((row) => {
+    const t = transformations.find((x) => x.changeId === row.id);
+    if (!t) return row;
+    const a = t.after;
+    if (a.op === "DEPRECATE_NODE" && a.nodeId === row.nodeId) {
+      applied.push(row.id);
+      return { ...row, action: "retain" };
+    }
+    if (a.op === "UPGRADE_NODE" && a.nodeId === row.nodeId) {
+      applied.push(row.id);
+      return { ...row, action: a.breaking ? "breaking" : "compatible" };
+    }
+    skipped.push(row.id);
+    return row;
+  });
+  for (const t of transformations)
+    if (!rows.some((row) => row.id === t.changeId)) skipped.push(t.changeId);
+  return { rows: next, applied, skipped };
+}
 /** Applies a Composer candidate's transformations to the editable rows (one operation per row). Nothing else changes. */
 export function applyCandidate(
   rows: PortfolioDraft[],
   transformations: { changeId: string; after: Op }[],
 ): PortfolioDraft[] {
-  return rows.map((row) => {
-    const t = transformations.find((x) => x.changeId === row.id);
-    if (!t) return row;
-    const a = t.after;
-    if (a.op === "DEPRECATE_NODE" && a.nodeId === row.nodeId)
-      return { ...row, action: "retain" };
-    if (a.op === "UPGRADE_NODE" && a.nodeId === row.nodeId)
-      return { ...row, action: a.breaking ? "breaking" : "compatible" };
-    return row;
-  });
+  return applyCandidateReport(rows, transformations).rows;
 }

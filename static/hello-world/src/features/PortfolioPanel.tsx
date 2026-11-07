@@ -10,7 +10,7 @@ import {
   portfolioActions,
   portfolioChanges,
   type PortfolioDraft,
-  applyCandidate,
+  applyCandidateReport,
 } from "../app/portfolio";
 import { useExpired } from "../app/useExpiry";
 import { evidenceCopy, formatTime, verdictCopy } from "../app/copy";
@@ -260,6 +260,39 @@ function PortfolioResultView({
   );
 }
 
+const fingerprint = (rows: PortfolioDraft[]) =>
+  JSON.stringify(
+    rows.map((r) => [r.id, r.label, r.nodeId, r.action, r.toNodeId]),
+  );
+
+type PickedReview = {
+  name: string;
+  verdict: "BLOCKED" | "NEEDS_REVIEW" | "PASS";
+  applied: number;
+  skipped: number;
+  assumptions: string[];
+  transformations: string[];
+};
+
+type ShapeOp = {
+  op: string;
+  nodeId?: string;
+  fromNodeId?: string;
+  toNodeId?: string;
+  breaking?: boolean;
+};
+const shortNode = (id: string) => id.replace(/^issue:/, "");
+const describeOp = (o: ShapeOp) =>
+  o.op === "UPGRADE_NODE"
+    ? `${o.breaking ? "breaking" : "non-breaking"} upgrade of ${shortNode(o.nodeId ?? "")}`
+    : o.op === "DEPRECATE_NODE"
+      ? `deprecate (keep) ${shortNode(o.nodeId ?? "")}`
+      : o.op === "REMOVE_NODE"
+        ? `remove ${shortNode(o.nodeId ?? "")}`
+        : o.op === "MIGRATE_DEPENDENTS"
+          ? `migrate ${shortNode(o.fromNodeId ?? "")} → ${shortNode(o.toNodeId ?? "")}`
+          : o.op;
+
 function PortfolioEditor({
   client,
   graph,
@@ -277,17 +310,30 @@ function PortfolioEditor({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState<SimulatePortfolioResult | null>(null);
+  const [pickedReview, setPickedReview] = useState<PickedReview | null>(null);
   const sequence = useRef(0);
   const addButton = useRef<HTMLButtonElement>(null);
   const active = useRef<AbortController | null>(null);
+  /** Request generation: bumped on every draft change and every submit, so a
+   *  late response can never be mistaken for the current draft's result. */
+  const flight = useRef(0);
+  /** Synchronous busy mirror: React state commits async, double submits do not wait. */
+  const busyRef = useRef(false);
+  const rowsRef = useRef(rows);
+  rowsRef.current = rows;
   const prefix = useId();
   const expired = useExpired(graph.expiresAt);
   useEffect(() => () => active.current?.abort(), []);
   const changes = portfolioChanges(rows, graph);
   const update = (next: PortfolioDraft[]) => {
+    active.current?.abort();
+    flight.current++;
+    busyRef.current = false;
+    setBusy(false);
     setRows(next);
     setResult(null);
     setError("");
+    setPickedReview(null);
   };
   const patch = (id: string, values: Partial<PortfolioDraft>) =>
     update(rows.map((row) => (row.id === id ? { ...row, ...values } : row)));
@@ -297,9 +343,13 @@ function PortfolioEditor({
     update(next);
   };
   async function run() {
-    if (!changes || busy || expired || workflowBusy) return;
+    if (!changes || busyRef.current || expired || workflowBusy) return;
+    active.current?.abort();
     const controller = new AbortController();
     active.current = controller;
+    const mine = ++flight.current;
+    const draft = fingerprint(rows);
+    busyRef.current = true;
     setBusy(true);
     setError("");
     setResult(null);
@@ -316,7 +366,12 @@ function PortfolioEditor({
         },
         controller.signal,
       );
-      if (controller.signal.aborted) return;
+      if (
+        controller.signal.aborted ||
+        mine !== flight.current ||
+        draft !== fingerprint(rowsRef.current)
+      )
+        return;
       if (
         next.snapshot.snapshotId !== graph.snapshotId ||
         next.snapshot.projectId !== graph.projectId ||
@@ -333,14 +388,17 @@ function PortfolioEditor({
         );
       setResult(next);
     } catch (e) {
-      if (controller.signal.aborted) return;
+      if (controller.signal.aborted || mine !== flight.current) return;
       setError(
         e instanceof CoreClientError
           ? e.message
           : "The portfolio simulation failed. No Jira changes were requested.",
       );
     } finally {
-      if (!controller.signal.aborted) setBusy(false);
+      if (mine === flight.current && !controller.signal.aborted) {
+        busyRef.current = false;
+        setBusy(false);
+      }
     }
   }
   return (
@@ -563,6 +621,60 @@ function PortfolioEditor({
           />
         )}
       </section>
+      {pickedReview && (
+        <section aria-label="Candidate under review">
+          <h3>Candidate under review: {pickedReview.name}</h3>
+          {result ? (
+            <p>
+              Proposal predicted {verdictCopy[pickedReview.verdict].label};
+              current draft now simulates{" "}
+              {verdictCopy[result.combined.result.verdict].label}.
+            </p>
+          ) : (
+            <p>
+              Previous result invalidated. Re-simulate to verify this candidate
+              on the current draft.
+            </p>
+          )}
+          <p>
+            {pickedReview.applied} of{" "}
+            {pickedReview.applied + pickedReview.skipped} prefilled.
+          </p>
+          {pickedReview.skipped > 0 && (
+            <Notice tone="warning" title="Prefill incomplete">
+              {pickedReview.skipped} transformation(s) could not be prefilled
+              and need manual review.
+            </Notice>
+          )}
+          {pickedReview.transformations.length > 0 && (
+            <ul>
+              {pickedReview.transformations.map((t) => (
+                <li key={t}>{t}</li>
+              ))}
+            </ul>
+          )}
+          {pickedReview.assumptions.length > 0 && (
+            <ul aria-label="Assumptions">
+              {pickedReview.assumptions.map((a) => (
+                <li key={a}>Assumes: {a}</li>
+              ))}
+            </ul>
+          )}
+          {!result && !busy && (
+            <button
+              type="button"
+              className="ax-btn ax-btn--primary"
+              onClick={() => void run()}
+            >
+              Re-simulate with candidate
+            </button>
+          )}
+          <p className="ax-small ax-muted">
+            A proposal is a hypothesis, not an executed change. Nothing here
+            approves or executes anything.
+          </p>
+        </section>
+      )}
       {result && composer && changes && (
         <SafeChangeComposer
           client={client}
@@ -573,7 +685,22 @@ function PortfolioEditor({
             snapshotId: graph.snapshotId,
             changes,
           }}
-          onSelect={(c) => update(applyCandidate(rows, c.transformations))}
+          onSelect={(c) => {
+            if (c.transformations.length === 0) return;
+            const prefill = applyCandidateReport(rows, c.transformations);
+            update(prefill.rows);
+            setPickedReview({
+              name: c.name,
+              verdict: c.verdict,
+              applied: prefill.applied.length,
+              skipped: prefill.skipped.length,
+              assumptions: c.assumptions,
+              transformations: c.transformations.map(
+                (t) =>
+                  `${t.changeId}: ${describeOp(t.before)} → ${describeOp(t.after)}`,
+              ),
+            });
+          }}
         />
       )}
     </Panel>

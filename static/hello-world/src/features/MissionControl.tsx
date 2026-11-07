@@ -479,6 +479,7 @@ export default function MissionControl({
         </div>
       </div>
       <ReleaseCommandCenter
+        key={`command-center:${project?.key ?? "none"}`}
         client={w.client}
         projectKey={project?.key ?? null}
         supported={
@@ -488,19 +489,18 @@ export default function MissionControl({
           w.capabilities?.operations.includes(RELEASE_CAPABILITY) ?? false
         }
         onReview={(key) => {
-          w.actions.chooseCandidate(key);
-          void w.actions.analyze();
+          void w.actions.analyzeIssue(key);
         }}
       />
       <ReleaseSafety
+        key={`release-safety:${project?.key ?? "none"}`}
         client={w.client}
         supported={
           w.capabilities?.operations.includes(RELEASE_CAPABILITY) ?? false
         }
         projectKey={project?.key ?? null}
         onReview={(key) => {
-          w.actions.chooseCandidate(key);
-          void w.actions.analyze();
+          void w.actions.analyzeIssue(key);
         }}
         overviewSupported={
           w.capabilities?.operations.includes(OVERVIEW_CAPABILITY) ?? false
