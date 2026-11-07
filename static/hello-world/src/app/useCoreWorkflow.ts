@@ -25,6 +25,9 @@ import { usePlanState } from "./usePlan";
 import { assertSnapshotFresh, useExpired } from "./useExpiry";
 import { isPlanStale } from "./planGuards";
 
+/** Client-side mirror of the server key format: cheap fail-fast, the backend stays authoritative. */
+const ISSUE_KEY_PATTERN = /^[A-Z][A-Z0-9_]+-[0-9]+$/;
+
 export { useExpired } from "./useExpiry";
 
 export function useCoreWorkflow(client: ForgeClient) {
@@ -44,6 +47,13 @@ export function useCoreWorkflow(client: ForgeClient) {
   const [candidates, setCandidates] = useState<JiraIssueSummary[] | null>(null);
   const [candidateCursor, setCandidateCursor] = useState<string | null>(null);
   const [rootIssueKey, setRootIssueKey] = useState("");
+  /** Synchronous mirror of rootIssueKey: setState commits async, but the
+   *  identity of an analysis request must be exact in the same tick. */
+  const rootKeyRef = useRef("");
+  function setRootKey(next: string) {
+    rootKeyRef.current = next;
+    setRootIssueKey(next);
+  }
   const [snapshot, setSnapshot] = useState<GraphSnapshot | null>(null);
   const [replacement, setReplacement] = useState("");
   const [requestedKind, setRequestedKind] = useState<ChangeKind>("retire");
@@ -85,6 +95,13 @@ export function useCoreWorkflow(client: ForgeClient) {
   const pending = useRef(false);
   const active = useRef(true);
   const controller = useRef<AbortController | null>(null);
+  /** True while the in-flight run (if any) is an issue analysis: a new
+   *  analysis may cancel it, but never a mutation or any other operation. */
+  const analysisFlight = useRef(false);
+  const analysisEpoch = useRef(0);
+  /** Key the running analysis flight was started for; coalescing compares
+   *  against this, never against the live selection. */
+  const inFlightKey = useRef<string | null>(null);
   useEffect(() => {
     active.current = true;
     return () => {
@@ -158,11 +175,16 @@ export function useCoreWorkflow(client: ForgeClient) {
   }
   async function readSnapshot(
     signal: AbortSignal,
-    rootKey = rootIssueKey,
+    rootKey: string,
     preferredReplacement = sampleReplacement,
   ) {
     requireOperation("getGraphSnapshot");
     requireOperation("getEvidenceGraph");
+    if (!ISSUE_KEY_PATTERN.test(rootKey))
+      throw new CoreClientError(
+        "VALIDATION",
+        "Enter a Jira issue key such as REL-123.",
+      );
     clearSnapshot();
     const selectedProject = projects.find(
       (project) => project.id === projectId,
@@ -182,6 +204,8 @@ export function useCoreWorkflow(client: ForgeClient) {
       },
       signal,
     );
+    if (signal.aborted || !active.current || rootKey !== rootKeyRef.current)
+      return;
     const graph = await client.request(
       "getEvidenceGraph",
       { snapshotId: created.snapshotId },
@@ -192,6 +216,8 @@ export function useCoreWorkflow(client: ForgeClient) {
         "INVALID_RESPONSE",
         "Root issue is absent from the graph.",
       );
+    if (signal.aborted || !active.current || rootKey !== rootKeyRef.current)
+      return;
     setSnapshot(graph);
     setReplacement(
       preferredReplacement &&
@@ -200,6 +226,74 @@ export function useCoreWorkflow(client: ForgeClient) {
         : "",
     );
     go("Evidence Graph");
+  }
+  /**
+   * Starts an analysis for an explicitly passed issue key. Never relies on
+   * committed React state for the request identity: the key is validated,
+   * captured and sent in the same tick. Cancels a previous in-flight
+   * analysis (never a mutation or any other operation); a repeated request
+   * for the same in-flight key is coalesced onto the running flight.
+   */
+  function analyzeIssue(issueKey: string): Promise<void> | undefined {
+    const normalized = issueKey.trim().toUpperCase();
+    if (!ISSUE_KEY_PATTERN.test(normalized)) {
+      setNotice("");
+      setError({
+        message: "Enter a Jira issue key such as REL-123.",
+        code: "VALIDATION",
+        retryable: false,
+        mutation: false,
+      });
+      return undefined;
+    }
+    const selectedProject = projects.find(
+      (project) => project.id === projectId,
+    );
+    if (!selectedProject || !normalized.startsWith(`${selectedProject.key}-`)) {
+      setNotice("");
+      setError({
+        message:
+          "Choose an issue from the selected Jira project, or select its project first.",
+        code: "VALIDATION",
+        retryable: false,
+        mutation: false,
+      });
+      return undefined;
+    }
+    if (!allowed("getGraphSnapshot") || !allowed("getEvidenceGraph")) {
+      setNotice("");
+      setError({
+        message: "Analysis is not enabled by the backend.",
+        code: "UNSUPPORTED",
+        retryable: false,
+        mutation: false,
+      });
+      return undefined;
+    }
+    if (sampleBusy) return undefined;
+    if (pending.current) {
+      if (!analysisFlight.current) return undefined;
+      if (normalized === inFlightKey.current) return undefined;
+      controller.current?.abort();
+      pending.current = false;
+      setBusy("");
+    }
+    const myEpoch = ++analysisEpoch.current;
+    analysisFlight.current = true;
+    inFlightKey.current = normalized;
+    setRootKey(normalized);
+    setSampleReplacement("");
+    clearSnapshot();
+    return run("Reading dependencies from Jira…", async (signal) => {
+      try {
+        await readSnapshot(signal, normalized);
+      } finally {
+        if (analysisEpoch.current === myEpoch) {
+          analysisFlight.current = false;
+          inFlightKey.current = null;
+        }
+      }
+    });
   }
   async function readPassport(
     currentPlan: PreventionPlan,
@@ -366,7 +460,7 @@ export function useCoreWorkflow(client: ForgeClient) {
       setSampleReplacement("");
       setCandidates(null);
       setCandidateCursor(null);
-      setRootIssueKey("");
+      setRootKey("");
       clearSnapshot();
     },
     loadMoreProjects() {
@@ -422,21 +516,20 @@ export function useCoreWorkflow(client: ForgeClient) {
     },
     chooseCandidate(key: string) {
       setSampleReplacement("");
-      setRootIssueKey(key);
+      setRootKey(key);
       clearSnapshot();
     },
     typeIssueKey(value: string) {
       setSampleReplacement("");
-      setRootIssueKey(value.toUpperCase().trim());
+      setRootKey(value.toUpperCase().trim());
       clearSnapshot();
     },
+    analyzeIssue,
     analyze() {
-      return run("Reading dependencies from Jira…", (signal) =>
-        readSnapshot(signal),
-      );
+      return analyzeIssue(rootKeyRef.current);
     },
     analyzeSample(root: string, replacementKey: string | null) {
-      setRootIssueKey(root);
+      setRootKey(root);
       setSampleReplacement(replacementKey ?? "");
       return run("Reading Jira sample snapshot…", (signal) =>
         readSnapshot(signal, root, replacementKey ?? ""),
@@ -520,7 +613,7 @@ export function useCoreWorkflow(client: ForgeClient) {
           );
         }
         setSampleReplacement("");
-        setRootIssueKey(report.change.issueKey ?? "");
+        setRootKey(report.change.issueKey ?? "");
         setComparison(report.comparison);
         setScenarioId(report.plan.scenarioId);
         setReplacement("");

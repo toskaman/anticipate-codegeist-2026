@@ -44,16 +44,38 @@ export default function ReleaseCommandCenter({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const seq = useRef(0);
+  /** Overviews cached per project: a cached overview only ever serves its own project. */
+  const overviews = useRef(new Map<string, ReleaseOverview>());
+  /** Latest requested project: every late response is checked against it. */
+  const keyRef = useRef(projectKey);
+  keyRef.current = projectKey;
 
-  async function load(groupIdx: number) {
-    if (!projectKey) return;
-    const mine = ++seq.current;
+  /**
+   * Loads one project's release digest. Identity comes only from parameters
+   * (project key + release index + request generation): shared state is never
+   * read as a cache, so a project switch cannot reuse another project's data.
+   */
+  async function loadFor(key: string, groupIdx: number, mine: number) {
     setBusy(true);
     setError("");
+    setSafety(null);
+    setAttention({});
+    setAttentionCapped(false);
     try {
-      const ov =
-        overview ?? (await client.request("listReleaseSafety", { projectKey }));
-      if (mine !== seq.current) return;
+      let ov = overviews.current.get(key);
+      if (!ov) {
+        ov = await client.request("listReleaseSafety", { projectKey: key });
+        if (mine !== seq.current || keyRef.current !== key) return;
+        if (ov.projectKey !== key)
+          throw new CoreClientError(
+            "INVALID_RESPONSE",
+            "Release overview belongs to another project.",
+          );
+        if (overviews.current.size >= 10) overviews.current.clear();
+        overviews.current.set(key, ov);
+      } else if (mine !== seq.current || keyRef.current !== key) {
+        return;
+      }
       setOverview(ov);
       const g = ov.releases[Math.min(groupIdx, ov.releases.length - 1)];
       if (!g) {
@@ -62,10 +84,15 @@ export default function ReleaseCommandCenter({
       }
       setGroup(Math.min(groupIdx, ov.releases.length - 1));
       const s = await client.request("getReleaseSafety", {
-        projectKey,
+        projectKey: key,
         fixVersion: g.fixVersion,
       });
-      if (mine !== seq.current) return;
+      if (mine !== seq.current || keyRef.current !== key) return;
+      if (s.scope.projectKey !== key || s.scope.fixVersion !== g.fixVersion)
+        throw new CoreClientError(
+          "INVALID_RESPONSE",
+          "Release safety belongs to another release.",
+        );
       setSafety(s);
       const decided = s.items.filter((i) => i.decision);
       setAttentionCapped(decided.length > ATTENTION_MAX_ITEMS);
@@ -81,10 +108,10 @@ export default function ReleaseCommandCenter({
           }
         }),
       );
-      if (mine !== seq.current) return;
+      if (mine !== seq.current || keyRef.current !== key) return;
       setAttention(Object.fromEntries(settled));
     } catch (e) {
-      if (mine !== seq.current) return;
+      if (mine !== seq.current || keyRef.current !== key) return;
       setSafety(null);
       setError(
         e instanceof CoreClientError
@@ -92,20 +119,30 @@ export default function ReleaseCommandCenter({
           : "Release data could not be read. Nothing was changed.",
       );
     } finally {
-      if (mine === seq.current) setBusy(false);
+      if (mine === seq.current && keyRef.current === key) setBusy(false);
     }
   }
 
   useEffect(() => {
+    seq.current++;
     setOverview(null);
     setSafety(null);
     setAttention({});
+    setAttentionCapped(false);
     setGroup(0);
     setError("");
-    seq.current++;
-    if (projectKey && supported && safetySupported) void load(0);
+    setBusy(false);
+    if (projectKey && supported && safetySupported) {
+      const mine = ++seq.current;
+      void loadFor(projectKey, 0, mine);
+    }
+    return () => {
+      // Invalidate in-flight responses on unmount or re-subscription.
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      seq.current++;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [projectKey]);
+  }, [projectKey, supported, safetySupported, client]);
 
   if (!supported || !safetySupported) return null;
   const stalePlans = safety
@@ -144,7 +181,11 @@ export default function ReleaseCommandCenter({
           {error}{" "}
           <button
             className="ax-btn ax-btn--ghost"
-            onClick={() => void load(group)}
+            onClick={() => {
+              if (!projectKey) return;
+              const mine = ++seq.current;
+              void loadFor(projectKey, group, mine);
+            }}
           >
             Try again
           </button>
@@ -158,7 +199,11 @@ export default function ReleaseCommandCenter({
           Release{" "}
           <select
             value={group}
-            onChange={(e) => void load(Number(e.target.value))}
+            onChange={(e) => {
+              if (!projectKey) return;
+              const mine = ++seq.current;
+              void loadFor(projectKey, Number(e.target.value), mine);
+            }}
           >
             {overview.releases.map((g, i) => (
               <option key={g.fixVersion ?? `unscheduled-${i}`} value={i}>
