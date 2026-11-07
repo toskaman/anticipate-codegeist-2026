@@ -240,6 +240,41 @@ const splitCandidate = {
   resultHash: "h3",
 };
 
+const skippedCandidate = {
+  candidateId: "cand-4",
+  kind: "RETAIN_OLD",
+  name: "Nothing applicable",
+  why: "Neither change can prefill.",
+  transformations: [
+    {
+      changeId: "change-1",
+      before: { op: "REMOVE_NODE", nodeId: "issue:ABC-1" },
+      after: { op: "REMOVE_NODE", nodeId: "issue:ABC-1" },
+    },
+    {
+      changeId: "change-9",
+      before: upg("issue:ABC-2", true),
+      after: upg("issue:ABC-2", false),
+    },
+  ],
+  assumptions: [],
+  phases: [["change-1"]],
+  order: null,
+  cycles: [],
+  verdict: "NEEDS_REVIEW",
+  blockers: 0,
+  unknowns: 1,
+  impacted: 1,
+  conflicts: 0,
+  conflictKinds: [],
+  requiredReviews: [],
+  resolvedConflicts: [],
+  remainingConflicts: [],
+  rank: 5,
+  dominatedBy: null,
+  resultHash: "h4",
+};
+
 const composerPayload = {
   snapshotId: graph.snapshotId,
   baselineCandidateId: "cand-0",
@@ -248,6 +283,7 @@ const composerPayload = {
     partialCandidate,
     baselineCandidate,
     splitCandidate,
+    skippedCandidate,
   ],
   truncated: false,
   limits: ["Composer coverage is bounded."],
@@ -363,4 +399,18 @@ it("selecting a split-phases candidate preserves the current result", async () =
   fireEvent.click(selects[3]);
   expect(screen.getByText("Combined simulation")).toBeTruthy();
   expect(screen.getByText("Safe Change Composer")).toBeTruthy();
+});
+
+it("a candidate with no applicable transformation reports zero prefilled", async () => {
+  await simulateAndCompose();
+  const selects = screen.getAllByText("Select for review");
+  fireEvent.click(selects[4]);
+  expect(screen.getByText(/0 of 2 prefilled/)).toBeTruthy();
+  expect(
+    screen.getByText(/2 transformation\(s\) could not be prefilled/),
+  ).toBeTruthy();
+  expect((screen.getByLabelText("Action") as HTMLSelectElement).value).toBe(
+    "remove",
+  );
+  expect(screen.queryByText("Combined simulation")).toBeNull();
 });
