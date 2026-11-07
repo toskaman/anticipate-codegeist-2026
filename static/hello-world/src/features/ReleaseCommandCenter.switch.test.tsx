@@ -138,8 +138,10 @@ const RELEASES: Record<string, { fixVersion: string; changes: number }> = {
 function setup(opts?: {
   empty?: string[];
   denyList?: Record<string, CoreClientError>;
+  deferSafety?: boolean;
 }) {
   const listResolvers: Record<string, Array<() => void>> = {};
+  const safetyResolvers: Record<string, Array<() => void>> = {};
   const listCalls: string[] = [];
   const safetyCalls: Array<{ projectKey: string; fixVersion: string }> = [];
   const client = new ForgeClient(async (operation, input) => {
@@ -166,17 +168,18 @@ function setup(opts?: {
       });
     }
     if (operation === "getReleaseSafety") {
-      safetyCalls.push({
-        projectKey: input.projectKey as string,
-        fixVersion: input.fixVersion as string,
-      });
-      return response(
-        mkSafety(
-          input.projectKey as string,
-          input.fixVersion as string,
-          input.projectKey as string,
-        ),
-      );
+      const projectKey = input.projectKey as string;
+      const fixVersion = input.fixVersion as string;
+      safetyCalls.push({ projectKey, fixVersion });
+      if (opts?.deferSafety) {
+        return new Promise((resolve) => {
+          const queue = (safetyResolvers[projectKey] ??= []);
+          queue.push(() =>
+            resolve(response(mkSafety(projectKey, fixVersion, projectKey))),
+          );
+        });
+      }
+      return response(mkSafety(projectKey, fixVersion, projectKey));
     }
     if (operation === "getPlanAttention")
       return response(
@@ -192,6 +195,11 @@ function setup(opts?: {
     listResolvers[projectKey] = [];
     queue.forEach((r) => r());
   };
+  const resolveSafety = (projectKey: string) => {
+    const queue = safetyResolvers[projectKey] ?? [];
+    safetyResolvers[projectKey] = [];
+    queue.forEach((r) => r());
+  };
   const renderCenter = (projectKey: string, caps?: object) =>
     render(
       <ReleaseCommandCenter
@@ -202,7 +210,14 @@ function setup(opts?: {
         {...caps}
       />,
     );
-  return { client, listCalls, safetyCalls, resolveList, renderCenter };
+  return {
+    client,
+    listCalls,
+    safetyCalls,
+    resolveList,
+    resolveSafety,
+    renderCenter,
+  };
 }
 
 async function settle(ms = 10) {
@@ -377,4 +392,32 @@ it("unmounting cancels in-flight work: late responses trigger no further request
     await new Promise((r) => setTimeout(r, 10));
   });
   expect(safetyCalls).toHaveLength(0);
+});
+
+it("a late safety response from a previous project is discarded", async () => {
+  const { resolveList, resolveSafety, renderCenter, client } = setup({
+    deferSafety: true,
+  });
+  const view = renderCenter("AAA");
+  resolveList("AAA");
+  await screen.findByText("Winter · 2 change(s)");
+  view.rerender(
+    <ReleaseCommandCenter
+      client={client}
+      projectKey="BBB"
+      supported
+      safetySupported
+    />,
+  );
+  resolveList("BBB");
+  await screen.findByText("Summer · 1 change(s)");
+  await act(async () => {
+    resolveSafety("AAA");
+    await new Promise((r) => setTimeout(r, 10));
+  });
+  expect(screen.queryByText("AAA-1")).toBeNull();
+  expect(screen.queryByText("Winter · 2 change(s)")).toBeNull();
+  resolveSafety("BBB");
+  await screen.findByText("BBB-1");
+  expect(screen.queryByText("AAA-1")).toBeNull();
 });

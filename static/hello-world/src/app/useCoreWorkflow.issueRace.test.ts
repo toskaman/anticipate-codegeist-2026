@@ -48,12 +48,25 @@ const graphFor = (
   nodes: [...roots.map(issueNode), ...graph.nodes],
 });
 
+const candidateItem = {
+  id: "10001",
+  key: "REL-1",
+  summary: "Retire Auth API v1",
+  status: "To Do",
+  issueType: "Task",
+  url: null,
+  updatedAt: "2026-11-05T12:00:00.000Z",
+  projectId: "100",
+};
+
 function setup(opts?: {
   evidenceRoots?: string[];
   failSnapshot?: (key: string) => unknown;
 }) {
   const snapCalls: string[] = [];
   const resolvers: Array<() => void> = [];
+  const candCalls: string[] = [];
+  const candResolvers: Array<() => void> = [];
   const client = new ForgeClient(async (operation, input) => {
     if (operation === "getCapabilities") return response(capabilities);
     if (operation === "listProjects")
@@ -77,9 +90,22 @@ function setup(opts?: {
       return response(
         graphFor(input.snapshotId as string, opts?.evidenceRoots),
       );
+    if (operation === "getChangeCandidates") {
+      candCalls.push(operation);
+      return new Promise((resolve) => {
+        candResolvers.push(() =>
+          resolve(
+            response({
+              items: [candidateItem],
+              page: { nextCursor: "next", totalKnown: 2 },
+            }),
+          ),
+        );
+      });
+    }
     throw new Error(`unexpected ${operation}`);
   });
-  return { client, snapCalls, resolvers };
+  return { client, snapCalls, resolvers, candCalls, candResolvers };
 }
 
 async function ready(opts?: Parameters<typeof setup>[0]) {
@@ -243,4 +269,39 @@ it("a graph without the requested root is rejected, never displayed", async () =
   });
   expect(hook.result.current.error?.code).toBe("INVALID_RESPONSE");
   expect(hook.result.current.snapshot).toBeNull();
+});
+
+it("analyzeIssue during another operation neither aborts it nor starts", async () => {
+  const { hook, snapCalls, resolvers, candCalls, candResolvers } =
+    await ready();
+  let loadFlight: Promise<void>;
+  act(() => {
+    loadFlight =
+      hook.result.current.actions.loadCandidates() as unknown as Promise<void>;
+  });
+  await waitFor(() => expect(candCalls).toHaveLength(1));
+  let dropped: unknown = "pending";
+  act(() => {
+    dropped = hook.result.current.actions.analyzeIssue("REL-1");
+  });
+  expect(dropped).toBeUndefined();
+  expect(snapCalls).toHaveLength(0);
+  expect(hook.result.current.rootIssueKey).toBe("");
+  await act(async () => {
+    candResolvers[0]!();
+    await loadFlight;
+  });
+  expect(hook.result.current.candidates).toHaveLength(1);
+  let flight: Promise<void>;
+  act(() => {
+    flight = hook.result.current.actions.analyzeIssue(
+      "REL-1",
+    ) as unknown as Promise<void>;
+  });
+  await waitFor(() => expect(snapCalls).toEqual(["REL-1"]));
+  await act(async () => {
+    resolvers[0]!();
+    await flight;
+  });
+  expect(hook.result.current.snapshot?.snapshotId).toBe("snap-REL-1");
 });

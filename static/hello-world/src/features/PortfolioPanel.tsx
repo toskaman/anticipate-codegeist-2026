@@ -648,15 +648,15 @@ function PortfolioEditor({
           )}
           {pickedReview.transformations.length > 0 && (
             <ul>
-              {pickedReview.transformations.map((t) => (
-                <li key={t}>{t}</li>
+              {pickedReview.transformations.map((t, i) => (
+                <li key={`${i}:${t}`}>{t}</li>
               ))}
             </ul>
           )}
           {pickedReview.assumptions.length > 0 && (
             <ul aria-label="Assumptions">
-              {pickedReview.assumptions.map((a) => (
-                <li key={a}>Assumes: {a}</li>
+              {pickedReview.assumptions.map((a, i) => (
+                <li key={`${i}:${a}`}>Assumes: {a}</li>
               ))}
             </ul>
           )}

@@ -58,6 +58,9 @@ export default function ReleaseCommandCenter({
   async function loadFor(key: string, groupIdx: number, mine: number) {
     setBusy(true);
     setError("");
+    setSafety(null);
+    setAttention({});
+    setAttentionCapped(false);
     try {
       let ov = overviews.current.get(key);
       if (!ov) {
@@ -85,6 +88,11 @@ export default function ReleaseCommandCenter({
         fixVersion: g.fixVersion,
       });
       if (mine !== seq.current || keyRef.current !== key) return;
+      if (s.scope.projectKey !== key || s.scope.fixVersion !== g.fixVersion)
+        throw new CoreClientError(
+          "INVALID_RESPONSE",
+          "Release safety belongs to another release.",
+        );
       setSafety(s);
       const decided = s.items.filter((i) => i.decision);
       setAttentionCapped(decided.length > ATTENTION_MAX_ITEMS);
@@ -103,7 +111,7 @@ export default function ReleaseCommandCenter({
       if (mine !== seq.current || keyRef.current !== key) return;
       setAttention(Object.fromEntries(settled));
     } catch (e) {
-      if (mine !== seq.current) return;
+      if (mine !== seq.current || keyRef.current !== key) return;
       setSafety(null);
       setError(
         e instanceof CoreClientError
@@ -111,7 +119,7 @@ export default function ReleaseCommandCenter({
           : "Release data could not be read. Nothing was changed.",
       );
     } finally {
-      if (mine === seq.current) setBusy(false);
+      if (mine === seq.current && keyRef.current === key) setBusy(false);
     }
   }
 

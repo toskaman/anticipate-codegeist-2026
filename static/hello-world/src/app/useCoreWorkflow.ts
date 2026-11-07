@@ -99,6 +99,9 @@ export function useCoreWorkflow(client: ForgeClient) {
    *  analysis may cancel it, but never a mutation or any other operation. */
   const analysisFlight = useRef(false);
   const analysisEpoch = useRef(0);
+  /** Key the running analysis flight was started for; coalescing compares
+   *  against this, never against the live selection. */
+  const inFlightKey = useRef<string | null>(null);
   useEffect(() => {
     active.current = true;
     return () => {
@@ -172,7 +175,7 @@ export function useCoreWorkflow(client: ForgeClient) {
   }
   async function readSnapshot(
     signal: AbortSignal,
-    rootKey = rootIssueKey,
+    rootKey: string,
     preferredReplacement = sampleReplacement,
   ) {
     requireOperation("getGraphSnapshot");
@@ -234,6 +237,7 @@ export function useCoreWorkflow(client: ForgeClient) {
   function analyzeIssue(issueKey: string): Promise<void> | undefined {
     const normalized = issueKey.trim().toUpperCase();
     if (!ISSUE_KEY_PATTERN.test(normalized)) {
+      setNotice("");
       setError({
         message: "Enter a Jira issue key such as REL-123.",
         code: "VALIDATION",
@@ -246,6 +250,7 @@ export function useCoreWorkflow(client: ForgeClient) {
       (project) => project.id === projectId,
     );
     if (!selectedProject || !normalized.startsWith(`${selectedProject.key}-`)) {
+      setNotice("");
       setError({
         message:
           "Choose an issue from the selected Jira project, or select its project first.",
@@ -255,22 +260,38 @@ export function useCoreWorkflow(client: ForgeClient) {
       });
       return undefined;
     }
+    if (!allowed("getGraphSnapshot") || !allowed("getEvidenceGraph")) {
+      setNotice("");
+      setError({
+        message: "Analysis is not enabled by the backend.",
+        code: "UNSUPPORTED",
+        retryable: false,
+        mutation: false,
+      });
+      return undefined;
+    }
+    if (sampleBusy) return undefined;
     if (pending.current) {
       if (!analysisFlight.current) return undefined;
-      if (normalized === rootKeyRef.current) return undefined;
+      if (normalized === inFlightKey.current) return undefined;
       controller.current?.abort();
       pending.current = false;
       setBusy("");
     }
     const myEpoch = ++analysisEpoch.current;
     analysisFlight.current = true;
+    inFlightKey.current = normalized;
     setRootKey(normalized);
+    setSampleReplacement("");
     clearSnapshot();
     return run("Reading dependencies from Jira…", async (signal) => {
       try {
         await readSnapshot(signal, normalized);
       } finally {
-        if (analysisEpoch.current === myEpoch) analysisFlight.current = false;
+        if (analysisEpoch.current === myEpoch) {
+          analysisFlight.current = false;
+          inFlightKey.current = null;
+        }
       }
     });
   }
