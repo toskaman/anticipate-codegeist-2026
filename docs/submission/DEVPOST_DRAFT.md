@@ -1,4 +1,4 @@
-> **Superseded by [DEVPOST_FINAL.md](DEVPOST_FINAL.md). Not for submission.** Kept for history; some values below are out of date (for example five MCP tools, now six).
+> **Superseded by [DEVPOST_FINAL.md](DEVPOST_FINAL.md). Not for submission.** Kept for history; some values below are out of date (for example five MCP tools, now seven).
 
 # Devpost draft (English) — to be finalised with EXPERIENCE
 
