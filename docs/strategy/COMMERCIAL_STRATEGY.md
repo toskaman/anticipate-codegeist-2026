@@ -61,7 +61,7 @@ Validation plan (owner + muse, before any listing):
 | Data residency / storage disclosure | PARTIAL | app stores snapshots, plans, approvals and audit in Forge KVS; document retention (retention tests exist: `test/retention.test.ts`) |
 | Security self-assessment / Cloud Fortified | NOT STARTED | needs SLA, monitoring and incident process; out of hackathon scope |
 | Upgrade safety (no scope change → no re-consent) | READY | manifest unchanged since ea3ee7c; 2.35/2.36 rolled out without re-consent |
-| Documentation for admins (scopes, validator setup, outage policy) | PARTIAL | README + Settings copy; needs an admin guide page |
+| Documentation for admins (scopes, validator setup, outage policy) | READY | `docs/admin/WORKFLOW_VALIDATOR.md` (setup steps, gating rule, outage policy) + README + Settings copy |
 | Pricing page and listing copy | NOT STARTED | after §4 validation |
 
 ## 6. Decisions deferred, with the reason
