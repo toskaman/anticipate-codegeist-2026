@@ -1,24 +1,26 @@
 {
   "agent": "orpheane",
-  "updated": "2026-11-04T16:03:51Z",
-  "runner": "EXPERIENCE follow-up currently runs in Codex desktop on feat/product-experience, with a five-minute chat heartbeat. GitHub issues and PRs coordinate with Muse. Local checks use MOCK_TRANSPORT; owner-machine and hosted verification remain with Muse/owner.",
+  "updated": "2026-11-08T13:00:00Z",
+  "runner": "EXPERIENCE resumed (TITAN-EXPERIENCE) in a Claude cloud session driving the owner machine; per-issue agent/orpheane/<n>-<slug> branches and PRs for Muse review. Local checks use MOCK_TRANSPORT; hosted verification remains with Muse/owner.",
   "current": {
-    "issue": 154,
-    "key": "154-202611041547",
-    "branch": "feat/product-experience",
-    "baseline": "ea3ee7c",
-    "phase": "Local validation complete; PR delivery for Muse review",
-    "hosted": "Muse first-run acceptance after merge/deploy; pending",
-    "validation": "140 unit; full Chromium135 in one completed run; new first-run4 each Chromium/Firefox/WebKit; typecheck/lint/build/format passed; hosted pending"
+    "issue": 213,
+    "key": "213-202611081300",
+    "branch": "agent/orpheane/213-collision-at-a-glance",
+    "baseline": "8adfdcb",
+    "phase": "PR for #213 (collision at a glance) + #214 (graph wheel trap); awaiting Muse review",
+    "hosted": "Not deployed; Muse hosted check of the portfolio result on dev after merge",
+    "validation": "vitest 203/203; typecheck/lint/build pass; Playwright chromium 37 targeted specs pass; firefox/webkit portfolio-panel run in this PR (see PR body)"
   },
   "review": [],
   "blockers": [
+    "#212: Muse to retire D11 and restore the EXPERIENCE/CORE split; until then orpheane only touches static/hello-world/ and docs/ux/.",
     "Portfolio #148 merged; real reused-snapshot/permissions/unchanged-Jira acceptance still pending Muse.",
     "Shared activation locked pending two-account hosted proof. Radar backend/dev link-event slice reported in #152; real #151 UI and production acceptance remain pending Muse.",
     "Hosted #140 first screen/pair/path/refusal, #126 dated-sample/slip, native screen reader, real zoom and human trials remain pending.",
     "HMAC activation reported in #107 comment6617210214; ACL/rotation/rollback are not completed."
   ],
   "next": [
+    "Muse reviews/merges the #213/#214 PR; then orpheane continues the TITAN-EXPERIENCE backlog in docs/ux/TITAN_EXPERIENCE_GAP_AUDIT.md (version identity needs a CORE decision; post-execution focus; accessibility manual checks remain NOT_VERIFIED).",
     "Muse reviews the ORP34 first-run copy delivery and checks the real hosted build at 390/1440 in light/dark after merge.",
     "Preserve hosted radar event-to-UI acceptance in docs/design/RADAR_UI_ACCEPTANCE.md, portfolio #148, #140 UI/refusal and #126 dated-slip checklists. Production deployment is owner-controlled.",
     "Monitor #107 for personal tasks to relay. Final video recording/publication and Devpost submission remain deferred."
