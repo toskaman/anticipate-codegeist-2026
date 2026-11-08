@@ -22,8 +22,8 @@ Status: **ready** (copy as is) · **needs owner** (a person must act or decide) 
 | 12 | Bonus prize and its write-up (one bonus can be won) | DEVPOST_FINAL → "Bonus write-up: Best app with Atlassian MCP"; decision D1 | 144 w / 884 c | ready (owner selects the bonus) |
 | 13 | Install link (Atlassian sharing link) | `docs/submission/INSTALL_LINK.md` (first link, "Sharing with anyone") | — | ready; re-check it opens on the final build |
 | 14 | Testing instructions (detailed, for judges) | DEVPOST_FINAL → Testing instructions (+ INSTALL_LINK prerequisites and validator/MCP steps) | 191 w / 1,322 c | ready |
-| 15 | Demo video URL (public YouTube, under 5 min, app running, no unlicensed music or trademarks) | Script: `docs/submission/VIDEO_SCRIPT.md` (4:20) | — | **missing** (to record on the hosted judge site; risk K1) |
-| 16 | Screenshots / image gallery | Diagram pack: `docs/submission/gallery/` (cover, architecture, slip propagation; PNG 1500×1000 + SVG, captions and sources in its README). Hosted app screenshots still needed: muse captures LIVE_FORGE screens (#64); repo MOCK_TRANSPORT images must stay labelled if used | 3 images | ready for diagrams; needs owner for live screenshots |
+| 15 | Demo video URL (public YouTube, under 5 min, app running, no unlicensed music or trademarks) | Final cut rendered 7 Nov (2:54, QA ACCEPTED 8 Nov: `docs/evidence/VIDEO_QA_REPORT.md`); script: `docs/submission/VIDEO_SCRIPT.md` | — | **needs owner** (voice spot-check, co-owner approval, public upload, paste URL; #189) |
+| 16 | Screenshots / image gallery | Diagram pack: `docs/submission/gallery/` (cover, architecture, slip propagation; PNG 1500×1000 + SVG, captions and sources in its README). Hosted dev screenshots 8 Nov: `docs/evidence/hosted-2026-11-08/` (5 LIVE_FORGE_DEV captures); repo MOCK_TRANSPORT images must stay labelled if used | 3 diagrams + film poster + 5 hosted | ready for diagrams + dev captures; judge-site captures pending (#191) |
 | 17 | Repository / "try it out" link | `README.md` (public repository) | — | ready (optional field) |
 | 18 | Team members and eligible representative | `docs/compliance/CODEGEIST_COMPLIANCE.md` row "Team" | — | needs owner |
 | 19 | English materials | All submission files are in English | — | ready |
@@ -33,7 +33,7 @@ Status: **ready** (copy as is) · **needs owner** (a person must act or decide) 
 
 | Rule item | Covered by | Status |
 |---|---|---|
-| Video < 5 min, public YouTube, shows the app running | row 15 | missing |
+| Video < 5 min, public YouTube, shows the app running | row 15 | cut ready + QA accepted; public upload needs owner |
 | Install link following Atlassian sharing instructions | row 13 | ready |
 | Setup / testing instructions | row 14 | ready |
 | Text description | rows 3–9 | ready |

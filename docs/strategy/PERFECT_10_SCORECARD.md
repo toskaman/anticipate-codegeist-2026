@@ -1,28 +1,27 @@
 # Perfect 10 scorecard (internal, evidence-backed)
 
-Last verified: **6 Nov 2026** on `main` **b8d0c8c** (post #194; TITAN cycle). Development v6.28.0, production v2.38.0. Fact refresh only: no score moves without new evidence (see scoring rules).
+Last verified: **8 Nov 2026** on `main` **0c1073e** (post #203; TITAN-7 cycle). Development 8.1.0 (RC code, owner-deployed 7 Nov 21:34:50 CET), production v2.38.0 installed with an uninstalled major 3 pending a shipping decision. Fact refresh only: no score moves without new evidence (see scoring rules).
 Scores are **internal planning estimates**, not predictions of the judges. A score only moves with evidence; anything without hosted proof is `NOT_VERIFIED`. Sources of truth: [RELEASE.md](../RELEASE.md) (versions, test counts), [STATUS.md](../STATUS.md) (capability states), [EVIDENCE_PACK.md](../evidence/EVIDENCE_PACK.md).
 
 | Dimension | Target | Provisional | NOT_VERIFIED items | Top gap (severity) | Next task |
 |---|---|---|---|---|---|
-| Technology | 10 | 8 | Radar issue-deleted event; slip/portfolio MCP tools in an external client | Radar link events, slip, portfolio, evidence-changed refusal and verified execution observed LIVE_FORGE_DEV (4 Nov); Release Safety, overview, Composer, Time Machine + first Radar prod event observed LIVE_FORGE_PRODUCTION 5 Nov on 2.37.0 (EVIDENCE_PACK). 5/7 MCP tools verified from an external client; slip + portfolio pending (HIGH); dev v6.28.0 carries all 7 tools for the session (#190) | external MCP client run on dev |
-| Design | 10 | 8 | native screen reader; Command Center/Explorer hosted exercise | Portfolio panel and Radar panel built and used live on dev (4 Nov); conflict reasons now named (#165). Playwright runs Chromium, Firefox and WebKit in CI since #168 (local browsers, not hosted Jira evidence); new Explorer/Command Center views UNIT_TESTED + mock-e2e axe-clean, hosted pending (#191); no native screen-reader run (MEDIUM) | native screen-reader pass (NVDA/VoiceOver) |
-| Impact | 10 | 6 | Value study not run with real users | Only synthetic benchmark + hosted journeys; no measured comparison vs manual Jira inspection (HIGH) | run `VALUE_STUDY_PROTOCOL.md` on the judge dataset (timed, self-run, labelled as such) |
-| Innovation | 10 | 8 | Collision demo on the judge site | DEMO 2 reproduced live on dev and on production (toskaman5962, 5 Nov, 2.37.0 session); DEMO 3 live on dev; not yet run on anticipate-judge (other account) (LOW) | owner runs the guided demo on anticipate-judge |
-| Presentation | 10 | 4 | Video does not exist | Mandatory video (K1) not recorded (owner); Devpost form not filled (K2) | owner; word-for-word script v3 + checklist ready (`docs/submission/VIDEO_SCRIPT.md`, #189) |
-| Security | 10 | 8 | Two-account hosted acceptance | Shared-decision bypass **fixed** (#144) and fault-tolerant (#145) but only unit-tested; feature correctly release-locked (MEDIUM) | #131 two-account run |
-| Performance | 10 | 8 | compare/execute under load; large graphs hosted | 10-parallel bursts on dev: listProjects 30/30 (p95 1.9 s), getGraphSnapshot 20/20 (p95 2.6 s); compare/execute and large hosted graphs not load-tested (MEDIUM) | burst on compareScenarios; larger demo graph |
-| Commercial readiness | 10 | 5 | Pricing / buyer journey unvalidated | Pricing hypotheses, Forge unit economics and Marketplace checklist now written (COMMERCIAL_STRATEGY.md, cited platform facts) but **no interviews or pilot yet**, so the score does not move (HIGH) | 5 interviews per persona + Van Westendorp, then decide payment model |
-| Judge reproducibility | 10 | 8 | Clean-site rerun on the shipping build | Production 2.38.0 (5 Nov, #179); smoke on toskaman5962 only; anticipate-judge install current (major 2, verified live 6 Nov) but behavior not re-checked since 2.35 and belongs to another account (MEDIUM) | clean-site rerun by the owner (#191) |
-| Documentation / compliance | 10 | 8 | — | Re-synced 6 Nov through #194: gauntlet, defensibility, quota facts, recount 306/75/12/175/186, jury kit (script v3, runbooks, checklists); MCP tool count guarded by a test (#163, CRLF fix #187). Devpost text must be re-read against the final build (LOW) | re-sync at release freeze |
+| Technology | 10 | 8 | slip/portfolio MCP tools in an external client; Radar issue-deleted event | 5/7 MCP tools verified from an external client; slip + portfolio pending (HIGH); dev 8.1.0 carries all 7 tools + #198 hardening, 6/6 read-only hosted acceptance green 8 Nov (HOSTED_ACCEPTANCE_T7) | external MCP client run on dev (#190) |
+| Design | 10 | 8 | native screen reader; Command Center/Explorer hosted exercise | A11y specs 12/12 re-green 8 Nov (local chromium); no native screen-reader run (MEDIUM); new views UNIT_TESTED + mock-e2e axe-clean, hosted pending (#191) | native screen-reader pass (NVDA, human) |
+| Impact | 10 | 6 | Value study not run with real users | Only synthetic benchmark + hosted journeys; no measured comparison vs manual Jira inspection (HIGH); automation timings are not human evidence | run `VALUE_STUDY_PROTOCOL.md` with consenting users, or honest self-timed baseline labelled as such |
+| Innovation | 10 | 8 | Collision demo on the judge site | DEMO 2 live on dev and production; not yet run on anticipate-judge (other account) (LOW) | owner runs the guided demo on anticipate-judge |
+| Presentation | 10 | 6 (was 4) | Public video URL; Devpost form | Final cut rendered + QA ACCEPTED 8 Nov (VIDEO_QA_REPORT): 2:54, genuine footage, timed subtitles, clean licenses — but NOT published and Devpost form not filled (HIGH) | owner: voice spot-check, co-owner approval, public upload, form fill (#189) |
+| Security | 10 | 8 | Two-account hosted acceptance | #198 hardening (throttle hashing, marker corroboration, BLOCKED literal, Rovo guards, policy cache) tested + deployed on dev 8.1.0; shared-decision bypass fixed but only unit-tested, feature correctly release-locked (MEDIUM) | #131 two-account run |
+| Performance | 10 | 8 | compare/execute under load; large graphs hosted | 10-parallel bursts green (listProjects p95 1.9 s, getGraphSnapshot p95 2.6 s); dev 8 Nov warm sample 189/1675 ms; compare/execute and large hosted graphs not load-tested (MEDIUM) | burst on compareScenarios; larger demo graph |
+| Commercial readiness | 10 | 5 | Pricing / buyer journey unvalidated | README buyer section + install-link HEAD 200 added, but **no interviews or pilot yet**, so the score does not move (HIGH) | 5 interviews per persona + Van Westendorp, then decide payment model |
+| Judge reproducibility | 10 | 8 | Clean-site rerun on the shipping build | anticipate-judge install on major 2 (Outdated app); production major 3 deployed-never-installed, shipping decision pending; dev 8.1.0 verified live but not the judge path (MEDIUM) | production release decision + clean-site rerun (#191) |
+| Documentation / compliance | 10 | 9 (was 8) | Devpost final re-read against shipping build | Re-synced 8 Nov through #203: video QA, hosted acceptance + screenshots, RC deploy record, jury README with poster/badges, recount 326/75/12/201/190; Devpost text + video URL still pending (LOW) | re-sync at release freeze |
 
 ## Blockers outside the agents' control
-- ~~Browser session expired~~ resolved 4 Nov: the owner session on the dev site works (hosted checks done).
 - **Two test accounts** with access to one project: needed for #131.
-- **Production deploy**: done by muse through the owner-approved bridge (`muse-cmd deploy-prod`), release gates checked; see RELEASE.md.
+- **Production release decision + deploy**: owner-approved per repo convention; major 3 deployed-never-installed must be resolved (promote or supersede); see RELEASE.md. Never Marketplace-submit this app ID (kills the sharing install link).
 - **Teamwork Graph**: allowlisting pending (ECOHELP-180616). Optional.
-- **Video and Devpost submission**: owner (#189), deadline 22 Dec 2026, 21:00 Paris.
-- **MCP 7/7 session + judge re-run**: owners (#190, #191); dev v6.28.0 live with all 7 tools.
+- **Video publication and Devpost submission**: owner (#189), deadline 22 Dec 2026, 21:00 Paris.
+- **MCP 7/7 session + judge re-run**: owners (#190, #191); dev 8.1.0 live with all 7 tools.
 
 ## Scoring rules
 No score rises because a PR merged or unit tests passed. A failed hosted test lowers the score until fixed. Criteria are not redefined to raise a score.
