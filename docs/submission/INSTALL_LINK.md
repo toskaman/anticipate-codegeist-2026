@@ -18,7 +18,7 @@ https://developer.atlassian.com/console/install/39a28f48-c891-4d86-a3cf-c14409cb
 Manual demo setup without the guided flow: docs/demo/JIRA_DEMO_SETUP.md.
 
 Support: info@lepcpro.fr · Privacy: docs/legal/PRIVACY.md · Terms: docs/legal/TERMS.md
-The link always installs the latest production deployment. NOTE (8 Nov 2026): installs currently on major 2 (v2.38.0) show "Outdated app"; a production major 3 was deployed 6 Nov from an experimental manifest and never installed. Do NOT treat major 3 as the shipping build. The validated shipping RC (main 4ea97f1, manifest-identical to v2.38.0) awaits owner deploy — see docs/deployment/PROD_RELEASE_CANDIDATE.md and the parity matrix docs/evidence/VIDEO_SHIPPING_PARITY.md before judging version-sensitive views (Release Command Center).
+The link always installs the latest production deployment, currently **4.0.0** (RC code, main 5610ca7, deployed 8 Nov 2026 13:20:51 UTC). Verified 8 Nov on the live consent page: exactly 4 scopes (Jira read/write, user profiles, app storage), no graph scopes — new installs receive the shipping build incl. the Release Command Center (screenshot docs/evidence/hosted-2026-11-08/24-install-consent-4x.png). Existing installs: toskaman5962 is on 4 (Up-to-date); anticipate-judge is still on major 2 pending its site admin's upgrade click (same 4 scopes, no new permissions). History: a production major 3 (6 Nov, experimental TWG manifest, never installed) was superseded by the 4.0.0 deploy. Full record: docs/deployment/PROD_RELEASE_CANDIDATE.md; parity: docs/evidence/VIDEO_SHIPPING_PARITY.md.
 
 
 ## Notes from the clean-site run (3 Nov 2026)

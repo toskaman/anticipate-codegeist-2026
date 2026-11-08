@@ -1,7 +1,6 @@
-# Production shipping release candidate — main 5610ca7 (TITAN-9 re-pin; TITAN-8 validation base 4ea97f1)
+# Production shipping release — main 5610ca7, deployed 4.0.0 (TITAN-9; TITAN-8 validation base 4ea97f1)
 
-Status: VALIDATED, NOT DEPLOYED. Deployment is OWNER AUTHORIZATION REQUIRED
-(per-deploy owner approval; no standing production authorization exists).
+Status: VALIDATED, DEPLOYED 8 Nov 2026 13:20:51 UTC as production 4.0.0 (owner-authorized: "go do all final recommendation", 8 Nov; Forge session Toska Marley).
 
 ## Source
 
@@ -68,7 +67,16 @@ Developer Console offers the new version as the installable latest, and
 whether existing installs ask for re-consent. Record all three before
 announcing the shipping build.
 
-## Deploy procedure (owner only)
+## Deploy record (8 Nov 2026, 13:20:51 UTC / 14:20:51 CET)
+
+- Source: detached worktree at exactly `5610ca7` (`.cache/prod-rc-5610ca7`, removed after); manifest hash `b474696d...` re-verified in the worktree; `forge lint` clean; CLI 14.2.0 + node 24.22.1.
+- First `forge deploy -e production` stopped on MAJOR_VERSION_RULE ("scope modification"): Forge compares against the latest production version, which was the major-3 TWG experiment — returning to the committed 4-scope manifest is a scope change, so Forge assigned a NEW major. Re-ran with `--approve MAJOR_VERSION_RULE` (same authorized deploy, acknowledging the observed assignment).
+- Assigned version: **4.0.0**. Production latest is now the RC: the version trap is structurally closed (major 3 superseded, never installed anywhere).
+- Installs after deploy: `toskaman5962` upgraded via CLI to major 4, Up-to-date; `anticipate-judge` CLI upgrade FAILED ("Failed to install into Jira", no detail even verbose) — the Forge session lacks rights there. Site-admin action required: Jira Admin → Apps → Manage apps → ANTICIPATE → Update (grants the same 4 scopes already consented on major 2; no new permission surface).
+- Install-link routing VERIFIED (CDP capture browser, consent page read, nothing installed): the link offers exactly the 4 RC scopes (no graph scopes) — new judge installs receive 4.0.0. Screenshot: `docs/evidence/hosted-2026-11-08/24-install-consent-4x.png`.
+- In-app production smoke NOT_VERIFIED: the capture-browser session is not entitled on `toskaman5962` ("insufficient permissions to load this app"). Owner step: open Apps → ANTICIPATE there and confirm the Release Command Center renders (its presence proves 4.0.0 code; 2.38.0 lacked it), then run JUDGE_RERUN_CHECKLIST.md (#191).
+
+## Deploy procedure (kept for audit; executed above)
 
 From a clean checkout of main `5610ca7` on the owner PC with a logged-in
 Forge CLI (pinned CLI 14.2.0, node 24.22.1 as in DEV_RELEASE_CANDIDATE.md):
@@ -106,8 +114,8 @@ Then:
 Redeploy production from `113ddc5` (v2.38.0 source, manifest-identical):
 
 ```powershell
-git worktree add E:\Codegeist2026\.cache\prod-rollback 113ddc5
-cd E:\Codegeist2026\.cache\prod-rollback\ANTICIPATE
+git worktree add --detach E:\Codegeist2026\.cache\prod-rollback 113ddc5
+cd E:\Codegeist2026\.cache\prod-rollback
 $env:Path = "E:\Codegeist2026\.cache\node-dist\node-v24.22.1-win-x64;E:\Codegeist2026\tools\forge-cli;$env:Path"
 forge deploy -e production
 ```
