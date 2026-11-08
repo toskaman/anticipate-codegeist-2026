@@ -273,3 +273,11 @@ Same method as the `listProjects` burst (app's own invocations, one user, develo
 
 ### Production after owner deploy (4 Nov ~15:40 UTC, main ea3ee7c)
 toskaman5962: startup invocations 1644 / 1412 ms (cold), then `getCapabilities` 325 ms; `getPlanAttention` listed.
+
+### T7-2: dev 8.1.0 deploy record + read-only acceptance (8 Nov 2026) — LIVE_FORGE_DEV, one-atlas-euza
+
+`forge deploy list`: Success, contributor Toska Marley, 2026-11-07T20:34:50Z, second deploy to major 8 (first 18:16Z = 8.0.0), hence 8.1.0 by Forge minor-increment (minor string INFERRED-STRONG). `forge install list`: development/one-atlas-euza major 8 (Latest), Up-to-date. Installed code = RC code (d1e6509/9004bab, docs-only delta). Full record: docs/deployment/DEV_RELEASE_CANDIDATE.md, docs/evidence/HOSTED_ACCEPTANCE_T7.md.
+
+Read-only walk (project capture browser, zero Jira writes): all 6 journey steps live with a consistent context pill (AVT · AVT-3 · Migrate first · Completed). Evidence Graph shows 7 records incl. AVT-1 (drift link persisted); Firewall MIGRATE FIRST Pass with stated assumption; Passport Radar Listening (7 indexed), Time Machine completed with 3 unchanged checkpoints. Capabilities as backend-reported: Jira read/write Available, MCP Permission required, Teamwork Graph Not configured. Perf single sample (warm): first content 189 ms, workspace connected 1675 ms. Screenshots: docs/evidence/hosted-2026-11-08/.
+
+Install-link liveness (8 Nov): HEAD on the INSTALL_LINK.md URL returns 200 (page resolves; full install flow not re-tested here).
