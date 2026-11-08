@@ -435,8 +435,7 @@ journey on a clean site — both are written down."
 
 ### Q24. What authentic first-15-second moment communicates exceptional value?
 
-**A. Vulnerability.** No video exists (`CODEGEIST_COMPLIANCE.md`: video FAIL, verdict NO-GO;
-Presentation 4/10) — the strongest moment is designed but unrecorded.
+**A. Vulnerability.** [SUPERSEDED 8 Nov: the film now exists — final cut rendered 7 Nov, QA ACCEPTED 8 Nov (`docs/evidence/VIDEO_QA_REPORT.md`: 2:54, genuine footage, timed subtitles, clean licenses), Presentation 6/10; publication pending owner (`CODEGEIST_COMPLIANCE.md`: video BLOCKED). Original text kept below for history.] No video exists (`CODEGEIST_COMPLIANCE.md`: video FAIL, verdict NO-GO; Presentation 4/10) — the strongest moment is designed but unrecorded.
 
 **B. Hardened Technical Fix.** The moment is DEMO 2 on production: two changes that pass alone,
 shown colliding the instant they are simulated together (EMERGENT_IMPACT + MIGRATE_ONTO_RETIRED
@@ -448,7 +447,7 @@ public (listed, per official rules — not unlisted) YouTube link + shot checkli
 **C. Ten-Second Rebuttal.** "Two safe changes, one screen, instant collision — the first fifteen
 seconds are the product, not a pitch."
 
-**Status:** `NEEDS_IMPLEMENTATION`
+**Status:** `NEEDS_OWNER_ACTION` (cut accepted; watch + co-owner approval + public upload pending, #189).
 
 ## Cluster 5 — Grandmaster Elevation
 
@@ -576,7 +575,7 @@ Continuity contracts (composer → decision), files and tests:
 - P0-C6 passport provenance: `ProvRec` + `getPreventionPassport` exist — assert the composer
   provenance chain appears in the Passport and in Rovo `get-passport`.
 
-Global P0s: G1 record video (Q24); G2 judge-site re-check on the shipping build (Q23);
+Global P0s: G1 publish video — cut rendered + QA accepted 8 Nov, owner upload pending (Q24, #189); G2 judge-site re-check on the shipping build (Q23);
 G3 MCP slip/portfolio external-client run (scorecard HIGH gap); G4 #131 two-account acceptance
 (keep release-locked until pass); G5 source-tree clarity (deploy source = this tree,
 `RELEASE.md`); G6 freeze-time recount + doc re-sync (Q23).
