@@ -1,11 +1,11 @@
 {
   "agent": "muse",
-  "updated": "2026-11-08T14:30:00Z",
-  "main": "472a867 (after #211; T9 value-repin merged, CI 42480075637 green)",
+  "updated": "2026-11-08T14:45:00Z",
+  "main": "28fa97e (after #219; prod 4.0.0 DEPLOYED 13:20:51Z, link verified, CI 42485123503 green)",
   "org": "D14 two-agent split: muse owns CORE/Forge/backend/security/MCP/prod/evidence/Devpost; orpheane owns EXPERIENCE (TITAN-EXPERIENCE); no EXPERIENCE edits under her lease",
   "runner": "Claude session with bridge to the owner's PC (gh, forge, capture browser on CDP 9333)",
   "deployed": {
-    "production": "2.38.0 installed (source 113ddc5); major 3 deployed-never-installed (experimental); shipping RC 5610ca7 code VALIDATED, NOT DEPLOYED (owner approval pending)",
+    "production": "4.0.0 (RC 5610ca7) DEPLOYED 8 Nov 13:20:51Z; toskaman5962 on 4 Up-to-date; anticipate-judge still 2 (site-admin upgrade needed); major 3 superseded; link verified serving 4.0.0"
     "development": "8.1.0 INFERRED-STRONG (RC code d1e6509/9004bab, owner-deployed 7 Nov 20:34:50Z)"
   },
   "bridge": "HMAC=LEGACY-NO-KEY, owner-accepted (K9, #167; D12)",
@@ -20,7 +20,7 @@
     "Playwright 190/190 executed locally (chromium+firefox+webkit)",
     "forge lint clean; audits 0 high (root 5 mod, frontend 4 mod)"
   ],
-  "current": "TITAN-9 final A-F report delivered; autonomous work complete except owner-gated items",
+  "current": "Final recommendations executed: prod deployed, video/MCP handed off with precise gates; #219 merged; issues updated"
   "next": [
     "Second self-run counterbalanced prep only if useful (not human evidence)",
     "Owner: prod RC deploy, video publish, MCP 7/7 session, judge rerun (#191), Devpost submit"
