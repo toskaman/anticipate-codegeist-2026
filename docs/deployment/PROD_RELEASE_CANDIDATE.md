@@ -1,14 +1,14 @@
-# Production shipping release candidate — main 4ea97f1 (TITAN-8)
+# Production shipping release candidate — main 5610ca7 (TITAN-9 re-pin; TITAN-8 validation base 4ea97f1)
 
 Status: VALIDATED, NOT DEPLOYED. Deployment is OWNER AUTHORIZATION REQUIRED
 (per-deploy owner approval; no standing production authorization exists).
 
 ## Source
 
-- main `4ea97f1` (merge #205; code tree = `40a84e3`).
+- main `5610ca7` (merge #210; code tree = `7c3e334`). Re-pinned 8 Nov after the TWG Preview message fix (#210, one user-visible string + lock test); previous pin `4ea97f1` in git history. Intermediate #206/#207/#209 docs + evidence only; #208 test-only.
 - Code delta vs installed production v2.38.0 (source `113ddc5`, after #179):
-  30 files in `src`, `static/hello-world/src`, `packages`
-  (+3168 / −67 lines), spanning #183–#199:
+  32 files in `src`, `static/hello-world/src`, `packages`
+  (+3173 / −70 lines), spanning #183–#199 plus #208/#210 tests and the TWG honesty string:
   issue-race/explicit analysis identity, project-scoped releases,
   portfolio generation guards, Release Command Center, Causal Collision
   Explorer, Time Machine retention notice, OMEGA P0 backend hardening
@@ -32,15 +32,15 @@ Status: VALIDATED, NOT DEPLOYED. Deployment is OWNER AUTHORIZATION REQUIRED
 
 ## Validation evidence
 
-All gates executed on trees code-identical to the RC (main `4ea97f1`):
+All gates executed on the RC tree (main `5610ca7`):
 
 | Gate | Result |
 |---|---|
-| Backend `npm test` | 326/326 (38 files), local |
+| Backend `npm test` | 333/333 (39 files; 326 +6 MCP adversarial #208 +1 TWG lock #210), local, re-run on RC tree |
 | Contracts / simulation-core | 12 / 75, local |
 | Frontend vitest / typecheck / lint / build | 201/201, exit 0, exit 0, build ok, local |
 | Playwright listed | 190 in 31 files (`--list`) |
-| Playwright executed, local (chromium 150 + firefox 20 + webkit 20) | 190/190 (2.0m), exit 0 |
+| Playwright executed, local (chromium 150 + firefox 20 + webkit 20) | 190/190 (2.2m), exit 0, re-run on RC tree |
 | Cloud CI on #205 (run 42433936416) | core pass 1m3s, frontend pass 59s (incl. new audit step), e2e pass 7m41s |
 | `forge lint` (CLI 14.2.0) | No issues found |
 | `npm audit --omit=dev --audit-level=high` | root 5 moderate / 0 high; frontend 4 moderate / 0 high |
@@ -61,7 +61,7 @@ Production history (see RELEASE.md):
   (INFERRED from Forge latest-version semantics — never install-tested
   and must NOT be treated as the shipping build).
 
-The RC deploy from `4ea97f1` carries the approved committed manifest,
+The RC deploy from `5610ca7` carries the approved committed manifest,
 which differs from the deployed-never-installed major 3. The owner must
 observe at deploy time: the version number Forge assigns, whether the
 Developer Console offers the new version as the installable latest, and
@@ -70,11 +70,11 @@ announcing the shipping build.
 
 ## Deploy procedure (owner only)
 
-From a clean checkout of main `4ea97f1` on the owner PC with a logged-in
+From a clean checkout of main `5610ca7` on the owner PC with a logged-in
 Forge CLI (pinned CLI 14.2.0, node 24.22.1 as in DEV_RELEASE_CANDIDATE.md):
 
 ```powershell
-git fetch origin; git checkout 4ea97f1
+git fetch origin; git checkout 5610ca7
 $env:Path = "E:\Codegeist2026\.cache\node-dist\node-v24.22.1-win-x64;E:\Codegeist2026\tools\forge-cli;$env:Path"
 forge deploy -e production
 forge install list
