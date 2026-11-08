@@ -6,9 +6,9 @@ Source: https://codegeist2026.devpost.com/rules (read 3 Nov 2026). Deadline: **2
 |---|---|---|---|---|
 | Runs on Forge, integrates Jira/Confluence/JSM/Bitbucket/TWG/Rovo | yes | PASS | manifest.yml (Jira, Rovo agent, rovo:mcp, workflow validator) | — |
 | Installable by judges via an install link ("start sharing your app") | yes | PASS | docs/submission/INSTALL_LINK.md; clean-site install 3 Nov (EVIDENCE_PACK); install page HTTP 200 re-verified 6 Nov | — |
-| Runs consistently and as described | yes | PASS (current build) | clean-site journey + validator, 3 Nov | re-run on final SHA (muse) |
-| Demo video < 5 min, YouTube public, shows the app running | yes | FAIL (not produced) | — | owner records (word-for-word script v3 + checklist ready); tracked in #189 |
-| No third-party trademarks or copyrighted music in video | yes | NOT VERIFIED | — | check at video review |
+| Runs consistently and as described | yes | PASS (current build) | clean-site journey + validator, 3 Nov; dev 8.1.0 read-only acceptance 6/6, 8 Nov (HOSTED_ACCEPTANCE_T7) | re-run on shipping build (#191) |
+| Demo video < 5 min, YouTube public, shows the app running | yes | BLOCKED (cut rendered + QA ACCEPTED 8 Nov, not public) | docs/evidence/VIDEO_QA_REPORT.md (2:54, genuine footage, timed subtitles) | owner: full watch + listen, co-owner approval, public upload, paste URL; tracked in #189 |
+| No third-party trademarks or copyrighted music in video | yes | PASS | VIDEO_QA_REPORT: own footage, Apache-2.0 TTS, CC BY 4.0 music with YT attribution, CC0 SFX, nominative Atlassian/Jira/Forge marks only | — |
 | Judge instructions (config, integrations) | yes | PASS | INSTALL_LINK.md (install, Free plan notes, validator steps) | keep in sync with final build |
 | Text description incl. how it meets the tech requirement | yes | NOT VERIFIED (final text ready, form not filled) | docs/submission/DEVPOST_FINAL.md, TECHNICAL_SECTION.md | owner pastes at submission; re-read against final build |
 | Category selected (Apps for Software Teams) | yes | NOT VERIFIED (form not submitted) | DEVPOST_FINAL.md header | owner submits |
@@ -22,4 +22,4 @@ Source: https://codegeist2026.devpost.com/rules (read 3 Nov 2026). Deadline: **2
 | One bonus maximum | rule | PASS | `.github/agent-coordination/decisions.md` D1 (MCP) | — |
 | No changes after the deadline | rule | NOT APPLICABLE yet | — | freeze release before 22 Dec |
 
-Verdict today: **NO-GO for submission** (video and Devpost form missing). Product build: GO for the demo scenario.
+Verdict today: **NO-GO for submission** (public video URL + Devpost form + production shipping release pending owner). Product build: GO for the demo scenario; shipping RC validated, deploy pending owner (PROD_RELEASE_CANDIDATE.md).

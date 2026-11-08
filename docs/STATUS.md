@@ -1,6 +1,6 @@
 # ANTICIPATE - source of truth (dated)
 
-Updated: 5 Nov 2026 (new rows for #173/#174/#176 and the release overview); earlier rows as of 4 Nov 2026, ~16:20 Paris. 6 Nov: TITAN rows (Explorer, Command Center, retention notice), dev v6.28.0 pointer. Owner of this file: CORE (muse).
+Updated: 5 Nov 2026 (new rows for #173/#174/#176 and the release overview); earlier rows as of 4 Nov 2026, ~16:20 Paris. 6 Nov: TITAN rows (Explorer, Command Center, retention notice), dev v6.28.0 pointer. 8 Nov: T8 refresh (dev 8.1.0 pointers, prod RC pending). Owner of this file: CORE (muse).
 
 | Item | Value |
 |---|---|
@@ -21,7 +21,7 @@ Updated: 5 Nov 2026 (new rows for #173/#174/#176 and the release overview); earl
 | Sample data (guided demo), CONFLICT guard | LIVE_FORGE | MP, AVT, MOBL; CONFLICT logged, no duplicates |
 | Dependency upgrade + compatibility evidence | LIVE_FORGE | MP-5 via UI and MCP |
 | Prevention Passport, historical record after snapshot expiry | UNIT_TESTED (expiry), LIVE_FORGE (live passport + PDF print) | retention tests |
-| MCP tools (read-only; see manifest `rovo:mcp` for the current list) | LIVE_FORGE for the original 5; newer tools (slip, portfolio) NOT_VERIFIED in an external client (#190; dev v6.28.0 carries all 7 tools) | external Claude client on dev |
+| MCP tools (read-only; see manifest `rovo:mcp` for the current list) | LIVE_FORGE for the original 5; newer tools (slip, portfolio) NOT_VERIFIED in an external client (#190; dev 8.1.0 carries all 7 tools) | external Claude client on dev |
 | Shared-decision execution gate (server-side) | UNIT_TESTED + deployed dev 6.9.0; feature release-locked | #144: 13 adversarial tests, every refusal asserts zero Jira writes |
 | Approval path under storage faults | UNIT_TESTED | #145: fault injection before/after each write |
 | Shared Decision Workspace (two-account flow) | BLOCKED (hosted two-account acceptance not run) | #131 |
@@ -31,8 +31,8 @@ Updated: 5 Nov 2026 (new rows for #173/#174/#176 and the release overview); earl
 | Release overview (`listReleaseSafety`: every fixVersion, worst first) | **LIVE_FORGE_PRODUCTION** 5 Nov (2.37.0, ADM) | docs/product/RELEASE_SAFETY.md |
 | Decision Time Machine (`getDecisionHistory`, Passport) | **LIVE_FORGE_PRODUCTION** 5 Nov including invalidation (approved → real Jira link → Radar → re-check → "Added: ADM-1 depends on ADM-6"); plans older than 6.22.0 get checkpoints only from their next re-check | #174; docs/product/DECISION_TIME_MACHINE.md |
 | Safe Change Composer (`composeSafeChanges`, Scenario Lab) | **LIVE_FORGE_PRODUCTION** 5 Nov (2.37.0, ADM: compatibility phase #1, 0 conflicts) | #176; docs/product/SAFE_CHANGE_COMPOSER.md |
-| Causal Collision Explorer (per-conflict causal explanation) | UNIT_TESTED + LOCAL mock-e2e (axe-clean); hosted exercise pending (#191); ships in dev v6.28.0 | #188 |
-| Release Command Center (read-only release digest + next action) | UNIT_TESTED + LOCAL mock-e2e (axe-clean); hosted exercise pending (#191); ships in dev v6.28.0 | #188 |
+| Causal Collision Explorer (per-conflict causal explanation) | UNIT_TESTED + LOCAL mock-e2e (axe-clean); hosted exercise pending (#191); ships in dev 8.1.0; included in the prod shipping RC (deploy pending owner, PROD_RELEASE_CANDIDATE.md) | #188 |
+| Release Command Center (read-only release digest + next action) | UNIT_TESTED + LOCAL mock-e2e (axe-clean); hosted exercise pending (#191); ships in dev 8.1.0; included in the prod shipping RC (deploy pending owner, PROD_RELEASE_CANDIDATE.md) | #188 |
 | Time Machine retention notice (dropped checkpoints, baseline state) | UNIT_TESTED; hosted exercise pending (#191) | #188 |
 | KVS transactions | Decision: keep setIfAbsent design (ADR) | #175; docs/design-core/ADR-KVS-TRANSACTIONS.md |
 | Policy-as-code preview engine | UNIT_TESTED only (37 tests, #159); inert: nothing calls it, gates nothing | docs/design-core/POLICY_AS_CODE.md |
@@ -43,6 +43,6 @@ Updated: 5 Nov 2026 (new rows for #173/#174/#176 and the release overview); earl
 ## Known limitations
 - Clean-site judge run: PASS on 3 Nov 2026 (anticipate-judge, Jira Free, production install from the public link; full journey to a Completed Passport; docs/evidence/EVIDENCE_PACK.md). Limited-permission roles cannot be configured on Jira Free (unit tests cover them).
 - Plans are private to their creator in production. Shared decisions are implemented and enforced at execution, but release-locked until the hosted two-account test passes.
-- zod 4.6.7 everywhere (high advisory remediated). 5 moderate advisories remain in Forge tooling (breaking @forge/api major needed).
+- zod 4.6.7 everywhere (high advisory remediated; stale nested v3 purge + CI audit gate in #205, re-verified 8 Nov: root 5 moderate / frontend 4 moderate, 0 high). 5 moderate advisories remain in Forge tooling (breaking @forge/api major needed).
 - First open: ~2.6 s warm, ~3.9 s backend-cold, up to ~9.3 s right after a deploy (cold CDN); see EVIDENCE_PACK (3 Nov, production 2.30.0).
 - MOCK_TRANSPORT screenshots are UI evidence only, not production proof.
