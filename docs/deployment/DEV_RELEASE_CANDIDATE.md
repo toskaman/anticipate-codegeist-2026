@@ -1,8 +1,28 @@
 # Development release candidate — main d1e6509 (TITAN-6)
 
-Status: VALIDATED, NOT DEPLOYED. Deployment is OWNER AUTHORIZATION REQUIRED
+Status: VALIDATED, DEPLOYED BY OWNER 2026-11-07 21:34:50 CET (see T7-2 note below). No further deploy action required for the RC code.
+
+> Superseded T6 line (kept for audit): VALIDATED, NOT DEPLOYED. Deployment was OWNER AUTHORIZATION REQUIRED.
 (no valid Forge session on this machine; no standing deploy authorization found —
 past deploys each had per-deploy owner approval in chat).
+
+## T7-2 recheck (8 Nov 2026, `forge deploy list` + `forge install list`)
+
+- `default` env, major 8, Success, contributor Toska Marley, at
+  2026-11-07T20:34:50Z — 9 min after the #202 merge. Previous major-8
+  deploy 18:16Z (= 8.0.0 from `bd683e4`); by Forge minor-increment this
+  deploy is **8.1.0** (minor string not directly observable via CLI:
+  INFERRED-STRONG, all indirect evidence consistent).
+- Installed code = RC code: deploy happened after `d1e6509` (21:15 CET)
+  and #202 `9004bab` (21:26 CET), which differ by docs only.
+- `forge install list`: development/one-atlas-euza major 8 (Latest),
+  Up-to-date. Production installs (toskaman5962, anticipate-judge) show
+  major 2, "Outdated app" — a production major 3 was deployed 6 Nov but
+  never installed anywhere (see T7-8/9 for the production decision; no
+  production action taken in T7-2).
+- HEAD `9004bab`, no open PRs, no pushes since #202; manifest unchanged
+  since `bd683e4` (re-verified). Pinned CLI 14.2.0 notes 15.0.0
+  available — kept pinned for release stability.
 
 ## Source
 
@@ -31,7 +51,7 @@ past deploys each had per-deploy owner approval in chat).
 | KVS 240 KiB boundary probe (temp, deleted) | 4/4, warn path confirmed |
 | A11y specs (chromium, incl. new display-prefs) | 12/12 within full run |
 
-## Deploy command (owner)
+## Deploy command (owner) — executed 7 Nov 21:34:50 CET, kept for rollback reference
 
 From a clean checkout of main `d1e6509` on the owner PC with a logged-in Forge CLI:
 

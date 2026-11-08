@@ -1,12 +1,37 @@
 # ANTICIPATE — The Decision Firewall for Software Teams
 
+[![CI](https://github.com/toskaman/anticipate-codegeist-2026/actions/workflows/ci.yml/badge.svg)](https://github.com/toskaman/anticipate-codegeist-2026/actions/workflows/ci.yml)
+[![Codegeist 2026](https://img.shields.io/badge/Codegeist_2026-Entrant-0052CC)](https://codegeist2026.devpost.com/)
+[![Atlassian MCP](https://img.shields.io/badge/Bonus_entry-Atlassian_MCP-FF5630)](docs/evidence/MCP_EXTERNAL_RUNBOOK.md)
+[![Built with Forge](https://img.shields.io/badge/Built_with-Atlassian_Forge-0052CC)](https://developer.atlassian.com/platform/forge/)
+[![Runs on Jira Cloud](https://img.shields.io/badge/Runs_on-Jira_Cloud-2684FF)](docs/submission/INSTALL_LINK.md)
+[![License](https://img.shields.io/badge/License-Proprietary-lightgrey)](LICENSE)
+
 **Test the consequences. Prove the safeguards. Then ship.**
+
+![ANTICIPATE film key art: two changes, one hidden collision — alone pass, together needs review](docs/submission/gallery/ANTICIPATE_CODEGEIST_2026_THUMBNAIL.jpg)
 
 A Forge app for Jira that checks a risky change *before* it ships: it shows what really depends on it, compares safer options, refuses stale decisions and keeps a verified record of who decided what.
 
-A ticket says "retire Auth API v1". It looks safe. The service that breaks is two links away, on an issue nobody opened, and the team finds out in production. Afterwards nobody can show what was known when the decision was made.
+A ticket says "retire Auth API v1". It looks safe. The service that breaks is two links away, on an issue nobody opened, and the team finds out in production. Afterwards nobody can show what was known when the decision was made. ANTICIPATE exists so that story stops happening.
 
-[Install (judges)](docs/submission/INSTALL_LINK.md) · [Evidence pack](docs/evidence/EVIDENCE_PACK.md) · [Devpost text](docs/submission/DEVPOST_FINAL.md) · [Video script](docs/submission/VIDEO_SCRIPT.md) · [Status](docs/STATUS.md)
+## For judges (2 minutes)
+
+1. **Install** with the link in [docs/submission/INSTALL_LINK.md](docs/submission/INSTALL_LINK.md), then open **Jira → Apps → ANTICIPATE**.
+2. **Start the guided demo** → Preview sample data → confirm → **Analyze** → Compare → Check safeguards → approve → execute → **Prevention Passport**.
+3. **Verify the claims**: every behaviour below links to its evidence in the [evidence pack](docs/evidence/EVIDENCE_PACK.md); hosted results are labelled with date and site.
+
+Demo video: public YouTube link will be added here on publication ([issue #189](https://github.com/toskaman/anticipate-codegeist-2026/issues/189)); the [script](docs/submission/VIDEO_SCRIPT.md) and [QA report](docs/evidence/VIDEO_QA_REPORT.md) are already in the repo.
+
+## For engineering leaders
+
+- **Know what will break** before the release train leaves: hidden multi-change collisions surface with names, paths and evidence — not hunches.
+- **Ship calmer releases**: release readiness joins every change with its recorded decision (Blocked, Needs review, Verified…), and the Jira workflow gate enforces it at transition time.
+- **Prove every decision** afterwards: each Prevention Passport records what was known, what was compared, who approved what, and what was verified by reading Jira back.
+- **Procurement-friendly**: runs 100% on Atlassian Forge inside your Jira (no external egress), acts with each viewer's own Jira permissions, minimal scopes ([privacy](docs/legal/PRIVACY.md) · [terms](docs/legal/TERMS.md) · [threat model](docs/security/THREAT_MODEL.md)).
+- **Honest about limits**: [no Teamwork Graph yet, no Marketplace listing, Jira-only evidence](#honest-limitations). What the app cannot know, it says.
+
+Product context: [buyer hypotheses](docs/strategy/BUYER_HYPOTHESES.md) · [value-study protocol](docs/strategy/VALUE_STUDY_PROTOCOL.md) · [commercial strategy](docs/strategy/COMMERCIAL_STRATEGY.md). Licensing or pilot enquiries: info@lepcpro.fr.
 
 ## What it does
 
@@ -38,6 +63,17 @@ Playwright captures of the real UI with a **mock backend transport (MOCK_TRANSPO
 | Evidence Graph | Scenario Lab | Prevention Passport |
 | --- | --- | --- |
 | ![Dependency map with evidence sources, provenance inspector and accessible list](evidence/experience/v3-redesign/visual/02-evidence-graph-desktop-dark.png) | ![Three alternatives compared on the same evidence, with verdicts and named open questions](evidence/experience/v3-redesign/visual/03-scenario-lab-desktop-dark.png) | ![Decision record with alternatives, approvals and verified execution](evidence/experience/v3-redesign/visual/11-prevention-passport-desktop-light.png) |
+
+## Documentation
+
+| Start here | Evidence | Product & strategy |
+| --- | --- | --- |
+| [Install link](docs/submission/INSTALL_LINK.md) | [Evidence pack](docs/evidence/EVIDENCE_PACK.md) | [Release record](docs/RELEASE.md) (versions, test counts) |
+| [Submission text](docs/submission/DEVPOST_FINAL.md) | [Video QA report](docs/evidence/VIDEO_QA_REPORT.md) | [Status](docs/STATUS.md) (capabilities, proofs) |
+| [Video script](docs/submission/VIDEO_SCRIPT.md) | [MCP external runbook](docs/evidence/MCP_EXTERNAL_RUNBOOK.md) | [Commercial strategy](docs/strategy/COMMERCIAL_STRATEGY.md) |
+| [Gallery pack](docs/submission/gallery/README.md) | [Judge re-run checklist](docs/submission/JUDGE_RERUN_CHECKLIST.md) | [Capacity envelope](docs/strategy/CAPACITY_ENVELOPE.md) |
+
+Security & legal: [threat model](docs/security/THREAT_MODEL.md) · [privacy](docs/legal/PRIVACY.md) · [terms](docs/legal/TERMS.md) · [validator admin guide](docs/admin/WORKFLOW_VALIDATOR.md).
 
 ## Atlassian modules and scopes
 
