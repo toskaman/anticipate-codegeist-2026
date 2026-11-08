@@ -233,9 +233,9 @@ Each of these is either tested LOCAL only or not observed at all. The browser ch
 | Passport print with the dark theme selected (PR #60 contrast fix) | LOCAL (axe in print media) | One saved PDF from the hosted site with Dark selected |
 | Judge site, non-admin Settings (J2 in `docs/jury/HOSTED_ACCEPTANCE_PR37.md`) | dev only (one-atlas-euza) | The same check on anticipate-judge with an invited account |
 | R18: unreadable (403/404) gated issue follows the outage policy | LOCAL (6 unit tests) | A site where issue security actually hides the issue from the app |
-| Hosted screenshots for the Devpost gallery | none (gallery has diagrams only) | LIVE_FORGE captures of graph, Scenario Lab, Firewall, Passport |
-| Demo video (K1) | none | Recording per `docs/submission/VIDEO_SCRIPT.md` v3 on the hosted judge site (#189) |
-| MCP slip + portfolio from an external client (5/7 → 7/7) | UNIT_TESTED + LOCAL rovo tests; dev v6.28.0 carries all 7 tools | One admin-enabled session per `MCP_EXTERNAL_RUNBOOK.md` (#190) |
+| Hosted screenshots for the Devpost gallery | 5 LIVE_FORGE_DEV captures 8 Nov (mission, graph, firewall, plan, passport — docs/evidence/hosted-2026-11-08/) + diagram pack | Judge-site captures on the shipping build (#191) |
+| Demo video (K1) | Final cut rendered 7 Nov + QA ACCEPTED 8 Nov (docs/evidence/VIDEO_QA_REPORT.md); genuine dev-8.x footage | Owner full watch + listen, co-owner approval, public YouTube upload + URL (#189) |
+| MCP slip + portfolio from an external client (5/7 → 7/7) | UNIT_TESTED + LOCAL rovo tests; dev 8.1.0 carries all 7 tools | One admin-enabled session per `MCP_EXTERNAL_RUNBOOK.md` (#190) |
 | Clean-site judge re-run on the shipping build | Judge PASS 3 Nov on an older build; new Explorer/Command Center UI UNIT_TESTED + LOCAL mock-e2e only | `JUDGE_RERUN_CHECKLIST.md` on anticipate-judge incl. new-UI exercise (#191) |
 
 
