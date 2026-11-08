@@ -43,6 +43,8 @@ jobs:
       - run: npm test
       - run: npm run benchmark:graph
       - run: npm run licenses:inventory
+      - name: Security audit (runtime dependencies, high and above)
+        run: npm audit --omit=dev --audit-level=high
       - run: npm run build
   e2e:
     # Playwright Chromium (UI journeys, axe, print, UI security). PRs and pushes to main; other pushes stay fast.
