@@ -64,8 +64,8 @@ export function mergeSource(snapshot: GraphSnapshot, res: SourceResult, maxExtra
   return { ...snapshot, coverage, nodes: [...nodes.values()].sort((x, y) => x.id.localeCompare(y.id)), edges: [...edges.values()].sort((x, y) => x.id.localeCompare(y.id)) };
 }
 
-/** Default source when Teamwork Graph is not allowlisted / not configured: honest, no data. */
+/** Default source when this build declares no graph scopes: honest, no data. (8 Nov 2026: the TWG API is in Preview and needs no allowlisting — Atlassian support ECOHELP-180616; the previous allowlist wording was retired with it.) */
 export const notConfiguredTwg: ContextSource = {
   name: 'TEAMWORK_GRAPH',
-  async fetch() { return { state: 'NOT_CONFIGURED', detail: 'Teamwork Graph access pending Atlassian allowlisting of this app.', objects: [], relations: [] }; }
+  async fetch() { return { state: 'NOT_CONFIGURED', detail: 'Teamwork Graph is not enabled for this installation: this build declares no graph scopes.', objects: [], relations: [] }; }
 };

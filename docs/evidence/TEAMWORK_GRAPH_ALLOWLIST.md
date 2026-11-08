@@ -1,5 +1,15 @@
 # Teamwork Graph: allowlisting evidence (for judges)
 
+## 8 Nov 2026 update — allowlist no longer required (SUPERSEDES the request below)
+
+Atlassian support (Deepak Pandey, ECOHELP-180616) confirmed: the Teamwork Graph API is in **Preview**, the app **no longer needs to be allowlisted**, and the deploy error came from the **retired EAP product-wide scope `read:graph:jira`** — consistent with our 3 Nov 13:01 observation (refused) vs 13:02 (per-object `read:graph:issue:jira` deployed). The user-facing "pending allowlisting" string was retired with it (see `src/context/sources.ts`, honest Preview wording + lock test).
+
+Two findings from the current official docs (verified 8 Nov):
+- Scope mapping for our three prototype relations: `read:graph:issue:jira` + `read:graph:component:compass` + `read:graph:issue-remote-link:jira` + `read:graph:build:external` (ExternalBuild object). All TWG scopes are read-only.
+- **Raw Cypher at request time is banned**: "Apps can no longer send arbitrary Cypher text." Our prototype builds Cypher at runtime, so it must migrate to 3 persisted Cypher queries (one per fixed shape) or curated queries (catalog checked 8 Nov: no match for our traversals; closest is `jiraWorkItemLinkedExternalDeployments`, wrong object type). Runtime then calls `customQuery` with key + params.
+
+Plan (not executed): `docs/evidence/TEAMWORK_GRAPH_PREVIEW_PLAN.md` — isolated dev experiment first, owner decision after. The shipping RC stays TWG-free (adding scopes = new major + re-consent). We still do not claim Teamwork Graph as live.
+
 ANTICIPATE has a Teamwork Graph integration ready (prototype adapter `src/context/twg.ts`, read-only hosted probe on branch `exp/teamwork-graph`), but Atlassian has not yet enabled the Teamwork Graph API for this app. We do not claim Teamwork Graph as live.
 
 ## Allowlist request
