@@ -1,5 +1,5 @@
 import { teamworkGraphSource, parseRows, cypherFor } from '../src/context/twg';
-import { mergeSource } from '../src/context/sources';
+import { mergeSource, notConfiguredTwg } from '../src/context/sources';
 import { simulate } from '../packages/simulation-core/src/index';
 import { FIXTURE_POLICIES } from '../packages/contracts/src/fixtures';
 import type { GraphSnapshot } from '../packages/contracts/src/index';
@@ -35,6 +35,14 @@ describe('Teamwork Graph prototype adapter (disabled by default)', () => {
     expect(merged.edges.filter((e) => e.references.some((r) => r.sourceSystem === 'TEAMWORK_GRAPH')).every((e) => e.status === 'INFERRED')).toBe(true);
     const op = { scenarioId: 'A', label: 'A', operations: [{ op: 'REMOVE_NODE' as const, nodeId: 'issue:A-1' }] };
     expect(simulate(merged, op, FIXTURE_POLICIES).verdict).toBe(simulate(snap, op, FIXTURE_POLICIES).verdict);
+  });
+  it('the disabled default reports NOT_CONFIGURED with honest Preview wording (no allowlist claim)', async () => {
+    const res = await notConfiguredTwg.fetch(['A-1']);
+    expect(res.state).toBe('NOT_CONFIGURED');
+    expect(res.detail).toMatch(/not enabled for this installation/);
+    expect(res.detail).not.toMatch(/allowlist/);
+    expect(res.objects).toEqual([]);
+    expect(res.relations).toEqual([]);
   });
   it('an outage is reported as UNAVAILABLE, a partial failure as PARTIAL', async () => {
     expect((await teamworkGraphSource(port(() => new Error('down'))).fetch(['A-1'])).state).toBe('UNAVAILABLE');

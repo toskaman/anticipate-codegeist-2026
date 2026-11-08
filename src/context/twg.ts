@@ -1,11 +1,13 @@
 /**
  * Teamwork Graph source (PROTOTYPE, disabled by default).
  *
- * Status: the Teamwork Graph API is in Forge Preview and needs `read:graph:*` scopes declared in manifest.yml
+ * Status (8 Nov 2026): the Teamwork Graph API is in Forge Preview, needs NO allowlisting (Atlassian support ECOHELP-180616), and needs per-object `read:graph:*` scopes declared in manifest.yml (the EAP product-wide `read:graph:jira` is retired).
  * (e.g. read:graph:issue:jira, plus one scope per object type on every traversal hop) and enabled by the site admin.
  * ANTICIPATE does NOT declare these scopes yet: adding scopes is a major version that every installation must consent
  * to, so it is a release decision for the owners. Until then `teamworkGraphSource` is never wired and the snapshot
  * reports Teamwork Graph as NOT_CONFIGURED.
+ *
+ * Migration required before any wiring: the platform no longer accepts raw Cypher text at request time. The three fixed shapes in TWG_RELATIONS must move to persisted Cypher queries (one queryKey per relation, registered once via TWG Labs or the registration endpoint) or to curated queries where they match; the runtime then calls `customQuery` with key + params. See docs/evidence/TEAMWORK_GRAPH_PREVIEW_PLAN.md. These traversals need read:graph:issue:jira + read:graph:component:compass + read:graph:issue-remote-link:jira + read:graph:build:external.
  *
  * Design rules (enforced by mergeSource): objects are merged only by stable identifiers (issue keys / ARIs), every
  * external relation is INFERRED (never auto-CONFIRMED), unknown relation types are ignored, and a failing source is
