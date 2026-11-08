@@ -2,8 +2,7 @@
 
 Date: 8 Nov 2026, ~02:35–02:50 CET (01:35–01:50 UTC).
 Environment: development site `one-atlas-euza`, major 8 (8.1.0 INFERRED-STRONG
-per DEV_RELEASE_CANDIDATE.md), installation `2ae8efdf-…`, owner session
-(Toska Marley, site admin). Method: CDP-driven capture browser (text-first +
+per DEV_RELEASE_CANDIDATE.md), installation `2ae8efdf-…`, co-owner browser session (capture profile signed in as the second co-owner's Atlassian account; Forge CLI session is Toska Marley). Method: CDP-driven capture browser (text-first +
 screenshots). Jira writes in this session: **zero** — navigation, one
 app-storage snapshot, and read-only simulations only; no approve, execute,
 or sample-creation confirm clicked.
