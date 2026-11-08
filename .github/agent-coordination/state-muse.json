@@ -1,11 +1,11 @@
 {
   "agent": "muse",
-  "updated": "2026-11-08T12:55:00Z",
-  "main": "3ea1e6b (after #208)",
+  "updated": "2026-11-08T14:30:00Z",
+  "main": "472a867 (after #211; T9 value-repin merged, CI 42480075637 green)",
   "org": "D14 two-agent split: muse owns CORE/Forge/backend/security/MCP/prod/evidence/Devpost; orpheane owns EXPERIENCE (TITAN-EXPERIENCE); no EXPERIENCE edits under her lease",
   "runner": "Claude session with bridge to the owner's PC (gh, forge, capture browser on CDP 9333)",
   "deployed": {
-    "production": "2.38.0 installed (source 113ddc5); major 3 deployed-never-installed (experimental); shipping RC 4ea97f1 code VALIDATED, NOT DEPLOYED (owner approval pending)",
+    "production": "2.38.0 installed (source 113ddc5); major 3 deployed-never-installed (experimental); shipping RC 5610ca7 code VALIDATED, NOT DEPLOYED (owner approval pending)",
     "development": "8.1.0 INFERRED-STRONG (RC code d1e6509/9004bab, owner-deployed 7 Nov 20:34:50Z)"
   },
   "bridge": "HMAC=LEGACY-NO-KEY, owner-accepted (K9, #167; D12)",
@@ -14,12 +14,15 @@
     "#206 prod shipping RC + video parity 12/12 + submission reconciliation",
     "#207 T8 hosted extension (RCC + portfolio DEMO 2 on dev 8.1.0, zero writes)",
     "#208 MCP adversarial handler tests (backend 326 -> 332)",
+    "#209 T9 MCP docs (quick-start, skill.md) + D14 two-agent split + gauntlet Q24 fix",
+    "#210 TWG Preview message fix + lock test (backend 333; support: no allowlist, EAP scope retired)",
+    "#211 RC re-pin 5610ca7 + value SELF-RUN #1 (CONTAMINATED n=1, Impact stays 6) + T8 attribution fix",
     "Playwright 190/190 executed locally (chromium+firefox+webkit)",
     "forge lint clean; audits 0 high (root 5 mod, frontend 4 mod)"
   ],
-  "current": "TITAN-9 Beta MCP docs (quick-start + skill.md) + D14 coordination + gauntlet Q24 fix; VALUE self-run baseline next",
+  "current": "TITAN-9 final A-F report delivered; autonomous work complete except owner-gated items",
   "next": [
-    "Epsilon SELF-RUN value baseline on dev (TD dataset, timed, labelled)",
+    "Second self-run counterbalanced prep only if useful (not human evidence)",
     "Owner: prod RC deploy, video publish, MCP 7/7 session, judge rerun (#191), Devpost submit"
   ],
   "blocked": {
@@ -31,7 +34,7 @@
     ],
     "external": [
       "#131 needs a second real account",
-      "Teamwork Graph allowlist ECOHELP-180616"
+      "Teamwork Graph: Preview needs no allowlist (support 8 Nov); 4 per-object scopes mapped; isolated dev experiment plan ready, RC stays TWG-free"
     ]
   },
   "history_2026-11-05": {
