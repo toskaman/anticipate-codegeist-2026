@@ -61,6 +61,14 @@ forge deploy -e development
 forge install list
 ```
 
+Build stamping (#217, every future development deploy):
+
+```powershell
+$sha = git rev-parse HEAD # must equal the deployed source commit
+forge variables set ANTICIPATE_BUILD_COMMIT $sha -e development
+forge variables set ANTICIPATE_BUILD_AT ((Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss.000Z")) -e development
+```
+
 Then verify: Settings shows the new build version; Apps → ANTICIPATE loads;
 run the §6 journey 1 smoke (project → release → change, no stale data).
 

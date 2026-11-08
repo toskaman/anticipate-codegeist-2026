@@ -28,6 +28,7 @@ import { mergeSource, notConfiguredTwg } from '../context/sources';
 import type { EvidenceDrift, PlanAttention } from '../../packages/contracts/src/index';
 import { stableHash } from '../../packages/simulation-core/src/index';
 import { payloadBytes, warnIfNearCap } from '../core/payloads';
+import { loadBuildInfo } from '../core/build-info';
 import { simulatePortfolio as runPortfolio, PortfolioError, PORTFOLIO_LIMITS } from '../../packages/simulation-core/src/portfolio';
 import type { SimulatePortfolioRequest, SimulatePortfolioResult, ChangeOperation } from '../../packages/contracts/src/index';
 import { ATTESTATION_VALID_DAYS, decideTransition, decisionKey, linksDigest, type DecisionRecord } from '../validator';
@@ -301,7 +302,8 @@ export function createService(d: Deps) {
         jiraRead: 'AVAILABLE', jiraWrite: 'AVAILABLE', confluenceRead: 'NOT_CONFIGURED', workflowValidator: 'AVAILABLE',
         rovoAgent: 'AVAILABLE', rovoMcp: 'PERMISSION_REQUIRED', teamworkGraph: 'NOT_CONFIGURED', llm: 'DISABLED_BY_BUDGET',
         operations: OPERATION_NAMES,
-        portfolioSimulation: 'AVAILABLE'
+        portfolioSimulation: 'AVAILABLE',
+        build: loadBuildInfo()
       };
     },
 
