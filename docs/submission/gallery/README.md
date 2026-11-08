@@ -9,3 +9,7 @@ Built from repository facts only. These are diagrams, not captures of the runnin
 | `03-slip-propagation.png` | What if it slips? A 5-day delay moves two dependents and makes release v2.0 4 days late; undated issues stay Unknown. Sample data. | Values from `packages/simulation-core/test/slip.test.ts` (first two tests); rules from `packages/simulation-core/src/slip.ts` (A1–A4); 50-issue limit `SLIP_MAX_ISSUES` and unreadable → Unknown in `src/engine/slip-service.ts` |
 
 Each SVG has its own solid background, so it reads the same on light or dark pages. It uses system fonts only (no external fonts) and text of 18 px or more at 1500 px wide.
+
+## Film key art
+
+`ANTICIPATE_CODEGEIST_2026_THUMBNAIL.jpg` (1920×1080) is the thumbnail/poster of the Codegeist demo film: "Two changes. One hidden collision." over a blurred capture of the real Scenario Lab collision state (ALONE · PASS / TOGETHER · NEEDS REVIEW). It is also the hero image of the repository README. Source: `brag-output/codegeist-2026/renders/ANTICIPATE_CODEGEIST_2026_THUMBNAIL.png`, converted to quality-2 JPEG.
