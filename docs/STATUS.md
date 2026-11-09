@@ -1,6 +1,6 @@
 # ANTICIPATE - source of truth (dated)
 
-Updated: 5 Nov 2026 (new rows for #173/#174/#176 and the release overview); earlier rows as of 4 Nov 2026, ~16:20 Paris. 6 Nov: TITAN rows (Explorer, Command Center, retention notice), dev v6.28.0 pointer. 8 Nov: T8 refresh (dev 8.1.0 pointers, prod RC pending). 9 Nov: #222 build-info UI + dev 8.3.0 pointers (muse). Owner of this file: CORE (muse).
+Updated: 5 Nov 2026 (new rows for #173/#174/#176 and the release overview); earlier rows as of 4 Nov 2026, ~16:20 Paris. 6 Nov: TITAN rows (Explorer, Command Center, retention notice), dev v6.28.0 pointer. 8 Nov: T8 refresh (dev 8.1.0 pointers, prod RC pending). 9 Nov: #222 build-info UI + dev 8.3.0 pointers (muse). Evening 9 Nov (OMEGA): #228/#229 recovery + #230 rows (muse). Owner of this file: CORE (muse).
 
 | Item | Value |
 |---|---|
@@ -35,6 +35,11 @@ Updated: 5 Nov 2026 (new rows for #173/#174/#176 and the release overview); earl
 | Release Command Center (read-only release digest + next action) | **LIVE_FORGE_DEV** 8 Nov on dev 8.1.0 (AVT 3-change digest + TD 1-change digest, project switch clean, zero Jira writes); included in prod 4.0.0 (deployed 8 Nov; in-app prod smoke pending, PROD_RELEASE_CANDIDATE.md) | #188; HOSTED_ACCEPTANCE_T8 |
 | Time Machine retention notice (dropped checkpoints, baseline state) | UNIT_TESTED; hosted exercise pending (#191) | #188 |
 | Build identity (deployed commit + build time in Settings) | **LIVE_FORGE_DEV** 9 Nov on dev 8.3.0 (59d5b11 values exact-match the stamped vars; nav round-trip clean; copy falls back gracefully in the Forge iframe; zero Jira writes) | #217 (closed); EVIDENCE_PACK 9 Nov |
+| Collision at a glance (portfolio result lead section) | UNIT_TESTED (2) + LOCAL_MOCK_E2E (CI chromium+firefox+webkit); honest copy, backend values only | #213 (closed via #228) |
+| Evidence Graph mouse-wheel scroll fix | LOCAL_MOCK_E2E (graph-scroll spec, CI chromium) | #214 (closed via #228) |
+| Focus to Verify results after execution | LOCAL_MOCK_E2E (core-integration assertion, CI chromium) | #216 (closed via #229) |
+| decision-clarity e2e hardening (waits + split) | LOCAL_MOCK_E2E repeated: chromium 3x8/8, firefox 2x8/8, webkit 2x8/8 + CI green | #225 (closed via #230) |
+| Copy fallback selects SHA when clipboard denied | UNIT_TESTED (2: denied + no-API) | #225 (closed via #230) |
 | KVS transactions | Decision: keep setIfAbsent design (ADR) | #175; docs/design-core/ADR-KVS-TRANSACTIONS.md |
 | Policy-as-code preview engine | UNIT_TESTED only (37 tests, #159); inert: nothing calls it, gates nothing | docs/design-core/POLICY_AS_CODE.md |
 | What-if slip panel | LIVE_FORGE_DEV 4 Nov: late release (by 9 d), 3 moved due dates with paths, unknowns listed | EVIDENCE_PACK 4 Nov |

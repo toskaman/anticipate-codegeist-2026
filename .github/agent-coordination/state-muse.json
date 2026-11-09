@@ -1,7 +1,7 @@
 {
   "agent": "muse",
   "updated": "2026-11-09T15:56:00Z",
-  "main": "7afdc47 (#223 docs + #224 CI-retry merged; main CI 42680995225 green; audit issue #225 filed; record PR pending)",
+  "main": "25685d0 (OMEGA #228/#229 recovery + #230 #225-fix merged; main CI 42706224248 green; #225 closed; Phase D pre-verif done; record PR pending)",
   "org": "D15 SOLO: single workflow owns CORE+EXPERIENCE; orpheane workstream closed; her PRs (#215, #218) and worktrees untouched unless owner directs",
   "runner": "Claude session with bridge to the owner's PC (gh, forge, capture browser on CDP 9333)",
   "deployed": {
@@ -21,9 +21,12 @@
     "forge lint clean; audits 0 high (root 5 mod, frontend 4 mod)",
     "#222 #217 BuildInfoPanel UI + 11 tests (frontend 201 -> 212); dev 8.3.0 from 59d5b11; hosted value check green; #217 closed",
     "main CI webkit flake (decision-clarity tail click) confirmed environmental, rerun green 42639724908",
-    "#223 docs record + #224 e2e --retries=1 merged (main 7afdc47, CI 42680995225 green); audit issue #225 filed"
+    "#223 docs record + #224 e2e --retries=1 merged (main 7afdc47, CI 42680995225 green); audit issue #225 filed",
+    "OMEGA #228/#229 EXPERIENCE ports merged; #215/#218 closed superseded; #213/#214/#216 closed",
+    "#230 #225-fix merged (waits+split+fallback); e2e 7x56/56 locally; #225 closed; prettier-.cache trap documented",
+    "Phase D: 7/7 declared+wired, handlers 26/26, transport live; #190 owner-session handoff posted"
   ],
-  "current": "Phase D-F scoping: audit found no CORE-side defects; remaining = #225 (EXPERIENCE lease), owner-blocked P0s #189/#190/#191, orpheane PRs #215/#218 untouched",
+  "current": "OMEGA single-owner: Phase D MCP/Rovo autonomous done (#190 handoff posted); next E-I (simplification, bonus strategy, prod readiness, video prep)",
   "next": [
     "Second self-run counterbalanced prep only if useful (not human evidence)",
     "Owner: prod RC deploy, video publish, MCP 7/7 session, judge rerun (#191), Devpost submit"
