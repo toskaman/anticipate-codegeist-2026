@@ -588,6 +588,13 @@ export default function EvidenceGraph({
                   fitViewOptions={{ padding: 0.08, maxZoom: 1 }}
                   minZoom={0.2}
                   maxZoom={1.75}
+                  // The page must keep scrolling over the map: wheel never zooms
+                  // or pans it (zoom stays on pinch, double-click and the
+                  // Controls buttons), so keyboard and mouse users are not
+                  // trapped inside the canvas while reading the page.
+                  zoomOnScroll={false}
+                  panOnScroll={false}
+                  preventScrolling={false}
                   nodesDraggable={false}
                   nodesConnectable={false}
                   elementsSelectable={false}

@@ -161,6 +161,25 @@ for (const theme of ["light", "dark"]) {
     await expect(
       p.getByRole("heading", { name: "Combined simulation", exact: true }),
     ).toBeVisible();
+    // EXPERIENCE: the comparison of each change alone vs together comes first.
+    const glance = p.getByRole("region", {
+      name: "Collision at a glance",
+      exact: true,
+    });
+    await expect(glance).toBeVisible();
+    await expect(glance).toContainText("Change A · alone");
+    await expect(glance).toContainText("Retire API");
+    await expect(glance).toContainText("Change B · alone");
+    await expect(glance).toContainText("All changes · together");
+    await expect(glance).toContainText("Nothing has been changed in Jira.");
+    const order = await p.evaluate((el) => {
+      const g = el.querySelector("[data-testid=collision-at-a-glance]");
+      const h = [...el.querySelectorAll("h3")].find(
+        (x) => x.textContent === "Conflicts and reasons",
+      );
+      return !!g && !!h && !!(g.compareDocumentPosition(h) & 4);
+    });
+    expect(order).toBe(true);
     await expect(p).toContainText("The selected replacement is also retired");
     // Backend reasons cite change ids; the panel shows the names the user typed.
     await expect(p).toContainText(
