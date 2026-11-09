@@ -213,8 +213,8 @@ export default function BuildInfoPanel({ client }: { client: ForgeClient }) {
       )}
       {shaSelected && (
         <p role="status" className="ax-muted ax-small">
-          Copy is unavailable in this browser context. The full SHA above is
-          now selected — copy it manually.
+          Copy is unavailable in this browser context. The full SHA above is now
+          selected — copy it manually.
         </p>
       )}
       {copyFailed && (

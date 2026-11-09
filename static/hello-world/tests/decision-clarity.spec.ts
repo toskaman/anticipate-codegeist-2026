@@ -134,12 +134,12 @@ async function reachFocusedMap(page: Page, missing: boolean) {
     .click();
   await expect(page.locator(".react-flow__node")).toHaveCount(3);
   await expect(page.locator(".react-flow__edge")).toHaveCount(2);
-  await expect(
-    page.locator(".react-flow__edge.ax-edge--unknown"),
-  ).toHaveCount(1);
-  await expect(
-    page.locator(".react-flow__edge.ax-edge--inferred"),
-  ).toHaveCount(1);
+  await expect(page.locator(".react-flow__edge.ax-edge--unknown")).toHaveCount(
+    1,
+  );
+  await expect(page.locator(".react-flow__edge.ax-edge--inferred")).toHaveCount(
+    1,
+  );
   await expect(
     page.getByRole("list", { name: "Impact path to ABC-4 Partner webhooks" }),
   ).toContainText("Unknown");
@@ -225,8 +225,7 @@ for (const missing of [false, true]) {
         () => document.documentElement.scrollWidth <= innerWidth + 1,
       ),
     ).toBe(true);
-    await page
-      .locator("body"); // terminates the orphaned chain; the real split follows
+    await page.locator("body"); // terminates the orphaned chain; the real split follows
   });
   test(`focused map returns to overview and retains the change (${missing ? "missing relationship" : "complete path"})`, async ({
     page,
@@ -334,8 +333,7 @@ for (const theme of ["dark", "light"]) {
           (element as HTMLInputElement).closest("label")?.textContent,
       );
     const initialCalls = calls.length;
-    await inspector
-      .getByLabel("Second option to inspect");
+    await inspector.getByLabel("Second option to inspect");
     // The chain above only terminates; the real wait follows: the option
     // list populates asynchronously, so wait for the target option
     // explicitly instead of racing selectOption (#225).
