@@ -109,6 +109,19 @@ function Stepper({ steps }: { steps: { label: string; state: StepState }[] }) {
 }
 
 export default function PreventionPlan({ w }: { w: Workflow }) {
+  // After a confirmed execution the dialog returns focus to the (now disabled)
+  // Execute button. Move focus to the verification results instead, so keyboard
+  // and screen-reader users land on the outcome. Errors keep their own alert.
+  const awaitingExecution = React.useRef(false);
+  React.useEffect(() => {
+    if (!awaitingExecution.current || w.busy) return;
+    awaitingExecution.current = false;
+    if (!w.records) return;
+    const heading = document.getElementById("verify-title");
+    if (!heading) return;
+    heading.setAttribute("tabindex", "-1");
+    heading.focus();
+  }, [w.busy, w.records]);
   const plan = w.plan;
   if (!plan)
     return (
@@ -588,7 +601,10 @@ export default function PreventionPlan({ w }: { w: Workflow }) {
           tone="danger"
           confirmLabel="Execute in Jira"
           onCancel={w.actions.cancelConfirmation}
-          onConfirm={() => void w.actions.confirmMutation("execute")}
+          onConfirm={() => {
+            awaitingExecution.current = true;
+            void w.actions.confirmMutation("execute");
+          }}
         >
           <p>
             <strong>
