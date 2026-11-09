@@ -50,6 +50,9 @@ export type RequestContext = z.infer<typeof RequestContext>;
 
 // ---------- capabilities ----------
 export const CapabilityState = z.enum(['AVAILABLE', 'NOT_CONFIGURED', 'UNSUPPORTED', 'PERMISSION_REQUIRED', 'DISABLED_BY_BUDGET']);
+/** Deployed-build identity (optional, additive; absent on older backends). commit = git SHA of the deployed source, builtAt = deploy time (UTC); both null when the deploy did not stamp build variables (forge tunnel, CI, older builds). Forge version numbers are NOT runtime-observable (UPM carries no per-app entry - verified 8 Nov 2026) and are intentionally absent. */
+export const BuildInfo = z.object({ commit: z.string().max(100).nullable(), builtAt: IsoDate.nullable() });
+export type BuildInfo = z.infer<typeof BuildInfo>;
 export const CapabilityAvailability = z.object({
   jiraRead: CapabilityState, jiraWrite: CapabilityState, confluenceRead: CapabilityState,
   workflowValidator: CapabilityState, rovoAgent: CapabilityState, rovoMcp: CapabilityState,
@@ -528,6 +531,7 @@ export type ComposeSafeChangesResult = z.infer<typeof ComposeSafeChangesResult>;
 
 export const OPERATIONS = {
   getCapabilities: { input: z.object({}), output: CapabilityAvailability },
+  getBuildInfo: { input: z.object({}), output: BuildInfo },
   listProjects: { input: z.object({ cursor: z.string().nullable().default(null) }), output: z.object({ items: z.array(ProjectSummary), page: PageInfo }) },
   getChangeCandidates: { input: z.object({ projectId: Id, cursor: z.string().nullable().default(null) }), output: z.object({ items: z.array(JiraIssueSummary), page: PageInfo }) },
   getGraphSnapshot: { input: GraphSnapshotRequest, output: GraphSnapshot },

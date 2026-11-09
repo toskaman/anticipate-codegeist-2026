@@ -28,7 +28,7 @@ export async function radarOnJiraEvent(event: unknown) {
 type Svc = ReturnType<typeof createService>;
 const throttle = createStoreThrottle(forgeStore, DEFAULT_THROTTLE);
 
-const ops: OperationName[] = ['getCapabilities', 'getPolicies', 'listProjects', 'getChangeCandidates', 'getGraphSnapshot', 'getEvidenceGraph', 'simulateChange',
+const ops: OperationName[] = ['getCapabilities', 'getBuildInfo', 'getPolicies', 'listProjects', 'getChangeCandidates', 'getGraphSnapshot', 'getEvidenceGraph', 'simulateChange',
   'compareScenarios', 'generatePreventionPlan', 'approvePlan', 'executeApprovedPlan', 'getExecutionStatus', 'getPreventionPassport', 'checkPlanFreshness', 'previewSampleProject', 'createSampleProject', 'getValidatorPolicy', 'setValidatorPolicy', 'simulateSlip', 'simulatePortfolio', 'getPlanAttention', 'getReleaseSafety', 'getDecisionHistory', 'composeSafeChanges', 'listReleaseSafety'];
 
 for (const op of ops) {

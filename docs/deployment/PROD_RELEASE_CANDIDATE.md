@@ -88,6 +88,15 @@ forge deploy -e production
 forge install list
 ```
 
+Build stamping (#217, every future production deploy): Settings shows the deployed commit from these variables. Set them for the deployed SHA (full 40-char) before or after the deploy (order irrelevant, values are read at function runtime):
+
+```powershell
+$sha = git rev-parse HEAD # must equal the deployed source commit
+forge variables set ANTICIPATE_BUILD_COMMIT $sha -e production
+forge variables set ANTICIPATE_BUILD_AT ((Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss.000Z")) -e production
+forge variables list -e production
+```
+
 Then:
 
 1. Record the assigned version + `forge install list` output in RELEASE.md.

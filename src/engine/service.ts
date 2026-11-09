@@ -12,7 +12,7 @@ import { RELEASE_SAFETY_LIMITS, type ReleaseSafety } from '../../packages/contra
  * a per-plan lease, per-action idempotent reconciliation, and post-write verification.
  */
 import type {
-  CapabilityAvailability, ExecutionRecord, GraphSnapshot, JiraIssueSummary, PreventionPassport, PreventionPlan,
+  BuildInfo, CapabilityAvailability, ExecutionRecord, GraphSnapshot, JiraIssueSummary, PreventionPassport, PreventionPlan,
   ProjectSummary, ScenarioComparison, SimulationRequest, ApprovalRequest, ProposedAction
 } from '../../packages/contracts/src/index';
 import { compareScenarios as compare, simulate } from '../../packages/simulation-core/src/index';
@@ -28,6 +28,7 @@ import { mergeSource, notConfiguredTwg } from '../context/sources';
 import type { EvidenceDrift, PlanAttention } from '../../packages/contracts/src/index';
 import { stableHash } from '../../packages/simulation-core/src/index';
 import { payloadBytes, warnIfNearCap } from '../core/payloads';
+import { loadBuildInfo } from '../core/build-info';
 import { simulatePortfolio as runPortfolio, PortfolioError, PORTFOLIO_LIMITS } from '../../packages/simulation-core/src/portfolio';
 import type { SimulatePortfolioRequest, SimulatePortfolioResult, ChangeOperation } from '../../packages/contracts/src/index';
 import { ATTESTATION_VALID_DAYS, decideTransition, decisionKey, linksDigest, type DecisionRecord } from '../validator';
@@ -306,6 +307,7 @@ export function createService(d: Deps) {
     },
 
     async getPolicies() { return DEFAULT_POLICIES; },
+    async getBuildInfo(): Promise<BuildInfo> { return loadBuildInfo(); },
 
     async listProjects(_ctx: Ctx, input: { cursor: string | null }): Promise<{ items: ProjectSummary[]; page: { nextCursor: string | null; totalKnown: number | null } }> {
       const startAt = input.cursor ? Number.parseInt(input.cursor, 10) || 0 : 0;
@@ -722,7 +724,7 @@ export function normalizeDate(s: string): string {
   return Number.isNaN(Date.parse(fixed)) ? new Date(0).toISOString() : fixed;
 }
 
-export const OPERATION_NAMES = ['getCapabilities', 'getPolicies', 'listProjects', 'getChangeCandidates', 'getGraphSnapshot', 'getEvidenceGraph', 'simulateChange',
+export const OPERATION_NAMES = ['getCapabilities', 'getBuildInfo', 'getPolicies', 'listProjects', 'getChangeCandidates', 'getGraphSnapshot', 'getEvidenceGraph', 'simulateChange',
   'compareScenarios', 'generatePreventionPlan', 'approvePlan', 'executeApprovedPlan', 'getExecutionStatus', 'getPreventionPassport', 'checkPlanFreshness', 'previewSampleProject', 'createSampleProject', 'getValidatorPolicy', 'setValidatorPolicy', 'simulateSlip', 'simulatePortfolio', 'getPlanAttention', 'getReleaseSafety', 'listReleaseSafety', 'getDecisionHistory', 'composeSafeChanges',
   // capability signals (not resolvers): scenario operations accepted by compareScenarios / generatePreventionPlan
   'scenario:UPGRADE_NODE', 'validator:outage-policy'];
