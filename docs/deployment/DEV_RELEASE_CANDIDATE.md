@@ -1,6 +1,6 @@
 # Development release candidate — main d1e6509 (TITAN-6)
 
-Status: VALIDATED, DEPLOYED BY OWNER 2026-11-07 21:34:50 CET (see T7-2 note below). No further deploy action required for the RC code.
+Status: SUPERSEDED 9 Nov 2026 by dev 8.2.0 (main bbdb835, #220 build-info resolver, build vars stamped pre-deploy, smoke green). Original 8.1.0 record kept below for audit.
 
 > Superseded T6 line (kept for audit): VALIDATED, NOT DEPLOYED. Deployment was OWNER AUTHORIZATION REQUIRED.
 (no valid Forge session on this machine; no standing deploy authorization found —
@@ -61,7 +61,7 @@ forge deploy -e development
 forge install list
 ```
 
-Build stamping (#217, every future development deploy):
+Build stamping (#217, every future development deploy — set BEFORE forge deploy, variables snapshot per deployment):
 
 ```powershell
 $sha = git rev-parse HEAD # must equal the deployed source commit
