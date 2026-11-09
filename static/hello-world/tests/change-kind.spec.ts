@@ -68,6 +68,12 @@ async function scenarioLab(page: Page, upgrade: boolean) {
       case "getFeatureFlag":
         data = lockedSharedDecisionsFlag;
         break;
+      case "getBuildInfo":
+        data = {
+          commit: "0123456789abcdef0123456789abcdef01234567",
+          builtAt: "2026-11-09T02:00:00.000Z",
+        };
+        break;
       default:
         throw new Error(`Unexpected resolver ${call.operation}`);
     }

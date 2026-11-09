@@ -39,6 +39,13 @@ async function settings(page: Page, flag: unknown | "error") {
             },
           });
         return route.fulfill({ json: response(flag) });
+      case "getBuildInfo":
+        return route.fulfill({
+          json: response({
+            commit: "0123456789abcdef0123456789abcdef01234567",
+            builtAt: "2026-11-09T02:00:00.000Z",
+          }),
+        });
       default:
         throw new Error(`Unexpected resolver ${call.operation}`);
     }
