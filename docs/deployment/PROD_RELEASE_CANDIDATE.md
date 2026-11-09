@@ -88,7 +88,7 @@ forge deploy -e production
 forge install list
 ```
 
-Build stamping (#217, every future production deploy): Settings shows the deployed commit from these variables. Set them for the deployed SHA (full 40-char) before or after the deploy (order irrelevant, values are read at function runtime):
+Build stamping (#217, every future production deploy): Settings shows the deployed commit from these variables. Set them for the deployed SHA (full 40-char) BEFORE running forge deploy (variables snapshot per deployment — post-deploy changes need another deploy; observed CLI tip 9 Nov):
 
 ```powershell
 $sha = git rev-parse HEAD # must equal the deployed source commit
