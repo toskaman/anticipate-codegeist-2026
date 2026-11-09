@@ -145,7 +145,9 @@ export default function BuildInfoPanel({ client }: { client: ForgeClient }) {
                     type="button"
                     className="ax-btn"
                     aria-label={
-                      copied ? "Copied to clipboard" : "Copy full SHA to clipboard"
+                      copied
+                        ? "Copied to clipboard"
+                        : "Copy full SHA to clipboard"
                     }
                     onClick={() => void copy(info.commit as string)}
                   >
