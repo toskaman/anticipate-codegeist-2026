@@ -1,8 +1,5 @@
 import type { BuildInfo } from '../../packages/contracts/src/index';
 
-// Minimal ambient for the Forge/Node runtime (no @types/node dependency).
-declare const process: { env: Record<string, string | undefined> } | undefined;
-
 /**
  * Deployed-build identity (#217). Values are stamped at deploy time via Forge
  * custom variables (ANTICIPATE_BUILD_COMMIT / ANTICIPATE_BUILD_AT); absent or
@@ -12,7 +9,7 @@ declare const process: { env: Record<string, string | undefined> } | undefined;
  */
 const COMMIT_RE = /^[0-9a-f]{4,64}$/i;
 
-export function loadBuildInfo(env: Record<string, string | undefined> = process?.env ?? {}): BuildInfo {
+export function loadBuildInfo(env: Record<string, string | undefined> = process.env): BuildInfo {
   const rawCommit = env.ANTICIPATE_BUILD_COMMIT;
   const rawAt = env.ANTICIPATE_BUILD_AT;
   return {

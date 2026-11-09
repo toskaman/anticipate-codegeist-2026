@@ -8,6 +8,7 @@ vi.mock('@forge/kvs', () => ({ kvs: {} }));
 const mk = () => { let n = 0; return createService({ jira: demoJira(), store: memoryStore(), now: () => new Date('2026-11-02T09:00:00Z'), newId: () => `c${++n}` }); };
 
 describe('build info (#217)', () => {
+  beforeEach(() => { delete process.env.ANTICIPATE_BUILD_COMMIT; delete process.env.ANTICIPATE_BUILD_AT; });
   it('loader returns stamped commit + build time from env', () => {
     expect(loadBuildInfo({ ANTICIPATE_BUILD_COMMIT: '5610ca7f2c4e8a1d5f6b7c8d9e0f1a2b3c4d5e6f', ANTICIPATE_BUILD_AT: '2026-11-08T13:20:51.000Z' }))
       .toEqual({ commit: '5610ca7f2c4e8a1d5f6b7c8d9e0f1a2b3c4d5e6f', builtAt: '2026-11-08T13:20:51.000Z' });
@@ -19,9 +20,10 @@ describe('build info (#217)', () => {
     expect(loadBuildInfo({ ANTICIPATE_BUILD_COMMIT: 'abc', ANTICIPATE_BUILD_AT: '2026-11-08T13:20:51.000Z' }))
       .toEqual({ commit: null, builtAt: '2026-11-08T13:20:51.000Z' });
   });
-  it('getCapabilities carries the build field and validates against the contract', async () => {
+  it('getBuildInfo resolver returns the stamped build and validates against the contract', async () => {
+    const info = await mk().getBuildInfo();
     const caps = await mk().getCapabilities();
-    expect(caps).toHaveProperty('build');
     expect(() => CapabilityAvailability.parse(caps)).not.toThrow();
+    expect(info).toEqual({ commit: null, builtAt: null });
   });
 });

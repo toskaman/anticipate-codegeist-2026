@@ -59,8 +59,7 @@ export const CapabilityAvailability = z.object({
   teamworkGraph: CapabilityState, llm: CapabilityState,
   operations: z.array(z.string()),
   /** Portfolio Impact Simulator availability (optional, additive; absent on older backends). Hard bounds: PORTFOLIO_LIMITS. */
-  portfolioSimulation: CapabilityState.optional(),
-  build: BuildInfo.optional()
+  portfolioSimulation: CapabilityState.optional()
 });
 export type CapabilityAvailability = z.infer<typeof CapabilityAvailability>;
 
@@ -532,6 +531,7 @@ export type ComposeSafeChangesResult = z.infer<typeof ComposeSafeChangesResult>;
 
 export const OPERATIONS = {
   getCapabilities: { input: z.object({}), output: CapabilityAvailability },
+  getBuildInfo: { input: z.object({}), output: BuildInfo },
   listProjects: { input: z.object({ cursor: z.string().nullable().default(null) }), output: z.object({ items: z.array(ProjectSummary), page: PageInfo }) },
   getChangeCandidates: { input: z.object({ projectId: Id, cursor: z.string().nullable().default(null) }), output: z.object({ items: z.array(JiraIssueSummary), page: PageInfo }) },
   getGraphSnapshot: { input: GraphSnapshotRequest, output: GraphSnapshot },

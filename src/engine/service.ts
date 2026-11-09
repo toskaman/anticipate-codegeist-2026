@@ -12,7 +12,7 @@ import { RELEASE_SAFETY_LIMITS, type ReleaseSafety } from '../../packages/contra
  * a per-plan lease, per-action idempotent reconciliation, and post-write verification.
  */
 import type {
-  CapabilityAvailability, ExecutionRecord, GraphSnapshot, JiraIssueSummary, PreventionPassport, PreventionPlan,
+  BuildInfo, CapabilityAvailability, ExecutionRecord, GraphSnapshot, JiraIssueSummary, PreventionPassport, PreventionPlan,
   ProjectSummary, ScenarioComparison, SimulationRequest, ApprovalRequest, ProposedAction
 } from '../../packages/contracts/src/index';
 import { compareScenarios as compare, simulate } from '../../packages/simulation-core/src/index';
@@ -302,12 +302,12 @@ export function createService(d: Deps) {
         jiraRead: 'AVAILABLE', jiraWrite: 'AVAILABLE', confluenceRead: 'NOT_CONFIGURED', workflowValidator: 'AVAILABLE',
         rovoAgent: 'AVAILABLE', rovoMcp: 'PERMISSION_REQUIRED', teamworkGraph: 'NOT_CONFIGURED', llm: 'DISABLED_BY_BUDGET',
         operations: OPERATION_NAMES,
-        portfolioSimulation: 'AVAILABLE',
-        build: loadBuildInfo()
+        portfolioSimulation: 'AVAILABLE'
       };
     },
 
     async getPolicies() { return DEFAULT_POLICIES; },
+    async getBuildInfo(): Promise<BuildInfo> { return loadBuildInfo(); },
 
     async listProjects(_ctx: Ctx, input: { cursor: string | null }): Promise<{ items: ProjectSummary[]; page: { nextCursor: string | null; totalKnown: number | null } }> {
       const startAt = input.cursor ? Number.parseInt(input.cursor, 10) || 0 : 0;
@@ -724,7 +724,7 @@ export function normalizeDate(s: string): string {
   return Number.isNaN(Date.parse(fixed)) ? new Date(0).toISOString() : fixed;
 }
 
-export const OPERATION_NAMES = ['getCapabilities', 'getPolicies', 'listProjects', 'getChangeCandidates', 'getGraphSnapshot', 'getEvidenceGraph', 'simulateChange',
+export const OPERATION_NAMES = ['getCapabilities', 'getBuildInfo', 'getPolicies', 'listProjects', 'getChangeCandidates', 'getGraphSnapshot', 'getEvidenceGraph', 'simulateChange',
   'compareScenarios', 'generatePreventionPlan', 'approvePlan', 'executeApprovedPlan', 'getExecutionStatus', 'getPreventionPassport', 'checkPlanFreshness', 'previewSampleProject', 'createSampleProject', 'getValidatorPolicy', 'setValidatorPolicy', 'simulateSlip', 'simulatePortfolio', 'getPlanAttention', 'getReleaseSafety', 'listReleaseSafety', 'getDecisionHistory', 'composeSafeChanges',
   // capability signals (not resolvers): scenario operations accepted by compareScenarios / generatePreventionPlan
   'scenario:UPGRADE_NODE', 'validator:outage-policy'];
