@@ -14,6 +14,7 @@ import { AccessibilityControls } from "../components/AccessibilityControls";
 import type { PreferencesApi } from "../app/preferences";
 import PerformancePanel from "../components/PerformancePanel";
 import ValidatorPolicyPanel from "../components/ValidatorPolicyPanel";
+import BuildInfoPanel from "../components/BuildInfoPanel";
 import SharedDecisionAcceptancePanel from "../components/SharedDecisionAcceptancePanel";
 
 type Key = Exclude<keyof CapabilityAvailability, "operations">;
@@ -180,6 +181,7 @@ export default function Settings({
           </table>
         </div>
       </Panel>
+      <BuildInfoPanel client={w.client} />
       <ValidatorPolicyPanel client={w.client} capabilities={caps} />
       <SharedDecisionAcceptancePanel
         client={w.client}
