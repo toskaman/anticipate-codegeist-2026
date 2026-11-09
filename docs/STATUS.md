@@ -1,6 +1,6 @@
 # ANTICIPATE - source of truth (dated)
 
-Updated: 5 Nov 2026 (new rows for #173/#174/#176 and the release overview); earlier rows as of 4 Nov 2026, ~16:20 Paris. 6 Nov: TITAN rows (Explorer, Command Center, retention notice), dev v6.28.0 pointer. 8 Nov: T8 refresh (dev 8.1.0 pointers, prod RC pending). Owner of this file: CORE (muse).
+Updated: 5 Nov 2026 (new rows for #173/#174/#176 and the release overview); earlier rows as of 4 Nov 2026, ~16:20 Paris. 6 Nov: TITAN rows (Explorer, Command Center, retention notice), dev v6.28.0 pointer. 8 Nov: T8 refresh (dev 8.1.0 pointers, prod RC pending). 9 Nov: #222 build-info UI + dev 8.3.0 pointers (muse). Owner of this file: CORE (muse).
 
 | Item | Value |
 |---|---|
@@ -34,6 +34,7 @@ Updated: 5 Nov 2026 (new rows for #173/#174/#176 and the release overview); earl
 | Causal Collision Explorer (per-conflict causal explanation) | UNIT_TESTED + LOCAL mock-e2e (axe-clean); hosted exercise pending (#191); ships in dev 8.1.0 and in prod 4.0.0 (deployed 8 Nov; in-app prod smoke pending, PROD_RELEASE_CANDIDATE.md) | #188 |
 | Release Command Center (read-only release digest + next action) | **LIVE_FORGE_DEV** 8 Nov on dev 8.1.0 (AVT 3-change digest + TD 1-change digest, project switch clean, zero Jira writes); included in prod 4.0.0 (deployed 8 Nov; in-app prod smoke pending, PROD_RELEASE_CANDIDATE.md) | #188; HOSTED_ACCEPTANCE_T8 |
 | Time Machine retention notice (dropped checkpoints, baseline state) | UNIT_TESTED; hosted exercise pending (#191) | #188 |
+| Build identity (deployed commit + build time in Settings) | **LIVE_FORGE_DEV** 9 Nov on dev 8.3.0 (59d5b11 values exact-match the stamped vars; nav round-trip clean; copy falls back gracefully in the Forge iframe; zero Jira writes) | #217 (closed); EVIDENCE_PACK 9 Nov |
 | KVS transactions | Decision: keep setIfAbsent design (ADR) | #175; docs/design-core/ADR-KVS-TRANSACTIONS.md |
 | Policy-as-code preview engine | UNIT_TESTED only (37 tests, #159); inert: nothing calls it, gates nothing | docs/design-core/POLICY_AS_CODE.md |
 | What-if slip panel | LIVE_FORGE_DEV 4 Nov: late release (by 9 d), 3 moved due dates with paths, unknowns listed | EVIDENCE_PACK 4 Nov |
