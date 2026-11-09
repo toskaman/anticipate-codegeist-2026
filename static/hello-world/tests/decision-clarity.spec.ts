@@ -104,6 +104,62 @@ async function workspace(page: Page, theme = "dark", missingPath = false) {
   return calls;
 }
 
+// Setup for the split tail test (#225): the original single test (~20
+// steps incl. an axe scan) exhausted the 30 s budget on the slowest
+// engine, so the flow now runs as two tests with isolated budgets. Test 1
+// keeps the original inline sequence; test 2 rebuilds it via this helper.
+async function reachFocusedMap(page: Page, missing: boolean) {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const calls = await workspace(page, "dark", missing);
+  await compare(page);
+  await page
+    .getByRole("navigation")
+    .getByRole("button", { name: /^Evidence Graph/ })
+    .click();
+  await expect(
+    page.getByRole("button", {
+      name: "Focus supplied impact path",
+      exact: true,
+    }),
+  ).toBeDisabled();
+  await page.getByLabel("Search evidence").fill("Partner webhooks");
+  await page
+    .getByRole("group", { name: "Show simulated impact for" })
+    .getByRole("button", { name: /^Remove now/ })
+    .click();
+  await expect(page.locator(".react-flow__node")).toHaveCount(1);
+  const initialCalls = calls.length;
+  await page
+    .getByRole("button", { name: "Focus supplied impact path", exact: true })
+    .click();
+  await expect(page.locator(".react-flow__node")).toHaveCount(3);
+  await expect(page.locator(".react-flow__edge")).toHaveCount(2);
+  await expect(page.locator(".react-flow__edge.ax-edge--unknown")).toHaveCount(
+    1,
+  );
+  await expect(page.locator(".react-flow__edge.ax-edge--inferred")).toHaveCount(
+    1,
+  );
+  await expect(
+    page.getByRole("list", { name: "Impact path to ABC-4 Partner webhooks" }),
+  ).toContainText("Unknown");
+  if (missing) {
+    await expect(
+      page.getByText("Path context is incomplete", { exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByText(/1 supplied relationships and 0 endpoints/),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("list", {
+        name: "Impact path to ABC-4 Partner webhooks",
+      }),
+    ).toContainText("not-loaded");
+  }
+  expect(calls).toHaveLength(initialCalls);
+  return { calls, initialCalls };
+}
+
 for (const missing of [false, true]) {
   test(`focused map includes supplied off-page context without guessing (${missing ? "missing relationship" : "complete path"})`, async ({
     page,
@@ -169,6 +225,12 @@ for (const missing of [false, true]) {
         () => document.documentElement.scrollWidth <= innerWidth + 1,
       ),
     ).toBe(true);
+    await page.locator("body"); // terminates the orphaned chain; the real split follows
+  });
+  test(`focused map returns to overview and retains the change (${missing ? "missing relationship" : "complete path"})`, async ({
+    page,
+  }) => {
+    const { calls, initialCalls } = await reachFocusedMap(page, missing);
     await page
       .getByRole("button", { name: "Return to map overview", exact: true })
       .focus();
@@ -196,6 +258,13 @@ for (const missing of [false, true]) {
 }
 
 async function compare(page: Page) {
+  // The project list populates asynchronously after load: wait for the
+  // target option explicitly instead of racing selectOption (#225).
+  await expect(
+    page
+      .getByRole("combobox", { name: "Jira project", exact: true })
+      .locator('option[value="100"]'),
+  ).toHaveCount(1);
   await page
     .getByRole("combobox", { name: "Jira project", exact: true })
     .selectOption("100");
@@ -206,6 +275,17 @@ async function compare(page: Page) {
   await page
     .getByRole("button", { name: "Compare options", exact: true })
     .click();
+  await page
+    .getByRole("combobox", { name: "Replacement for option C", exact: true })
+    .locator('option[value="issue:ABC-3"]');
+  // The option above only terminates the chain; the real wait follows: the
+  // replacement list populates asynchronously, so wait for the target
+  // option explicitly instead of racing selectOption (#225).
+  await expect(
+    page
+      .getByRole("combobox", { name: "Replacement for option C", exact: true })
+      .locator('option[value="issue:ABC-3"]'),
+  ).toHaveCount(1);
   await page
     .getByRole("combobox", { name: "Replacement for option C", exact: true })
     .selectOption("issue:ABC-3");
@@ -253,6 +333,15 @@ for (const theme of ["dark", "light"]) {
           (element as HTMLInputElement).closest("label")?.textContent,
       );
     const initialCalls = calls.length;
+    await inspector.getByLabel("Second option to inspect");
+    // The chain above only terminates; the real wait follows: the option
+    // list populates asynchronously, so wait for the target option
+    // explicitly instead of racing selectOption (#225).
+    await expect(
+      inspector
+        .getByLabel("Second option to inspect")
+        .locator('option[value="C-migrate-then-retire"]'),
+    ).toHaveCount(1);
     await inspector
       .getByLabel("Second option to inspect")
       .selectOption("C-migrate-then-retire");

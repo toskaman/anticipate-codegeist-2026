@@ -33,6 +33,24 @@ async function copyText(value: string): Promise<boolean> {
   }
 }
 
+// Last-resort fallback (#225): programmatic text selection needs no
+// clipboard permission or focus, so it works where both copy paths fail
+// (e.g. the Forge iframe). Returns whether the element is now selected.
+function selectElementText(el: HTMLElement | null): boolean {
+  try {
+    if (!el) return false;
+    const selection = window.getSelection();
+    if (!selection) return false;
+    selection.removeAllRanges();
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    selection.addRange(range);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 function formatLocal(iso: string): string {
   return new Date(iso).toLocaleString(undefined, {
     dateStyle: "medium",
@@ -49,7 +67,9 @@ export default function BuildInfoPanel({ client }: { client: ForgeClient }) {
   const [state, setState] = useState<LoadState>({ status: "loading" });
   const [copied, setCopied] = useState(false);
   const [copyFailed, setCopyFailed] = useState(false);
+  const [shaSelected, setShaSelected] = useState(false);
   const inFlight = useRef<AbortController | null>(null);
+  const shaRef = useRef<HTMLElement | null>(null);
 
   const load = useCallback(
     async (signal?: AbortSignal) => {
@@ -84,14 +104,20 @@ export default function BuildInfoPanel({ client }: { client: ForgeClient }) {
   const retry = useCallback(() => {
     setCopied(false);
     setCopyFailed(false);
+    setShaSelected(false);
     void load();
   }, [load]);
 
   const copy = useCallback(async (value: string) => {
     setCopyFailed(false);
+    setShaSelected(false);
     if (await copyText(value)) {
       setCopied(true);
+    } else if (selectElementText(shaRef.current)) {
+      setCopied(false);
+      setShaSelected(true);
     } else {
+      setCopied(false);
       setCopyFailed(true);
     }
   }, []);
@@ -161,10 +187,14 @@ export default function BuildInfoPanel({ client }: { client: ForgeClient }) {
               ),
             ],
             ...(info.commit
-              ? ([["Full SHA", <Code key="full">{info.commit}</Code>]] as [
-                  React.ReactNode,
-                  React.ReactNode,
-                ][])
+              ? ([
+                  [
+                    "Full SHA",
+                    <Code key="full">
+                      <span ref={shaRef}>{info.commit}</span>
+                    </Code>,
+                  ],
+                ] as [React.ReactNode, React.ReactNode][])
               : []),
             [
               "Built",
@@ -180,6 +210,12 @@ export default function BuildInfoPanel({ client }: { client: ForgeClient }) {
             ],
           ]}
         />
+      )}
+      {shaSelected && (
+        <p role="status" className="ax-muted ax-small">
+          Copy is unavailable in this browser context. The full SHA above is now
+          selected — copy it manually.
+        </p>
       )}
       {copyFailed && (
         <p role="status" className="ax-muted ax-small">

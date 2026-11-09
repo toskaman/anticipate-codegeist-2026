@@ -170,6 +170,31 @@ describe("BuildInfoPanel (#217)", () => {
     expect(screen.queryByRole("button", { name: /retry/i })).toBeNull();
   });
 
+  it("selects the full SHA for manual copy when the clipboard write is denied", async () => {
+    const writeText = vi.fn(async () => {
+      throw new DOMException("denied", "NotAllowedError");
+    });
+    vi.stubGlobal("navigator", { clipboard: { writeText } });
+    render(<BuildInfoPanel client={clientFor({ commit: SHA, builtAt: AT })} />);
+    const copy = await screen.findByRole("button", { name: /copy full/i });
+    fireEvent.click(copy);
+    expect(await screen.findByText(/is now selected/i)).toBeTruthy();
+    const sel = window.getSelection();
+    expect(sel?.rangeCount).toBe(1);
+    expect(sel?.getRangeAt(0).cloneContents().textContent).toBe(SHA);
+  });
+
+  it("selects the full SHA for manual copy when no clipboard API exists", async () => {
+    vi.stubGlobal("navigator", {});
+    render(<BuildInfoPanel client={clientFor({ commit: SHA, builtAt: AT })} />);
+    const copy = await screen.findByRole("button", { name: /copy full/i });
+    fireEvent.click(copy);
+    expect(await screen.findByText(/is now selected/i)).toBeTruthy();
+    expect(
+      window.getSelection()?.getRangeAt(0).cloneContents().textContent,
+    ).toBe(SHA);
+  });
+
   it("operates the copy action from the keyboard", async () => {
     const writeText = vi.fn(async () => {});
     vi.stubGlobal("navigator", { clipboard: { writeText } });
