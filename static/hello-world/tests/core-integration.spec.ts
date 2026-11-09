@@ -714,6 +714,11 @@ test("CORE failed execution remains failed and is not retried", async ({
   await expect(
     page.getByText("record:ABC-1: FAILED · attempt 1", { exact: false }),
   ).toBeVisible();
+  // EXPERIENCE #ORP-EXP-3: focus lands on the outcome, not on the disabled
+  // Execute button the confirmation dialog would otherwise restore.
+  await expect(
+    page.getByRole("heading", { name: "4 · Verify results", exact: true }),
+  ).toBeFocused();
   await expect(
     page.getByText("record:ABC-1: VERIFIED", { exact: false }),
   ).toHaveCount(0);
