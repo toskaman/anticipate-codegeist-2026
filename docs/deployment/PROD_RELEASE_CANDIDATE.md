@@ -136,3 +136,38 @@ Throttle budgets reset again on rollback.
 
 Same as DEV_RELEASE_CANDIDATE.md: docs-only commits never change test
 counts. Re-verify `forge lint` + one CI link at submission freeze.
+
+## Provenance re-check (9 Nov 2026, main `ee5dbe1`) — read-only, NOT deployed
+
+Workstream Alpha integrity pass. No production deploy was performed; the
+candidate below awaits owner authorization + prod build-var stamping
+(see "Build stamping" above).
+
+- Production latest (re-verified via `forge deploy list`, 9 Nov):
+  major 4 @ 2026-11-08T13:20:51Z = **4.0.0**, runtime source `5610ca7`
+  (timestamp corroborated by the deploy record above + RELEASE.md).
+- Installs (re-verified via `forge install list`, 9 Nov):
+  `toskaman5962` production 4 Up-to-date; `anticipate-judge`
+  production 2 Outdated (site-admin upgrade still pending);
+  `one-atlas-euza` development 8 Up-to-date (8.3.0 code — the live
+  Settings panel renders the stamped `59d5b11` values).
+- Manifest: `git hash-object manifest.yml` on main `ee5dbe1` =
+  `b474696d2e2fae62eeda491461431223c3636f30`, byte-identical to the
+  recorded 4.0.0 manifest. Scopes unchanged
+  (`read:jira-work`, `write:jira-work`, `read:jira-user`,
+  `storage:app`; no graph scopes). A production deploy from `ee5dbe1`
+  keeps the same permission surface: minor version + no re-consent
+  expected — OBSERVE at deploy time, do not assume.
+- Runtime delta `5610ca7..ee5dbe1` (32 files, +676/−65) is additive
+  only: `getBuildInfo` resolver + `BuildInfo` contract (null-safe) +
+  `BuildInfoPanel` UI + 11 unit tests + e2e mocks + docs + CI
+  `--retries=1`. No storage change, no migration,
+  `SHARED_DECISIONS_RELEASED = false` on both ends, no existing
+  operation altered.
+- Candidate verdict: `ee5dbe1` is a valid production candidate on
+  provenance + CI grounds (main CI green, run 42684235556; dev 8.3.0
+  proves the new code hosted with zero writes). Installed 4.0.0 lacks
+  `getBuildInfo`, so its Settings shows the unstamped state until a
+  future prod deploy. Rollback from an `ee5dbe1`-based prod = redeploy
+  from `5610ca7` (manifest-identical; same worktree procedure as
+  above, stamped vars for the rollback SHA).
