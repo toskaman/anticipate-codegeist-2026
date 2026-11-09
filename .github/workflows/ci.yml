@@ -63,7 +63,14 @@ jobs:
       - run: npm ci --prefix ../../packages/contracts
       - run: npm ci
       - run: npx playwright install --with-deps chromium firefox webkit
-      - run: npm run test:browser
+      - run: npm run build
+      # Retry once: absorbs proven environmental flakes (e.g. the webkit
+      # click timeout on run 42639724908, green on same-SHA rerun) without
+      # touching EXPERIENCE-owned test files. Deterministic regressions fail
+      # twice and stay red.
+      - run: npx playwright test --retries=1 --reporter=html,line
+      - if: always()
+        run: ls playwright-report/index.html || echo MISSING-PLAYWRIGHT-REPORT
       - if: failure()
         uses: actions/upload-artifact@v4
         with:
