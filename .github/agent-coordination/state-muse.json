@@ -1,7 +1,7 @@
 {
   "agent": "muse",
-  "updated": "2026-11-08T14:45:00Z",
-  "main": "28fa97e (after #219; prod 4.0.0 DEPLOYED 13:20:51Z, link verified, CI 42485123503 green)",
+  "updated": "2026-11-09T02:10:00Z",
+  "main": "2d17823 (after #221; #217 merged+deployed dev 8.2.0, CI 42547749449 green)",
   "org": "D14 two-agent split: muse owns CORE/Forge/backend/security/MCP/prod/evidence/Devpost; orpheane owns EXPERIENCE (TITAN-EXPERIENCE); no EXPERIENCE edits under her lease",
   "runner": "Claude session with bridge to the owner's PC (gh, forge, capture browser on CDP 9333)",
   "deployed": {
