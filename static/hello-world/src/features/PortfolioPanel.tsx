@@ -17,6 +17,7 @@ import { evidenceCopy, formatTime, verdictCopy } from "../app/copy";
 import { Badge, Notice, Panel, TechDetails } from "../components/ui";
 import SafeChangeComposer, { COMPOSER_CAPABILITY } from "./SafeChangeComposer";
 import CollisionExplorer from "./CollisionExplorer";
+import CollisionAtAGlance from "./CollisionAtAGlance";
 
 function Limited<T>({
   items,
@@ -91,6 +92,7 @@ function PortfolioResultView({
   };
   return (
     <div className="ax-portfolio__result">
+      <CollisionAtAGlance result={r} graph={graph} />
       <h3>Combined simulation</h3>
       <Badge tone={verdictCopy[r.combined.result.verdict].tone}>
         {verdictCopy[r.combined.result.verdict].label}
