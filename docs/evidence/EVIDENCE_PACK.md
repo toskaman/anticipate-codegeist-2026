@@ -1,4 +1,4 @@
-# Jury evidence pack (CORE)
+﻿# Jury evidence pack (CORE)
 
 **How to read this pack.** Every result carries one label:
 - **LIVE_FORGE**: observed on a deployed Forge app on a real Jira Cloud site. The row or section names the site (`one-atlas-euza` = development, `toskaman5962` and `anticipate-judge` = production installs) and the date.
@@ -321,3 +321,7 @@ Main `0904034` deployed in two steps: **4.1.0** at 00:35:28Z (vars missed — un
 ### OMEGA video: full-pipeline film rebuild (10 Nov 2026) — REBUILT DELIVERABLE ACCEPTED FOR OWNER UPLOAD
 
 Brag-full re-render from the retained composition (hyperframes@0.9.19): captions=false render 174.00 s (audio −21.4 LUFS == premaster, deterministic) + captions=true render after QA caught the `captions` variant default (first re-render was captionless); 2-pass loudnorm + true-peak limit → measured **−15.1 LUFS / −1.2 dBTP** (YouTube-compatible); spot frames at 0:02/0:45/2:40 match the accepted editorial; superseded 8 Nov masters preserved in `premaster/`. Footage, edit, narration, and provenance claims unchanged; shipping prod 4.2.0 supports all 12 beats (parity matrix refreshed). Full record: VIDEO_QA_REPORT addendum. Public YouTube upload remains the owner's interactive step (#189).
+
+### OMEGA wow: one-click collision pair + verdict-shift hero (10 Nov 2026) — main ac940a9, CI green
+
+#233 (branch feat/wow-collision-demo, no backend/contract/manifest change): `collisionCounterpart` proposes a breaking upgrade of the migration target when the draft holds exactly one complete migration (draft-driven, zero guessing); "Complete the collision pair" button with an exact preview, invalidation-safe, focus to Simulate; Collision-at-a-glance hero headlines the worst alone-to-together shift (worst-first, others counted). An earlier fixture-gated prefill was prototyped then reverted: serving DEMO_FIXTURE over the Jira Analyze flow is rejected INVALID_RESPONSE by design (client anti-confusion guard), so fixture-gating would have been dead code in production. Tests: 4 unit + 3 hero + 2 component + 1 e2e (200 listed, 32 files); local 225/225 unit + 11/11 portfolio chromium; PR run 42733744062 green; main run 42734602264 success. Visual check: test-results/portfolio-wow-MOCK_TRANSPORT.png (mock only, out-of-repo).
