@@ -1,6 +1,10 @@
-import { describe, expect, it } from "vitest";
+﻿import { describe, expect, it } from "vitest";
 import { graph } from "../../tests/core-test-data";
-import { portfolioChanges, type PortfolioDraft } from "./portfolio";
+import {
+  collisionCounterpart,
+  portfolioChanges,
+  type PortfolioDraft,
+} from "./portfolio";
 
 const row: PortfolioDraft = {
   id: "c1",
@@ -70,6 +74,47 @@ describe("portfolio input boundaries", () => {
     expect(
       portfolioChanges([{ ...row, label: "  Retire API  " }], graph)?.[0].label,
     ).toBe("Retire API");
+  });
+});
+
+describe("collisionCounterpart", () => {
+  const migrated = {
+    ...row,
+    action: "migrate" as const,
+    toNodeId: graph.nodes[1].id,
+  };
+  it("offers nothing without exactly one draft change", () => {
+    expect(collisionCounterpart([], graph)).toBeNull();
+    expect(collisionCounterpart([migrated, migrated], graph)).toBeNull();
+  });
+  it("offers nothing unless the single change is a complete migration", () => {
+    expect(collisionCounterpart([row], graph)).toBeNull();
+    expect(
+      collisionCounterpart([{ ...migrated, toNodeId: "" }], graph),
+    ).toBeNull();
+    expect(
+      collisionCounterpart([{ ...migrated, toNodeId: "unloaded" }], graph),
+    ).toBeNull();
+    expect(
+      collisionCounterpart([{ ...migrated, label: "   " }], graph),
+    ).toBeNull();
+  });
+  it("proposes a breaking upgrade of the migration target", () => {
+    expect(collisionCounterpart([migrated], graph)).toEqual({
+      label: `Breaking upgrade of ${graph.nodes[1].label}`,
+      nodeId: graph.nodes[1].id,
+      action: "breaking",
+      toNodeId: "",
+    });
+  });
+  it("keeps the completed draft valid", () => {
+    const spec = collisionCounterpart([migrated], graph);
+    expect(spec).not.toBeNull();
+    const rows = [
+      { ...migrated, id: "change-1" },
+      { ...spec!, id: "change-2" },
+    ];
+    expect(portfolioChanges(rows, graph)).toHaveLength(2);
   });
 });
 

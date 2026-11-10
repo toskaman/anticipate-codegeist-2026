@@ -1,4 +1,4 @@
-// @vitest-environment jsdom
+﻿// @vitest-environment jsdom
 import React from "react";
 import {
   act,
@@ -6,6 +6,7 @@ import {
   fireEvent,
   render,
   screen,
+  waitFor,
 } from "@testing-library/react";
 import { afterEach, expect, it } from "vitest";
 import {
@@ -79,4 +80,74 @@ it("keeps pending work read-only and drops its response when the analysed snapsh
   ).toBeNull();
   expect(screen.getByText(/No changes added/)).toBeTruthy();
   expect(operations).toEqual(["simulatePortfolio"]);
+});
+
+function renderLive() {
+  const client = new ForgeClient(async () => {
+    throw new Error("no backend calls expected");
+  }, 5000);
+  render(
+    <PortfolioPanel
+      w={{
+        client,
+        capabilities: CapabilityAvailability.parse({
+          ...capabilities,
+          portfolioSimulation: "AVAILABLE",
+          operations: [...capabilities.operations, "simulatePortfolio"],
+        }),
+        snapshot: graph,
+        rootIssueKey: "ABC-1",
+        busy: "",
+      }}
+    />,
+  );
+}
+function draftMigration() {
+  fireEvent.click(screen.getByRole("button", { name: "Add change" }));
+  fireEvent.change(screen.getByRole("textbox", { name: "Name" }), {
+    target: { value: "Move to replacement" },
+  });
+  fireEvent.change(screen.getByRole("combobox", { name: "Action" }), {
+    target: { value: "migrate" },
+  });
+  fireEvent.change(screen.getByRole("combobox", { name: "Record" }), {
+    target: { value: graph.nodes[0].id },
+  });
+  fireEvent.change(
+    screen.getByRole("combobox", { name: "Replacement record" }),
+    { target: { value: graph.nodes[2].id } },
+  );
+}
+it("completes a lone migration with its breaking counterpart in one click", async () => {
+  renderLive();
+  expect(
+    screen.queryByRole("button", { name: "Complete the collision pair" }),
+  ).toBeNull();
+  draftMigration();
+  const complete = screen.getByRole("button", {
+    name: "Complete the collision pair",
+  });
+  expect(complete.getAttribute("title")).toContain(graph.nodes[2].label);
+  fireEvent.click(complete);
+  expect(screen.getAllByRole("group", { name: /^Change \d+$/ })).toHaveLength(
+    2,
+  );
+  expect(
+    screen.getByDisplayValue(`Breaking upgrade of ${graph.nodes[2].label}`),
+  ).toBeTruthy();
+  const simulate = screen.getByRole("button", {
+    name: "Simulate combined changes",
+  }) as HTMLButtonElement;
+  expect(simulate.disabled).toBe(false);
+  await waitFor(() => expect(document.activeElement).toBe(simulate));
+  expect(
+    screen.queryByRole("button", { name: "Complete the collision pair" }),
+  ).toBeNull();
+});
+it("offers no counterpart for an incomplete migration", () => {
+  renderLive();
+  fireEvent.click(screen.getByRole("button", { name: "Add change" }));
+  expect(
+    screen.queryByRole("button", { name: "Complete the collision pair" }),
+  ).toBeNull();
 });

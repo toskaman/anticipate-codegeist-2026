@@ -1,4 +1,4 @@
-import { expect, test, type Page, type Route } from "@playwright/test";
+﻿import { expect, test, type Page, type Route } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import type { SimulatePortfolioRequest } from "@anticipate/contracts";
 import {
@@ -357,4 +357,49 @@ test("cycles and missing nested snapshot identity never become an approved order
   await expect(
     p.getByRole("heading", { name: "Combined simulation", exact: true }),
   ).toHaveCount(0);
+});
+test("collision pair completes in one click and headlines the verdict shift", async ({
+  page,
+}) => {
+  const calls = await lab(page);
+  const p = panel(page);
+  await expect(
+    p.getByRole("button", { name: "Complete the collision pair", exact: true }),
+  ).toHaveCount(0);
+  const first = await add(page);
+  await first.getByLabel("Name", { exact: true }).fill("Move to replacement");
+  await first
+    .getByRole("combobox", { name: "Action", exact: true })
+    .selectOption("migrate");
+  await first.getByLabel("Replacement record").selectOption(graph.nodes[2].id);
+  await p
+    .getByRole("button", { name: "Complete the collision pair", exact: true })
+    .click();
+  await expect(
+    p.getByRole("group", { name: "Change 2", exact: true }),
+  ).toBeVisible();
+  const simulate = p.getByRole("button", {
+    name: "Simulate combined changes",
+  });
+  await expect(simulate).toBeEnabled();
+  await expect(simulate).toBeFocused();
+  await simulate.click();
+  await expect(
+    p.getByRole("heading", { name: "Combined simulation", exact: true }),
+  ).toBeVisible();
+  await expect(p.getByTestId("collision-hero")).toContainText(
+    "Move to replacement goes from Pass alone to Blocked together.",
+  );
+  const request = calls.find((c) => c.operation === "simulatePortfolio")!.input;
+  expect(request.changes).toHaveLength(2);
+  expect(request.changes[1]).toMatchObject({
+    label: `Breaking upgrade of ${graph.nodes[2].label}`,
+    operations: [
+      { op: "UPGRADE_NODE", nodeId: graph.nodes[2].id, breaking: true },
+    ],
+  });
+  await p.screenshot({
+    path: "test-results/portfolio-wow-MOCK_TRANSPORT.png",
+    style: "#root > p[role='status'] { position: static !important; }",
+  });
 });

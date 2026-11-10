@@ -1,4 +1,4 @@
-import {
+﻿import {
   PORTFOLIO_LIMITS,
   type GraphSnapshot,
   type PortfolioChange,
@@ -68,6 +68,31 @@ export function portfolioChanges(
     });
   }
   return changes;
+}
+
+export type SamplePrefillSpec = Omit<PortfolioDraft, "id">;
+/**
+ * Collision-pair completion: when the draft holds exactly one complete
+ * migration, propose its breaking counterpart (a breaking upgrade of the
+ * migration target) so the combined run is one click away. Nothing is
+ * guessed: the target comes from the user's own draft.
+ */
+export function collisionCounterpart(
+  rows: PortfolioDraft[],
+  graph: GraphSnapshot,
+): SamplePrefillSpec | null {
+  if (rows.length !== 1) return null;
+  const [row] = rows;
+  if (row.action !== "migrate" || portfolioChanges([row], graph) === null)
+    return null;
+  const to = graph.nodes.find((n) => n.id === row.toNodeId);
+  if (!to) return null;
+  return {
+    label: `Breaking upgrade of ${to.label}`,
+    nodeId: to.id,
+    action: "breaking",
+    toNodeId: "",
+  };
 }
 
 type Op = PortfolioChange["operations"][number];

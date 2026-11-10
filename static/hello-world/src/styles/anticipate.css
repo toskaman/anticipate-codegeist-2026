@@ -1,4 +1,4 @@
-/* ==========================================================================
+﻿/* ==========================================================================
    ANTICIPATE — Precision Intelligence design system (v3)
    Scoped to .ax-app so the local authored prototype (style.css) is unaffected.
    Sections: 1 tokens · 2 base · 3 shell · 4 primitives · 5 features ·
@@ -4648,6 +4648,12 @@ body:has(.ax-app) {
 }
 .ax-glance__shift {
   padding-left: var(--ax-5);
+}
+.ax-glance__hero {
+  margin: 0 0 var(--ax-3);
+  font-size: var(--ax-fs-2xl);
+  font-weight: 700;
+  line-height: 1.25;
 }
 @media (forced-colors: active) {
   .ax-glance__card--blocked,
