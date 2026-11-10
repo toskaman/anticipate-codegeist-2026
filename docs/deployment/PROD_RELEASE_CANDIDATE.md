@@ -1,9 +1,10 @@
-# Production shipping release — main 5610ca7, deployed 4.0.0 (TITAN-9; TITAN-8 validation base 4ea97f1)
+# Production shipping release — main 0904034, deployed 4.2.0 stamped (OMEGA 10 Nov; history: 4.0.0 from 5610ca7, 4.1.0 unstamped same source)
 
-Status: VALIDATED, DEPLOYED 8 Nov 2026 13:20:51 UTC as production 4.0.0 (owner-authorized: "go do all final recommendation", 8 Nov; Forge session Toska Marley).
+Status: VALIDATED, DEPLOYED 10 Nov 2026 00:48:15 UTC as production 4.2.0, stamped (owner-authorized: "DO everything yourself", 10 Nov; Forge session Toska Marley). Previous: 4.1.0 same source unstamped (00:35:28Z, superseded within the hour); 4.0.0 from 5610ca7 (8 Nov 13:20:51 UTC).
 
 ## Source
 
+- main `0904034` (merge #231; docs-only over `25685d0`). Replaces the `5610ca7` pin; the `ee5dbe1` candidate (9 Nov) was superseded without deploy.
 - main `5610ca7` (merge #210; code tree = `7c3e334`). Re-pinned 8 Nov after the TWG Preview message fix (#210, one user-visible string + lock test); previous pin `4ea97f1` in git history. Intermediate #206/#207/#209 docs + evidence only; #208 test-only.
 - Code delta vs installed production v2.38.0 (source `113ddc5`, after #179):
   32 files in `src`, `static/hello-world/src`, `packages`
@@ -13,6 +14,13 @@ Status: VALIDATED, DEPLOYED 8 Nov 2026 13:20:51 UTC as production 4.0.0 (owner-a
   Explorer, Time Machine retention notice, OMEGA P0 backend hardening
   (#198), a11y display prefs (#199), zod lockfile purge + CI audit gate
   (#205, no source change).
+- Delta `5610ca7..0904034` (42 files, +1292/−66) is additive only:
+  `getBuildInfo` resolver + contract + `BuildInfoPanel` UI (#220/#222),
+  Collision-at-a-glance + graph wheel fix (#228), focus-after-execution
+  (#229), #225 e2e hardening + copy fallback (#230), docs + CI retry
+  (#211/#219/#221/#223/#224/#227/#231). No storage change, no migration,
+  `SHARED_DECISIONS_RELEASED = false` on both ends, no existing operation
+  altered.
 - Docs-only merges #200–#204 included; they change no shipped code.
 
 ## Manifest (VERIFIED)
@@ -20,7 +28,9 @@ Status: VALIDATED, DEPLOYED 8 Nov 2026 13:20:51 UTC as production 4.0.0 (owner-a
 - `git diff 113ddc5 HEAD -- manifest.yml`: EMPTY. The shipping manifest is
   byte-identical to the installed production manifest.
 - Fingerprint: `git hash-object manifest.yml` =
-  `b474696d2e2fae62eeda491461431223c3636f30` (same on both ends).
+  `b474696d2e2fae62eeda491461431223c3636f30` (same on both ends;
+  re-verified 10 Nov: `git diff 5610ca7 HEAD -- manifest.yml` EMPTY on main
+  `0904034`).
 - Scopes: `read:jira-work`, `write:jira-work`, `read:jira-user`,
   `storage:app`. No graph scopes, no Teamwork Graph, no shared-decision
   release (`SHARED_DECISIONS_RELEASED = false`), no licensing change.
@@ -46,6 +56,11 @@ All gates executed on the RC tree (main `5610ca7`):
 | Demo 2 deterministic verdict pins | PASS (backend suite, incl. named-reason pins) |
 | Rovo 7-handler local probe | 7/7, zero Jira writes (T6 record, handlers unchanged since) |
 | KVS 240 KiB boundary probe | 4/4, warn path confirmed (T6 record, storage code unchanged since) |
+
+10 Nov gates on main `0904034` (no source change since `25685d0`;
+#231 docs only): main CI 42719465493 green (core, frontend, e2e);
+counts backend 336 / simulation-core 75 / contracts 13 / frontend 216
+/ Playwright 197 listed (see RELEASE.md).
 
 ## Version trap (why this deploy needs care)
 
@@ -75,6 +90,15 @@ announcing the shipping build.
 - Installs after deploy: `toskaman5962` upgraded via CLI to major 4, Up-to-date; `anticipate-judge` CLI upgrade FAILED ("Failed to install into Jira", no detail even verbose) — the Forge session lacks rights there. Site-admin action required: Jira Admin → Apps → Manage apps → ANTICIPATE → Update (grants the same 4 scopes already consented on major 2; no new permission surface).
 - Install-link routing VERIFIED (CDP capture browser, consent page read, nothing installed): the link offers exactly the 4 RC scopes (no graph scopes) — new judge installs receive 4.0.0. Screenshot: `docs/evidence/hosted-2026-11-08/24-install-consent-4x.png`.
 - In-app production smoke NOT_VERIFIED: the capture-browser session is not entitled on `toskaman5962` ("insufficient permissions to load this app"). Owner step: open Apps → ANTICIPATE there and confirm the Release Command Center renders (its presence proves 4.0.0 code; 2.38.0 lacked it), then run JUDGE_RERUN_CHECKLIST.md (#191).
+
+## Deploy record (10 Nov 2026, 00:48:15 UTC / 01:48:15 CET)
+
+- Source: working tree at exactly `0904034` (clean, `git status` empty); manifest diff `5610ca7..HEAD` EMPTY; `forge lint` clean; CLI latest via npx + portable node 24.22.2 (system node 24.14.1 is rejected by the CLI: requires ^22.23.4 || ^24.22.1 || >=26.12.1).
+- First deploy 00:35:28Z assigned **4.1.0** but the build vars were missed (unstamped). Stamped `ANTICIPATE_BUILD_COMMIT=090403468e7f4e7ab89cba62a2d9e6f771430386` + `ANTICIPATE_BUILD_AT=2026-11-10T00:46:06.000Z`, re-read both via `forge variables list -e production` to confirm, then redeployed.
+- Assigned version: **4.2.0**. Minor on major 4 (no scope change): existing major-4 installs auto-update without re-consent — OBSERVED via `forge install list` (toskaman5962 production 4 Up-to-date).
+- `anticipate-judge` still production 2 Outdated: same site-admin upgrade click as above (Jira Admin → Apps → Manage apps → ANTICIPATE → Update).
+- New installs receive 4.2.0 (same 4 scopes; consent-page re-read not repeated — manifest byte-identical to the verified 4.0.0).
+- In-app production smoke NOT_VERIFIED (no entitled browser session in this run): owner step unchanged — open Apps → ANTICIPATE on toskaman5962, confirm Settings shows Commit 0904034 + Built 10 Nov 00:46 UTC and the Release Command Center renders, then run JUDGE_RERUN_CHECKLIST.md (#191).
 
 ## Deploy procedure (kept for audit; executed above)
 
@@ -131,6 +155,10 @@ forge deploy -e production
 
 Verify installs revert + app loads. Remove the worktree afterwards.
 Throttle budgets reset again on rollback.
+
+Rollback from 4.2.0: prefer redeploy from `5610ca7`
+(manifest-identical, stamped vars for that SHA); deep rollback to
+113ddc5 as above.
 
 ## Freeze rule
 

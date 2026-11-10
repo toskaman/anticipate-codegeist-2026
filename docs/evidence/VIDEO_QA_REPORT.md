@@ -81,3 +81,25 @@ compresses both runs into one story beat (standard, disclosed).
 - Upload CLEAN mp4 + EN.srt (or FINAL with burned captions); paste title,
   description, tags; verify processing completes at 1080p.
 - Record the public URL in issue #189 before closing it.
+
+## Addendum 10 Nov 2026 — full-pipeline rebuild (brag full)
+
+The film was re-rendered end-to-end from the retained composition sources
+(`brag-output/codegeist-2026/composition/`, hyperframes@0.9.19) and promoted to
+the shipping deliverable; the 8 Nov master is preserved at
+`renders/premaster/SUPERSEDED_2026-11-08_FINAL.mp4` (+ `_CLEAN.mp4`).
+
+- Composition render (captions=false default): 174.00 s, 5220/5220 frames,
+  1080p30 H.264 + AAC 48 kHz; audio -21.4 LUFS == premaster (bit-deterministic chain).
+- Root cause caught in QA: the composition variable `captions` defaults to
+  false, so the first re-render was a CLEAN. Re-rendered with
+  `--variables '{"captions":true}'`; spot frames at 0:02, 0:45, 2:40 match the
+  accepted editorial (burned captions present, identical footage states).
+- Mastering: 2-pass loudnorm to I=-14.5 + true-peak limiter. Measured final:
+  **-15.1 LUFS integrated, -1.2 dBTP** (YouTube-compatible; gains honest-recorded,
+  not the -14.5 target). Blackdetect: only the intentional 0–0.667 s lead-in.
+- Same audio muxed onto the captions-free render → new CLEAN (174.00 s);
+  existing EN.srt/EN.vtt (39 cues, last ends 2:43.77) still fit — timing unchanged.
+- Thumbnail, title, description, narration script unchanged (footage/provenance
+  claims still true). No re-record: all beats remain in shipping prod 4.2.0.
+- Verdict: REBUILT DELIVERABLE ACCEPTED FOR OWNER UPLOAD (public-listed).
