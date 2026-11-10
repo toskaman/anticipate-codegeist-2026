@@ -40,12 +40,12 @@ Shot: Apps → ANTICIPATE cold open ("Connected · live mode") → Mission Contr
 
 Shot: portfolio draft with the lone migration → **"Complete the collision
 pair" click** → Simulate → **hero verdict hold 4 s**
-("goes from Pass alone to Blocked together") → scroll conflicts + emergent
+("goes from Pass alone to Needs review together") → scroll conflicts + emergent
 impacts naming ADM-2/3/4.
 
 > "Now watch the moment that matters. One migration, drafted. One click
 > completes the collision pair. Simulated together — they collide. Alone, the
-> migration passes. Together, it is blocked: the consumers land on an API that
+> migration passes. Together, it needs review: the consumers land on an API that
 > is about to break. Records impacted only when the changes run together. No
 > dashboard shows you this. ANTICIPATE proves it."
 
@@ -80,12 +80,12 @@ Shot: plan approved → Jira link added → Re-check CHANGED → Time Machine
 
 ### S7 2:05–2:25 — Jira-native enforcement (EXECUTED + VERIFIED)
 
-Shot: Jira transition refused with the ANTICIPATE message → real migration →
-verified execution (read-back) → Passport "In short".
+Shot: Passport gate banner (ADM uses a simplified workflow: no Forge validator slot; validator proof lives in EVIDENCE_PACK on AVT/JDG) → real migration
+(blocks links removed in Jira) → verified execution (read-back) → Passport "In short".
 
-> "Jira enforces it too. Move the ticket, and the transition is refused: the
-> decision assumed work Jira does not show. Real migration, verified by
-> reading Jira back — the gate opens. And the Passport records what was known,
+> "Without a verified migration in Jira, the decision cannot proceed.
+> Migrate for real: links removed in Jira, evidence re-read. Then execute,
+> verified by reading Jira back. And the Passport records what was known,
 > who approved, and what was verified."
 
 ### S8 2:25–2:45 — Agents on the same engine (OBSERVED IN JIRA)
@@ -118,7 +118,7 @@ date — filled at render).
 6. Release Safety: attention list → release → states → unknowns.
 7. Approve → Jira link added → Re-check CHANGED → Time Machine diff →
    refusal (0 writes).
-8. Transition refused banner → verified execution → Passport "In short".
+8. Passport gate banner → real migration → verified execution → Passport "In short".
 9. MCP client Q&A + Rovo answer (dev site acceptable, labeled on screen).
 10. Settings: capabilities + Build Information close-up (commit + timestamp).
 11. Title + closing cards (team-made, no capture needed).
