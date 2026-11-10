@@ -1,4 +1,4 @@
-import React, { useEffect, useId, useRef, useState } from "react";
+﻿import React, { useEffect, useId, useRef, useState } from "react";
 import {
   PORTFOLIO_LIMITS,
   type GraphSnapshot,
@@ -7,6 +7,7 @@ import {
 import { CoreClientError, type ForgeClient } from "../api/ForgeClient";
 import type { Workflow } from "../app/useCoreWorkflow";
 import {
+  collisionCounterpart,
   portfolioActions,
   portfolioChanges,
   type PortfolioDraft,
@@ -327,6 +328,7 @@ function PortfolioEditor({
   const expired = useExpired(graph.expiresAt);
   useEffect(() => () => active.current?.abort(), []);
   const changes = portfolioChanges(rows, graph);
+  const counterpart = collisionCounterpart(rows, graph);
   const update = (next: PortfolioDraft[]) => {
     active.current?.abort();
     flight.current++;
@@ -581,6 +583,31 @@ function PortfolioEditor({
             >
               Add change
             </button>
+            {counterpart && (
+              <button
+                type="button"
+                className="ax-btn"
+                title={`Adds “${counterpart.label}” as Change 2`}
+                onClick={(e) => {
+                  const spec = collisionCounterpart(rows, graph);
+                  if (!spec) return;
+                  update([
+                    ...rows,
+                    { ...spec, id: `change-${++sequence.current}` },
+                  ]);
+                  const form = e.currentTarget.closest("form");
+                  requestAnimationFrame(() => {
+                    form
+                      ?.querySelector<HTMLButtonElement>(
+                        'button[type="submit"]',
+                      )
+                      ?.focus();
+                  });
+                }}
+              >
+                Complete the collision pair
+              </button>
+            )}
             <button
               type="submit"
               className="ax-btn ax-btn--primary"

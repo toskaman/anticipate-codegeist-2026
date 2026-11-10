@@ -1,4 +1,4 @@
-import React, { useId } from "react";
+﻿import React, { useId } from "react";
 import type {
   GraphSnapshot,
   SimulatePortfolioResult,
@@ -32,6 +32,11 @@ export default function CollisionAtAGlance({
     (e) => rank[e.portfolioVerdict] > rank[e.standaloneVerdict],
   );
   const collided = r.conflicts.length > 0 || emergent.length > 0;
+  const hero = [...worsened].sort(
+    (a, b) =>
+      rank[b.portfolioVerdict] - rank[a.portfolioVerdict] ||
+      rank[a.standaloneVerdict] - rank[b.standaloneVerdict],
+  )[0];
   const shown = emergent.slice(0, MAX_NAMES);
   return (
     <section
@@ -42,6 +47,16 @@ export default function CollisionAtAGlance({
       <h3 id={headingId}>
         {collided ? "Collision at a glance" : "Combined result at a glance"}
       </h3>
+      {hero && (
+        <p className="ax-glance__hero" data-testid="collision-hero">
+          <strong>{label(hero.changeId)}</strong> goes from{" "}
+          {verdictCopy[hero.standaloneVerdict].label} alone to{" "}
+          {verdictCopy[hero.portfolioVerdict].label} together.
+          {worsened.length > 1
+            ? ` ${worsened.length - 1} more change${worsened.length - 1 === 1 ? "" : "s"} also worsen${worsened.length - 1 === 1 ? "s" : ""}.`
+            : ""}
+        </p>
+      )}
       <ol
         className="ax-glance__row"
         aria-label="Each change alone, then together"

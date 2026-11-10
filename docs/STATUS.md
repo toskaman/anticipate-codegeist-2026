@@ -1,4 +1,4 @@
-# ANTICIPATE - source of truth (dated)
+﻿# ANTICIPATE - source of truth (dated)
 
 Updated: 5 Nov 2026 (new rows for #173/#174/#176 and the release overview); earlier rows as of 4 Nov 2026, ~16:20 Paris. 6 Nov: TITAN rows (Explorer, Command Center, retention notice), dev v6.28.0 pointer. 8 Nov: T8 refresh (dev 8.1.0 pointers, prod RC pending). 9 Nov: #222 build-info UI + dev 8.3.0 pointers (muse). Evening 9 Nov (OMEGA): #228/#229 recovery + #230 rows (muse). 10 Nov: prod 4.2.0 (stamped 0904034) + rebuilt film pointers (muse). Owner of this file: CORE (muse).
 
@@ -40,6 +40,8 @@ Updated: 5 Nov 2026 (new rows for #173/#174/#176 and the release overview); earl
 | Focus to Verify results after execution | LOCAL_MOCK_E2E (core-integration assertion, CI chromium) | #216 (closed via #229) |
 | decision-clarity e2e hardening (waits + split) | LOCAL_MOCK_E2E repeated: chromium 3x8/8, firefox 2x8/8, webkit 2x8/8 + CI green | #225 (closed via #230) |
 | Copy fallback selects SHA when clipboard denied | UNIT_TESTED (2: denied + no-API) | #225 (closed via #230) |
+| Collision-pair completion (one-click breaking counterpart) | UNIT_TESTED + LOCAL_MOCK_E2E (CI chromium+firefox+webkit); draft-driven, no invented records | this branch (unit + component + e2e) |
+| Verdict-shift hero (headlined alone-to-together shift) | UNIT_TESTED (3) + LOCAL_MOCK_E2E; backend values only | this branch (unit + e2e) |
 | KVS transactions | Decision: keep setIfAbsent design (ADR) | #175; docs/design-core/ADR-KVS-TRANSACTIONS.md |
 | Policy-as-code preview engine | UNIT_TESTED only (37 tests, #159); inert: nothing calls it, gates nothing | docs/design-core/POLICY_AS_CODE.md |
 | What-if slip panel | LIVE_FORGE_DEV 4 Nov: late release (by 9 d), 3 moved due dates with paths, unknowns listed | EVIDENCE_PACK 4 Nov |
