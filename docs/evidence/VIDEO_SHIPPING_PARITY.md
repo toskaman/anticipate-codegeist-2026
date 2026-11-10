@@ -1,28 +1,29 @@
-# Video ↔ shipping-build parity matrix (OMEGA, refreshed 10 Nov 2026)
+﻿# Video ↔ shipping-build parity matrix (OMEGA, refreshed 10 Nov 2026)
 
 Film: `ANTICIPATE_CODEGEIST_2026_FINAL.mp4` (2:54, QA ACCEPTED 8 Nov, REBUILT 10 Nov from
 identical composition sources — same footage, edit, narration; remastered audio -15.1 LUFS / -1.2 dBTP;
 see `docs/evidence/VIDEO_QA_REPORT.md`). Captured on dev 8.x.
-Shipping build: main `0904034`, DEPLOYED as production **4.2.0** 10 Nov 2026 00:48:15 UTC (stamped
-commit 090403468e7f4e7ab89cba62a2d9e6f771430386, vars 00:46:06Z; see
-`docs/deployment/PROD_RELEASE_CANDIDATE.md`). Delta 5610ca7..0904034 is additive only
-(BuildInfo UI, Collision-at-a-glance, focus/scroll a11y, #225 test hardening; manifest byte-identical).
-Installed production at matrix refresh: 4.2.0 on toskaman5962 (auto-updated, same major 4, no re-consent);
-anticipate-judge still on major 2 pending its site admin's upgrade. New installs receive 4.2.0
+Shipping build: main `b1e4677`, DEPLOYED as production **4.3.0** 10 Nov 2026 11:45:14 UTC (stamped
+commit b1e46776c29d424e3b03f3cd3906830f4a9fb927, vars 11:43:49Z; see
+`docs/deployment/PROD_RELEASE_CANDIDATE.md`). Delta 0904034..b1e4677 is additive only
+(#233 wow UI: collision-pair button + glance hero; docs #232/#234; manifest byte-identical).
+The film predates the wow additions but every beat still holds.
+Installed production at matrix refresh: 4.3.0 on toskaman5962 (auto-updated, same major 4, no re-consent);
+anticipate-judge still on major 2 pending its site admin's upgrade. New installs receive 4.3.0
 (same 4 scopes, no graph scopes).
 
 How to read the "Shipping version" column: HAS = present in the shipping build
-(main `0904034` = production 4.2.0); the "Installed prod" column says whether judges
-installing TODAY (4.2.0) see it.
+(main `b1e4677` = production 4.3.0); the "Installed prod" column says whether judges
+installing TODAY (4.3.0) see it.
 
-| # | Video claim (film beat) | Feature | Source commit | Shipping version (4.2.0) | Installed prod 4.2.0 | Hosted evidence | Judge test |
+| # | Video claim (film beat) | Feature | Source commit | Shipping version (4.3.0) | Installed prod 4.3.0 | Hosted evidence | Judge test |
 |---|---|---|---|---|---|---|---|
 | 1 | Evidence Graph, 6 records, Confirmed/Inferred | Evidence Graph | pre-`113ddc5` | HAS | HAS | EVIDENCE_PACK clean-site run (JDG-1); HOSTED_ACCEPTANCE_T7 (7 records, AVT) | JUDGE_RERUN: Analyze sample root |
 | 2 | Portfolio input, collision verdict COMBINED: NEEDS REVIEW | Portfolio Impact Simulator | pre-`113ddc5` (named reasons #165) | HAS | HAS | EVIDENCE_PACK DEMO 2 prod 2.36.0/2.37.0 (EMERGENT_IMPACT + MIGRATE_ONTO_RETIRED) | JUDGE_RERUN: portfolio interaction |
 | 3 | Per-side verdicts | Portfolio per-change detail | pre-`113ddc5` | HAS | HAS | same as #2 | same as #2 |
 | 4 | Composer #1, 0 conflicts, assumption stated | Safe Change Composer | #176 (in 2.37.0) | HAS | HAS | EVIDENCE_PACK prod 2.37.0 session (compatibility phase #1) | JUDGE_RERUN: Show the Composer |
 | 5 | Decision Firewall BLOCKED traced to AVT-4/5/8 | Decision Firewall | pre-`113ddc5` | HAS | HAS | EVIDENCE_PACK (Firewall verdicts); HOSTED_ACCEPTANCE_T7 (MIGRATE FIRST Pass) | JUDGE_RERUN: Review a plan |
-| 6 | Release Command Center (AVT-3 INVALIDATED, needs re-check) | Release Command Center | `8b5091f` (#188) — was VERIFIED absent from old `113ddc5`, ships since 4.0.0 | HAS | HAS (4.2.0; in-app prod render pending owner smoke, #191) | HOSTED_ACCEPTANCE_T7/T8 RCC on dev 8.1.0 (read-only); dedicated RCC hosted exercise pending (#191) | JUDGE_RERUN: Show Release Safety + project switch (no stale data) |
+| 6 | Release Command Center (AVT-3 INVALIDATED, needs re-check) | Release Command Center | `8b5091f` (#188) — was VERIFIED absent from old `113ddc5`, ships since 4.0.0 (now 4.3.0) | HAS | HAS (4.3.0; in-app prod render pending owner smoke, #191) | HOSTED_ACCEPTANCE_T7/T8 RCC on dev 8.1.0 (read-only); dedicated RCC hosted exercise pending (#191) | JUDGE_RERUN: Show Release Safety + project switch (no stale data) |
 | 7 | Approve → execute as separate steps | Explicit approvals | pre-`113ddc5` | HAS | HAS | EVIDENCE_PACK clean-site run (plan-a0e742f7) | JUDGE_RERUN: Review and approve a plan |
 | 8 | Verified execution (1 of 1 read back, comment id) | Verified Jira execution | pre-`113ddc5` | HAS | HAS | EVIDENCE_PACK: 6/6 writes verified; clean-site VERIFIED 14:01 | JUDGE_RERUN: Execute + verify Jira read-back |
 | 9 | Approved-not-executed plan state | Plan lifecycle states | pre-`113ddc5` | HAS | HAS | EVIDENCE_PACK DEMO 3 (Approved · not executed) | JUDGE_RERUN: approval flow |
@@ -40,11 +41,12 @@ installing TODAY (4.2.0) see it.
 - MCP/Rovo, Teamwork Graph, Marketplace, customers, ROI: correctly
   ABSENT from the film (VIDEO_QA_REPORT). No parity issue.
 
-## Verdict (refreshed 10 Nov after the 4.2.0 deploy)
+## Verdict (refreshed 10 Nov after the 4.3.0 deploy)
 
-- Shipping build (4.2.0 = `0904034`) supports every film beat: **12/12 HAS**.
+- Shipping build (4.3.0 = `b1e4677`) supports every film beat: **12/12 HAS**.
+- Wow #233 (pair button + hero) postdates the footage and is additive: no beat invalidated, no re-capture needed.
 - Installed prod on toskaman5962: **12/12 structural** (same code); in-app render still to be eyeballed by the owner (#191 smoke).
 - anticipate-judge (still major 2): behind until its site admin upgrades.
-- **The parity gap is closed for every new install.** Judges installing from the public link receive 4.2.0.
+- **The parity gap is closed for every new install.** Judges installing from the public link receive 4.3.0.
 - No film beat requires re-capture: all footage shows behavior the shipping build
   contains. Do NOT re-record for parity reasons.

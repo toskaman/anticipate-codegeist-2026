@@ -1,6 +1,6 @@
 ﻿# ANTICIPATE - source of truth (dated)
 
-Updated: 5 Nov 2026 (new rows for #173/#174/#176 and the release overview); earlier rows as of 4 Nov 2026, ~16:20 Paris. 6 Nov: TITAN rows (Explorer, Command Center, retention notice), dev v6.28.0 pointer. 8 Nov: T8 refresh (dev 8.1.0 pointers, prod RC pending). 9 Nov: #222 build-info UI + dev 8.3.0 pointers (muse). Evening 9 Nov (OMEGA): #228/#229 recovery + #230 rows (muse). 10 Nov: prod 4.2.0 (stamped 0904034) + rebuilt film pointers (muse). 10 Nov (wow): #233 merged, proof pointers (muse). Owner of this file: CORE (muse).
+Updated: 5 Nov 2026 (new rows for #173/#174/#176 and the release overview); earlier rows as of 4 Nov 2026, ~16:20 Paris. 6 Nov: TITAN rows (Explorer, Command Center, retention notice), dev v6.28.0 pointer. 8 Nov: T8 refresh (dev 8.1.0 pointers, prod RC pending). 9 Nov: #222 build-info UI + dev 8.3.0 pointers (muse). Evening 9 Nov (OMEGA): #228/#229 recovery + #230 rows (muse). 10 Nov: prod 4.2.0 (stamped 0904034) + rebuilt film pointers (muse). 10 Nov (wow): #233 merged, proof pointers (muse). 10 Nov: prod 4.3.0 pointers (muse). Owner of this file: CORE (muse).
 
 | Item | Value |
 |---|---|
@@ -31,17 +31,17 @@ Updated: 5 Nov 2026 (new rows for #173/#174/#176 and the release overview); earl
 | Release overview (`listReleaseSafety`: every fixVersion, worst first) | **LIVE_FORGE_PRODUCTION** 5 Nov (2.37.0, ADM) | docs/product/RELEASE_SAFETY.md |
 | Decision Time Machine (`getDecisionHistory`, Passport) | **LIVE_FORGE_PRODUCTION** 5 Nov including invalidation (approved → real Jira link → Radar → re-check → "Added: ADM-1 depends on ADM-6"); plans older than 6.22.0 get checkpoints only from their next re-check | #174; docs/product/DECISION_TIME_MACHINE.md |
 | Safe Change Composer (`composeSafeChanges`, Scenario Lab) | **LIVE_FORGE_PRODUCTION** 5 Nov (2.37.0, ADM: compatibility phase #1, 0 conflicts) | #176; docs/product/SAFE_CHANGE_COMPOSER.md |
-| Causal Collision Explorer (per-conflict causal explanation) | UNIT_TESTED + LOCAL mock-e2e (axe-clean); hosted exercise pending (#191); ships in dev 8.1.0 and in prod 4.2.0 (deployed 10 Nov stamped; in-app prod smoke pending, PROD_RELEASE_CANDIDATE.md) | #188 |
-| Release Command Center (read-only release digest + next action) | **LIVE_FORGE_DEV** 8 Nov on dev 8.1.0 (AVT 3-change digest + TD 1-change digest, project switch clean, zero Jira writes); included in prod 4.2.0 (deployed 10 Nov stamped; in-app prod smoke pending, PROD_RELEASE_CANDIDATE.md) | #188; HOSTED_ACCEPTANCE_T8 |
+| Causal Collision Explorer (per-conflict causal explanation) | UNIT_TESTED + LOCAL mock-e2e (axe-clean); hosted exercise pending (#191); ships in dev 8.1.0 and in prod 4.3.0 (deployed 10 Nov 11:45 UTC stamped; in-app prod smoke pending, PROD_RELEASE_CANDIDATE.md) | #188 |
+| Release Command Center (read-only release digest + next action) | **LIVE_FORGE_DEV** 8 Nov on dev 8.1.0 (AVT 3-change digest + TD 1-change digest, project switch clean, zero Jira writes); included in prod 4.3.0 (deployed 10 Nov 11:45 UTC stamped; in-app prod smoke pending, PROD_RELEASE_CANDIDATE.md) | #188; HOSTED_ACCEPTANCE_T8 |
 | Time Machine retention notice (dropped checkpoints, baseline state) | UNIT_TESTED; hosted exercise pending (#191) | #188 |
-| Build identity (deployed commit + build time in Settings) | **LIVE_FORGE_DEV** 9 Nov on dev 8.3.0 (59d5b11 values exact-match the stamped vars; nav round-trip clean; copy falls back gracefully in the Forge iframe; zero Jira writes); prod 4.2.0 carries the resolver + stamped vars (in-app prod render pending #191) | #217 (closed); EVIDENCE_PACK 9 Nov + 10 Nov |
+| Build identity (deployed commit + build time in Settings) | **LIVE_FORGE_DEV** 9 Nov on dev 8.3.0 (59d5b11 values exact-match the stamped vars; nav round-trip clean; copy falls back gracefully in the Forge iframe; zero Jira writes); prod 4.3.0 carries the resolver + stamped vars (in-app prod render pending #191) | #217 (closed); EVIDENCE_PACK 9 Nov + 10 Nov |
 | Collision at a glance (portfolio result lead section) | UNIT_TESTED (2) + LOCAL_MOCK_E2E (CI chromium+firefox+webkit); honest copy, backend values only | #213 (closed via #228) |
 | Evidence Graph mouse-wheel scroll fix | LOCAL_MOCK_E2E (graph-scroll spec, CI chromium) | #214 (closed via #228) |
 | Focus to Verify results after execution | LOCAL_MOCK_E2E (core-integration assertion, CI chromium) | #216 (closed via #229) |
 | decision-clarity e2e hardening (waits + split) | LOCAL_MOCK_E2E repeated: chromium 3x8/8, firefox 2x8/8, webkit 2x8/8 + CI green | #225 (closed via #230) |
 | Copy fallback selects SHA when clipboard denied | UNIT_TESTED (2: denied + no-API) | #225 (closed via #230) |
-| Collision-pair completion (one-click breaking counterpart) | UNIT_TESTED + LOCAL_MOCK_E2E (CI chromium+firefox+webkit); draft-driven, no invented records | #233 (merged; CI green) |
-| Verdict-shift hero (headlined alone-to-together shift) | UNIT_TESTED (3) + LOCAL_MOCK_E2E; backend values only | #233 (merged; CI green) |
+| Collision-pair completion (one-click breaking counterpart) | UNIT_TESTED + LOCAL_MOCK_E2E (CI chromium+firefox+webkit); draft-driven, no invented records | #233 (merged; ships in prod 4.3.0) |
+| Verdict-shift hero (headlined alone-to-together shift) | UNIT_TESTED (3) + LOCAL_MOCK_E2E; backend values only | #233 (merged; ships in prod 4.3.0) |
 | KVS transactions | Decision: keep setIfAbsent design (ADR) | #175; docs/design-core/ADR-KVS-TRANSACTIONS.md |
 | Policy-as-code preview engine | UNIT_TESTED only (37 tests, #159); inert: nothing calls it, gates nothing | docs/design-core/POLICY_AS_CODE.md |
 | What-if slip panel | LIVE_FORGE_DEV 4 Nov: late release (by 9 d), 3 moved due dates with paths, unknowns listed | EVIDENCE_PACK 4 Nov |

@@ -1,9 +1,10 @@
-# Production shipping release — main 0904034, deployed 4.2.0 stamped (OMEGA 10 Nov; history: 4.0.0 from 5610ca7, 4.1.0 unstamped same source)
+﻿# Production shipping release — main b1e4677, deployed 4.3.0 stamped (OMEGA 10 Nov; history: 4.2.0 from 0904034, 4.1.0 unstamped, 4.0.0 from 5610ca7)
 
-Status: VALIDATED, DEPLOYED 10 Nov 2026 00:48:15 UTC as production 4.2.0, stamped (owner-authorized: "DO everything yourself", 10 Nov; Forge session Toska Marley). Previous: 4.1.0 same source unstamped (00:35:28Z, superseded within the hour); 4.0.0 from 5610ca7 (8 Nov 13:20:51 UTC).
+Status: VALIDATED, DEPLOYED 10 Nov 2026 11:45:14 UTC as production 4.3.0, stamped (owner-authorized: "go 4.3.0", 10 Nov; Forge session Toska Marley). Previous: 4.2.0 from 0904034 (00:48:15Z); 4.1.0 same source unstamped (00:35:28Z); 4.0.0 from 5610ca7 (8 Nov 13:20:51 UTC).
 
 ## Source
 
+- main `b1e4677` (merge #234; docs-only over `ac940a9` = #233 wow: collision pair + hero, frontend-only, no manifest/contract change). Delta `0904034..b1e4677` verified additive (manifest diff EMPTY).
 - main `0904034` (merge #231; docs-only over `25685d0`). Replaces the `5610ca7` pin; the `ee5dbe1` candidate (9 Nov) was superseded without deploy.
 - main `5610ca7` (merge #210; code tree = `7c3e334`). Re-pinned 8 Nov after the TWG Preview message fix (#210, one user-visible string + lock test); previous pin `4ea97f1` in git history. Intermediate #206/#207/#209 docs + evidence only; #208 test-only.
 - Code delta vs installed production v2.38.0 (source `113ddc5`, after #179):
@@ -99,6 +100,15 @@ announcing the shipping build.
 - `anticipate-judge` still production 2 Outdated: same site-admin upgrade click as above (Jira Admin → Apps → Manage apps → ANTICIPATE → Update).
 - New installs receive 4.2.0 (same 4 scopes; consent-page re-read not repeated — manifest byte-identical to the verified 4.0.0).
 - In-app production smoke NOT_VERIFIED (no entitled browser session in this run): owner step unchanged — open Apps → ANTICIPATE on toskaman5962, confirm Settings shows Commit 0904034 + Built 10 Nov 00:46 UTC and the Release Command Center renders, then run JUDGE_RERUN_CHECKLIST.md (#191).
+
+## Deploy record (10 Nov 2026, 11:45:14 UTC / 12:45:14 CET)
+
+- Source: working tree at exactly `b1e4677` (clean); main CI 42736707837 success; manifest diff `0904034..HEAD` EMPTY; `forge lint` clean; CLI latest + portable node 24.22.2.
+- Vars stamped pre-deploy: `ANTICIPATE_BUILD_COMMIT=b1e46776c29d424e3b03f3cd3906830f4a9fb927` + `ANTICIPATE_BUILD_AT=2026-11-10T11:43:49.000Z`, re-read via `forge variables list -e production` to confirm, then deployed.
+- Assigned version: **4.3.0**. Minor on major 4 (no scope change): toskaman5962 production 4 Up-to-date (auto-update OBSERVED via `forge install list`). Wow #233 ships (collision pair + verdict hero, frontend-only).
+- `anticipate-judge` still production 2 Outdated: same site-admin upgrade click (Jira Admin → Apps → Manage apps → ANTICIPATE → Update).
+- New installs receive 4.3.0 (same 4 scopes; consent-page re-read not repeated — manifest byte-identical).
+- In-app production smoke NOT_VERIFIED (no entitled browser session in this run): owner step — open Apps → ANTICIPATE on toskaman5962, confirm Settings shows Commit b1e4677 + Built 10 Nov 11:43 UTC, the Release Command Center renders, and the portfolio "Complete the collision pair" + glance hero appear on a lone migration, then run JUDGE_RERUN_CHECKLIST.md (#191).
 
 ## Deploy procedure (kept for audit; executed above)
 
