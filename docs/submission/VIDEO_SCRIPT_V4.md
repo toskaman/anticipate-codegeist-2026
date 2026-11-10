@@ -7,9 +7,9 @@ English subtitles. Licensed music track `vol12.mp3` + sfx set may be reused
 as used. Corner tags OBSERVED IN JIRA / SIMULATION / EXECUTED + VERIFIED kept
 from V3 (honesty system, jury differentiator).
 
-Record on **production 4.3.0** (`toskaman5962`, ADM sample project) unless a
+Record on **production 4.6.0** (`toskaman5962`, ADM sample project) unless a
 scene says otherwise. The signature moment (pair button + hero verdict) exists
-only in 4.3.0 — V3 footage must NOT be reused for scene 3. Every result shown
+only in ≥4.6.0 (4.3.0–4.5.0 served a stale frontend without the wow) — V3 footage must NOT be reused for scene 3. Every result shown
 must be observed on recording day; nothing from MOCK_TRANSPORT captures.
 Publication needs the owner's agreement. The V3 film stays archived as the
 fallback until V4 passes QA.
@@ -99,14 +99,14 @@ Shot: MCP client Q&A citing Jira records (label "dev site" if recorded there)
 
 ### S9 2:45–3:00 — Close
 
-Shot: closing card (team-made) + provenance line (prod 4.3.0, source commit,
+Shot: closing card (team-made) + provenance line (prod 4.6.0, source commit,
 date — filled at render).
 
 > "Most tools show you what changed. ANTICIPATE helps you decide what should
 > change — and proves it. Test the consequences. Prove the safeguards. Then
 > ship."
 
-## Shot list (capture order, prod 4.3.0 unless noted)
+## Shot list (capture order, prod 4.6.0 unless noted)
 
 1. Jira ADM-1 issue view + links; ADM-4 two links away (hook B-roll).
 2. Apps → ANTICIPATE cold open, "Connected · live mode".
