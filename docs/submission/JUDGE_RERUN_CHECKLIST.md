@@ -39,6 +39,9 @@ Release Safety, Radar hint, Time Machine invalidation. Name files
 
 ## Close-out (same day)
 
+Last run: 12 Nov 2026 on production 4.6.0 — all items below done (EVIDENCE_PACK "Judge re-run on the shipping build"; captures in `docs/evidence/hosted-2026-11-12/`).
+
+
 - [ ] First-open timings measured (warm / backend-cold) → `RELEASE.md` latency row (Q10).
 - [ ] Test counts recounted on the shipping main (`RELEASE.md` method) → freeze counts.
 - [ ] EVIDENCE_PACK rows added with the legend labels; "proofs still missing" updated.

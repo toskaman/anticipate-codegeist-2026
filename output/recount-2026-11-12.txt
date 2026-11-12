@@ -1,0 +1,49 @@
+﻿HEAD: 114054e
+=== backend
+
+[2m Test Files [22m [1m[32m40 passed[39m[22m[90m (40)[39m
+[2m      Tests [22m [1m[32m336 passed[39m[22m[90m (336)[39m
+[2m   Duration [22m 5.06s[2m (transform 3.50s, setup 0ms, collect 11.72s, tests 12.00s, environment 14ms, prepare 
+6.65s)[22m
+
+
+exit 0, 6s
+=== contracts
+
+[2m Test Files [22m [1m[32m3 passed[39m[22m[90m (3)[39m
+[2m      Tests [22m [1m[32m13 passed[39m[22m[90m (13)[39m
+[2m   Duration [22m 553ms[2m (transform 145ms, setup 0ms, collect 501ms, tests 43ms, environment 1ms, prepare 
+431ms)[22m
+
+
+exit 0, 1s
+=== simcore
+
+[2m Test Files [22m [1m[32m5 passed[39m[22m[90m (5)[39m
+[2m      Tests [22m [1m[32m75 passed[39m[22m[90m (75)[39m
+[2m   Duration [22m 1.02s[2m (transform 271ms, setup 0ms, collect 930ms, tests 557ms, environment 1ms, prepare 
+596ms)[22m
+
+
+exit 0, 2s
+=== frontend
+
+[2m Test Files [22m [1m[32m45 passed[39m[22m[90m (45)[39m
+[2m      Tests [22m [1m[32m225 passed[39m[22m[90m (225)[39m
+[2m   Duration [22m 7.18s[2m (environment 66%, import 18%, tests 13%, transform 2%)[22m
+
+
+exit 0, 8s
+=== playwright-list
+
+  [chromium] › a11y-display-prefs.spec.ts:137:1 › reduced motion collapses transition durations (media query and 
+manual Reduce)
+  [chromium] › change-kind.spec.ts:189:1 › session timings show real milestones and backend call durations
+  [chromium] › core-integration.spec.ts:699:1 › CORE failed execution remains failed and is not retried
+  [chromium] › radar-attention.spec.ts:343:1 › a failed freshness check never clears attention or invents a successful 
+verdict
+Total: 200 tests in 32 files
+
+
+exit 0, 2s
+DONE
