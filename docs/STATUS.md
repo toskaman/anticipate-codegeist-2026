@@ -17,7 +17,7 @@ Updated: 5 Nov 2026 (new rows for #173/#174/#176 and the release overview); earl
 | Validator outage policy (admin) | LIVE_FORGE on dev | admin ALLOW to BLOCK to ALLOW persisted (12:03); non-admin read-only, no control (EXPERIENCE capture) |
 | Assumed-migration guard (R17), legitimate OPEN and Passport `gate` | LIVE_FORGE on dev and in production (judge site JDG: CLOSED then OPEN after real migration) | MOBL-58 Migrate first: Jira transition CLOSED with reason |
 | Validator: unreadable issue (403/404) follows outage policy (R18) | UNIT_TESTED; hosted attempt | 6 tests; on AVT a reporter-only security level does not hide issues from the app, so 403 cannot be produced on this site (see ENGINEERING_REPORT R18) |
-| Judge journey (guided demo → Passport) | LIVE_FORGE in production on a clean site | anticipate-judge JDG-1, 3 Nov 14:01 |
+| Judge journey (guided demo → Passport) | LIVE_FORGE in production on the shipping build 4.6.0 | anticipate-judge JDG-1, 3 Nov 14:01; re-run 12 Nov on 4.6.0 (EVIDENCE_PACK) |
 | Sample data (guided demo), CONFLICT guard | LIVE_FORGE | MP, AVT, MOBL; CONFLICT logged, no duplicates |
 | Dependency upgrade + compatibility evidence | LIVE_FORGE | MP-5 via UI and MCP |
 | Prevention Passport, historical record after snapshot expiry | UNIT_TESTED (expiry), LIVE_FORGE (live passport + PDF print) | retention tests |

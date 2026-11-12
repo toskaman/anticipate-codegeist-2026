@@ -117,6 +117,30 @@ Setup: the "ANTICIPATE Decision Firewall" validator (production extension `.../4
 
 Cleanup: JDG-6 and JDG-1 back to Backlog. The two removed consumer links are part of the scenario (the migration); "Preview sample data" will offer to recreate them.
 
+## Judge re-run on the shipping build, 12 Nov 2026, 17:14-17:27 Paris (PRODUCTION 4.6.0, anticipate-judge) · LIVE_FORGE (#191)
+
+Install f4a739e5 upgraded by the site admin (anticipate-judge account) from production 2.40.0 "Obsolete" to **4.6.0 "Up to date"** (admin.atlassian.com → Connected apps → ANTICIPATE → Update, 12 Nov ~17:13). The CLI upgrade still returns 403 "Principal has insufficient permissions": the Forge owner account is not admin of this site, which explains the earlier failures. Driver: Claude (Cowork) in the desktop browser pane as anticipate-judge. Site not pristine: JDG-1..JDG-6 from 3 Nov reused (the 3 Nov reset had left out 2 consumer links).
+
+| # | Step | Observed |
+|---|---|---|
+| 1 | Open app (global page) | PASS: "Connected · live mode", Mission Control, no consent prompt after the upgrade |
+| 2 | Guided demo → Preview sample data (JDG) | PASS: 6 issues "Already in Jira · reused", JDG-1→JDG-2 / JDG-1→JDG-3 "Will be created", nothing written |
+| 3 | Confirm sample data | PASS: 2 links "Created · verified in Jira", 4 others reused |
+| 4 | Analyze JDG-1 → Evidence Graph | PASS: 5 records, Confirmed + Inferred (JDG-5 "affects", inferred), Jira sources |
+| 5 | Compare options (replacement JDG-5) | PASS: A Remove now Blocked (1 blocker), B Retain Needs review, C Migrate first Pass + assumption line; suggested "Migrate first" |
+| 6 | Portfolio: Migrate JDG-1→JDG-5 + Upgrade JDG-5 breaking | PASS: each Pass alone, Needs review together, 3 records affected only together; both conflicts explained (emergent impact + migrate onto a breaking upgrade) |
+| 7 | Composer | PASS: #1 Compatibility phase for JDG-5, 0 blockers / 0 conflicts / 0 impacted, assumption stated; resolves EMERGENT_IMPACT + MIGRATE_ONTO_RETIRED |
+| 8 | Plan → approve → execute | PASS: 1 action (decision comment on JDG-1), approval recorded on plan version, executed, **Verified** (read back) |
+| 9 | Prevention Passport | PASS: Completed, "In short", 1 of 1 verified, Jira transition reported as refused by the validator |
+| 10 | Move JDG-1 → En cours; real migration; move | PASS: refused (400, "assumes work that Jira does not show as done yet"); consumer links JDG-1→JDG-2/3 removed, re-analysis "Remove now" Pass 0 affected, new plan executed (Verified 17:22), transition accepted (204) |
+| 11 | Release Command Center + Release Safety | PASS: JDG-1 "Needs re-check" with next action; Release Safety 1 change "Verified (recorded scope)", 0 blocked, "What this check cannot know (2)" listed, read-only |
+| 12 | Radar: add a link → hint → re-check | PASS: link added 17:23, radar "Needs review · Link created · Blocks" at 17:23, Re-check evidence → "This decision is blocked. Rebuild the snapshot", no Jira write by the radar |
+| 13 | Slip JDG-1 +10 d | PARTIAL (expected-honest): JDG sample issues have no due dates (created 3 Nov), so 0 dates move and 4 items are listed "Cannot be assessed (not assumed safe)" with paths; nothing changed in Jira |
+
+Note on step 10: the extra "JDG-5 blocks" links added during the migration were created in the reverse direction (JDG-2/3 blocking JDG-5) by a REST call; this does not change the result (the validator only requires that JDG-1 no longer has consumers), and they were removed at reset.
+Reset: JDG-1 back to Backlog; links back to the 3 Nov baseline (JDG-1 blocks JDG-2, JDG-3; relates JDG-5; JDG-2 blocks JDG-4); temporary links removed. Two decision comments remain on JDG-1 (execution records).
+Not done here: first-open timing measurement (no stopwatch, a single visual sample only), freeze test recount, screenshot files for the hosted gallery.
+
 ## What-if slip simulation, hosted on dev, 3 Nov 2026 16:30 Paris (dev 6.2.0, one-atlas-euza) · LIVE_FORGE (Rovo action; the Scenario Lab panel itself is LOCAL-tested only)
 Test data (dev test project MP): due dates MP-5 01 Dec, MP-6 04 Dec, MP-7 06 Dec, MP-8 08 Dec, MP-9 09 Dec; version "Winter release (test)" 10 Dec on MP-8. Links: MP-5 blocks MP-6 and MP-7; MP-6 blocks MP-8; MP-5 relates to MP-9.
 Rovo agent "ANTICIPATE Decision Reviewer", question "What happens to our dates and releases if MP-5 slips 4 days?" → action anticipate-simulate-slip:
@@ -237,7 +261,7 @@ Each of these is either tested LOCAL only or not observed at all. The browser ch
 | Hosted screenshots for the Devpost gallery | 5 LIVE_FORGE_DEV captures 8 Nov (mission, graph, firewall, plan, passport — docs/evidence/hosted-2026-11-08/) + diagram pack | Judge-site captures on the shipping build (#191) |
 | Demo video (K1) | Final cut rendered 7 Nov + QA ACCEPTED 8 Nov (docs/evidence/VIDEO_QA_REPORT.md); genuine dev-8.x footage | Owner full watch + listen, co-owner approval, public YouTube upload + URL (#189) |
 | MCP slip + portfolio from an external client (5/7 → 7/7) | **CLOSED 12 Nov** — EXTERNAL_MCP_VERIFIED, see row above (#190) | — |
-| Clean-site judge re-run on the shipping build | Judge PASS 3 Nov on an older build; new Explorer/Command Center UI UNIT_TESTED + LOCAL mock-e2e only | `JUDGE_RERUN_CHECKLIST.md` on anticipate-judge incl. new-UI exercise (#191) |
+| Clean-site judge re-run on the shipping build | **Done 12 Nov on production 4.6.0** (12 PASS + slip PARTIAL, see section above) | Timings + test recount + gallery screenshots |
 
 
 ## 4 Nov 2026 — LIVE_FORGE_DEV: 10-parallel burst (#53) and Decision Radar end to end (#132)
