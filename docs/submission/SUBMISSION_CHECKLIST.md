@@ -11,7 +11,7 @@ Status: **ready** (copy as is) · **needs owner** (a person must act or decide) 
 | 1 | Project name | DEVPOST_FINAL → header "Project name" | 53 chars | ready |
 | 2 | Tagline / elevator pitch | DEVPOST_FINAL → header "Tagline" | 55 chars | ready |
 | 3 | Inspiration | DEVPOST_FINAL → Inspiration | 72 w / 406 c | ready |
-| 4 | What it does | DEVPOST_FINAL → What it does | 701 w / 4,612 c | ready |
+| 4 | What it does | DEVPOST_FINAL → What it does | 702 w / 4,614 c | ready |
 | 5 | How we built it (includes how it meets the Forge + Atlassian product requirement) | DEVPOST_FINAL → How we built it | 289 w / 1,957 c | ready |
 | 6 | Challenges we ran into | DEVPOST_FINAL → Challenges | 118 w / 726 c | ready |
 | 7 | Accomplishments | DEVPOST_FINAL → Accomplishments | 137 w / 852 c | ready |
