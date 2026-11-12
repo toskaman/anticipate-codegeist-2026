@@ -139,7 +139,7 @@ Install f4a739e5 upgraded by the site admin (anticipate-judge account) from prod
 
 Note on step 10: the extra "JDG-5 blocks" links added during the migration were created in the reverse direction (JDG-2/3 blocking JDG-5) by a REST call; this does not change the result (the validator only requires that JDG-1 no longer has consumers), and they were removed at reset.
 Reset: JDG-1 back to Backlog; links back to the 3 Nov baseline (JDG-1 blocks JDG-2, JDG-3; relates JDG-5; JDG-2 blocks JDG-4); temporary links removed. Two decision comments remain on JDG-1 (execution records).
-Not done here: first-open timing measurement (no stopwatch, a single visual sample only), freeze test recount, screenshot files for the hosted gallery.
+Close-out (same day): first-open timings 4.03 s first-of-session / 2.43 and 2.29 s warm (RELEASE.md); freeze recount 336/75/13/225/200 on main 114054e, all green; 14 captures in `docs/evidence/hosted-2026-11-12/` (browser-pane captures, 800 px wide).
 
 ## What-if slip simulation, hosted on dev, 3 Nov 2026 16:30 Paris (dev 6.2.0, one-atlas-euza) · LIVE_FORGE (Rovo action; the Scenario Lab panel itself is LOCAL-tested only)
 Test data (dev test project MP): due dates MP-5 01 Dec, MP-6 04 Dec, MP-7 06 Dec, MP-8 08 Dec, MP-9 09 Dec; version "Winter release (test)" 10 Dec on MP-8. Links: MP-5 blocks MP-6 and MP-7; MP-6 blocks MP-8; MP-5 relates to MP-9.
@@ -261,7 +261,7 @@ Each of these is either tested LOCAL only or not observed at all. The browser ch
 | Hosted screenshots for the Devpost gallery | 5 LIVE_FORGE_DEV captures 8 Nov (mission, graph, firewall, plan, passport — docs/evidence/hosted-2026-11-08/) + diagram pack | Judge-site captures on the shipping build (#191) |
 | Demo video (K1) | Final cut rendered 7 Nov + QA ACCEPTED 8 Nov (docs/evidence/VIDEO_QA_REPORT.md); genuine dev-8.x footage | Owner full watch + listen, co-owner approval, public YouTube upload + URL (#189) |
 | MCP slip + portfolio from an external client (5/7 → 7/7) | **CLOSED 12 Nov** — EXTERNAL_MCP_VERIFIED, see row above (#190) | — |
-| Clean-site judge re-run on the shipping build | **Done 12 Nov on production 4.6.0** (12 PASS + slip PARTIAL, see section above) | Timings + test recount + gallery screenshots |
+| Clean-site judge re-run on the shipping build | **Done 12 Nov on production 4.6.0** (12 PASS + slip PARTIAL, timings, recount, gallery; see section above) | — |
 
 
 ## 4 Nov 2026 — LIVE_FORGE_DEV: 10-parallel burst (#53) and Decision Radar end to end (#132)
