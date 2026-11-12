@@ -9,7 +9,7 @@ Judge reproducibility). Owner-gated: needs the `anticipate-judge` account (other
 - [ ] Production build version noted (Settings → Performance; expected: current `RELEASE.md`
       production row). Judge site must show the shipping version, not 2.35.
 - [ ] Clean project JDG (company-managed software): JDG-1 labelled `anticipate-change`,
-      in Backlog; validator "ANTICIPATE Decision Firewall" on the transition to "En cours".
+      in Backlog; validator "ANTICIPATE Decision Firewall" on the transition to "En cours" ("In Progress" in English Jira).
 - [ ] Capture environment: 1920×1080, zoom 125%, dark theme, notifications off.
 
 ## Journey (DEVPOST_FINAL testing instructions, step by step)
@@ -28,6 +28,7 @@ Judge reproducibility). Owner-gated: needs the `anticipate-judge` account (other
 | 10 | Move JDG-1 → refused; real migration → move → accepted | Refused with reason, then allowed | |
 | 11 | Release overview + Release Safety | Groups, states, unknowns listed | |
 | 12 | Radar: add a link → needsReview → re-check → blocked, 0 writes | Hint in minutes, refusal explained | |
+| 13 | Slip: simulate a delay on the sample root (optional: create a fixVersion and assign it for the late-releases part) | Moved dates with paths; late releases named if a version exists | |
 
 ## Capture list (hosted gallery)
 
