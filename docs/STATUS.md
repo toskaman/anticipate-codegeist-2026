@@ -1,4 +1,4 @@
-# ANTICIPATE - source of truth (dated)
+﻿# ANTICIPATE - source of truth (dated)
 
 Updated: 5 Nov 2026 (new rows for #173/#174/#176 and the release overview); earlier rows as of 4 Nov 2026, ~16:20 Paris. 6 Nov: TITAN rows (Explorer, Command Center, retention notice), dev v6.28.0 pointer. 8 Nov: T8 refresh (dev 8.1.0 pointers, prod RC pending). 9 Nov: #222 build-info UI + dev 8.3.0 pointers (muse). Evening 9 Nov (OMEGA): #228/#229 recovery + #230 rows (muse). 10 Nov: prod 4.2.0 (stamped 0904034) + rebuilt film pointers (muse). 10 Nov (wow): #233 merged, proof pointers (muse). 10 Nov: prod 4.3.0 pointers (muse). 12 Nov: prod 4.6.0 pointers (muse). Owner of this file: CORE (muse).
 

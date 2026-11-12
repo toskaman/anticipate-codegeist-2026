@@ -1,4 +1,4 @@
-# Production shipping release — main 49e1f40, deployed 4.6.0 stamped (10 Nov redeploys; history: 4.3.0 from b1e4677, 4.2.0 from 0904034, 4.1.0 unstamped, 4.0.0 from 5610ca7)
+﻿# Production shipping release — main 49e1f40, deployed 4.6.0 stamped (10 Nov redeploys; history: 4.3.0 from b1e4677, 4.2.0 from 0904034, 4.1.0 unstamped, 4.0.0 from 5610ca7)
 
 Status: VALIDATED, DEPLOYED 10 Nov 2026 12:52:55 UTC as production 4.6.0, stamped (same-code redeploys 12:47:41–12:52:55Z from main 49e1f40, vars 12:48:19Z; stale-frontend flush). Previous: 4.3.0 from b1e4677 (11:45:14Z, owner-authorized "go 4.3.0"); 4.2.0 from 0904034 (00:48:15Z); 4.1.0 same source unstamped (00:35:28Z); 4.0.0 from 5610ca7 (8 Nov 13:20:51 UTC).
 
