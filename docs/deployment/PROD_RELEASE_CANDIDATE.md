@@ -1,6 +1,6 @@
-﻿# Production shipping release — main b1e4677, deployed 4.3.0 stamped (OMEGA 10 Nov; history: 4.2.0 from 0904034, 4.1.0 unstamped, 4.0.0 from 5610ca7)
+# Production shipping release — main 49e1f40, deployed 4.6.0 stamped (10 Nov redeploys; history: 4.3.0 from b1e4677, 4.2.0 from 0904034, 4.1.0 unstamped, 4.0.0 from 5610ca7)
 
-Status: VALIDATED, DEPLOYED 10 Nov 2026 11:45:14 UTC as production 4.3.0, stamped (owner-authorized: "go 4.3.0", 10 Nov; Forge session Toska Marley). Previous: 4.2.0 from 0904034 (00:48:15Z); 4.1.0 same source unstamped (00:35:28Z); 4.0.0 from 5610ca7 (8 Nov 13:20:51 UTC).
+Status: VALIDATED, DEPLOYED 10 Nov 2026 12:52:55 UTC as production 4.6.0, stamped (same-code redeploys 12:47:41–12:52:55Z from main 49e1f40, vars 12:48:19Z; stale-frontend flush). Previous: 4.3.0 from b1e4677 (11:45:14Z, owner-authorized "go 4.3.0"); 4.2.0 from 0904034 (00:48:15Z); 4.1.0 same source unstamped (00:35:28Z); 4.0.0 from 5610ca7 (8 Nov 13:20:51 UTC).
 
 ## Source
 
@@ -109,6 +109,16 @@ announcing the shipping build.
 - `anticipate-judge` still production 2 Outdated: same site-admin upgrade click (Jira Admin → Apps → Manage apps → ANTICIPATE → Update).
 - New installs receive 4.3.0 (same 4 scopes; consent-page re-read not repeated — manifest byte-identical).
 - In-app production smoke NOT_VERIFIED (no entitled browser session in this run): owner step — open Apps → ANTICIPATE on toskaman5962, confirm Settings shows Commit b1e4677 + Built 10 Nov 11:43 UTC, the Release Command Center renders, and the portfolio "Complete the collision pair" + glance hero appear on a lone migration, then run JUDGE_RERUN_CHECKLIST.md (#191).
+
+## Deploy record (10 Nov 2026, 12:47:41–12:52:55 UTC / 13:47:41–13:52:55 CET)
+
+- Source: main `49e1f40` (merge #235; docs-only over `b1e4677` — `git diff b1e4677..49e1f40 --stat` = 5 md files, verified 12 Nov). Same shipped code as 4.3.0 (wow #233 included).
+- Three redeploys, all Success (Forge session Toska Marley): 12:47:41Z → **4.4.0**, 12:49:11Z → **4.5.0**, 12:52:55Z → **4.6.0** (minor numbers sequential after the recorded 4.3.0; 4.6.0 corroborated by the V4 film footage captured live on prod 4.6.0, see VIDEO_QA_REPORT.md).
+- Reason: stale-frontend flush — 4.3.0–4.5.0 served a stale frontend without the wow (see VIDEO_SCRIPT_V4.md); 4.6.0 serves it.
+- Vars stamped between redeploy 1 and 2: `ANTICIPATE_BUILD_COMMIT=49e1f4032a7ae35275dabb8398741575ccc709f4` + `ANTICIPATE_BUILD_AT=2026-11-10T12:48:19.000Z`, read back 12 Nov via `forge variables list -e production`. Carried by 4.5.0 + 4.6.0 (4.4.0 likely shows the previous b1e4677/11:43:49Z vars).
+- Minor on major 4 (no scope change): toskaman5962 production 4 Up-to-date (auto-update OBSERVED via `forge install list`, 12 Nov). `anticipate-judge` still production 2 Outdated: same site-admin upgrade click (Jira Admin → Apps → Manage apps → ANTICIPATE → Update).
+- New installs receive 4.6.0 (same 4 scopes; consent-page re-read not repeated — manifest byte-identical to the verified 4.0.0).
+- In-app production evidence PARTIAL: V4 film scenes captured live on prod 4.6.0 (cold open, ADM-1 evidence, collision pair, Composer, release surface, refusal with 0 writes, verified execute + Passport, Rovo answer, build info). Full JUDGE_RERUN_CHECKLIST.md run still owner (#191).
 
 ## Deploy procedure (kept for audit; executed above)
 
