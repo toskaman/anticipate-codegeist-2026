@@ -21,7 +21,7 @@ Updated: 5 Nov 2026 (new rows for #173/#174/#176 and the release overview); earl
 | Sample data (guided demo), CONFLICT guard | LIVE_FORGE | MP, AVT, MOBL; CONFLICT logged, no duplicates |
 | Dependency upgrade + compatibility evidence | LIVE_FORGE | MP-5 via UI and MCP |
 | Prevention Passport, historical record after snapshot expiry | UNIT_TESTED (expiry), LIVE_FORGE (live passport + PDF print) | retention tests |
-| MCP tools (read-only; see manifest `rovo:mcp` for the current list) | LIVE_FORGE for the original 5; newer tools (slip, portfolio) NOT_VERIFIED in an external client (#190; dev 8.1.0 carries all 7 tools) | external Claude client on dev |
+| MCP tools (read-only; see manifest `rovo:mcp` for the current list) | LIVE_FORGE 7/7 — slip + portfolio verified from an external Claude MCP client 12 Nov (#190, EVIDENCE_PACK) | external Claude client on dev |
 | Shared-decision execution gate (server-side) | UNIT_TESTED + deployed dev 6.9.0; feature release-locked | #144: 13 adversarial tests, every refusal asserts zero Jira writes |
 | Approval path under storage faults | UNIT_TESTED | #145: fault injection before/after each write |
 | Shared Decision Workspace (two-account flow) | BLOCKED (hosted two-account acceptance not run) | #131 |

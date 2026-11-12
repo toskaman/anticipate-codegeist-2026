@@ -111,7 +111,7 @@ ANTICIPATE exposes seven tools through `rovo:mcp` that never write to Jira: get 
 | Release Safety + release overview | EVIDENCE_PACK: production 2.37.0 session, 5 Nov (ADM group + per-change state + unknowns) |
 | Decision Time Machine replay | EVIDENCE_PACK: production 2.37.0 session, 5 Nov (invalidation replay "Added: ADM-1 depends on ADM-6") |
 | Clean-site judge journey from the public link | EVIDENCE_PACK: "Clean-site judge run, 3 Nov 2026" |
-| MCP from an external client | EVIDENCE_PACK: "MCP (external client)" (get-graph, simulate-retirement, get-passport, 2 Nov), "MCP after rollback"; simulate-upgrade + check-freshness via mcp.atlassian.com 3 Nov (ENGINEERING_REPORT). 5/7 tools externally verified; slip + portfolio pending an admin-enabled session (STATUS.md) |
+| MCP from an external client | EVIDENCE_PACK: "MCP (external client)" (get-graph, simulate-retirement, get-passport, 2 Nov), "MCP after rollback"; simulate-upgrade + check-freshness via mcp.atlassian.com 3 Nov (ENGINEERING_REPORT). simulate-slip + simulate-portfolio via Claude MCP client 12 Nov (EVIDENCE_PACK, Jira unchanged). 7/7 tools externally verified |
 | Rovo agent answers | EVIDENCE_PACK: "Hosted verification, 2 Nov" (Rovo chat), "Dependency upgrade use case" |
 | Sample data, idempotent | EVIDENCE_PACK: "Hosted verification, 2 Nov"; clean-site run "Re-preview" |
 | Test counts | docs/RELEASE.md (single source): backend 336, simulation-core 75, contracts 13, frontend unit 225, Playwright 200 listed in 32 files (main c378163; cloud CI green, main run 43224602099; 190/190 executed locally 8 Nov on main 4ea97f1) |

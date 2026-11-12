@@ -48,12 +48,12 @@ Nothing. Forge-hosted compute + Forge KVS storage only; no external
 HTTP calls in the backend. Evidence: `src/forge-adapters.ts` (only
 `requestJira` + `kvs`), 4-scope manifest, TITAN security review.
 
-## 7. "Your MCP claim says 5/7 externally verified — why not 7/7?"
+## 7. "Are all seven MCP tools verified from an external client?"
 
-Five tools verified from an external MCP client; slip + portfolio are
-live in-app with external verification pending (#190). All seven are
+Yes, 7/7: five on 2-3 Nov, slip + portfolio on 12 Nov from a Claude MCP
+client, with Jira re-read unchanged afterwards (#190). All seven are
 read-only and share one permission model (invoker's Jira permissions).
-Evidence: `docs/evidence/MCP_EXTERNAL_RUNBOOK.md`, DEVPOST_FINAL.
+Evidence: `docs/evidence/mcp-external-2026-11-12/TRANSCRIPT.md`, EVIDENCE_PACK, DEVPOST_FINAL.
 
 ## 8. "What are the scale limits?"
 
