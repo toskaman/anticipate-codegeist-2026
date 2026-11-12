@@ -1,6 +1,6 @@
 # Devpost submission checklist (field by field)
 
-Purpose: the owner fills the Devpost form by copy-paste, and every mandatory rule item has a source. Rules source: `docs/research/VERIFIED_RULES_AND_APIS.md` (rules read 2 Nov 2026) and `docs/compliance/CODEGEIST_COMPLIANCE.md`. Deadline: **22 Dec 2026, 12:00 PT (21:00 Paris)**. Counts measured on `docs/submission/DEVPOST_FINAL.md` (words = whitespace-separated tokens, characters = trimmed body incl. markdown); re-measured 12 Nov 2026 on the freeze branch (main 49e1f40; DEVPOST_FINAL.md untouched by #236).
+Purpose: the owner fills the Devpost form by copy-paste, and every mandatory rule item has a source. Rules source: `docs/research/VERIFIED_RULES_AND_APIS.md` (rules read 2 Nov 2026) and `docs/compliance/CODEGEIST_COMPLIANCE.md`. Deadline: **22 Dec 2026, 12:00 PT (21:00 Paris)**. Counts measured on `docs/submission/DEVPOST_FINAL.md` (words = whitespace-separated tokens, characters = trimmed body incl. markdown); re-measured 12 Nov 2026 on the freeze branch (main c378163).
 
 Status: **ready** (copy as is) · **needs owner** (a person must act or decide) · **missing** (does not exist yet).
 
@@ -67,7 +67,7 @@ Checked and consistent: product name and tagline; category; MCP-only bonus and T
 ## 12 Nov 2026 refresh (freeze)
 
 - Sizes re-measured on the freeze branch (words = whitespace-separated tokens, chars = trimmed body incl. markdown); "What it does" grew with shipped features (portfolio, Composer, Release Safety, Time Machine).
-- DEVPOST_FINAL test counts refreshed to main 49e1f40 (336/75/13/225/200); evidence row points at RELEASE.md + main run 42811434928.
+- DEVPOST_FINAL test counts refreshed to main c378163 (336/75/13/225/200); evidence row points at RELEASE.md + main run 43224602099.
 - Shipping build is prod 4.6.0 (main 49e1f40, code = b1e4677; redeploys 10 Nov 12:47:41–12:52:55Z, vars 12:48:19Z): RELEASE.md, PROD_RELEASE_CANDIDATE.md, INSTALL_LINK.md and VIDEO_SHIPPING_PARITY.md updated.
 - Video row now points at the V10 Titan master (2:48, QA ACCEPTED 10 Nov, prod 4.6.0 footage) + VIDEO_SCRIPT_V4.md; upload still owner (#189).
 - Remaining owner actions unchanged: public video URL, Devpost form fill, #191 judge rerun, #190 MCP 7/7, team eligibility.
