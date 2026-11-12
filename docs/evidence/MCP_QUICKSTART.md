@@ -1,7 +1,7 @@
 # ANTICIPATE MCP quick-start (judges and integrators)
 
 Seven read-only tools that answer "what breaks if we change X?" with the same
-deterministic engine as the app. Status: **5/7 EXTERNAL_MCP_VERIFIED** (see
+deterministic engine as the app. Status: **7/7 EXTERNAL_MCP_VERIFIED** (slip + portfolio 12 Nov) (see
 `docs/evidence/EVIDENCE_PACK.md`); `simulate-slip` and `simulate-portfolio`
 are UNIT_TESTED + locally probed 7/7 and await one admin-enabled external
 session (`docs/evidence/MCP_EXTERNAL_RUNBOOK.md`, #190).
