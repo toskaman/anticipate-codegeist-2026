@@ -31,10 +31,10 @@ ANTICIPATE turns a proposed change in Jira into an evidence-backed decision.
 - **Guard the Jira transition.** An optional workflow validator stops issues labelled `anticipate-change` until their decision is completed and the live Jira links agree. A completed "migrate first" plan does not open the gate while consumers still depend on the change in Jira; once they have really migrated, it does. Administrators choose whether transitions pass or are blocked if ANTICIPATE is unavailable.
 - **Rewind a decision.** The Decision Time Machine replays the recorded evidence checks of a plan. It shows when the evidence changed, the exact Jira relation that appeared or disappeared, and why the approval can no longer authorize execution. Recorded history only, never reconstructed from today's Jira.
 - **Keep the record.** The Prevention Passport opens with a short answer (option chosen, verified actions, transition status, open questions), then the evidence, alternatives, approvals, verified outcomes and timeline. It exports to JSON and prints as an A4 report. It is an audit-style record, not a legal or cryptographic certificate.
-- **Ask from Rovo or any MCP client.** Seven MCP tools that never write to Jira and the "ANTICIPATE Decision Reviewer" Rovo agent answer "what happens if we retire, upgrade or delay X?" with the same engine. They cannot approve or execute.
-- **Try it in a minute.** A guided demo previews, then creates, six labelled sample issues and four links in a project you choose. Opening or previewing never writes to Jira.
+- **Ask from Rovo or any MCP client.** Seven MCP tools that never write to Jira (get-graph, simulate-retirement, simulate-upgrade, simulate-slip, simulate-portfolio, get-passport, check-freshness) and the "ANTICIPATE Decision Reviewer" Rovo agent answer "what happens if we retire, upgrade or delay X?" with the same engine. Five of them verified from an external client so far; all seven live in-app. They cannot approve or execute.
+- **Try it in minutes.** A guided demo previews, then creates, six labelled sample issues and four links in a project you choose. Opening or previewing never writes to Jira.
 
-Who it helps: engineering managers reviewing risky changes, platform teams retiring or upgrading shared services, release governance, and API lifecycle owners.
+Who it helps: engineering managers reviewing risky changes, platform teams retiring or upgrading shared services, release governance, and API lifecycle owners. Plans and snapshots are private to their creator.
 
 ## How we built it
 
@@ -43,7 +43,7 @@ Who it helps: engineering managers reviewing risky changes, platform teams retir
 - **Deterministic engine:** a pure TypeScript simulation package applies each option to an isolated copy of a frozen snapshot, traces impact through reverse dependencies with causal paths, evaluates policies and returns a reproducible hash. No probabilities or invented savings.
 - **Safe execution:** approval is bound to the plan version and expires with the snapshot. Execution takes a per-plan lease, uses idempotency keys and marker reconciliation so retries never create duplicates, and only reports Verified after re-reading Jira. Partial outcomes are reported as Partial.
 - **Shared contracts:** zod schemas validate every request and response on both sides.
-- **Quality:** 336 backend tests (including authorization, concurrency, outage policy, a 50-cycle soak test and storage-failure injection), 75 simulation-engine tests, 13 contract tests, 225 frontend unit tests and 200 Playwright cases listed in 32 files (Chromium, Firefox and WebKit) including automated accessibility checks on light and dark themes. Counts are for main c378163 on 12 Nov 2026 (190/190 Playwright executed locally 8 Nov on main 4ea97f1; 200 listed since the wow e2e, green in cloud CI); see docs/RELEASE.md. CI runs typecheck, lint, formatting, unit tests, Playwright and a security audit on every pull request.
+- **Quality:** 336 backend tests (including authorization, concurrency, outage policy, a 50-cycle soak test and storage-failure injection), 75 simulation-engine tests, 13 contract tests, 225 frontend unit tests and 200 Playwright cases listed in 32 files (full suite on Chromium, critical journeys also on Firefox and WebKit) including automated accessibility checks on light and dark themes. Counts are for main c378163 on 12 Nov 2026 (190/190 Playwright executed locally 8 Nov on main 4ea97f1; 200 listed since the wow e2e, green in cloud CI); see docs/RELEASE.md. CI runs typecheck, lint, formatting, unit tests, Playwright and a security audit on every pull request.
 - **Two-person team:** one owner on backend, engine, Forge and security; one on interface, accessibility and presentation, coordinating through written contracts in the repository.
 
 ## Challenges we ran into
@@ -79,7 +79,7 @@ The valuable part is not the graph, it is the decision: comparing options on the
 3. Click **Start the guided demo**, choose a company-managed software project you can edit, **Preview sample data**, then confirm. Six labelled issues and four links are created (about 15–20 seconds the first time; if the screen waits longer, preview again: nothing is created twice).
 4. **Analyze** the sample root → **Compare options** → **Check safeguards** → **Generate prevention plan** → approve **all** the actions (a partial approval ends as Partial) → execute → open the **Prevention Passport**.
 5. Optional, workflow validator: Project settings → Workflows → edit a test workflow, add the rule "ANTICIPATE Decision Firewall" to a transition and publish. Issues labelled `anticipate-change` are refused until their decision is completed and Jira agrees; other issues pass.
-6. Optional, MCP: an organization admin enables "Expose tools to MCP-compatible apps" for ANTICIPATE (admin.atlassian.com → site → Connected apps), then connects an MCP client to `https://mcp.atlassian.com/forge/39a28f48-c891-4d86-a3cf-c14409cbd29e`.
+6. Optional, MCP: an organization admin enables "Expose tools to MCP-compatible apps" for ANTICIPATE (admin.atlassian.com → site → Connected apps), then connects an MCP client to `https://mcp.atlassian.com/forge/39a28f48-c891-4d86-a3cf-c14409cbd29e`. In Rovo (where available), ask about your own issue keys; the starter prompts reference the dev sample.
 
 ## Bonus write-up: Best app with Atlassian MCP
 
@@ -90,6 +90,7 @@ ANTICIPATE exposes seven tools through `rovo:mcp` that never write to Jira: get 
 - No tool can approve or execute: acting requires explicit human approval inside ANTICIPATE. The freshness check may mark a stale approved plan as Invalidated, which only removes the ability to execute it.
 - The same tools power the "ANTICIPATE Decision Reviewer" Rovo agent.
 - Availability depends on the site and an administrator enabling MCP for the app.
+- Slip and portfolio simulation are live in-app; verification from an external client is pending.
 
 ---
 

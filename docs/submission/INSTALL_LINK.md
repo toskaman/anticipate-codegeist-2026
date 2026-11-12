@@ -6,12 +6,12 @@ https://developer.atlassian.com/console/install/39a28f48-c891-4d86-a3cf-c14409cb
 
 ## Before installing (prerequisites)
 - A Jira Cloud site that includes **Jira (software projects)**. A site with only Jira Service Management cannot host the demo: its service projects do not let apps create sample tickets (verified on our own clean site, which has only Service Management).
-- A **company-managed software project** you can edit (Kanban or Scrum template), or permission to create one. A free Jira site is enough.
+- A **company-managed software project** you can edit (Kanban or Scrum template), or permission to create one. A free Jira site is enough. When creating it, choose the **Company-managed** option (project creation offers Team-managed vs Company-managed — team-managed projects cannot host the demo). Creating dated sample issues needs the Schedule Issues permission and the Due date field on the create screen.
 - Optional: Rovo on the site for the Rovo agent; an org admin enabling "Expose tools to MCP-compatible apps" for the MCP tools.
 
 ## After installing
 1. Open Jira, then **Apps → ANTICIPATE** (or `https://<site>.atlassian.net/apps/full-page/<installation-id>/hello-world/`; the installation id is on the site's Apps > Manage apps page). The first open can take about 10 seconds while Forge starts.
-2. Click **Start the guided demo**, choose your software project, **Preview sample data**, then confirm. Six labelled issues and four "blocks" links are created (about 15–20 s the first time); existing issues are never modified.
+2. Click **Start the guided demo**, choose your software project, **Preview sample data**, then confirm. Six labelled issues and four links (three "blocks", one "relates") are created (about 15–20 s the first time); existing issues are never modified. To clean up afterwards, delete the six labelled sample issues in Jira (they are marked safe to delete).
 3. **Analyze** the sample root, compare options, open the Decision Firewall, generate a plan, approve **all** actions, execute, then open the Prevention Passport.
 4. Optional: add the "ANTICIPATE Decision Firewall" validator to a transition of a test workflow (Project settings → Workflows → Edit). Issues labelled `anticipate-change` then need a completed, non-blocked, verified plan to move forward. Behaviour during outages (Allow by default, Block opt-in) and how to change it: [docs/admin/WORKFLOW_VALIDATOR.md](../admin/WORKFLOW_VALIDATOR.md).
 
@@ -27,7 +27,7 @@ The link always installs the latest production deployment, currently **4.6.0** (
 
 ## Optional: turn on the Jira workflow gate (5 steps, company-managed project)
 1. Project settings > Workflows > edit the workflow.
-2. Select the transition to protect (for example "In Progress").
+2. Select the transition to protect (for example "In Progress" / "En cours" depending on your Jira language).
 3. Rules > Add rule > Validate details > "ANTICIPATE Decision Firewall".
 4. Save and publish the workflow.
 5. Label the change issue `anticipate-change`. The transition is refused until its ANTICIPATE plan is completed and verified, and refused again if the plan only assumes a migration Jira does not show yet.
