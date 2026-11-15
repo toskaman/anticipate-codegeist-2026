@@ -354,3 +354,12 @@ Brag-full re-render from the retained composition (hyperframes@0.9.19): captions
 ### OMEGA Phase G2: production 4.3.0 stamped deploy (10 Nov 2026, 11:45:14 UTC) — LIVE_FORGE_PRODUCTION, owner-authorized ("go 4.3.0")
 
 Main `b1e4677` (main CI 42736707837 success): vars stamped (`ANTICIPATE_BUILD_COMMIT=b1e46776c29d424e3b03f3cd3906830f4a9fb927` + `ANTICIPATE_BUILD_AT=2026-11-10T11:43:49.000Z`, re-read to confirm), one deploy → **4.3.0** (`forge lint` clean, manifest diff `0904034..HEAD` EMPTY, same major 4 → toskaman5962 auto-updated; anticipate-judge still major 2). Ships wow #233 (counterpart + hero, frontend-only). In-app prod smoke still pending (#191). Full record: docs/deployment/PROD_RELEASE_CANDIDATE.md.
+
+## Production 4.7.0 deploy + smoke, 15 Nov 2026 · LIVE_FORGE (smoke only) (owner-authorized in chat: "Go tout faire toi meme")
+
+- Source: main `0dd5fb47559c89139000d2e1f398a90170b1708d` (#244 docs, #245 manifest). Code identical to 4.6.0; manifest delta: Rovo agent conversation starters made generic + one prompt line (ask for a missing key), `routePrefix: hello-world` -> `anticipate`.
+- Vars stamped pre-deploy and read back: `ANTICIPATE_BUILD_COMMIT=0dd5fb47559c89139000d2e1f398a90170b1708d`, `ANTICIPATE_BUILD_AT=2026-11-15T18:27:46.000Z`.
+- `forge deploy -e production --non-interactive` (CLI 14.2.0, node v26.13.1 on the owner PC, via the Windows bridge): lint clean, assigned **4.7.0**, no major-version prompt.
+- `forge install list`: toskaman5962 production 4 Up-to-date; anticipate-judge production 4 Up-to-date.
+- Hosted smoke (toskaman5962, scripted Chrome session, ~19:32 Paris): hosted smoke on toskaman5962 the same evening: app loads at `/anticipate/` ("Connected · live mode"), Settings shows commit 0dd5fb4, ADM-1 analysed read-only (6 records, 5 relations), zero Jira writes; the old `/hello-world/` URL now returns Forge's app-loading error.
+- Not done: judge-site journey on 4.7.0 (no anticipate-judge session available), Rovo starters in chat, MCP re-check. Rollback = redeploy from `49e1f40` with its stamped vars.

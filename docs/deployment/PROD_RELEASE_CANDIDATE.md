@@ -219,3 +219,12 @@ candidate below awaits owner authorization + prod build-var stamping
   future prod deploy. Rollback from an `ee5dbe1`-based prod = redeploy
   from `5610ca7` (manifest-identical; same worktree procedure as
   above, stamped vars for the rollback SHA).
+
+## Production 4.7.0, 15 Nov 2026 (owner-authorized in chat: "Go tout faire toi meme")
+
+- Source: main `0dd5fb47559c89139000d2e1f398a90170b1708d` (#244 docs, #245 manifest). Code identical to 4.6.0; manifest delta: Rovo agent conversation starters made generic + one prompt line (ask for a missing key), `routePrefix: hello-world` -> `anticipate`.
+- Vars stamped pre-deploy and read back: `ANTICIPATE_BUILD_COMMIT=0dd5fb47559c89139000d2e1f398a90170b1708d`, `ANTICIPATE_BUILD_AT=2026-11-15T18:27:46.000Z`.
+- `forge deploy -e production --non-interactive` (CLI 14.2.0, node v26.13.1 on the owner PC, via the Windows bridge): lint clean, assigned **4.7.0**, no major-version prompt.
+- `forge install list`: toskaman5962 production 4 Up-to-date; anticipate-judge production 4 Up-to-date.
+- Hosted smoke (toskaman5962, scripted Chrome session, ~19:32 Paris): hosted smoke on toskaman5962 the same evening: app loads at `/anticipate/` ("Connected · live mode"), Settings shows commit 0dd5fb4, ADM-1 analysed read-only (6 records, 5 relations), zero Jira writes; the old `/hello-world/` URL now returns Forge's app-loading error.
+- Not done: judge-site journey on 4.7.0 (no anticipate-judge session available), Rovo starters in chat, MCP re-check. Rollback = redeploy from `49e1f40` with its stamped vars.
