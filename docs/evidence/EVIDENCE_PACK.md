@@ -151,7 +151,7 @@ Close-out (same day): first-open timings 4.03 s first-of-session / 2.43 and 2.29
   - plan-3650f497 recovered (pre-filled recovery id): Radar "Needs review" with Re-check; after Re-check one state "Blocked: evidence changed", no re-check button, no contradictory line; drift notice "checked 15 Nov 2026, 23:21 CET" (was a raw UTC ISO string).
   - Release Command Center: JDG-1 "Needs review". Release Safety: "Needs review", 0 verified, reason "Jira changed after decision plan-3650f497… was recorded (Decision Radar)…" (4.7.0 said "Verified (recorded scope)").
 - dev 8.6.0 (one-atlas-euza): app listed in Jira → Apps; after a verified execution (label on TD-2, plan-75b37594) the approve area says approvals are closed; MCP get-graph TD-1 lists 8/8 relations (6 confirmed, 2 inferred); errors end with one period; get-passport / check-plan-freshness on plan-75b37594 answer `PERMISSION_DENIED — Plans are private to the user who created them` (the MCP connector account differs from the browser account that created the plan; positive MCP read last verified 12 Nov).
-- Follow-up in PR "drift notice wording": the notice read "Evidence changed (checked …). Evidence changed since the snapshot …"; now "Evidence re-checked <local time>. <reason>".
+- Follow-up #249 (drift notice wording): the notice read "Evidence changed (checked …). Evidence changed since the snapshot …"; now "Evidence re-checked <local time>. <reason>". Deployed as **production 4.9.0** (main `74841215f62b2dc666e17f67ff397e8f3768a70c`, vars 22:33:33Z, both installs Up-to-date) and verified on anticipate-judge at 23:35 Paris (plan-3650f497 re-check, read-only).
 
 ## Judge re-run on production 4.7.0, 15 Nov 2026, 20:52-21:10 Paris (anticipate-judge) · LIVE_FORGE
 
