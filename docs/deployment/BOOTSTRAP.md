@@ -19,5 +19,5 @@ forge deploy -e development
 forge install -e development     # choose the dev Jira site; accept the new scopes
 forge install list               # note the installation id
 ```
-Open: `https://<site>.atlassian.net/apps/full-page/<installation-id>/hello-world/`
+Open: Jira → **Apps → ANTICIPATE** (jira:globalPage), or the full-screen page `https://<site>.atlassian.net/apps/full-page/<installation-id>/anticipate/` (`routePrefix: anticipate` since production 4.7.0; `/hello-world/` no longer resolves).
 Scopes changed (read/write:jira-work, read:jira-user, storage:app) → existing installs need `forge install --upgrade`.

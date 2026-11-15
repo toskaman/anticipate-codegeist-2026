@@ -12,7 +12,7 @@ All data below is created by hand in a judge-controlled Jira site; ANTICIPATE ne
    - `PAY-2` **blocks** `PAY-4`              → Partner webhooks depend on Checkout (transitive impact).
    - `PAY-2` **relates to** `PAY-6`          → shown as INFERRED context. (If a "Test"/"tests" link type exists, use it to make PAY-6 a verifying test.)
    - Optional UNKNOWN evidence: link `PAY-1` **blocks** an issue in a project the demo user cannot browse.
-4. Open ANTICIPATE: `https://<site>.atlassian.net/apps/full-page/<installation-id>/hello-world/`.
+4. Open ANTICIPATE: Jira → **Apps → ANTICIPATE** (left sidebar), or the full-screen page `https://<site>.atlassian.net/apps/full-page/<installation-id>/anticipate/`.
 
 Expected (deterministic): scenario "Remove now" = BLOCKED (P1 on PAY-2, PAY-3; PAY-4 transitive);
 "Retain temporarily" = NEEDS_REVIEW; "Migrate first" (replacement PAY-5) = PASS or NEEDS_REVIEW depending on test links / unknowns.

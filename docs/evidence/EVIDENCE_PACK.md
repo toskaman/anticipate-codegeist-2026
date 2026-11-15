@@ -141,6 +141,29 @@ Note on step 10: the extra "JDG-5 blocks" links added during the migration were 
 Reset: JDG-1 back to Backlog; links back to the 3 Nov baseline (JDG-1 blocks JDG-2, JDG-3; relates JDG-5; JDG-2 blocks JDG-4); temporary links removed. Two decision comments remain on JDG-1 (execution records).
 Close-out (same day): first-open timings 4.03 s first-of-session / 2.43 and 2.29 s warm (RELEASE.md); freeze recount 336/75/13/225/200 on main 114054e, all green; 14 captures in `docs/evidence/hosted-2026-11-12/` (browser-pane captures, 800 px wide).
 
+## Judge re-run on production 4.7.0, 15 Nov 2026, 20:52-21:10 Paris (anticipate-judge) · LIVE_FORGE
+
+Built-in browser pane of the Claude desktop app, signed in as the anticipate-judge account (owner signed in himself). Admin → Connected apps → ANTICIPATE shows **4.7.0 "À jour"**. App opened at `/apps/full-page/f4a739e5-887e-4cab-b343-9771c8e1d81a/anticipate/` (narrow pane, ~506 px: responsive layout exercised).
+
+| # | Step | Observed |
+|---|---|---|
+| 1 | Open app | PASS: "Connected · live mode · CORE 0.2.0", Mission Control. Finding: ANTICIPATE is **not listed in Jira → Apps** (a `global:fullPage` has no menu entry); the installation id had to be read from the GraphQL API. Fixed in branch `fix/judge-rerun-470` (adds a `jira:globalPage` "ANTICIPATE"). |
+| 2-3 | Guided demo → Preview sample data (JDG) | PASS: 6 issues "Already in Jira · reused", nothing written. Finding: the replacement link (JDG-1 → JDG-5, a Jira "Relates") was labelled "blocks"; fixed (preview now says "relates"). |
+| 4 | Analyze JDG-1 | PASS: 5 records, 4 relations (3 confirmed, 1 inferred, 0 unknown), Jira sources |
+| 5 | Compare options (replacement JDG-5) | PASS: A Remove now Blocked (1 blocker, P1+P3), B Retain Needs review (P3), C Migrate first Pass + assumption line, suggested |
+| 6 | Portfolio: Remove JDG-1 + Remove JDG-3 | PASS: "Change 2 goes from Pass alone to Blocked together", named conflict (same dependency chain), collision explanation, suggested order Change 2 → Change 1, user order flagged |
+| 7 | Composer | PASS: 5 alternatives ranked, each with assumptions; #1 "Retain everything, compatible upgrades" 0 blockers / 1 conflict (this pair, unlike the 12 Nov pair Migrate JDG-1→JDG-5 + Upgrade JDG-5 breaking, keeps both changes on one chain) |
+| 8 | Plan → approve → execute | PASS: plan-4ba334f0 (Migrate first), 1 action (decision comment on JDG-1), approval recorded on version b9d78ba6ae28481b, executed, **Verified** 21:03 (read back). Finding: "A Jira-affecting request is pending review" stayed under the approve button after a verified execution; fixed. |
+| 9 | Prevention Passport | PASS: Completed, "In short", 1 of 1 verified, Jira transition "Closed · the validator refuses it" with reason |
+| 10 | Move JDG-1 → En cours; real migration; move | PASS: refused ("Échec de la transition", plan-4ba334f0 assumes work Jira does not show as done); links 10011/10012 (JDG-1 blocks JDG-2/3) deleted, re-analysis 2 records, "Remove now" Pass 0 affected, plan-3650f497 executed (Verified 21:07), transition accepted (REST 204, status En cours) |
+| 11 | Release Command Center + Release Safety | PASS with finding: Command Center "Next: Re-check 1 stale plan(s)"; Release Safety still said "Verified (recorded scope)" for the same stale decision. Fixed: an unresolved Decision Radar alert now turns a verified item into NEEDS_REVIEW with a reason. |
+| 12 | Radar: add links → hint → re-check | PASS: links JDG-1 blocks JDG-2/3 recreated (10013/10014, also the reset) at 21:08; radar "Needs review · Link created · Blocks" ×2; Re-check evidence → "This decision is blocked", no Jira write by the radar. Findings: the box above kept "Needs review" (fixed: one "Blocked: evidence changed" state); the drift banner showed a raw UTC timestamp `CHANGED at 2026-11-15T20:08:50.454Z` (fixed: local time, plain words). |
+| 13 | Slip JDG-1 +10 d | PASS (expected-honest): no due dates on JDG, 0 dates move, 4 items "cannot be assessed" |
+
+Reset: JDG-1 back to Backlog (REST 204); links equal the 3 Nov baseline (JDG-1 blocks JDG-2, JDG-3; relates JDG-5; JDG-2 blocks JDG-4), the two blocks links carry new ids 10013/10014. Two more decision comments on JDG-1 (execution records).
+
+MCP, same evening, external Claude MCP client on the **dev** connector (`mcp.atlassian.com/forge/39a28f48-…`, tools suffixed `_development`, one-atlas-euza): get-graph TD-1 (8 relations: 6 confirmed, 2 inferred), simulate-retirement (A BLOCKED 4/1 blocker, B NEEDS_REVIEW), simulate-slip +5 d (TD-1/2/4 move, TD-3/6 unknown, "ANTICIPATE demo release 1.0" late 4 d), simulate-upgrade (A NEEDS_REVIEW, B compatible lowest risk, MISSING_TEST_EVIDENCE), simulate-portfolio (REMOVE TD-1; UPGRADE TD-1 breaking → BLOCKED, SAME_TARGET conflict) all answered from live data. get-passport / check-plan-freshness answer `NOT_FOUND` cleanly for unknown ids and for the judge-site plan (plans are stored per installation). Findings: get-graph listed only the 6 confirmed relations of the 8 it counted (fixed: every relation listed, up to 20), and errors ended with ".." (fixed).
+
 ## What-if slip simulation, hosted on dev, 3 Nov 2026 16:30 Paris (dev 6.2.0, one-atlas-euza) · LIVE_FORGE (Rovo action; the Scenario Lab panel itself is LOCAL-tested only)
 Test data (dev test project MP): due dates MP-5 01 Dec, MP-6 04 Dec, MP-7 06 Dec, MP-8 08 Dec, MP-9 09 Dec; version "Winter release (test)" 10 Dec on MP-8. Links: MP-5 blocks MP-6 and MP-7; MP-6 blocks MP-8; MP-5 relates to MP-9.
 Rovo agent "ANTICIPATE Decision Reviewer", question "What happens to our dates and releases if MP-5 slips 4 days?" → action anticipate-simulate-slip:

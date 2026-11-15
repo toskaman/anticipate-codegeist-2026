@@ -4,6 +4,16 @@ All notable changes to ANTICIPATE, written for readers who use or judge the app.
 
 ## [Unreleased]
 
+### Fixed (judge re-run on production 4.7.0, 15 Nov 2026)
+- ANTICIPATE now appears in **Jira → Apps** (new `jira:globalPage` "ANTICIPATE", same screens and resolver, no new permission); the full page also gets a tab title.
+- Release Safety no longer reports "Verified" for a decision the Decision Radar flagged after it was recorded: the change becomes "needs review" with the reason. A radar hint can never improve a state.
+- Decision Radar shows one "Blocked: evidence changed" state after a re-check confirms the change, instead of "Needs review" next to a blocked message.
+- The evidence re-check notice shows local time in plain words instead of `CHANGED at 2026-…Z`.
+- After a verified execution, the approve area says approvals are closed instead of "a request is pending review".
+- The sample-data preview labels the replacement link "relates" (it is created as a Jira "Relates" link), not "blocks".
+- Collision headline and explanation list read cleanly on narrow screens (no double list marker).
+- Rovo/MCP `anticipate-get-graph` lists every relation it counts (inferred and unknown included, up to 20); error replies end with one period.
+
 ### Added (engine, not yet in the app UI)
 - Portfolio Impact Simulator: simulate up to 10 proposed changes together on one frozen snapshot, with shared impacts, conflicts between changes, a safe order (or the cycle that prevents one), evidence gaps and a reproducible hash. Pure engine and contracts only; not exposed in Jira yet. Design: docs/design-core/PORTFOLIO_SIMULATOR.md.
 - Portfolio Impact Simulator on real Jira data: new read-only `simulatePortfolio` operation on your permission-filtered snapshot (unknown or unreadable issues are rejected, never invented), a `portfolioSimulation` limits block in capabilities, and the read-only Rovo action / MCP tool `anticipate-simulate-portfolio` (e.g. "REMOVE MP-5; UPGRADE MP-9 breaking"). No app UI yet ([#134](https://github.com/toskaman/anticipate-codegeist-2026/issues/134)).

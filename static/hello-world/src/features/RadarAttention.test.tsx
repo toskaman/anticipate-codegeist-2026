@@ -60,3 +60,56 @@ it("drops a delayed read from a different plan and leaves loading without assumi
   expect(screen.getByText("Newest plan observations")).toBeTruthy();
   expect(reads).toEqual([plan.planId, "next-plan"]);
 });
+
+function radarWorkflow(overrides: Record<string, unknown> = {}) {
+  const client = new ForgeClient(
+    async () => response({ ...radarAttention, planId: plan.planId }),
+    5000,
+  );
+  return {
+    client,
+    capabilities: CapabilityAvailability.parse({
+      ...capabilities,
+      operations: [
+        ...capabilities.operations,
+        "getPlanAttention",
+        "checkPlanFreshness",
+      ],
+    }),
+    plan,
+    allowed: () => true,
+    expired: false,
+    evidenceFailure: null,
+    busy: "",
+    actions: { checkFreshness: async () => {} },
+    ...overrides,
+  };
+}
+
+it("keeps 'Needs review' and the re-check button while the evidence has not been re-checked", async () => {
+  render(<RadarAttention w={radarWorkflow()} planId={plan.planId} />);
+  expect(await screen.findByText("Needs review")).toBeTruthy();
+  expect(
+    screen.getByRole("button", { name: "Re-check evidence" }),
+  ).toBeTruthy();
+  expect(screen.queryByText("Blocked: evidence changed")).toBeNull();
+});
+
+it("shows a single blocked state once the re-check confirmed that the evidence changed", async () => {
+  render(
+    <RadarAttention
+      w={radarWorkflow({ plan: { ...plan, status: "EVIDENCE_CHANGED" } })}
+      planId={plan.planId}
+    />,
+  );
+  expect(await screen.findByText("Blocked: evidence changed")).toBeTruthy();
+  expect(screen.queryByText("Needs review")).toBeNull();
+  expect(
+    screen.queryByRole("button", { name: "Re-check evidence" }),
+  ).toBeNull();
+  expect(
+    screen.queryByText(
+      "This decision is blocked. Rebuild the snapshot and review a new plan.",
+    ),
+  ).toBeNull();
+});

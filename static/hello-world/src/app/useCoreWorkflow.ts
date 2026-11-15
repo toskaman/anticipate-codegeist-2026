@@ -24,6 +24,7 @@ import { useBootstrap } from "./useBootstrap";
 import { usePlanState } from "./usePlan";
 import { assertSnapshotFresh, useExpired } from "./useExpiry";
 import { isPlanStale } from "./planGuards";
+import { formatTime } from "./copy";
 
 /** Client-side mirror of the server key format: cheap fail-fast, the backend stays authoritative. */
 const ISSUE_KEY_PATTERN = /^[A-Z][A-Z0-9_]+-[0-9]+$/;
@@ -577,7 +578,7 @@ export function useCoreWorkflow(client: ForgeClient) {
           }
         }
         setNotice(
-          `${drift.fresh ? "FRESH" : "CHANGED"} at ${drift.checkedAt}. ${drift.reason} Approval and execution revalidate on the server.`,
+          `${drift.fresh ? "Evidence unchanged" : "Evidence changed"} (checked ${formatTime(drift.checkedAt)}). ${drift.reason} Approval and execution revalidate on the server.`,
         );
       });
     },

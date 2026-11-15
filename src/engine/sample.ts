@@ -39,7 +39,7 @@ async function inspect(jira: JiraPort, projectKey: string, now: Date): Promise<S
   for (const [a, b] of LINKS) {
     let exists = false;
     if (keys[a] && keys[b]) { const cur = cache.get(keys[a] as string)!; exists = cur.kind === 'ok' && cur.issue.links.some((l) => l.otherKey === keys[b] && (b === 'v2' ? true : l.typeName === 'Blocks' && l.direction === 'outward')); }
-    links.push({ from: keys[a] ?? a, relation: 'blocks' as const, to: keys[b] ?? b, status: exists ? 'EXISTS' as const : 'TO_CREATE' as const });
+    links.push({ from: keys[a] ?? a, relation: b === 'v2' ? 'relates' as const : 'blocks' as const, to: keys[b] ?? b, status: exists ? 'EXISTS' as const : 'TO_CREATE' as const });
   }
   return {
     projectKey, issueType, canCreate: !missing.length && !!issueType, missingPermissions: missing, keys,

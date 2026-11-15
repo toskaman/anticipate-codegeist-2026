@@ -236,7 +236,7 @@ export type EvidenceDrift = z.infer<typeof EvidenceDrift>;
 export const SampleItem = z.object({ role: z.string(), summary: z.string(), issueKey: z.string().nullable(), status: z.enum(['TO_CREATE', 'EXISTS', 'CREATED', 'FAILED']),
   /** Planned date for a new sample, actual Jira date for an existing one; omitted by older backends. */
   dueDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional() });
-export const SampleLink = z.object({ from: z.string(), relation: z.literal('blocks'), to: z.string(), status: z.enum(['TO_CREATE', 'EXISTS', 'CREATED', 'FAILED']) });
+export const SampleLink = z.object({ from: z.string(), relation: z.enum(['blocks', 'relates']), to: z.string(), status: z.enum(['TO_CREATE', 'EXISTS', 'CREATED', 'FAILED']) });
 export const SampleProjectPlan = z.object({
   projectKey: z.string(), issueType: z.string().nullable(), canCreate: z.boolean(), missingPermissions: z.array(z.string()),
   items: z.array(SampleItem).max(10), links: z.array(SampleLink).max(10),

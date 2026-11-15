@@ -71,6 +71,36 @@ describe('Release Safety Control Plane', () => {
     void s;
   });
 
+  it('a Decision Radar alert on a verified decision turns it into NEEDS_REVIEW, never VERIFIED', async () => {
+    const store = memoryStore();
+    await store.set('decision:REL-3', dec({ planId: 'plan-3' }));
+    const j = site(); j.issues.delete('REL-1'); j.issues.delete('REL-2');
+    const radar = { attention: async (id: string) => ({ needsReview: id === 'plan-3' }) } as unknown as NonNullable<Parameters<typeof createService>[0]['radar']>;
+    const r = parse(await createService({ jira: j, store, now: () => NOW, newId: () => 'x', radar }).getReleaseSafety(ctx, { projectKey: 'REL', fixVersion: 'Winter' }));
+    expect(r.verdict).toBe('NEEDS_REVIEW');
+    expect(r.items[0]!.state).toBe('NEEDS_REVIEW');
+    expect(r.items[0]!.reasons[0]).toMatch(/Jira changed after decision plan-3/);
+    expect(r.verdictReasons.join(' ')).not.toMatch(/not a guarantee/);
+    const overview = OPERATIONS.listReleaseSafety.output.parse(await createService({ jira: j, store, now: () => NOW, newId: () => 'x', radar }).listReleaseSafety(ctx, { projectKey: 'REL' }));
+    expect(overview.releases.find((x) => x.fixVersion === 'Winter')!.verdict).toBe('NEEDS_REVIEW');
+  });
+
+  it('an unreadable radar or a cleared alert never changes the verdict', async () => {
+    const store = memoryStore();
+    await store.set('decision:REL-3', dec({ planId: 'plan-3' }));
+    const j = site(); j.issues.delete('REL-1'); j.issues.delete('REL-2');
+    for (const attention of [async () => { throw new Error('down'); }, async () => ({ needsReview: false })]) {
+      const radar = { attention } as unknown as NonNullable<Parameters<typeof createService>[0]['radar']>;
+      const r = parse(await createService({ jira: j, store, now: () => NOW, newId: () => 'x', radar }).getReleaseSafety(ctx, { projectKey: 'REL', fixVersion: 'Winter' }));
+      expect(r.verdict).toBe('VERIFIED_FOR_RECORDED_SCOPE');
+    }
+  });
+
+  it('a radar alert can never improve a BLOCKED decision', () => {
+    const issue = { key: 'REL-1', summary: 's', status: 'Backlog', links: [] } as unknown as Parameters<typeof classify>[0];
+    expect(classify(issue, dec({ status: 'EVIDENCE_CHANGED' }), NOW, true).state).toBe('BLOCKED');
+  });
+
   it('stale (EVIDENCE_CHANGED) or BLOCKED decisions block the release', async () => {
     const { store, s } = svc();
     await store.set('decision:REL-1', dec({ status: 'EVIDENCE_CHANGED' }));

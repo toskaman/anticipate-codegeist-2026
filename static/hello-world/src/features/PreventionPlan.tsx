@@ -205,11 +205,13 @@ export default function PreventionPlan({ w }: { w: Workflow }) {
         ? "The snapshot is not loaded, so new approvals are disabled."
         : writeBlocked
           ? "Jira writes are unavailable for this workspace."
-          : w.attempted || w.approvalUncertain
-            ? "A Jira-affecting request is pending review. Check execution status first."
-            : !w.selected.length
-              ? "Select at least one action above."
-              : `${plural(w.selected.length, "action")} selected.`;
+          : w.records?.length && !w.approvalUncertain
+            ? "Execution was requested for this plan, so approvals are closed. Results are under Verify results."
+            : w.attempted || w.approvalUncertain
+              ? "A Jira-affecting request is pending review. Check execution status first."
+              : !w.selected.length
+                ? "Select at least one action above."
+                : `${plural(w.selected.length, "action")} selected.`;
   const executeHint = evidenceBlocked
     ? "Evidence changed. This plan cannot execute or be retried."
     : w.canExecute

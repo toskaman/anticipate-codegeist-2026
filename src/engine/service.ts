@@ -435,20 +435,31 @@ export function createService(d: Deps) {
         // Plans are private: only the caller's own decision is used; anyone else's counts as "none visible".
         chunk.forEach((x, j) => { const r = recs[j]; decisions[x.key] = r && r.owner === ctx.accountId ? r : undefined; });
       }
-      return { jql, issues: bounded, truncated, decisions };
+      // Decision Radar hints for the caller's own decisions: Jira changed after the decision was recorded. A hint can only
+      // make an item worse (never better); an unreadable radar adds nothing (the coverage notes already say radar is a hint).
+      const radarAlerts: Record<string, boolean> = {};
+      if (d.radar) {
+        const planIds = [...new Set(Object.values(decisions).filter((x): x is DecisionRecord => !!x).map((x) => x.planId))];
+        for (let i = 0; i < planIds.length; i += 10) {
+          const chunk = planIds.slice(i, i + 10);
+          const res = await Promise.all(chunk.map(async (id) => { try { return (await d.radar!.attention(id)).needsReview === true; } catch { return false; } }));
+          chunk.forEach((id, j) => { if (res[j]) radarAlerts[id] = true; });
+        }
+      }
+      return { jql, issues: bounded, truncated, decisions, radarAlerts };
     },
 
     async getReleaseSafety(ctx: Ctx, input: { projectKey: string; fixVersion: string | null }): Promise<ReleaseSafety> {
       const r = await svc.readReleaseScope(ctx, input);
       return aggregateRelease({ projectKey: input.projectKey, fixVersion: input.fixVersion, jql: r.jql, evaluatedAt: iso(), issues: r.issues,
-        truncated: r.truncated, siteUrl: d.jira.siteUrl(), decisions: r.decisions });
+        truncated: r.truncated, siteUrl: d.jira.siteUrl(), decisions: r.decisions, radarAlerts: r.radarAlerts });
     },
 
     /** Release overview: every fixVersion of the project's change issues, worst first. Same rules as getReleaseSafety. */
     async listReleaseSafety(ctx: Ctx, input: { projectKey: string }): Promise<ReleaseOverview> {
       const r = await svc.readReleaseScope(ctx, { projectKey: input.projectKey, fixVersion: null });
       return overviewReleases({ projectKey: input.projectKey, jql: r.jql, evaluatedAt: iso(), issues: r.issues, truncated: r.truncated,
-        siteUrl: d.jira.siteUrl(), decisions: r.decisions });
+        siteUrl: d.jira.siteUrl(), decisions: r.decisions, radarAlerts: r.radarAlerts });
     },
 
     async simulateChange(ctx: Ctx, req: SimulationRequest) {

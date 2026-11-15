@@ -26,9 +26,11 @@ export interface ReleaseInput {
   issues: JiraIssue[]; truncated: boolean; siteUrl: string | null;
   /** Decision visible to the caller per issue key (undefined = none recorded or not the caller's). */
   decisions: Record<string, DecisionRecord | undefined>;
+  /** Plans with an unresolved Decision Radar alert (Jira changed after the decision). Hint only: can never improve a state. */
+  radarAlerts?: Record<string, boolean>;
 }
 
-export function classify(issue: JiraIssue, d: DecisionRecord | undefined, now: Date): { state: ReleaseVerdict; reasons: string[] } {
+export function classify(issue: JiraIssue, d: DecisionRecord | undefined, now: Date, radarAlert = false): { state: ReleaseVerdict; reasons: string[] } {
   if (!d) return { state: 'NEEDS_REVIEW', reasons: ['No ANTICIPATE decision of yours is recorded for this change.'] };
   const reasons: string[] = [];
   if (d.status === 'EVIDENCE_CHANGED' || d.status === 'INVALIDATED')
@@ -46,6 +48,10 @@ export function classify(issue: JiraIssue, d: DecisionRecord | undefined, now: D
   else if (d.status === 'APPROVED') { state = 'APPROVED_NOT_EXECUTED'; reasons.push('Approved; prevention actions not executed yet.'); }
   else { state = 'NEEDS_REVIEW'; reasons.push(`Decision ${d.planId} is ${d.status}; awaiting approval.`); }
   if (verdict === 'UNKNOWN') state = worst(state, 'EVIDENCE_INCOMPLETE');
+  if (radarAlert) {
+    state = worst(state, 'NEEDS_REVIEW');
+    reasons.unshift(`Jira changed after decision ${d.planId} was recorded (Decision Radar). Re-check its evidence before relying on it.`);
+  }
   if (state === 'VERIFIED_FOR_RECORDED_SCOPE') reasons.push(`Verified actions for plan ${d.planId} (scope recorded at ${d.at.slice(0, 10)}).`);
   if (issue.links.length === 0) reasons.push('No Jira links on this issue: dependencies may simply be unrecorded.');
   return { state, reasons: reasons.slice(0, 6) };
@@ -57,7 +63,7 @@ export function aggregateRelease(input: ReleaseInput): ReleaseSafety {
   const site = input.siteUrl ? input.siteUrl.replace(/\/$/, '') : null;
   const items: ReleaseSafetyItem[] = issues.slice(0, RELEASE_SAFETY_LIMITS.maxItems).map((i) => {
     const d = input.decisions[i.key];
-    const c = classify(i, d, now);
+    const c = classify(i, d, now, !!(d && input.radarAlerts?.[d.planId]));
     return {
       issue: { key: i.key, summary: i.summary.slice(0, 1000), status: i.status.slice(0, 100), url: site ? `${site}/browse/${i.key}` : null },
       state: c.state, reasons: c.reasons.map((r) => r.slice(0, 300)),
