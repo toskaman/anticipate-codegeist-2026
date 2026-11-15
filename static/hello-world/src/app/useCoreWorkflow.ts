@@ -578,7 +578,7 @@ export function useCoreWorkflow(client: ForgeClient) {
           }
         }
         setNotice(
-          `${drift.fresh ? "Evidence unchanged" : "Evidence changed"} (checked ${formatTime(drift.checkedAt)}). ${drift.reason} Approval and execution revalidate on the server.`,
+          `Evidence re-checked ${formatTime(drift.checkedAt)}. ${drift.reason} Approval and execution revalidate on the server.`,
         );
       });
     },

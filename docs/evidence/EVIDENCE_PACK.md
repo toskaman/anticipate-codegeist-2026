@@ -141,13 +141,25 @@ Note on step 10: the extra "JDG-5 blocks" links added during the migration were 
 Reset: JDG-1 back to Backlog; links back to the 3 Nov baseline (JDG-1 blocks JDG-2, JDG-3; relates JDG-5; JDG-2 blocks JDG-4); temporary links removed. Two decision comments remain on JDG-1 (execution records).
 Close-out (same day): first-open timings 4.03 s first-of-session / 2.43 and 2.29 s warm (RELEASE.md); freeze recount 336/75/13/225/200 on main 114054e, all green; 14 captures in `docs/evidence/hosted-2026-11-12/` (browser-pane captures, 800 px wide).
 
+## Production 4.8.0: judge re-run fixes, 15 Nov 2026 23:18-23:25 Paris · LIVE_FORGE (owner-authorized in chat: "Je te donne l'autorisation pour TOUT")
+
+- PRs #247 (docs) and #248 (fixes) merged after green CI (core, frontend, e2e); main `837d23b1f057824505ff7f2361c4652ea2475746`.
+- Vars stamped `ANTICIPATE_BUILD_COMMIT=837d23b…`, `ANTICIPATE_BUILD_AT=2026-11-15T22:18:16.000Z`; `forge deploy -e production --non-interactive` via the owner's Windows bridge: lint clean, **4.8.0**, no major-version prompt; `forge install list`: toskaman5962 and anticipate-judge production 4 Up-to-date.
+- Dev first: 8.5.0 (a88716b) rejected the sample preview with INVALID_RESPONSE because `static/hello-world/node_modules/@anticipate/contracts` on the owner PC was a 9 Nov copy without the new `relates` value (production 4.7.0 was unaffected: copy and source were identical before this change). Fix e057fda: `prebuild` refuses a stale copy; dev 8.6.0 then showed the 4 relations including "relates".
+- anticipate-judge (built-in browser, judge account), all read-only:
+  - Jira → Apps lists **ANTICIPATE** under "Vos apps"; it opens the app in Jira ("Connected · live mode · CORE 0.2.0"); first open after the deploy took ~20 s.
+  - plan-3650f497 recovered (pre-filled recovery id): Radar "Needs review" with Re-check; after Re-check one state "Blocked: evidence changed", no re-check button, no contradictory line; drift notice "checked 15 Nov 2026, 23:21 CET" (was a raw UTC ISO string).
+  - Release Command Center: JDG-1 "Needs review". Release Safety: "Needs review", 0 verified, reason "Jira changed after decision plan-3650f497… was recorded (Decision Radar)…" (4.7.0 said "Verified (recorded scope)").
+- dev 8.6.0 (one-atlas-euza): app listed in Jira → Apps; after a verified execution (label on TD-2, plan-75b37594) the approve area says approvals are closed; MCP get-graph TD-1 lists 8/8 relations (6 confirmed, 2 inferred); errors end with one period; get-passport / check-plan-freshness on plan-75b37594 answer `PERMISSION_DENIED — Plans are private to the user who created them` (the MCP connector account differs from the browser account that created the plan; positive MCP read last verified 12 Nov).
+- Follow-up in PR "drift notice wording": the notice read "Evidence changed (checked …). Evidence changed since the snapshot …"; now "Evidence re-checked <local time>. <reason>".
+
 ## Judge re-run on production 4.7.0, 15 Nov 2026, 20:52-21:10 Paris (anticipate-judge) · LIVE_FORGE
 
 Built-in browser pane of the Claude desktop app, signed in as the anticipate-judge account (owner signed in himself). Admin → Connected apps → ANTICIPATE shows **4.7.0 "À jour"**. App opened at `/apps/full-page/f4a739e5-887e-4cab-b343-9771c8e1d81a/anticipate/` (narrow pane, ~506 px: responsive layout exercised).
 
 | # | Step | Observed |
 |---|---|---|
-| 1 | Open app | PASS: "Connected · live mode · CORE 0.2.0", Mission Control. Finding: ANTICIPATE is **not listed in Jira → Apps** (a `global:fullPage` has no menu entry); the installation id had to be read from the GraphQL API. Fixed in branch `fix/judge-rerun-470` (adds a `jira:globalPage` "ANTICIPATE"). |
+| 1 | Open app | PASS: "Connected · live mode · CORE 0.2.0", Mission Control. Finding: ANTICIPATE is **not listed in Jira → Apps** (a `global:fullPage` has no menu entry); the installation id had to be read from the GraphQL API. Fixed in production 4.8.0 (adds a `jira:globalPage` "ANTICIPATE"). |
 | 2-3 | Guided demo → Preview sample data (JDG) | PASS: 6 issues "Already in Jira · reused", nothing written. Finding: the replacement link (JDG-1 → JDG-5, a Jira "Relates") was labelled "blocks"; fixed (preview now says "relates"). |
 | 4 | Analyze JDG-1 | PASS: 5 records, 4 relations (3 confirmed, 1 inferred, 0 unknown), Jira sources |
 | 5 | Compare options (replacement JDG-5) | PASS: A Remove now Blocked (1 blocker, P1+P3), B Retain Needs review (P3), C Migrate first Pass + assumption line, suggested |
