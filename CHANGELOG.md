@@ -4,11 +4,12 @@ All notable changes to ANTICIPATE, written for readers who use or judge the app.
 
 ## [Unreleased]
 
-### Fixed (judge re-run on production 4.7.0, 15 Nov 2026)
+### Fixed in production 4.8.0 (judge re-run on production 4.7.0, 15 Nov 2026; [#248](https://github.com/toskaman/anticipate-codegeist-2026/pull/248))
 - ANTICIPATE now appears in **Jira → Apps** (new `jira:globalPage` "ANTICIPATE", same screens and resolver, no new permission); the full page also gets a tab title.
 - Release Safety no longer reports "Verified" for a decision the Decision Radar flagged after it was recorded: the change becomes "needs review" with the reason. A radar hint can never improve a state.
 - Decision Radar shows one "Blocked: evidence changed" state after a re-check confirms the change, instead of "Needs review" next to a blocked message.
-- The evidence re-check notice shows local time in plain words instead of `CHANGED at 2026-…Z`.
+- The evidence re-check notice shows local time in plain words instead of `CHANGED at 2026-…Z` ("Evidence re-checked <time>. <reason>").
+- The UI build refuses a stale installed copy of the shared contracts, which had made dev 8.5.0 reject the sample preview.
 - After a verified execution, the approve area says approvals are closed instead of "a request is pending review".
 - The sample-data preview labels the replacement link "relates" (it is created as a Jira "Relates" link), not "blocks".
 - Collision headline and explanation list read cleanly on narrow screens (no double list marker).
