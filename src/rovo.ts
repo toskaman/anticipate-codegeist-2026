@@ -90,7 +90,7 @@ export function createRovoActions(deps: (p: ActionPayload) => Deps, opts?: RovoO
     if (!verdict.allowed) throw new AppError('RATE_LIMITED', `Rate limit exceeded for ${action}; retry in ${Math.ceil(verdict.retryAfterMs / 1000)}s.`, true, { retryAfterMs: verdict.retryAfterMs });
   };
   const safe = (action: string, validate: (p: ActionPayload) => unknown, fn: (p: ActionPayload, c?: ActionContext) => Promise<string>) => async (p: ActionPayload, c?: ActionContext) => {
-    try { const payload = p ?? {}; validate(payload); await guard(action, payload, c); return await fn(payload, c); } catch (e) { return `ANTICIPATE could not complete this request: ${e instanceof AppError ? `${e.code} — ${e.message}` : 'unexpected error'}.`; }
+    try { const payload = p ?? {}; validate(payload); await guard(action, payload, c); return await fn(payload, c); } catch (e) { return `ANTICIPATE could not complete this request: ${e instanceof AppError ? `${e.code} — ${e.message.replace(/[.\s]+$/, '')}` : 'unexpected error'}.`; }
   };
   return {
     getGraph: safe('getGraph', needIssueKey, async (p, c) => {
@@ -100,7 +100,8 @@ export function createRovoActions(deps: (p: ActionPayload) => Deps, opts?: RovoO
       const count = (s: string) => g.edges.filter((e) => e.status === s).length;
       return [`Evidence graph for ${p.issueKey} (snapshot ${g.snapshotId}, ${g.truncated ? 'truncated' : 'complete within limits'}):`,
         `${g.nodes.length} items, ${g.edges.length} relations — ${count('CONFIRMED')} confirmed, ${count('INFERRED')} inferred, ${count('UNKNOWN')} unknown.`,
-        ...g.edges.filter((e) => e.kind === 'DEPENDS_ON' || e.kind === 'USES').slice(0, 20).map((e) => `- ${e.from.replace('issue:', '')} ${e.kind} ${e.to.replace('issue:', '')} [${e.status}]`)].join('\n');
+        ...g.edges.slice(0, 20).map((e) => `- ${e.from.replace('issue:', '')} ${e.kind} ${e.to.replace('issue:', '')} [${e.status}]`),
+        ...(g.edges.length > 20 ? [`(${g.edges.length - 20} more relation(s) not listed; open ANTICIPATE for the full graph.)`] : [])].join('\n');
     }),
     simulateRetirement: safe('simulateRetirement', needIssueKey, async (p, actx) => {
       needIssueKey(p);

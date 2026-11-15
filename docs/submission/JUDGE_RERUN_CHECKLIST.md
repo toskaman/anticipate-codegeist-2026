@@ -16,13 +16,13 @@ Judge reproducibility). Owner-gated: needs the `anticipate-judge` account (other
 
 | # | Step | Expected | Observed (fill on the day) |
 |---|---|---|---|
-| 1 | Install from the public link (`INSTALL_LINK.md`) | Installs, app opens, "Connected · live mode" | |
+| 1 | Install from the public link (`INSTALL_LINK.md`), then Jira → Apps → ANTICIPATE | Installs, app listed in the Apps menu, opens, "Connected · live mode" | |
 | 2 | Guided demo → Preview sample data | Preview lists creates, writes nothing | |
 | 3 | Confirm sample data | 6 labelled issues + 4 links, re-read from Jira | |
 | 4 | Analyze JDG-1 → Evidence Graph | CONFIRMED/INFERRED/UNKNOWN with Jira sources | |
 | 5 | Compare options (A/B/C) | BLOCKED / NEEDS_REVIEW / PASS + assumption line | |
-| 6 | Portfolio: two colliding changes | EMERGENT_IMPACT + named conflict | |
-| 7 | Composer: alternatives ranked | #1 with 0 conflicts + stated assumption | |
+| 6 | Portfolio: MIGRATE JDG-1 → JDG-5 + UPGRADE JDG-5 breaking | Each Pass alone, worse together; EMERGENT_IMPACT + named conflict | |
+| 7 | Composer on the step-6 pair: alternatives ranked | #1 with 0 conflicts + stated assumption (other pairs can rank a 1-conflict #1; still honest) | |
 | 8 | Generate plan → approve ALL actions → execute | Per-action VERIFIED by read-back | |
 | 9 | Prevention Passport | "In short", approvals, outcomes, transition status | |
 | 10 | Move JDG-1 → refused; real migration → move → accepted | Refused with reason, then allowed | |
@@ -39,7 +39,7 @@ Release Safety, Radar hint, Time Machine invalidation. Name files
 
 ## Close-out (same day)
 
-Last run: 12 Nov 2026 on production 4.6.0 — all items below done (EVIDENCE_PACK "Judge re-run on the shipping build"; captures in `docs/evidence/hosted-2026-11-12/`).
+Last run: 15 Nov 2026 on production 4.7.0 (EVIDENCE_PACK "Judge re-run on production 4.7.0"; 13/13 steps, 6 findings fixed in `fix/judge-rerun-470`). Previous: 12 Nov 2026 on production 4.6.0 — all items below done (EVIDENCE_PACK "Judge re-run on the shipping build"; captures in `docs/evidence/hosted-2026-11-12/`).
 
 
 - [ ] First-open timings measured (warm / backend-cold) → `RELEASE.md` latency row (Q10).

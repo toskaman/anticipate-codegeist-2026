@@ -5,6 +5,13 @@ modules:
       resolver:
         function: resolver
       routePrefix: anticipate
+      title: ANTICIPATE
+  jira:globalPage:
+    - key: anticipate-jira-global-page
+      resource: main
+      resolver:
+        function: resolver
+      title: ANTICIPATE
   jira:workflowValidator:
     - key: anticipate-decision-firewall
       name: ANTICIPATE Decision Firewall

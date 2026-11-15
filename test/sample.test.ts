@@ -74,6 +74,8 @@ describe('judge sample project', () => {
     const p = SampleProjectPlan.parse(await s.svc.previewSampleProject(ctx, { projectKey: 'JDG' }));
     expect(p.items.every((i) => i.status === 'TO_CREATE')).toBe(true);
     expect(p.links).toHaveLength(4);
+    // The replacement link is created as Jira "Relates", so the preview must not call it "blocks".
+    expect(p.links.map((l) => l.relation)).toEqual(['blocks', 'blocks', 'blocks', 'relates']);
     expect(s.jira.writes).toEqual({ create: 0, link: 0, comment: 0, label: 0 });
   });
   it('creation is verified, idempotent and never touches existing issues; then the full analysis works', async () => {

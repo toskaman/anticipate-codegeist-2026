@@ -28,6 +28,8 @@ type ReaderProps = {
   onRecheck: () => Promise<unknown> | undefined;
   disabledReason: string;
   historical: boolean;
+  /** The workflow already confirmed that this plan's evidence changed. */
+  blocked: boolean;
 };
 
 function AttentionReader({
@@ -36,6 +38,7 @@ function AttentionReader({
   onRecheck,
   disabledReason,
   historical,
+  blocked,
 }: ReaderProps) {
   const [attention, setAttention] = useState<PlanAttention | null>(null);
   const [loading, setLoading] = useState(false);
@@ -192,7 +195,13 @@ function AttentionReader({
               "No radar observation time supplied. Re-check evidence before approval or execution."
             )}
           </p>
-          {attention.needsReview ? (
+          {attention.needsReview && blocked ? (
+            <Notice tone="danger" title="Blocked: evidence changed">
+              The evidence re-check confirmed that Jira changed since this plan
+              was built. This plan can no longer be approved or executed.
+              Rebuild the snapshot and review a new plan.
+            </Notice>
+          ) : attention.needsReview ? (
             <Notice tone="warning" title="Needs review">
               Relevant event hints were reported. Re-check the actual evidence
               before reviewing this decision again.
@@ -244,7 +253,7 @@ function AttentionReader({
         </section>
       )}
       <div className="ax-radar__actions">
-        {attention?.needsReview && (
+        {attention?.needsReview && !blocked && (
           <button
             type="button"
             className="ax-btn ax-btn--primary"
@@ -268,7 +277,7 @@ function AttentionReader({
           {error ? "Retry radar read" : "Refresh radar"}
         </button>
       </div>
-      {attention?.needsReview && disabledReason && (
+      {attention?.needsReview && disabledReason && !blocked && (
         <p id={`${id}-disabled`} className="ax-small ax-muted">
           {disabledReason}
         </p>
@@ -297,6 +306,9 @@ export default function RadarAttention({
 }) {
   if (!planId || !w.capabilities?.operations.includes("getPlanAttention"))
     return null;
+  const blocked =
+    w.plan?.planId === planId &&
+    (!!w.evidenceFailure || isPlanStale(w.plan.status));
   const disabledReason =
     w.plan?.planId !== planId
       ? "Recover this plan before re-checking its evidence."
@@ -317,6 +329,7 @@ export default function RadarAttention({
       onRecheck={w.actions.checkFreshness}
       disabledReason={disabledReason}
       historical={historical}
+      blocked={blocked}
     />
   );
 }

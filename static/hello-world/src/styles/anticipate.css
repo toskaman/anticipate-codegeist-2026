@@ -4650,10 +4650,20 @@ body:has(.ax-app) {
   padding-left: var(--ax-5);
 }
 .ax-glance__hero {
-  margin: 0 0 var(--ax-3);
+  margin: 0 0 var(--ax-4);
   font-size: var(--ax-fs-2xl);
   font-weight: 700;
   line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 560px) {
+  .ax-glance__hero {
+    font-size: var(--ax-fs-xl);
+  }
+}
+/* A collision explanation is a <details> inside a list item: one disclosure marker, not a bullet plus a triangle. */
+.ax-portfolio__list > li:has(> details.ax-collision) {
+  list-style: none;
 }
 @media (forced-colors: active) {
   .ax-glance__card--blocked,

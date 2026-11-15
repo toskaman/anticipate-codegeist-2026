@@ -248,9 +248,12 @@ test("changed evidence from radar re-check preserves workflow approval/execution
       name: "Evidence changed — this plan cannot execute",
     }),
   ).toBeVisible();
+  // Once the re-check confirmed the change, the radar shows one blocked state instead of "Needs review".
+  await expect(p.getByText("Blocked: evidence changed")).toBeVisible();
+  await expect(p.getByText("Needs review", { exact: true })).toHaveCount(0);
   await expect(
     p.getByRole("button", { name: "Re-check evidence", exact: true }),
-  ).toBeDisabled();
+  ).toHaveCount(0);
   await expect(
     page.getByRole("button", { name: "Approve selected actions", exact: true }),
   ).toBeDisabled();
