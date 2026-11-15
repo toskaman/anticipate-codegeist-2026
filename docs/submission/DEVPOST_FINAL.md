@@ -79,7 +79,7 @@ The valuable part is not the graph, it is the decision: comparing options on the
 3. Click **Start the guided demo**, choose a company-managed software project you can edit, **Preview sample data**, then confirm. Six labelled issues and four links are created (about 15–20 seconds the first time; if the screen waits longer, preview again: nothing is created twice).
 4. **Analyze** the sample root → **Compare options** → **Check safeguards** → **Generate prevention plan** → approve **all** the actions (a partial approval ends as Partial) → execute → open the **Prevention Passport**.
 5. Optional, workflow validator: Project settings → Workflows → edit a test workflow, add the rule "ANTICIPATE Decision Firewall" to a transition and publish. Issues labelled `anticipate-change` are refused until their decision is completed and Jira agrees; other issues pass.
-6. Optional, MCP: an organization admin enables "Expose tools to MCP-compatible apps" for ANTICIPATE (admin.atlassian.com → site → Connected apps), then connects an MCP client to `https://mcp.atlassian.com/forge/39a28f48-c891-4d86-a3cf-c14409cbd29e`. In Rovo (where available), ask about your own issue keys; the starter prompts reference the dev sample.
+6. Optional, MCP: an organization admin enables "Expose tools to MCP-compatible apps" for ANTICIPATE (admin.atlassian.com → site → Connected apps), then connects an MCP client to `https://mcp.atlassian.com/forge/39a28f48-c891-4d86-a3cf-c14409cbd29e`. In Rovo (where available), pick a starter prompt and give the agent one of your own issue keys (for example the sample root).
 
 ## Bonus write-up: Best app with Atlassian MCP
 

@@ -10,7 +10,7 @@ https://developer.atlassian.com/console/install/39a28f48-c891-4d86-a3cf-c14409cb
 - Optional: Rovo on the site for the Rovo agent; an org admin enabling "Expose tools to MCP-compatible apps" for the MCP tools.
 
 ## After installing
-1. Open Jira, then **Apps → ANTICIPATE** (or `https://<site>.atlassian.net/apps/full-page/<installation-id>/hello-world/`; the installation id is on the site's Apps > Manage apps page). The first open can take about 10 seconds while Forge starts.
+1. Open Jira, then **Apps → ANTICIPATE** (or `https://<site>.atlassian.net/apps/full-page/<installation-id>/anticipate/` once the build with the renamed route is deployed; `/hello-world/` on production 4.6.0 and earlier; the installation id is on the site's Apps > Manage apps page). The first open can take about 10 seconds while Forge starts.
 2. Click **Start the guided demo**, choose your software project, **Preview sample data**, then confirm. Six labelled issues and four links (three "blocks", one "relates") are created (about 15–20 s the first time); existing issues are never modified. To clean up afterwards, delete the six labelled sample issues in Jira (they are marked safe to delete).
 3. **Analyze** the sample root, compare options, open the Decision Firewall, generate a plan, approve **all** actions, execute, then open the Prevention Passport.
 4. Optional: add the "ANTICIPATE Decision Firewall" validator to a transition of a test workflow (Project settings → Workflows → Edit). Issues labelled `anticipate-change` then need a completed, non-blocked, verified plan to move forward. Behaviour during outages (Allow by default, Block opt-in) and how to change it: [docs/admin/WORKFLOW_VALIDATOR.md](../admin/WORKFLOW_VALIDATOR.md).

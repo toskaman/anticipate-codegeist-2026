@@ -101,8 +101,8 @@ Still open, owner only (blocking submission):
 
 Open decisions (not done here because they change the deployed app or the licence):
 
-- Rovo agent conversation starters name `TD-1`/`TD-5`, which do not exist on a judge's site. Generic starters need a manifest change and a redeploy.
-- The app URL and module key still read `hello-world` (template leftover). Renaming `routePrefix` changes every bookmarked URL; do it only with a full re-run.
+- Rovo agent conversation starters named `TD-1`/`TD-5`, which do not exist on a judge's site. Branch `fix/rovo-generic-starters` makes them generic and tells the agent to ask for a key. **Not deployed**: merge only together with a production redeploy (`forge lint`, deploy, stamp vars) and update RELEASE.md / INSTALL_LINK.md; until then the deployed starters still name TD-1 and DEVPOST_FINAL testing step 6 on this branch is ahead of production.
+- The app URL read `hello-world` (template leftover). Branch `fix/rovo-generic-starters` sets `routePrefix: anticipate` (module key and `static/hello-world` folder unchanged, so installs and CI are untouched). **Not deployed**: after the redeploy, old `/hello-world/` URLs in dated evidence stop resolving; open the app from Jira → Apps and re-run the judge journey.
 - Done 15 Nov: `skill.md` is MIT (both owners agreed), with a matching exception in LICENSE; the MCP bonus rule mentions "open-source skill.md files".
 - Best Agents can be selected as a second bonus at no product cost (BONUS_AGENTS_DRAFT.md).
 - "Best Marketplace published app" only requires a listing **submitted** for review; not pursued.
