@@ -21,7 +21,7 @@ A ticket says "retire Auth API v1". It looks safe. The service that breaks is tw
 2. **Start the guided demo** → Preview sample data → confirm → **Analyze** → Compare → Check safeguards → approve → execute → **Prevention Passport**.
 3. **Verify the claims**: every behaviour below links to its evidence in the [evidence pack](docs/evidence/EVIDENCE_PACK.md); hosted results are labelled with date and site.
 
-Demo video: public YouTube link will be added here on publication ([issue #189](https://github.com/toskaman/anticipate-codegeist-2026/issues/189)); the [script](docs/submission/VIDEO_SCRIPT.md) and [QA report](docs/evidence/VIDEO_QA_REPORT.md) are already in the repo.
+Demo video: public YouTube link will be added here on publication ([issue #189](https://github.com/toskaman/anticipate-codegeist-2026/issues/189)); the [script](docs/submission/VIDEO_SCRIPT_V4.md) and [QA report](docs/evidence/VIDEO_QA_REPORT.md) are already in the repo.
 
 ## For engineering leaders
 
@@ -70,7 +70,7 @@ Playwright captures of the real UI with a **mock backend transport (MOCK_TRANSPO
 | --- | --- | --- |
 | [Install link](docs/submission/INSTALL_LINK.md) | [Evidence pack](docs/evidence/EVIDENCE_PACK.md) | [Release record](docs/RELEASE.md) (versions, test counts) |
 | [Submission text](docs/submission/DEVPOST_FINAL.md) | [Video QA report](docs/evidence/VIDEO_QA_REPORT.md) | [Status](docs/STATUS.md) (capabilities, proofs) |
-| [Video script](docs/submission/VIDEO_SCRIPT.md) | [MCP external runbook](docs/evidence/MCP_EXTERNAL_RUNBOOK.md) | [Commercial strategy](docs/strategy/COMMERCIAL_STRATEGY.md) |
+| [Video script](docs/submission/VIDEO_SCRIPT_V4.md) | [MCP external runbook](docs/evidence/MCP_EXTERNAL_RUNBOOK.md) | [Commercial strategy](docs/strategy/COMMERCIAL_STRATEGY.md) |
 | [Gallery pack](docs/submission/gallery/README.md) | [Judge re-run checklist](docs/submission/JUDGE_RERUN_CHECKLIST.md) | [Capacity envelope](docs/strategy/CAPACITY_ENVELOPE.md) |
 
 Security & legal: [threat model](docs/security/THREAT_MODEL.md) · [privacy](docs/legal/PRIVACY.md) · [terms](docs/legal/TERMS.md) · [validator admin guide](docs/admin/WORKFLOW_VALIDATOR.md).
@@ -106,7 +106,7 @@ Details: [privacy](docs/legal/PRIVACY.md) · [terms](docs/legal/TERMS.md) · [th
 
 ## Honest limitations
 
-- **No Teamwork Graph yet.** Atlassian has not allowlisted the graph scope for this app (request ECOHELP-180616, [evidence](docs/evidence/TEAMWORK_GRAPH_ALLOWLIST.md)); the app shows it as *Not configured*.
+- **No Teamwork Graph yet.** The shipping build declares no graph scopes; a prototype and a read-only scope map for the Preview API exist ([plan](docs/evidence/TEAMWORK_GRAPH_PREVIEW_PLAN.md), [history](docs/evidence/TEAMWORK_GRAPH_ALLOWLIST.md)). The app shows it as *Not configured* and the bonus is not claimed.
 - **No Marketplace listing.** Distribution is the install link.
 - **Dependencies come only from Jira** issue links and components; anything unreadable stays Unknown.
 - **Deterministic rules, not predictions.** No probabilities; ANTICIPATE does not claim to prevent every incident.
@@ -123,8 +123,8 @@ cd static/hello-world && npm ci && npm run typecheck && npm run lint && npm test
 
 ## Codegeist 2026
 
-Category: Apps for Software Teams. Bonus claimed: Best app with Atlassian MCP. Built by two people: CORE (backend, engine, Forge, security) and EXPERIENCE (interface, accessibility, presentation).
+Category: Apps for Software Teams. Bonus claimed: Best app with Atlassian MCP (all seven tools verified from an external client; an open-source (MIT) [skill.md](skill.md) is provided for third-party agents). Built by two people: CORE (backend, engine, Forge, security) and EXPERIENCE (interface, accessibility, presentation).
 
 Product context: [buyer hypotheses](docs/strategy/BUYER_HYPOTHESES.md) · [value-study protocol](docs/strategy/VALUE_STUDY_PROTOCOL.md). Product feedback and pilot questions can be raised through [repository issues](https://github.com/toskaman/anticipate-codegeist-2026/issues); no customer outcomes or commercial offering are implied.
 
-Licence: proprietary, source available. Copyright © 2026 toskaman and Orphee; see [LICENSE](LICENSE).
+Licence: proprietary, source available (except `skill.md`, MIT). Copyright © 2026 toskaman and Orphee; see [LICENSE](LICENSE).

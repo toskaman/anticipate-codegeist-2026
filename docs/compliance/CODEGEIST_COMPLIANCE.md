@@ -1,13 +1,13 @@
 # Codegeist 2026 compliance matrix
 
-Source: https://codegeist2026.devpost.com/rules (read 3 Nov 2026). Deadline: **22 Dec 2026, 12:00 Pacific Time (21:00 Paris)**. Status values: PASS / FAIL / BLOCKED / NOT VERIFIED / NOT APPLICABLE.
+Source: https://codegeist2026.devpost.com/rules (read 3 Nov 2026; re-checked line by line against the official rules text on 15 Nov 2026). Deadline: **22 Dec 2026, 12:00 Pacific Time (21:00 Paris)**. Status values: PASS / FAIL / BLOCKED / NOT VERIFIED / NOT APPLICABLE.
 
 | Requirement | Mandatory | Status | Evidence | Remediation / owner |
 |---|---|---|---|---|
 | Runs on Forge, integrates Jira/Confluence/JSM/Bitbucket/TWG/Rovo | yes | PASS | manifest.yml (Jira, Rovo agent, rovo:mcp, workflow validator) | — |
 | Installable by judges via an install link ("start sharing your app") | yes | PASS | docs/submission/INSTALL_LINK.md; clean-site install 3 Nov (EVIDENCE_PACK); install page HTTP 200 re-verified 6 Nov | — |
-| Runs consistently and as described | yes | PASS (current build) | clean-site journey + validator, 3 Nov; dev 8.1.0 read-only acceptance 6/6, 8 Nov (HOSTED_ACCEPTANCE_T7) | re-run on shipping build (#191) |
-| Demo video < 5 min, YouTube public, shows the app running | yes | BLOCKED (cut rendered + QA ACCEPTED 8 Nov, not public) | docs/evidence/VIDEO_QA_REPORT.md (2:54, genuine footage, timed subtitles) | owner: full watch + listen, co-owner approval, public upload, paste URL; tracked in #189 |
+| Runs consistently and as described | yes | PASS (current build) | clean-site journey + validator, 3 Nov; dev 8.1.0 read-only acceptance 6/6, 8 Nov (HOSTED_ACCEPTANCE_T7) | re-run done 12 Nov on production 4.6.0 (EVIDENCE_PACK) |
+| Demo video < 5 min, YouTube public, shows the app running | yes | BLOCKED (V10 master 2:48, QA ACCEPTED 10 Nov on prod 4.6.0 footage, not public) | docs/evidence/VIDEO_QA_REPORT.md (2:54, genuine footage, timed subtitles) | owner: full watch + listen, co-owner approval, public upload, paste URL; tracked in #189 |
 | No third-party trademarks or copyrighted music in video | yes | PASS | VIDEO_QA_REPORT: own footage, Apache-2.0 TTS, CC BY 4.0 music with YT attribution, CC0 SFX, nominative Atlassian/Jira/Forge marks only | — |
 | Judge instructions (config, integrations) | yes | PASS | INSTALL_LINK.md (install, Free plan notes, validator steps) | keep in sync with final build |
 | Text description incl. how it meets the tech requirement | yes | NOT VERIFIED (final text ready, form not filled) | docs/submission/DEVPOST_FINAL.md, TECHNICAL_SECTION.md | owner pastes at submission; re-read against final build |
@@ -16,10 +16,12 @@ Source: https://codegeist2026.devpost.com/rules (read 3 Nov 2026). Deadline: **2
 | English materials | yes | PASS | repository and drafts in English | — |
 | New or rebuilt in Forge during the period | yes | PASS | repository history from Nov 2026 | — |
 | Original, owned by entrants; third-party licenses respected | yes | PASS (to re-check before submit) | LICENSE (50/50), THIRD_PARTY_NOTICES in build | licence scan in CI (muse, P1) |
-| Team: one eligible Representative | yes | NOT VERIFIED | — | owner confirms eligibility (not a restricted jurisdiction) |
+| Team: one eligible Representative | yes | NOT VERIFIED | — | owner confirms for **every** member: age of majority; not resident of an excluded place (incl. Brazil, Quebec, Russia, Belarus); not an employee, agent or household/immediate family of Atlassian or Devpost; not employed by a judge |
+| No financial or preferential support from Atlassian or Devpost | yes | NOT VERIFIED | — | owner confirms (no funding, contract or commercial licence from the Sponsor or Administrator) |
+| Each submission unique; solely owned by the Entrant | yes | PASS (one submission; LICENSE 50/50 between the two team members) | LICENSE | Representative submits for the team |
 | Repository public / license | not required | NOT APPLICABLE | repo is public, proprietary source-available | — |
 | Marketplace listing | only for that bonus | NOT APPLICABLE | not claimed | — |
-| One bonus maximum | rule | PASS | `.github/agent-coordination/decisions.md` D1 (MCP) | — |
+| One bonus won at most (several may be entered) | rule | PASS | `.github/agent-coordination/decisions.md` D1 (MCP) | — |
 | No changes after the deadline | rule | NOT APPLICABLE yet | — | freeze release before 22 Dec |
 
-Verdict today: **NO-GO for submission** (public video URL + Devpost form + production shipping release pending owner). Product build: GO for the demo scenario; shipping RC validated, deploy pending owner (PROD_RELEASE_CANDIDATE.md).
+Verdict today: **NO-GO for submission** (public video URL + Devpost form + eligibility confirmations pending owner). Product build: GO; shipping build production 4.6.0 is deployed and was re-run on the judge site on 12 Nov (EVIDENCE_PACK).

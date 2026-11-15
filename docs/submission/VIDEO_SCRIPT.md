@@ -1,5 +1,7 @@
 # Demo video — script and shot list
 
+> **Superseded by [VIDEO_SCRIPT_V4.md](VIDEO_SCRIPT_V4.md) (10 Nov 2026), the script of the rendered film.** Kept for the validator setup and dataset reset instructions; the roadmap line about allowlisting below is out of date (see docs/STATUS.md).
+
 Preparation update (4 November 2026): [DRIFT_CAPTURE_PLAN.md](DRIFT_CAPTURE_PLAN.md) proposes a 4:30 English narration/caption storyboard with stale-decision refusal before 3:00. It supersedes the timing proposal below when that hosted proof is available; retain this file's validator setup and dataset reset instructions. Neither plan is recorded evidence. Final recording and publication remain deferred.
 
 Target: **4:20** (limit 4:45; Devpost limit 5:00). The core journey, including the Jira gate, ends by **2:55**. English narration and English subtitles. No music, or only music the team made or holds a licence for; no third-party logos other than Atlassian product UI shown as used.
