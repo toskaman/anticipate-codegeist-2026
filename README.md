@@ -123,8 +123,8 @@ cd static/hello-world && npm ci && npm run typecheck && npm run lint && npm test
 
 ## Codegeist 2026
 
-Category: Apps for Software Teams. Bonus claimed: Best app with Atlassian MCP (all seven tools verified from an external client; a [skill.md](skill.md) is provided for third-party agents). Built by two people: CORE (backend, engine, Forge, security) and EXPERIENCE (interface, accessibility, presentation).
+Category: Apps for Software Teams. Bonus claimed: Best app with Atlassian MCP (all seven tools verified from an external client; an open-source (MIT) [skill.md](skill.md) is provided for third-party agents). Built by two people: CORE (backend, engine, Forge, security) and EXPERIENCE (interface, accessibility, presentation).
 
 Product context: [buyer hypotheses](docs/strategy/BUYER_HYPOTHESES.md) · [value-study protocol](docs/strategy/VALUE_STUDY_PROTOCOL.md). Product feedback and pilot questions can be raised through [repository issues](https://github.com/toskaman/anticipate-codegeist-2026/issues); no customer outcomes or commercial offering are implied.
 
-Licence: proprietary, source available. Copyright © 2026 toskaman and Orphee; see [LICENSE](LICENSE).
+Licence: proprietary, source available (except `skill.md`, MIT). Copyright © 2026 toskaman and Orphee; see [LICENSE](LICENSE).

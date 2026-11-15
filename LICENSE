@@ -21,6 +21,10 @@ Not permitted without prior written permission from both copyright holders:
   hosting as a service, or creating derivative works of this code, in whole or
   in part.
 
+Exception: the file skill.md at the repository root is open source under the
+MIT License reproduced in that file (agreed by both copyright holders,
+15 November 2026). Everything else stays under this license.
+
 Third-party components keep their own licenses (see THIRD_PARTY_NOTICES.txt in
 the built app and the package manifests). This license applies only to code
 written by the ANTICIPATE team.

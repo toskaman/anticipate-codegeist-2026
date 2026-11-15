@@ -63,3 +63,26 @@ agent alongside an MCP client connected to
   and named conflicts.
 - "Is my approved plan still valid?" → check-plan-freshness; if CHANGED,
   explain what changed and that execution is blocked until re-review.
+
+## License (this file only)
+
+`skill.md` is open source under the MIT License. The rest of the repository
+stays under the proprietary licence in `LICENSE`.
+
+Copyright (c) 2026 toskaman and Orphee
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this file, to deal in it without restriction, including without limitation
+the rights to use, copy, modify, merge, publish, distribute, sublicense,
+and/or sell copies of it, and to permit persons to whom it is furnished to do
+so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of this file.
+
+THIS FILE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THIS FILE OR ITS USE.

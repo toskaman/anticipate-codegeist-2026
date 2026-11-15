@@ -91,7 +91,7 @@ ANTICIPATE exposes seven tools through `rovo:mcp` that never write to Jira: get 
 - The same tools power the "ANTICIPATE Decision Reviewer" Rovo agent.
 - Availability depends on the site and an administrator enabling MCP for the app.
 - All seven tools were verified from an external MCP client (five on 2–3 Nov, slip and portfolio on 12 Nov 2026), with Jira re-read and unchanged afterwards; the transcript is in the repository (`docs/evidence/mcp-external-2026-11-12/TRANSCRIPT.md`).
-- A `skill.md` at the repository root tells third-party agents when and how to call the tools.
+- An open-source (MIT) `skill.md` at the repository root tells third-party agents when and how to call the tools.
 
 ---
 

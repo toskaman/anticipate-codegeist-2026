@@ -103,6 +103,6 @@ Open decisions (not done here because they change the deployed app or the licenc
 
 - Rovo agent conversation starters name `TD-1`/`TD-5`, which do not exist on a judge's site. Generic starters need a manifest change and a redeploy.
 - The app URL and module key still read `hello-world` (template leftover). Renaming `routePrefix` changes every bookmarked URL; do it only with a full re-run.
-- The MCP bonus rule mentions "open-source skill.md files"; LICENSE is proprietary. Releasing `skill.md` alone under a permissive licence needs both owners' written agreement.
+- Done 15 Nov: `skill.md` is MIT (both owners agreed), with a matching exception in LICENSE; the MCP bonus rule mentions "open-source skill.md files".
 - Best Agents can be selected as a second bonus at no product cost (BONUS_AGENTS_DRAFT.md).
 - "Best Marketplace published app" only requires a listing **submitted** for review; not pursued.
