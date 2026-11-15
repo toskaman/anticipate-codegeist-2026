@@ -4,7 +4,7 @@ modules:
       resource: main
       resolver:
         function: resolver
-      routePrefix: hello-world
+      routePrefix: anticipate
   jira:workflowValidator:
     - key: anticipate-decision-firewall
       name: ANTICIPATE Decision Firewall
