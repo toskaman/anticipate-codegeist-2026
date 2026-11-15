@@ -101,7 +101,7 @@ Still open, owner only (blocking submission):
 
 Open decisions (not done here because they change the deployed app or the licence):
 
-- Rovo agent conversation starters named `TD-1`/`TD-5`, which do not exist on a judge's site. Branch `fix/rovo-generic-starters` makes them generic and tells the agent to ask for a key. Deployed in production 4.7.0 (15 Nov); the starters themselves were not exercised in Rovo on that build.
+- Rovo agent conversation starters named `TD-1`/`TD-5`, which do not exist on a judge's site. Branch `fix/rovo-generic-starters` makes them generic and tells the agent to ask for a key. Deployed in production 4.7.0 (15 Nov); the same manifest was verified in Rovo on dev 8.4.0 (EVIDENCE_PACK 15 Nov); the production sites have no Rovo.
 - The app URL read `hello-world` (template leftover). Branch `fix/rovo-generic-starters` sets `routePrefix: anticipate` (module key and `static/hello-world` folder unchanged, so installs and CI are untouched). Deployed in production 4.7.0 (15 Nov): old `/hello-world/` URLs in dated evidence stop resolving; open the app from Jira → Apps and re-run the judge journey.
 - Done 15 Nov: `skill.md` is MIT (both owners agreed), with a matching exception in LICENSE; the MCP bonus rule mentions "open-source skill.md files".
 - Best Agents can be selected as a second bonus at no product cost (BONUS_AGENTS_DRAFT.md).

@@ -363,3 +363,12 @@ Main `b1e4677` (main CI 42736707837 success): vars stamped (`ANTICIPATE_BUILD_CO
 - `forge install list`: toskaman5962 production 4 Up-to-date; anticipate-judge production 4 Up-to-date.
 - Hosted smoke (toskaman5962, scripted Chrome session, ~19:32 Paris): hosted smoke on toskaman5962 the same evening: app loads at `/anticipate/` ("Connected · live mode"), Settings shows commit 0dd5fb4, ADM-1 analysed read-only (6 records, 5 relations), zero Jira writes; the old `/hello-world/` URL now returns Forge's app-loading error.
 - Not done: judge-site journey on 4.7.0 (no anticipate-judge session available), Rovo starters in chat, MCP re-check. Rollback = redeploy from `49e1f40` with its stamped vars.
+
+## Rovo generic starters, hosted on dev, 15 Nov 2026 ~20:00 Paris (dev 8.4.0, one-atlas-euza) · LIVE_FORGE_DEV
+
+Dev 8.4.0 deployed from main `4c8e7a5` (same manifest and code as production 4.7.0) because neither production site has Rovo. Scripted Chrome session as the owner account.
+
+- Agent "ANTICIPATE Decision Reviewer" page shows the new starters ("What happens if we retire an API tracked in Jira?", "Compare removing a component now versus migrating its consumers first", "Is my approved plan still based on fresh evidence?"); the old "What happens if we retire TD-1?" is gone. The fourth starter ("Which Jira issues depend on an issue I name?") was not displayed on the agent page.
+- Clicking the first starter: the agent asks for a Jira issue key and calls nothing. PASS.
+- Reply "TD-1": simulate-retirement answer from live data: Remove now BLOCKED (4 issues impacted, 3 direct, 1 blocker; P1, P3), Retain temporarily NEEDS REVIEW (P3); consumers TD-2, TD-3, TD-6, indirect TD-4; states that nothing changed in Jira and that approval happens in the app. PASS.
+- Not done: MCP tools from an external client on 4.7.0 / 8.4.0 (no MCP client connected in this session; the action code is unchanged since 4.6.0), judge-site journey on 4.7.0 (needs an anticipate-judge sign-in).
