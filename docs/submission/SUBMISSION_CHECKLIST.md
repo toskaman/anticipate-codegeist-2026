@@ -80,3 +80,29 @@ Checked and consistent: product name and tagline; category; MCP-only bonus and T
 - VERIFIED_RULES: fixed wrong "(3 min watched)" — rule says judges may stop at 5:00.
 - New: BONUS_AGENTS_DRAFT.md (optional 2nd bonus; entering 2 allowed, winning 1 max; recommendation stays MCP).
 - Film P0 (overlays contradicting honesty rules) filed on #189 for the owner; video untouched by this branch.
+
+## 15 Nov 2026 rules re-audit (official rules text, line by line)
+
+Fixed in this pass (documentation only; no code, manifest or deployed build touched):
+
+- DEVPOST_FINAL: MCP wording now says 7/7 tools verified from an external client (was "five ... so far" and "pending", contradicting JUDGE_FAQ and EVIDENCE_PACK 12 Nov); bonus write-up cites the transcript and `skill.md`; Teamwork Graph "once Atlassian allowlists" removed (support confirmed 8 Nov that no allowlisting is needed); testing step 2 no longer sends a judge to a repository file for the install link.
+- README, EXPERIENCE_SECTION: same Teamwork Graph correction; README video-script links point to VIDEO_SCRIPT_V4 (the rendered film); VIDEO_SCRIPT.md marked superseded.
+- INSTALL_LINK: anticipate-judge is on 4.6.0 since 12 Nov (was "still on major 2").
+- BONUS_AGENTS_DRAFT: external-client run no longer "pending".
+- CODEGEIST_COMPLIANCE: stale video/deploy rows refreshed; bonus rule reworded (several may be entered, one won); eligibility, no-sponsor-support and ownership rows added.
+- STATUS: Causal Collision Explorer and Release Command Center rows point at the 12 Nov production re-run.
+
+Still open, owner only (blocking submission):
+
+1. Publish the film on YouTube as **Public** (not Unlisted), under 5:00, and paste the URL in the form and in README (#189). Resolve the film P0 on #189 first (overlays vs honesty rules).
+2. Fill and **submit** the Devpost form before 22 Dec 2026 12:00 PT (a saved draft is not a submission). Paste the full install URL in the form.
+3. Re-open the install link in a private window the day of submission.
+4. Confirm the eligibility rows in CODEGEIST_COMPLIANCE for both team members; add the co-owner to the Devpost project.
+
+Open decisions (not done here because they change the deployed app or the licence):
+
+- Rovo agent conversation starters name `TD-1`/`TD-5`, which do not exist on a judge's site. Generic starters need a manifest change and a redeploy.
+- The app URL and module key still read `hello-world` (template leftover). Renaming `routePrefix` changes every bookmarked URL; do it only with a full re-run.
+- The MCP bonus rule mentions "open-source skill.md files"; LICENSE is proprietary. Releasing `skill.md` alone under a permissive licence needs both owners' written agreement.
+- Best Agents can be selected as a second bonus at no product cost (BONUS_AGENTS_DRAFT.md).
+- "Best Marketplace published app" only requires a listing **submitted** for review; not pursued.

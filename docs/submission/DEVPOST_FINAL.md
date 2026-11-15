@@ -5,7 +5,7 @@ Paste each section into the matching Devpost field. The evidence table at the en
 **Project name:** ANTICIPATE — The Decision Firewall for Software Teams
 **Tagline:** Test the consequences. Prove the safeguards. Then ship.
 **Category:** Apps for Software Teams
-**Bonus:** Best app with Atlassian MCP
+**Bonus:** Best app with Atlassian MCP (optional second entry: Best Agents, text in BONUS_AGENTS_DRAFT.md; several bonuses may be entered, one can be won)
 
 ---
 
@@ -31,7 +31,7 @@ ANTICIPATE turns a proposed change in Jira into an evidence-backed decision.
 - **Guard the Jira transition.** An optional workflow validator stops issues labelled `anticipate-change` until their decision is completed and the live Jira links agree. A completed "migrate first" plan does not open the gate while consumers still depend on the change in Jira; once they have really migrated, it does. Administrators choose whether transitions pass or are blocked if ANTICIPATE is unavailable.
 - **Rewind a decision.** The Decision Time Machine replays the recorded evidence checks of a plan. It shows when the evidence changed, the exact Jira relation that appeared or disappeared, and why the approval can no longer authorize execution. Recorded history only, never reconstructed from today's Jira.
 - **Keep the record.** The Prevention Passport opens with a short answer (option chosen, verified actions, transition status, open questions), then the evidence, alternatives, approvals, verified outcomes and timeline. It exports to JSON and prints as an A4 report. It is an audit-style record, not a legal or cryptographic certificate.
-- **Ask from Rovo or any MCP client.** Seven MCP tools that never write to Jira (get-graph, simulate-retirement, simulate-upgrade, simulate-slip, simulate-portfolio, get-passport, check-freshness) and the "ANTICIPATE Decision Reviewer" Rovo agent answer "what happens if we retire, upgrade or delay X?" with the same engine. Five of them verified from an external client so far; all seven live in-app. They cannot approve or execute.
+- **Ask from Rovo or any MCP client.** Seven MCP tools that never write to Jira (get-graph, simulate-retirement, simulate-upgrade, simulate-slip, simulate-portfolio, get-passport, check-freshness) and the "ANTICIPATE Decision Reviewer" Rovo agent answer "what happens if we retire, upgrade or delay X?" with the same engine. All seven were verified from an external MCP client (12 Nov 2026) and are live in-app. They cannot approve or execute.
 - **Try it in minutes.** A guided demo previews, then creates, six labelled sample issues and four links in a project you choose. Opening or previewing never writes to Jira.
 
 Who it helps: engineering managers reviewing risky changes, platform teams retiring or upgrading shared services, release governance, and API lifecycle owners. Plans and snapshots are private to their creator.
@@ -68,14 +68,14 @@ The valuable part is not the graph, it is the decision: comparing options on the
 
 ## What's next for ANTICIPATE
 
-- Teamwork Graph sources (pull requests, deployments, Confluence) once Atlassian allowlists the app (request ECOHELP-180616).
+- Teamwork Graph sources (pull requests, deployments, Confluence): a prototype and a read-only scope map for the Preview API exist, but they are not in the shipping build, so we do not claim that bonus.
 - A shared decision workspace with separation of duties (a backend prototype exists; not released).
 - More change types (database migrations, feature-flag removal) and policy packs per team.
 
 ## Testing instructions
 
 1. Use a Jira Cloud site that includes Jira software projects (a free site works). Sites with only Jira Service Management cannot host the demo.
-2. Install with the link in `docs/submission/INSTALL_LINK.md`, then open Jira → **Apps → ANTICIPATE**. The first open can take about 10 seconds.
+2. Install with the installation link provided with this submission (also in `docs/submission/INSTALL_LINK.md` in the repository; the install page lists only the sites where your Atlassian account is an admin), then open Jira → **Apps → ANTICIPATE**. The first open can take about 10 seconds.
 3. Click **Start the guided demo**, choose a company-managed software project you can edit, **Preview sample data**, then confirm. Six labelled issues and four links are created (about 15–20 seconds the first time; if the screen waits longer, preview again: nothing is created twice).
 4. **Analyze** the sample root → **Compare options** → **Check safeguards** → **Generate prevention plan** → approve **all** the actions (a partial approval ends as Partial) → execute → open the **Prevention Passport**.
 5. Optional, workflow validator: Project settings → Workflows → edit a test workflow, add the rule "ANTICIPATE Decision Firewall" to a transition and publish. Issues labelled `anticipate-change` are refused until their decision is completed and Jira agrees; other issues pass.
@@ -90,7 +90,8 @@ ANTICIPATE exposes seven tools through `rovo:mcp` that never write to Jira: get 
 - No tool can approve or execute: acting requires explicit human approval inside ANTICIPATE. The freshness check may mark a stale approved plan as Invalidated, which only removes the ability to execute it.
 - The same tools power the "ANTICIPATE Decision Reviewer" Rovo agent.
 - Availability depends on the site and an administrator enabling MCP for the app.
-- Slip and portfolio simulation are live in-app; verification from an external client is pending.
+- All seven tools were verified from an external MCP client (five on 2–3 Nov, slip and portfolio on 12 Nov 2026), with Jira re-read and unchanged afterwards; the transcript is in the repository (`docs/evidence/mcp-external-2026-11-12/TRANSCRIPT.md`).
+- A `skill.md` at the repository root tells third-party agents when and how to call the tools.
 
 ---
 

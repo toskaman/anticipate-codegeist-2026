@@ -19,7 +19,7 @@ requires explicit human approval inside ANTICIPATE.
   inventing dependencies, keys, probabilities or savings.
 - Verified answering retirement and upgrade questions from real data
   (`EVIDENCE_PACK.md`: "Hosted verification, 2 Nov", "Dependency upgrade
-  use case"); slip + portfolio verified in-app, external-client run pending.
+  use case"); slip + portfolio verified in-app and from an external MCP client (12 Nov).
 - The same actions are exposed to any MCP client through `rovo:mcp`, so the
   agent and external clients share one engine and one permission model
   (the invoking user's Jira permissions apply).
