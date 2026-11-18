@@ -21,7 +21,7 @@ A ticket says "retire Auth API v1". It looks safe. The service that breaks is tw
 2. **Start the guided demo** → Preview sample data → confirm → **Analyze** → Compare → Check safeguards → approve → execute → **Prevention Passport**.
 3. **Verify the claims**: every behaviour below links to its evidence in the [evidence pack](docs/evidence/EVIDENCE_PACK.md); hosted results are labelled with date and site.
 
-Demo video: public YouTube link will be added here on publication ([issue #189](https://github.com/toskaman/anticipate-codegeist-2026/issues/189)); the [script](docs/submission/VIDEO_SCRIPT_V4.md) and [QA report](docs/evidence/VIDEO_QA_REPORT.md) are already in the repo.
+**Demo video (3:03):** https://youtu.be/kNBhV1Di82U — the full story (collision, safer plan, refused stale approval, verified execution, Rovo and MCP) is told in the first three minutes. App footage is captured live on Jira Cloud.
 
 ## For engineering leaders
 
