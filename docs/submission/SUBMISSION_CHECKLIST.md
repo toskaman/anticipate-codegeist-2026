@@ -33,7 +33,7 @@ Status: **ready** (copy as is) · **needs owner** (a person must act or decide) 
 
 | Rule item | Covered by | Status |
 |---|---|---|
-| Video < 5 min, public YouTube, shows the app running | row 15 | cut ready + QA accepted; public upload needs owner |
+| Video < 5 min, public YouTube, shows the app running | row 15 | published: https://youtu.be/kNBhV1Di82U (3:03) |
 | Install link following Atlassian sharing instructions | row 13 | ready |
 | Setup / testing instructions | row 14 | ready |
 | Text description | rows 3–9 | ready |
@@ -94,7 +94,7 @@ Fixed in this pass (documentation only; no code, manifest or deployed build touc
 
 Still open, owner only (blocking submission):
 
-1. Publish the film on YouTube as **Public** (not Unlisted), under 5:00, and paste the URL in the form and in README (#189). Resolve the film P0 on #189 first (overlays vs honesty rules).
+1. ~~Publish the film on YouTube~~ done (18 Nov 2026): https://youtu.be/kNBhV1Di82U, linked in README. Owner check: visibility is **Public** (not Unlisted), the description carries the music credit (Sascha Ende, ende.app, CC BY 4.0), and the URL is pasted in the Devpost form.
 2. Fill and **submit** the Devpost form before 22 Dec 2026 12:00 PT (a saved draft is not a submission). Paste the full install URL in the form.
 3. Re-open the install link in a private window the day of submission.
 4. Confirm the eligibility rows in CODEGEIST_COMPLIANCE for both team members; add the co-owner to the Devpost project.
